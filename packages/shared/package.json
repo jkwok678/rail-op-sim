@@ -1,0 +1,16 @@
+{
+  "name": "@rail-op-sim/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "echo 'Shared dev stub'",
+    "build": "echo 'Shared build stub'",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.5"
+  }
+}

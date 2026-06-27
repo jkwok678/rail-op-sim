@@ -2,7 +2,11 @@ Welcome to your new TanStack Start app!
 
 # Getting Started
 
-To run this application:
+This is a monorepo managed by `pnpm` workspaces. It contains two main packages:
+- `packages/app`: The TanStack Start frontend application.
+- `packages/shared`: A shared TypeScript library.
+
+To run this application from the root:
 
 ```bash
 pnpm install
@@ -33,10 +37,10 @@ This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
 
 If you prefer not to use Tailwind CSS:
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
+1. Remove the demo pages in `packages/app/src/routes/demo/`
+2. Replace the Tailwind import in `packages/app/src/styles.css` with your own styles
+3. Remove `tailwindcss()` from the plugins array in `packages/app/vite.config.ts`
+4. Uninstall the packages: `cd packages/app && pnpm remove @tailwindcss/vite tailwindcss`
 
 ## Linting & Formatting
 
