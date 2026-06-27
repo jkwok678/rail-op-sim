@@ -1,0 +1,4 @@
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/hooks/usePixiApp.ts
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/hooks/useTheme.ts
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/lib/utils.ts
+/Users/jonathankwok/projects/rail-op-sim/packages/app/vite.config.ts

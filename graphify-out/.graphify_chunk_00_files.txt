@@ -1,0 +1,6 @@
+/Users/jonathankwok/projects/rail-op-sim/CLAUDE.md
+/Users/jonathankwok/projects/rail-op-sim/PLAN.md
+/Users/jonathankwok/projects/rail-op-sim/README.md
+/Users/jonathankwok/projects/rail-op-sim/UPDATED_PLAN.md
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/robots.txt
+/Users/jonathankwok/projects/rail-op-sim/pnpm-workspace.yaml

@@ -1,0 +1,12 @@
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalDown.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalLeft.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalLeftDown.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalLeftUp.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalRight.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalRightDown.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalRightUp.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/signalUp.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/straightH.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/straightLeftUp.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/straightRightUp.svg
+/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/straightV.svg
