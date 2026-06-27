@@ -1,42 +1,59 @@
 // Barrel exports for the railway module
 
-// Types
-export type { FontInfo, Point, TextSelectionPrompt, MessageCallback } from "./types";
+// Element classes
+export {
+	Concourse,
+	Element,
+	NamedElement,
+	NamedLocation,
+	Parapet,
+	Text,
+} from "./element";
 
 // Enums
 export {
-  ParapetType,
-  Platform,
-  StraightType,
-  DirectedType,
-  CurvedType,
-  LinkedType,
-  ExitType,
-  BufferType,
-  SignalType,
-  BridgeUnderpassType,
-  SwitchType,
-  CrossoverType,
-  FlyoverType,
+	BridgeUnderpassType,
+	BufferType,
+	CrossoverType,
+	CurvedType,
+	DirectedType,
+	ExitType,
+	FlyoverType,
+	LinkedType,
+	ParapetType,
+	Platform,
+	SignalType,
+	StraightType,
+	SwitchType,
 } from "./enums";
 
 // Errors
 export {
-  RailwayError,
-  ElementAlreadyExistsError,
-  ElementNotFoundError,
-  TrackNotConnectedError,
-  ZeroTrackError,
-  LinkedTrackError,
+	ElementAlreadyExistsError,
+	ElementNotFoundError,
+	LinkedTrackError,
+	RailwayError,
+	TrackNotConnectedError,
+	ZeroTrackError,
 } from "./errors";
-
-// Element classes
-export { Element, Text, NamedElement, NamedLocation, Concourse, Parapet } from "./element";
-
-// Track class
-export { Track } from "./track";
-export type { TrackData, TrackKind, TrackKindMeta } from "./track";
-export { KIND_META, getLinksForSubtype, hasSecondaryPath, supportsPlatforms, supportsLevelCrossing, subtypeToCode, kindToLabel } from "./track";
-
 // Map class
 export { Map_ as Map } from "./map";
+export type { TrackData, TrackKind, TrackKindMeta } from "./track";
+// Track class
+export {
+	getLinksForSubtype,
+	hasSecondaryPath,
+	KIND_META,
+	kindToLabel,
+	subtypeToCode,
+	supportsLevelCrossing,
+	supportsPlatforms,
+	Track,
+} from "./track";
+// Types
+export type {
+	FontInfo,
+	MessageCallback,
+	Point,
+	TextSelectionPrompt,
+} from "./types";

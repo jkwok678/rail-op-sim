@@ -1,7 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { SimLayout } from "#/components/sim/SimLayout";
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
-  return <main />
+	return <SimLayout />;
 }

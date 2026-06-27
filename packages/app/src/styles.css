@@ -161,6 +161,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-deep: var(--lagoon-deep);
+  --color-sea-ink: var(--sea-ink);
+  --color-sea-ink-soft: var(--sea-ink-soft);
+  --color-palm: var(--palm);
+  --color-sand: var(--sand);
+  --color-foam: var(--foam);
   --font-heading: var(--font-mono);
   --font-mono: 'JetBrains Mono Variable', monospace;
   --radius-2xl: calc(var(--radius) * 1.8);

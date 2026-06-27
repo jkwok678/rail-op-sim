@@ -3,14 +3,14 @@
  * Serialized as "family,pointSize" (same format as QFont.toString()).
  */
 export interface FontInfo {
-  family: string;
-  pointSize: number;
+	family: string;
+	pointSize: number;
 }
 
 /** 2D coordinate. */
 export interface Point {
-  x: number;
-  y: number;
+	x: number;
+	y: number;
 }
 
 /**
@@ -24,6 +24,6 @@ export type TextSelectionPrompt = (options: string[]) => string | null;
  * The app layer connects this to a toast / notification.
  */
 export type MessageCallback = (
-  type: "success" | "error" | "info",
-  message: string
+	type: "success" | "error" | "info",
+	message: string,
 ) => void;
