@@ -1,3 +1,4 @@
 packages:
   - "packages/*"
-minimumReleaseAge: 10080
+# reenable once app is stable
+# minimumReleaseAge: 10080
