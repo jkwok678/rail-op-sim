@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Map_ } from "../map";
 import {
   linkLocalText,
@@ -6,7 +6,7 @@ import {
   changeDeleteText,
 } from "../map/map-text-linking";
 import { StraightType, Platform } from "../enums";
-import type { FontInfo, TextSelectionPrompt } from "../types";
+import type { FontInfo } from "../types";
 import { Text } from "../element";
 import { addPlatform } from "../map/map-platform";
 
@@ -19,22 +19,22 @@ const testFont: FontInfo = { family: "Arial", pointSize: 12 };
 describe("linkLocalText", () => {
   it("links Text to a track that has a platform", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack({ kind: 'straight', subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false }, 0, 0);
     // Track needs a platform before linkLocalText will link text to it
     addPlatform(map, Platform.UP, 0, 0);
     const text = new Text(0, 0, "Platform A", testFont);
     linkLocalText(map, 0, 0, text);
-    const track = map.getStraightTrackAt(0, 0)!;
+    const track = map.getTrackAt(0, 0)!;
     expect(track.getText()).toBe(text);
     expect(track.getNamed()).toBe(true);
   });
 
   it("does not link to a track without a platform", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack({ kind: 'straight', subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false }, 0, 0);
     const text = new Text(0, 0, "Platform A", testFont);
     linkLocalText(map, 0, 0, text);
-    const track = map.getStraightTrackAt(0, 0)!;
+    const track = map.getTrackAt(0, 0)!;
     expect(track.getNamed()).toBe(false);
   });
 
@@ -70,23 +70,23 @@ describe("linkLocalText", () => {
 describe("deleteTextFromAllElements", () => {
   it("removes text reference from all named elements", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack({ kind: 'straight', subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false }, 0, 0);
     addPlatform(map, Platform.UP, 0, 0);
     const text = new Text(0, 0, "Platform A", testFont);
-    map.getStraightTrackAt(0, 0)!.setText(text);
+    map.getTrackAt(0, 0)!.setText(text);
 
     map.createAddConcourse(16, 0);
     map.getConcourseAt(16, 0)!.setText(text);
 
     deleteTextFromAllElements(map, text);
 
-    expect(map.getStraightTrackAt(0, 0)!.getText()).toBeNull();
+    expect(map.getTrackAt(0, 0)!.getText()).toBeNull();
     expect(map.getConcourseAt(16, 0)!.getText()).toBeNull();
   });
 
   it("does nothing when text is not referenced anywhere", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack({ kind: 'straight', subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false }, 0, 0);
     const text = new Text(0, 0, "Unused", testFont);
     expect(() => deleteTextFromAllElements(map, text)).not.toThrow();
   });
@@ -129,12 +129,12 @@ describe("changeDeleteText", () => {
 
   it("removes text from all referencing elements when deleting", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack({ kind: 'straight', subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false }, 0, 0);
     addPlatform(map, Platform.UP, 0, 0);
     const text = map.createAddText(0, 0, "Platform A", testFont);
-    map.getStraightTrackAt(0, 0)!.setText(text);
+    map.getTrackAt(0, 0)!.setText(text);
 
     changeDeleteText(map, "", true, text);
-    expect(map.getStraightTrackAt(0, 0)!.getText()).toBeNull();
+    expect(map.getTrackAt(0, 0)!.getText()).toBeNull();
   });
 });

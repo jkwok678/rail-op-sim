@@ -3,7 +3,7 @@
 // ============================================================================
 
 /** 28 different parapets (element.h) */
-export const enum ParapetType {
+export enum ParapetType {
   PARAPET1 = "PARAPET1",
   PARAPET2 = "PARAPET2",
   PARAPET3 = "PARAPET3",
@@ -35,7 +35,7 @@ export const enum ParapetType {
 }
 
 /** Platform side on a track (track.h) */
-export const enum Platform {
+export enum Platform {
   LEFT = "LEFT",
   RIGHT = "RIGHT",
   UP = "UP",
@@ -43,7 +43,7 @@ export const enum Platform {
 }
 
 /** 4 types of StraightTrack (track.h) */
-export const enum StraightType {
+export enum StraightType {
   STRAIGHTH = "STRAIGHTH",
   STRAIGHTV = "STRAIGHTV",
   STRAIGHTLEFTUP = "STRAIGHTLEFTUP",
@@ -51,7 +51,7 @@ export const enum StraightType {
 }
 
 /** 8 different DirectedTrack types (track.h) */
-export const enum DirectedType {
+export enum DirectedType {
   DIRECTEDLEFT = "DIRECTEDLEFT",
   DIRECTEDRIGHT = "DIRECTEDRIGHT",
   DIRECTEDUP = "DIRECTEDUP",
@@ -63,7 +63,7 @@ export const enum DirectedType {
 }
 
 /** 12 Curves: four 90° and eight 135° turns (track.h) */
-export const enum CurvedType {
+export enum CurvedType {
   TIGHTCURVE1 = "TIGHTCURVE1",
   TIGHTCURVE2 = "TIGHTCURVE2",
   TIGHTCURVE3 = "TIGHTCURVE3",
@@ -79,7 +79,7 @@ export const enum CurvedType {
 }
 
 /** 8 types of LinkedTrack (track.h) */
-export const enum LinkedType {
+export enum LinkedType {
   LINKLEFT = "LINKLEFT",
   LINKRIGHT = "LINKRIGHT",
   LINKDOWN = "LINKDOWN",
@@ -91,7 +91,7 @@ export const enum LinkedType {
 }
 
 /** 8 Exit tracks (track.h) */
-export const enum ExitType {
+export enum ExitType {
   EXITLEFT = "EXITLEFT",
   EXITRIGHT = "EXITRIGHT",
   EXITDOWN = "EXITDOWN",
@@ -103,7 +103,7 @@ export const enum ExitType {
 }
 
 /** 8 different directions of the buffer (track.h) */
-export const enum BufferType {
+export enum BufferType {
   BUFFERLEFT = "BUFFERLEFT",
   BUFFERRIGHT = "BUFFERRIGHT",
   BUFFERDOWN = "BUFFERDOWN",
@@ -115,7 +115,7 @@ export const enum BufferType {
 }
 
 /** 8 directions of signals (track.h) */
-export const enum SignalType {
+export enum SignalType {
   SIGNALLEFT = "SIGNALLEFT",
   SIGNALRIGHT = "SIGNALRIGHT",
   SIGNALDOWN = "SIGNALDOWN",
@@ -127,7 +127,7 @@ export const enum SignalType {
 }
 
 /** 2 underpasses and 2 bridges (track.h) */
-export const enum BridgeUnderpassType {
+export enum BridgeUnderpassType {
   BRIDGE1 = "BRIDGE1",
   BRIDGE2 = "BRIDGE2",
   UNDERPASS1 = "UNDERPASS1",
@@ -137,7 +137,7 @@ export const enum BridgeUnderpassType {
 /**
  * 32 switch types: 8 tight 90°, 8 split, 16 normal 135° (track.h)
  */
-export const enum SwitchType {
+export enum SwitchType {
   SWITCHTIGHT1 = "SWITCHTIGHT1",
   SWITCHTIGHT2 = "SWITCHTIGHT2",
   SWITCHTIGHT3 = "SWITCHTIGHT3",
@@ -173,7 +173,7 @@ export const enum SwitchType {
 }
 
 /** 6 crossover tracks (track.h) */
-export const enum CrossoverType {
+export enum CrossoverType {
   CROSSOVER1 = "CROSSOVER1",
   CROSSOVER2 = "CROSSOVER2",
   CROSSOVER3 = "CROSSOVER3",
@@ -183,7 +183,7 @@ export const enum CrossoverType {
 }
 
 /** 12 flyover tracks (track.h) */
-export const enum FlyoverType {
+export enum FlyoverType {
   FLYOVER1 = "FLYOVER1",
   FLYOVER2 = "FLYOVER2",
   FLYOVER3 = "FLYOVER3",

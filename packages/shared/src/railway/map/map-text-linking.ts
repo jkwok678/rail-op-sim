@@ -4,15 +4,17 @@ import type { Text } from "../element";
 // ============================================================================
 // Text-linking helpers for Map_
 // ============================================================================
-//
-// Extracted from the Map_ class so that text management logic lives in a
-// focused file. Each function receives the Map_ instance and calls its
-// public API.
-// ============================================================================
+
+/** Cardinal direction offsets (dx, dy) in grid units. */
+const NEIGHBOR_OFFSETS: readonly [number, number][] = [
+  [0, 1],   // above
+  [0, -1],  // below
+  [1, 0],   // right
+  [-1, 0],  // left
+];
 
 /**
  * Try to link a text to an adjacent track / concourse / bridge.
- * (Formerly private Map_ method.)
  */
 function tryLinkTrackOrConcourseOrBridge(
   map: Map_,
@@ -22,20 +24,20 @@ function tryLinkTrackOrConcourseOrBridge(
 ): void {
   const trackTemp = map.getTrackHasPlatformAt(x, y);
   const concourseTemp = map.getConcourseAt(x, y);
-  const bridgeTemp = map.getBridgeUnderpassTrack(x, y);
+  const bridgeTemp = map.getTrackAt(x, y);
 
-  if (trackTemp !== null) {
-    if (trackTemp.hasPlatform()) {
-      if (!trackTemp.getNamed()) {
-        linkLocalText(map, x, y, linkedText);
-      }
+  if (trackTemp) {
+    if (trackTemp.hasPlatform() && !trackTemp.getNamed()) {
+      linkLocalText(map, x, y, linkedText);
     }
-  } else if (concourseTemp !== null) {
+  } else if (concourseTemp) {
     if (!concourseTemp.getNamed()) {
       linkLocalText(map, x, y, linkedText);
     }
   }
-  if (bridgeTemp !== null) {
+
+  // Check if it's a bridge/underpass (now included in getTrackHasPlatformAt)
+  if (bridgeTemp && (bridgeTemp.data.kind === "bridgeUnderpass")) {
     if (!bridgeTemp.getNamed()) {
       linkLocalText(map, x, y, linkedText);
     }
@@ -44,7 +46,6 @@ function tryLinkTrackOrConcourseOrBridge(
 
 /**
  * Try to link a text to an adjacent named location.
- * (Formerly private Map_ method.)
  */
 function tryLinkNamedLocationNeighbor(
   map: Map_,
@@ -54,16 +55,14 @@ function tryLinkNamedLocationNeighbor(
 ): void {
   if (!map.checkElementExists(x, y)) return;
   const nl = map.getNamedLocationAt(x, y);
-  if (nl !== null) {
-    if (!nl.getNamed()) {
-      linkLocalText(map, x, y, linkedText);
-    }
+  if (nl && !nl.getNamed()) {
+    linkLocalText(map, x, y, linkedText);
   }
 }
 
 /**
  * Link a local text to elements at the given coordinates and propagate
- * to neighbors. (Formerly Map_.linkLocalText.)
+ * to neighbors.
  */
 export function linkLocalText(
   map: Map_,
@@ -71,97 +70,48 @@ export function linkLocalText(
   locationY: number,
   linkedText: Text,
 ): void {
-  if (map.checkElementExists(locationX, locationY)) {
-    const track = map.getTrackHasPlatformAt(locationX, locationY);
-    const concourse = map.getConcourseAt(locationX, locationY);
-    const namedLocation = map.getNamedLocationAt(locationX, locationY);
-    const bridgeUnderpassTrack = map.getBridgeUnderpassTrack(
-      locationX,
-      locationY,
-    );
+  if (!map.checkElementExists(locationX, locationY)) return;
 
-    if (bridgeUnderpassTrack !== null) {
-      if (!bridgeUnderpassTrack.getNamed()) {
-        bridgeUnderpassTrack.setText(linkedText);
-      }
-    }
-    if (track !== null) {
-      if (track.hasPlatform()) {
-        track.setText(linkedText);
-      }
-    }
-    if (concourse !== null) {
-      if (!concourse.getNamed()) {
-        concourse.setText(linkedText);
-      }
-    }
-    if (namedLocation !== null) {
-      if (!namedLocation.getNamed()) {
-        namedLocation.setText(linkedText);
-      }
-    }
+  const track = map.getTrackHasPlatformAt(locationX, locationY);
+  const concourse = map.getConcourseAt(locationX, locationY);
+  const namedLocation = map.getNamedLocationAt(locationX, locationY);
+  const bridgeUnderpassTrack = map.getTrackAt(locationX, locationY);
 
-    if (track !== null || concourse !== null) {
-      // above
-      if (map.checkElementExists(locationX, locationY + 16)) {
+  if (bridgeUnderpassTrack && bridgeUnderpassTrack.data.kind === "bridgeUnderpass") {
+    if (!bridgeUnderpassTrack.getNamed()) {
+      bridgeUnderpassTrack.setText(linkedText);
+    }
+  }
+  if (track && track.hasPlatform()) {
+    track.setText(linkedText);
+  }
+  if (concourse && !concourse.getNamed()) {
+    concourse.setText(linkedText);
+  }
+  if (namedLocation && !namedLocation.getNamed()) {
+    namedLocation.setText(linkedText);
+  }
+
+  const grid = map.getImageSize();
+
+  if (track || concourse) {
+    for (const [dx, dy] of NEIGHBOR_OFFSETS) {
+      if (map.checkElementExists(locationX + dx * grid, locationY + dy * grid)) {
         tryLinkTrackOrConcourseOrBridge(
           map,
-          locationX,
-          locationY + 16,
+          locationX + dx * grid,
+          locationY + dy * grid,
           linkedText,
         );
       }
-      // below
-      if (map.checkElementExists(locationX, locationY - 16)) {
-        tryLinkTrackOrConcourseOrBridge(
-          map,
-          locationX,
-          locationY - 16,
-          linkedText,
-        );
-      }
-      // right
-      if (map.checkElementExists(locationX + 16, locationY)) {
-        tryLinkTrackOrConcourseOrBridge(
-          map,
-          locationX + 16,
-          locationY,
-          linkedText,
-        );
-      }
-      // left
-      if (map.checkElementExists(locationX - 16, locationY)) {
-        tryLinkTrackOrConcourseOrBridge(
-          map,
-          locationX - 16,
-          locationY,
-          linkedText,
-        );
-      }
-    } else {
-      // namedLocation neighbor propagation
+    }
+  } else {
+    // namedLocation neighbor propagation
+    for (const [dx, dy] of NEIGHBOR_OFFSETS) {
       tryLinkNamedLocationNeighbor(
         map,
-        locationX,
-        locationY + 16,
-        linkedText,
-      );
-      tryLinkNamedLocationNeighbor(
-        map,
-        locationX,
-        locationY - 16,
-        linkedText,
-      );
-      tryLinkNamedLocationNeighbor(
-        map,
-        locationX + 16,
-        locationY,
-        linkedText,
-      );
-      tryLinkNamedLocationNeighbor(
-        map,
-        locationX - 16,
-        locationY,
+        locationX + dx * grid,
+        locationY + dy * grid,
         linkedText,
       );
     }
@@ -170,39 +120,71 @@ export function linkLocalText(
 
 /**
  * Delete a text from all named elements that reference it.
- * (Formerly Map_.deleteTextFromAllElements.)
  */
 export function deleteTextFromAllElements(
   map: Map_,
   textToDelete: Text,
 ): void {
-  const allNamed = [
-    map.getStraightTrackList(),
-    map.getDirectedTrackList(),
-    map.getCurvedTrackList(),
-    map.getLinkedTrackList(),
-    map.getExitTrackList(),
-    map.getBufferTrackList(),
-    map.getSignalTrackList(),
-    map.getBridgeUnderpassTrackList(),
-    map.getSwitchTrackList(),
-    map.getCrossoverTrackList(),
-    map.getFlyoverTrackList(),
-    map.getNamedLocationList(),
-    map.getConcourseList(),
-  ];
-  for (const list of allNamed) {
-    for (const el of list) {
-      if (el.getText() === textToDelete) {
-        el.setText(null);
-      }
+  // Iterate all tracks dynamically (no hardcoded kind list)
+  map.forEachTrack((el) => {
+    if (el.getText() === textToDelete) {
+      el.setText(null);
+    }
+  });
+
+  for (const el of map.getNamedLocationList()) {
+    if (el.getText() === textToDelete) {
+      el.setText(null);
+    }
+  }
+
+  for (const el of map.getConcourseList()) {
+    if (el.getText() === textToDelete) {
+      el.setText(null);
     }
   }
 }
 
 /**
+ * Collect texts from named neighbours in the 4 cardinal directions.
+ */
+function collectNeighbourTexts(
+  map: Map_,
+  locationX: number,
+  locationY: number,
+  isNamedLocation: boolean,
+): Text[] {
+  const grid = map.getImageSize();
+  const surroundingTextList: Text[] = [];
+
+  for (const [dx, dy] of NEIGHBOR_OFFSETS) {
+    const nx = locationX + dx * grid;
+    const ny = locationY + dy * grid;
+
+    if (isNamedLocation) {
+      const neighbour = map.getNamedLocationAt(nx, ny);
+      if (neighbour?.getNamed()) {
+        const t = neighbour.getText();
+        if (t) surroundingTextList.push(t);
+      }
+    } else {
+      const trackNeighbour = map.getTrackAt(nx, ny);
+      const concourseNeighbour = map.getConcourseAt(nx, ny);
+      if (trackNeighbour?.getNamed()) {
+        const t = trackNeighbour.getText();
+        if (t) surroundingTextList.push(t);
+      } else if (concourseNeighbour?.getNamed()) {
+        const t = concourseNeighbour.getText();
+        if (t) surroundingTextList.push(t);
+      }
+    }
+  }
+
+  return surroundingTextList;
+}
+
+/**
  * Link a newly placed element to text from neighbors.
- * (Formerly Map_.linkNewElementToText.)
  */
 export function linkNewElementToText(
   map: Map_,
@@ -210,43 +192,12 @@ export function linkNewElementToText(
   locationY: number,
 ): void {
   const namedLocation = map.getNamedLocationAt(locationX, locationY);
-  const surroundingTextList: Text[] = [];
-
-  if (namedLocation !== null) {
-    const above = map.getNamedLocationAt(locationX, locationY + 16);
-    if (above?.getNamed()) surroundingTextList.push(above.getText()!);
-    const below = map.getNamedLocationAt(locationX, locationY - 16);
-    if (below?.getNamed()) surroundingTextList.push(below.getText()!);
-    const right = map.getNamedLocationAt(locationX + 16, locationY);
-    if (right?.getNamed()) surroundingTextList.push(right.getText()!);
-    const left = map.getNamedLocationAt(locationX - 16, locationY);
-    if (left?.getNamed()) surroundingTextList.push(left.getText()!);
-  } else {
-    const trackAbove = map.getTrackAt(locationX, locationY + 16);
-    const concourseAbove = map.getConcourseAt(locationX, locationY + 16);
-    if (trackAbove?.getNamed()) surroundingTextList.push(trackAbove.getText()!);
-    else if (concourseAbove?.getNamed())
-      surroundingTextList.push(concourseAbove.getText()!);
-
-    const trackBelow = map.getTrackAt(locationX, locationY - 16);
-    const concourseBelow = map.getConcourseAt(locationX, locationY - 16);
-    if (trackBelow?.getNamed()) surroundingTextList.push(trackBelow.getText()!);
-    else if (concourseBelow?.getNamed())
-      surroundingTextList.push(concourseBelow.getText()!);
-
-    const trackRight = map.getTrackAt(locationX + 16, locationY);
-    const concourseRight = map.getConcourseAt(locationX + 16, locationY);
-    if (trackRight?.getNamed())
-      surroundingTextList.push(trackRight.getText()!);
-    else if (concourseRight?.getNamed())
-      surroundingTextList.push(concourseRight.getText()!);
-
-    const trackLeft = map.getTrackAt(locationX - 16, locationY);
-    const concourseLeft = map.getConcourseAt(locationX - 16, locationY);
-    if (trackLeft?.getNamed()) surroundingTextList.push(trackLeft.getText()!);
-    else if (concourseLeft?.getNamed())
-      surroundingTextList.push(concourseLeft.getText()!);
-  }
+  const surroundingTextList = collectNeighbourTexts(
+    map,
+    locationX,
+    locationY,
+    namedLocation !== null,
+  );
 
   if (surroundingTextList.length > 0) {
     let textToLink: Text | null = null;
@@ -276,7 +227,6 @@ export function linkNewElementToText(
 
 /**
  * Change or delete a text based on user input.
- * (Formerly Map_.changeDeleteText.)
  */
 export function changeDeleteText(
   map: Map_,

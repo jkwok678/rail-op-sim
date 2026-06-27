@@ -33,21 +33,10 @@ export {
 // Element classes
 export { Element, Text, NamedElement, NamedLocation, Concourse, Parapet } from "./element";
 
-// Track classes
-export {
-  Track,
-  StraightTrack,
-  DirectedTrack,
-  CurvedTrack,
-  LinkedTrack,
-  ExitTrack,
-  BufferTrack,
-  SignalTrack,
-  BridgeUnderpassTrack,
-  SwitchTrack,
-  CrossoverTrack,
-  FlyoverTrack,
-} from "./track";
+// Track class
+export { Track } from "./track";
+export type { TrackData, TrackKind, TrackKindMeta } from "./track";
+export { KIND_META, getLinksForSubtype, hasSecondaryPath, supportsPlatforms, supportsLevelCrossing, subtypeToCode, kindToLabel } from "./track";
 
 // Map class
 export { Map_ as Map } from "./map";

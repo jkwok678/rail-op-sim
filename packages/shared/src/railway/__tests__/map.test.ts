@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Map_ } from "../map";
 import {
   StraightType,
@@ -19,10 +19,6 @@ import { Text } from "../element";
 
 const testFont: FontInfo = { family: "Arial", pointSize: 12 };
 
-function makeMap(onMessage?: MessageCallback): Map_ {
-  return new Map_({ onMessage });
-}
-
 // ============================================================================
 // Initial state
 // ============================================================================
@@ -40,17 +36,17 @@ describe("Map initial state", () => {
 
   it("all element lists are empty", () => {
     const map = new Map_();
-    expect(map.getStraightTrackList()).toEqual([]);
-    expect(map.getDirectedTrackList()).toEqual([]);
-    expect(map.getCurvedTrackList()).toEqual([]);
-    expect(map.getLinkedTrackList()).toEqual([]);
-    expect(map.getExitTrackList()).toEqual([]);
-    expect(map.getBufferTrackList()).toEqual([]);
-    expect(map.getSignalTrackList()).toEqual([]);
-    expect(map.getBridgeUnderpassTrackList()).toEqual([]);
-    expect(map.getSwitchTrackList()).toEqual([]);
-    expect(map.getCrossoverTrackList()).toEqual([]);
-    expect(map.getFlyoverTrackList()).toEqual([]);
+    expect(map.getTracksOfKind("straight")).toEqual([]);
+    expect(map.getTracksOfKind("directed")).toEqual([]);
+    expect(map.getTracksOfKind("curved")).toEqual([]);
+    expect(map.getTracksOfKind("linked")).toEqual([]);
+    expect(map.getTracksOfKind("exit")).toEqual([]);
+    expect(map.getTracksOfKind("buffer")).toEqual([]);
+    expect(map.getTracksOfKind("signal")).toEqual([]);
+    expect(map.getTracksOfKind("bridgeUnderpass")).toEqual([]);
+    expect(map.getTracksOfKind("switch")).toEqual([]);
+    expect(map.getTracksOfKind("crossover")).toEqual([]);
+    expect(map.getTracksOfKind("flyover")).toEqual([]);
     expect(map.getNamedLocationList()).toEqual([]);
     expect(map.getConcourseList()).toEqual([]);
     expect(map.getParapetList()).toEqual([]);
@@ -88,133 +84,233 @@ describe("setImageSize", () => {
 });
 
 // ============================================================================
-// CRUD - StraightTrack
+// CRUD - StraightTrack (via unified addTrack)
 // ============================================================================
 
 describe("StraightTrack CRUD", () => {
-  it("createAddStraightTrack adds to list", () => {
+  it("addTrack with 'straight' adds to list", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    expect(map.getStraightTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("straight")).toHaveLength(1);
   });
 
-  it("checkStraightTrackAt returns true after add", () => {
+  it("getTrackAt returns the track after add", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    expect(map.checkStraightTrackAt(0, 0)).toBe(true);
-  });
-
-  it("getStraightTrackAt returns the added instance", () => {
-    const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    const track = map.getStraightTrackAt(0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    const track = map.getTrackAt(0, 0);
     expect(track).not.toBeNull();
-    expect(track!.getStraightType()).toBe(StraightType.STRAIGHTH);
+    expect(track!.data.subtype).toBe(StraightType.STRAIGHTH);
   });
 
-  it("checkStraightTrackAt returns false for empty coord", () => {
+  it("hasTrackAt returns false for empty coord", () => {
     const map = new Map_();
-    expect(map.checkStraightTrackAt(10, 10)).toBe(false);
+    expect(map.hasTrackAt(10, 10)).toBe(false);
   });
 
   it("checkElementExists returns true after add", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.checkElementExists(0, 0)).toBe(true);
   });
 
   it("totalTrack increments after add", () => {
     const map = new Map_();
     expect(map.getTotalTrack()).toBe(0);
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.getTotalTrack()).toBe(1);
   });
 
   it("adding at occupied coordinate is silently ignored", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    expect(map.getStraightTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("straight")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
   });
 });
 
 // ============================================================================
-// CRUD - all track types compact
+// CRUD - all track types compact (via unified addTrack + getTracksOfKind)
 // ============================================================================
 
 describe("Track type CRUD (all 11 types)", () => {
-  it("createAddDirectedTrack adds to directed list and increments totalTrack", () => {
+  it("addTrack with 'directed' adds to directed list and increments totalTrack", () => {
     const map = new Map_();
-    map.createAddDirectedTrack(DirectedType.DIRECTEDLEFT, 0, 0);
-    expect(map.getDirectedTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "directed",
+        subtype: DirectedType.DIRECTEDLEFT,
+        platform1: false,
+        platform2: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("directed")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
-    expect(map.checkDirectedTrackAt(0, 0)).toBe(true);
+    expect(map.hasTrackAt(0, 0)).toBe(true);
   });
 
-  it("createAddCurvedTrack adds to curved list", () => {
+  it("addTrack with 'curved' adds to curved list", () => {
     const map = new Map_();
-    map.createAddCurvedTrack(CurvedType.CURVE1, 0, 0);
-    expect(map.getCurvedTrackList()).toHaveLength(1);
+    map.addTrack({ kind: "curved", subtype: CurvedType.CURVE1 }, 0, 0);
+    expect(map.getTracksOfKind("curved")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
-    expect(map.checkCurvedTrackAt(0, 0)).toBe(true);
+    expect(map.hasTrackAt(0, 0)).toBe(true);
   });
 
-  it("createAddLinkedTrack adds to linked list", () => {
+  it("addTrack with 'linked' adds to linked list", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    expect(map.getLinkedTrackList()).toHaveLength(1);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    expect(map.getTracksOfKind("linked")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
-    expect(map.checkLinkedTrackAt(0, 0)).toBe(true);
+    expect(map.hasTrackAt(0, 0)).toBe(true);
   });
 
-  it("createAddExitTrack adds to exit list", () => {
+  it("addTrack with 'exit' adds to exit list", () => {
     const map = new Map_();
-    map.createAddExitTrack(ExitType.EXITLEFT, 0, 0);
-    expect(map.getExitTrackList()).toHaveLength(1);
+    map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, 0, 0);
+    expect(map.getTracksOfKind("exit")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
-    expect(map.checkExitTrackAt(0, 0)).toBe(true);
+    expect(map.hasTrackAt(0, 0)).toBe(true);
   });
 
-  it("createAddBufferTrack adds to buffer list", () => {
+  it("addTrack with 'buffer' adds to buffer list", () => {
     const map = new Map_();
-    map.createAddBufferTrack(BufferType.BUFFERLEFT, 0, 0);
-    expect(map.getBufferTrackList()).toHaveLength(1);
-    expect(map.getTotalTrack()).toBe(1);
-  });
-
-  it("createAddSignalTrack adds to signal list", () => {
-    const map = new Map_();
-    map.createAddSignalTrack(SignalType.SIGNALLEFT, 2, 0, 0);
-    expect(map.getSignalTrackList()).toHaveLength(1);
-    expect(map.getTotalTrack()).toBe(1);
-  });
-
-  it("createAddBridgeUnderpassTrack adds to bridge list", () => {
-    const map = new Map_();
-    map.createAddBridgeUnderpassTrack(BridgeUnderpassType.BRIDGE1, 0, 0);
-    expect(map.getBridgeUnderpassTrackList()).toHaveLength(1);
-    expect(map.getTotalTrack()).toBe(1);
-  });
-
-  it("createAddSwitchTrack adds to switch list", () => {
-    const map = new Map_();
-    map.createAddSwitchTrack(SwitchType.SWITCH1, 0, 0);
-    expect(map.getSwitchTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "buffer",
+        subtype: BufferType.BUFFERLEFT,
+        platform1: false,
+        platform2: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("buffer")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
   });
 
-  it("createAddCrossoverTrack adds to crossover list", () => {
+  it("addTrack with 'signal' adds to signal list", () => {
     const map = new Map_();
-    map.createAddCrossoverTrack(CrossoverType.CROSSOVER1, 0, 0);
-    expect(map.getCrossoverTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "signal",
+        subtype: SignalType.SIGNALLEFT,
+        aspect: 2,
+        platform1: false,
+        platform2: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("signal")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
   });
 
-  it("createAddFlyoverTrack adds to flyover list", () => {
+  it("addTrack with 'bridgeUnderpass' adds to bridge list", () => {
     const map = new Map_();
-    map.createAddFlyoverTrack(FlyoverType.FLYOVER1, 0, 0);
-    expect(map.getFlyoverTrackList()).toHaveLength(1);
+    map.addTrack(
+      {
+        kind: "bridgeUnderpass",
+        subtype: BridgeUnderpassType.BRIDGE1,
+        platform1: false,
+        platform2: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("bridgeUnderpass")).toHaveLength(1);
+    expect(map.getTotalTrack()).toBe(1);
+  });
+
+  it("addTrack with 'switch' adds to switch list", () => {
+    const map = new Map_();
+    map.addTrack(
+      {
+        kind: "switch",
+        subtype: SwitchType.SWITCH1,
+        platform1: false,
+        platform2: false,
+      },
+      0,
+      0,
+    );
+    expect(map.getTracksOfKind("switch")).toHaveLength(1);
+    expect(map.getTotalTrack()).toBe(1);
+  });
+
+  it("addTrack with 'crossover' adds to crossover list", () => {
+    const map = new Map_();
+    map.addTrack({ kind: "crossover", subtype: CrossoverType.CROSSOVER1 }, 0, 0);
+    expect(map.getTracksOfKind("crossover")).toHaveLength(1);
+    expect(map.getTotalTrack()).toBe(1);
+  });
+
+  it("addTrack with 'flyover' adds to flyover list", () => {
+    const map = new Map_();
+    map.addTrack({ kind: "flyover", subtype: FlyoverType.FLYOVER1 }, 0, 0);
+    expect(map.getTracksOfKind("flyover")).toHaveLength(1);
     expect(map.getTotalTrack()).toBe(1);
   });
 });
@@ -267,27 +363,57 @@ describe("Existence guards", () => {
 
   it("checkCanAddNamedLocation on STRAIGHTH returns true", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.checkCanAddNamedLocation(0, 0)).toBe(true);
   });
 
   it("checkCanAddNamedLocation on STRAIGHTH with platform returns false", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    const track = map.getStraightTrackAt(0, 0)!;
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    const track = map.getTrackAt(0, 0)!;
     track.setPlatform1(true);
     expect(map.checkCanAddNamedLocation(0, 0)).toBe(false);
   });
 
   it("checkCanAddNamedLocation on angled straight returns false", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTLEFTUP, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTLEFTUP,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.checkCanAddNamedLocation(0, 0)).toBe(false);
   });
 });
 
 // ============================================================================
-// makeTrackList
+// makeTrackList / getTrackList
 // ============================================================================
 
 describe("makeTrackList / getTrackList", () => {
@@ -299,17 +425,77 @@ describe("makeTrackList / getTrackList", () => {
 
   it("one of each track type produces 11 items", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    map.createAddDirectedTrack(DirectedType.DIRECTEDLEFT, 16, 0);
-    map.createAddCurvedTrack(CurvedType.CURVE1, 32, 0);
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 48, 0);
-    map.createAddExitTrack(ExitType.EXITLEFT, 64, 0);
-    map.createAddBufferTrack(BufferType.BUFFERLEFT, 80, 0);
-    map.createAddSignalTrack(SignalType.SIGNALLEFT, 2, 96, 0);
-    map.createAddBridgeUnderpassTrack(BridgeUnderpassType.BRIDGE1, 112, 0);
-    map.createAddSwitchTrack(SwitchType.SWITCH1, 128, 0);
-    map.createAddCrossoverTrack(CrossoverType.CROSSOVER1, 144, 0);
-    map.createAddFlyoverTrack(FlyoverType.FLYOVER1, 160, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "directed",
+        subtype: DirectedType.DIRECTEDLEFT,
+        platform1: false,
+        platform2: false,
+      },
+      16,
+      0,
+    );
+    map.addTrack({ kind: "curved", subtype: CurvedType.CURVE1 }, 32, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 48, 0);
+    map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, 64, 0);
+    map.addTrack(
+      {
+        kind: "buffer",
+        subtype: BufferType.BUFFERLEFT,
+        platform1: false,
+        platform2: false,
+      },
+      80,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "signal",
+        subtype: SignalType.SIGNALLEFT,
+        aspect: 2,
+        platform1: false,
+        platform2: false,
+      },
+      96,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "bridgeUnderpass",
+        subtype: BridgeUnderpassType.BRIDGE1,
+        platform1: false,
+        platform2: false,
+      },
+      112,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "switch",
+        subtype: SwitchType.SWITCH1,
+        platform1: false,
+        platform2: false,
+      },
+      128,
+      0,
+    );
+    map.addTrack(
+      { kind: "crossover", subtype: CrossoverType.CROSSOVER1 },
+      144,
+      0,
+    );
+    map.addTrack({ kind: "flyover", subtype: FlyoverType.FLYOVER1 }, 160, 0);
     map.makeTrackList();
     expect(map.getTrackList()).toHaveLength(11);
   });
@@ -322,8 +508,8 @@ describe("makeTrackList / getTrackList", () => {
 describe("LinkedTrack state machine", () => {
   it("connectTwoLinkedTracks: first click sets linkedTrack1", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    map.createAddLinkedTrack(LinkedType.LINKRIGHT, 16, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
     map.connectTwoLinkedTracks(0, 0);
     expect(map.getLinkedTrack1()).not.toBeNull();
     expect(map.getLinkedTrack2()).toBeNull();
@@ -331,19 +517,19 @@ describe("LinkedTrack state machine", () => {
 
   it("connectTwoLinkedTracks: second click pairs them", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    map.createAddLinkedTrack(LinkedType.LINKRIGHT, 16, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
     map.connectTwoLinkedTracks(0, 0);
     map.connectTwoLinkedTracks(16, 0);
-    const a = map.getLinkedTrackAt(0, 0)!;
-    const b = map.getLinkedTrackAt(16, 0)!;
+    const a = map.getTrackAt(0, 0)!;
+    const b = map.getTrackAt(16, 0)!;
     expect(a.isLinked()).toBe(true);
     expect(b.isLinked()).toBe(true);
   });
 
   it("connectTwoLinkedTracks: same location twice is no-op", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
     map.connectTwoLinkedTracks(0, 0);
     map.connectTwoLinkedTracks(0, 0); // same location
     // Second click: temp2 === linkedTrack1, so the if block does not execute
@@ -359,21 +545,21 @@ describe("LinkedTrack state machine", () => {
 
   it("checkAllLinkedTrackLinked: odd count returns false", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
     expect(map.checkAllLinkedTrackLinked()).toBe(false);
   });
 
   it("checkAllLinkedTrackLinked: even unlinked returns false", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    map.createAddLinkedTrack(LinkedType.LINKRIGHT, 16, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
     expect(map.checkAllLinkedTrackLinked()).toBe(false);
   });
 
   it("checkAllLinkedTrackLinked: even all linked returns true", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    map.createAddLinkedTrack(LinkedType.LINKRIGHT, 16, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
     map.connectTwoLinkedTracks(0, 0);
     map.connectTwoLinkedTracks(16, 0);
     expect(map.checkAllLinkedTrackLinked()).toBe(true);
@@ -387,11 +573,21 @@ describe("LinkedTrack state machine", () => {
 describe("deleteElement", () => {
   it("deletes track from list and decrements totalTrack", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.getTotalTrack()).toBe(1);
     expect(map.deleteElement(0, 0)).toBe(true);
     expect(map.getTotalTrack()).toBe(0);
-    expect(map.getStraightTrackList()).toHaveLength(0);
+    expect(map.getTracksOfKind("straight")).toHaveLength(0);
   });
 
   it("deletes NamedLocation", () => {
@@ -422,11 +618,11 @@ describe("deleteElement", () => {
 
   it("deleting linked track disconnects the pair", () => {
     const map = new Map_();
-    map.createAddLinkedTrack(LinkedType.LINKLEFT, 0, 0);
-    map.createAddLinkedTrack(LinkedType.LINKRIGHT, 16, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+    map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
     map.connectTwoLinkedTracks(0, 0);
     map.connectTwoLinkedTracks(16, 0);
-    const b = map.getLinkedTrackAt(16, 0)!;
+    const b = map.getTrackAt(16, 0)!;
     expect(b.isLinked()).toBe(true);
     map.deleteElement(0, 0);
     expect(b.isLinked()).toBe(false);
@@ -434,8 +630,18 @@ describe("deleteElement", () => {
 
   it("deleteElement cascades text cleanup for named tracks", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    const track = map.getStraightTrackAt(0, 0)!;
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    const track = map.getTrackAt(0, 0)!;
     const text = map.createAddText(0, 0, "Platform A", testFont);
     track.setText(text);
     expect(map.getTextList()).toHaveLength(1);
@@ -553,22 +759,52 @@ describe("Unified lookups", () => {
 
   it("getTrackAt finds any track type", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    map.createAddCurvedTrack(CurvedType.CURVE1, 16, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    map.addTrack({ kind: "curved", subtype: CurvedType.CURVE1 }, 16, 0);
     expect(map.getTrackAt(0, 0)).not.toBeNull();
     expect(map.getTrackAt(16, 0)).not.toBeNull();
   });
 
   it("hasTrackAt returns correct boolean", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     expect(map.hasTrackAt(0, 0)).toBe(true);
     expect(map.hasTrackAt(16, 0)).toBe(false);
   });
 
   it("getElementAt returns track at coordinate", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
     const el = map.getElementAt(0, 0);
     expect(el).not.toBeNull();
     expect(el!.locationToString()).toBe("0,0");
@@ -588,10 +824,20 @@ describe("Unified lookups", () => {
     expect(map.hasElementAt(0, 0)).toBe(true);
   });
 
-  it("getTrackHasPlatformAt returns StraightTrack subclasses only", () => {
+  it("getTrackHasPlatformAt returns platform-capable tracks", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    map.createAddCurvedTrack(CurvedType.CURVE1, 16, 0);
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    map.addTrack({ kind: "curved", subtype: CurvedType.CURVE1 }, 16, 0);
     expect(map.getTrackHasPlatformAt(0, 0)).not.toBeNull();
     expect(map.getTrackHasPlatformAt(16, 0)).toBeNull(); // curved has no platforms
   });
@@ -602,13 +848,34 @@ describe("Unified lookups", () => {
 // ============================================================================
 
 describe("List to save string methods", () => {
-  it("straightTrackListToSaveString returns joined save strings", () => {
+  it("tracksToSaveStrings returns save strings grouped by kind", () => {
     const map = new Map_();
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 0, 0);
-    map.createAddStraightTrack(StraightType.STRAIGHTH, 16, 0);
-    const result = map.straightTrackListToSaveString();
-    expect(result).toContain("SH,0,0,200,100,0,0,0");
-    expect(result).toContain("\n");
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      0,
+      0,
+    );
+    map.addTrack(
+      {
+        kind: "straight",
+        subtype: StraightType.STRAIGHTH,
+        platform1: false,
+        platform2: false,
+        levelCrossing: false,
+      },
+      16,
+      0,
+    );
+    const all = map.tracksToSaveStrings();
+    const straightResult = all.get("straight")!;
+    expect(straightResult).toContain("SH,0,0,200,100,0,0,0");
+    expect(straightResult).toContain("\n");
   });
 
   it("textListToSaveString returns joined text save strings", () => {

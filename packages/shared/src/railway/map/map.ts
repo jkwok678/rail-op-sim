@@ -1,34 +1,9 @@
 import { Element, NamedElement, NamedLocation, Concourse, Parapet, Text } from "../element";
-import {
-  StraightTrack,
-  DirectedTrack,
-  CurvedTrack,
-  LinkedTrack,
-  ExitTrack,
-  BufferTrack,
-  SignalTrack,
-  BridgeUnderpassTrack,
-  SwitchTrack,
-  CrossoverTrack,
-  FlyoverTrack,
-  Track,
-} from "../track";
+import { Track } from "../track/track";
+import type { TrackData, TrackKind } from "../track/track-data";
+import { KIND_META, supportsPlatforms } from "../track/track-data";
 import type { FontInfo, TextSelectionPrompt, MessageCallback } from "../types";
-import {
-  StraightType,
-  DirectedType,
-  CurvedType,
-  LinkedType,
-  ExitType,
-  BufferType,
-  SignalType,
-  BridgeUnderpassType,
-  SwitchType,
-  CrossoverType,
-  FlyoverType,
-  ParapetType,
-  Platform,
-} from "../enums";
+import { Platform } from "../enums";
 
 import {
   linkLocalText,
@@ -40,46 +15,45 @@ import { addPlatform as addPlatformFn, addLevelCrossing as addLevelCrossingFn } 
 import { checkAllTracksConnected as checkAllTracksConnectedFn } from "./map-connectivity";
 
 // ============================================================================
-// Map — data structure storing all user-placed content
+// Map_ — data structure storing all user-placed content
 // ============================================================================
 
+function coordKey(x: number, y: number): string {
+  return `${x},${y}`;
+}
+
 /**
- * @brief Data structure for storing all content the user adds to the screen.
+ * @brief Data structure for storing all user-placed content.
  * Ported from RailwayBuilder map.h / map.cpp Map class.
  */
 export class Map_ {
-  // ── image & counters ──────────────────────────────────────────────
+  // ── image & counters ────────────────────────────────────────────────
   private imageSize: number = 16;
   private totalTrack: number = 0;
 
-  // ── type‑specific element arrays ───────────────────────────────────
-  private straightTrackList: StraightTrack[] = [];
-  private directedTrackList: DirectedTrack[] = [];
-  private curvedTrackList: CurvedTrack[] = [];
-  private linkedTrackList: LinkedTrack[] = [];
-  private exitTrackList: ExitTrack[] = [];
-  private bufferTrackList: BufferTrack[] = [];
-  private signalTrackList: SignalTrack[] = [];
-  private bridgeUnderpassTrackList: BridgeUnderpassTrack[] = [];
-  private switchTrackList: SwitchTrack[] = [];
-  private crossoverTrackList: CrossoverTrack[] = [];
-  private flyoverTrackList: FlyoverTrack[] = [];
+  // ── spatial index — O(1) lookups ────────────────────────────────────
+  private elementsByCoord = new Map<string, Element>();
+
+  // ── kind-based track arrays (for iteration without scanning) ────────
+  private tracksByKind = new Map<TrackKind, Track[]>();
+
+  // ── non-track element arrays (for iteration & save order) ───────────
   private namedLocationList: NamedLocation[] = [];
   private concourseList: Concourse[] = [];
   private parapetList: Parapet[] = [];
   private textList: Text[] = [];
 
-  // ── unified track list (built by makeTrackList) ────────────────────
+  // ── unified track list ──────────────────────────────────────────────
   private trackList: Track[] = [];
 
-  // ── linked‑track connection state machine ──────────────────────────
-  private linkedTrack1: LinkedTrack | null = null;
-  private linkedTrack2: LinkedTrack | null = null;
+  // ── linked‑track connection state machine ────────────────────────────
+  private linkedTrack1: Track | null = null;
+  private linkedTrack2: Track | null = null;
 
-  // ── text drag‑and‑drop ─────────────────────────────────────────────
+  // ── text drag‑and‑drop ───────────────────────────────────────────────
   private textToMove: Text | null = null;
 
-  // ── callbacks (replace QMessageBox / QInputDialog) ─────────────────
+  // ── callbacks ────────────────────────────────────────────────────────
   private textSelectionPrompt: TextSelectionPrompt | null;
   private onMessage: MessageCallback | null;
 
@@ -95,12 +69,10 @@ export class Map_ {
   // Internal accessors (for extracted modules)
   // ====================================================================
 
-  /** @internal — exposed for map-text-linking */
   getTextSelectionPrompt(): TextSelectionPrompt | null {
     return this.textSelectionPrompt;
   }
 
-  /** @internal — exposed for map-connectivity */
   getOnMessage(): MessageCallback | null {
     return this.onMessage;
   }
@@ -113,1201 +85,247 @@ export class Map_ {
     return this.imageSize;
   }
 
-  setImageSize(newImageSize: number): void {
-    this.imageSize = newImageSize;
+  setImageSize(n: number): void {
+    this.imageSize = n;
   }
 
   getTotalTrack(): number {
     return this.totalTrack;
   }
 
-  setTotalTrack(newTrackTotal: number): void {
-    this.totalTrack = newTrackTotal;
+  setTotalTrack(n: number): void {
+    this.totalTrack = n;
   }
 
-  // ── existence checks ───────────────────────────────────────────────
+  // ── Kind-based track access ─────────────────────────────────────────
 
-  checkElementExists(locationX: number, locationY: number): boolean {
-    return (
-      this.checkStraightTrackAt(locationX, locationY) ||
-      this.checkDirectedTrackAt(locationX, locationY) ||
-      this.checkCurvedTrackAt(locationX, locationY) ||
-      this.checkLinkedTrackAt(locationX, locationY) ||
-      this.checkExitTrackAt(locationX, locationY) ||
-      this.checkBufferTrackAt(locationX, locationY) ||
-      this.checkSignalTrackAt(locationX, locationY) ||
-      this.checkBridgeUnderpassTrackAt(locationX, locationY) ||
-      this.checkSwitchTrackAt(locationX, locationY) ||
-      this.checkCrossoverTrackAt(locationX, locationY) ||
-      this.checkFlyoverTrackAt(locationX, locationY) ||
-      this.checkNamedLocationAt(locationX, locationY) ||
-      this.checkConcourseAt(locationX, locationY) ||
-      this.checkParapetAt(locationX, locationY)
-    );
-  }
-
-  checkTrackConcourseParapetExists(
-    locationX: number,
-    locationY: number,
-  ): boolean {
-    return (
-      this.checkStraightTrackAt(locationX, locationY) ||
-      this.checkDirectedTrackAt(locationX, locationY) ||
-      this.checkCurvedTrackAt(locationX, locationY) ||
-      this.checkLinkedTrackAt(locationX, locationY) ||
-      this.checkExitTrackAt(locationX, locationY) ||
-      this.checkBufferTrackAt(locationX, locationY) ||
-      this.checkSignalTrackAt(locationX, locationY) ||
-      this.checkBridgeUnderpassTrackAt(locationX, locationY) ||
-      this.checkSwitchTrackAt(locationX, locationY) ||
-      this.checkCrossoverTrackAt(locationX, locationY) ||
-      this.checkFlyoverTrackAt(locationX, locationY) ||
-      this.checkConcourseAt(locationX, locationY) ||
-      this.checkParapetAt(locationX, locationY)
-    );
-  }
-
-  // prettier-ignore
-  checkCanAddNamedLocation(locationX: number, locationY: number): boolean {
-    if (this.hasElementAt(locationX, locationY)) {
-      const straightTrack = this.getStraightTrackAt(locationX, locationY);
-      if (straightTrack !== null) {
-        switch (straightTrack.getStraightType()) {
-          case StraightType.STRAIGHTH:
-          case StraightType.STRAIGHTV:
-            if (straightTrack.hasPlatform() || straightTrack.hasLevelCrossing()) return false;
-            return true;
-          default: return false;
-        }
-      }
-      const directedTrack = this.getDirectedTrackAt(locationX, locationY);
-      if (directedTrack !== null) {
-        switch (directedTrack.getDirectType()) {
-          case DirectedType.DIRECTEDLEFT: case DirectedType.DIRECTEDRIGHT:
-          case DirectedType.DIRECTEDUP:   case DirectedType.DIRECTEDDOWN:
-            if (directedTrack.hasPlatform()) return false;
-            return true;
-          default: return false;
-        }
-      }
-      const curvedTrack = this.getCurvedTrackAt(locationX, locationY);
-      if (curvedTrack !== null) {
-        switch (curvedTrack.getCurvedType()) {
-          case CurvedType.CURVE1: case CurvedType.CURVE2:
-          case CurvedType.CURVE3: case CurvedType.CURVE4:
-          case CurvedType.CURVE5: case CurvedType.CURVE6:
-          case CurvedType.CURVE7: case CurvedType.CURVE8:
-            return true;
-          default: return false;
-        }
-      }
-      const exitTrack = this.getExitTrackAt(locationX, locationY);
-      if (exitTrack !== null) {
-        switch (exitTrack.getExitType()) {
-          case ExitType.EXITLEFT: case ExitType.EXITRIGHT:
-          case ExitType.EXITUP:   case ExitType.EXITDOWN:
-            return true;
-          default: return false;
-        }
-      }
-      const bufferTrack = this.getBufferTrackAt(locationX, locationY);
-      if (bufferTrack !== null) {
-        switch (bufferTrack.getBufferType()) {
-          case BufferType.BUFFERLEFT: case BufferType.BUFFERRIGHT:
-          case BufferType.BUFFERUP:   case BufferType.BUFFERDOWN:
-            if (bufferTrack.hasPlatform()) return false;
-            return true;
-          default: return false;
-        }
-      }
-      return false;
+  /** O(1) — ensures a kind array exists and returns it. */
+  private getOrCreateKindArray(kind: TrackKind): Track[] {
+    let arr = this.tracksByKind.get(kind);
+    if (!arr) {
+      arr = [];
+      this.tracksByKind.set(kind, arr);
     }
+    return arr;
+  }
+
+  /** Get all tracks of a specific kind. */
+  getTracksOfKind(kind: TrackKind): Track[] {
+    return this.tracksByKind.get(kind) ?? [];
+  }
+
+  /** Iterate all tracks regardless of kind. */
+  forEachTrack(fn: (track: Track) => void): void {
+    for (const arr of this.tracksByKind.values()) {
+      for (const t of arr) fn(t);
+    }
+  }
+
+  // ── Existence checks (O(1)) ─────────────────────────────────────────
+
+  checkElementExists(x: number, y: number): boolean {
+    return this.elementsByCoord.has(coordKey(x, y));
+  }
+
+  checkTrackConcourseParapetExists(x: number, y: number): boolean {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    return el instanceof Track || el instanceof Concourse || el instanceof Parapet;
+  }
+
+  hasElementAt(x: number, y: number): boolean {
+    return this.elementsByCoord.has(coordKey(x, y));
+  }
+
+  hasTrackAt(x: number, y: number): boolean {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    return el instanceof Track;
+  }
+
+  hasElementExcludingTrack(x: number, y: number): boolean {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    return el !== undefined && !(el instanceof Track);
+  }
+
+  // ── Generic element lookups ─────────────────────────────────────────
+
+  getElementAt(x: number, y: number): Element | null {
+    return this.elementsByCoord.get(coordKey(x, y)) ?? null;
+  }
+
+  getElementExcludingTrackAt(x: number, y: number): Element | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el && !(el instanceof Track)) return el;
+    return null;
+  }
+
+  getNamedElementAt(x: number, y: number): NamedElement | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el instanceof NamedElement) return el;
+    return null;
+  }
+
+  getTrackAt(x: number, y: number): Track | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el instanceof Track) return el;
+    return null;
+  }
+
+  /** Get a platform-capable track at the given coordinates. */
+  getTrackHasPlatformAt(x: number, y: number): Track | null {
+    const t = this.getTrackAt(x, y);
+    if (t && supportsPlatforms(t.data.kind)) {
+      return t;
+    }
+    return null;
+  }
+
+  // ── Can add NamedLocation check ─────────────────────────────────────
+
+  checkCanAddNamedLocation(x: number, y: number): boolean {
+    // If a non-track element occupies this coordinate, refuse
+    if (this.hasElementExcludingTrack(x, y)) return false;
+
+    const t = this.getTrackAt(x, y);
+    if (!t) return true;
+
+    // Use declarative metadata from KIND_META
+    const meta = KIND_META[t.data.kind];
+    const allowed = meta.canAddNamedLocationSubtypes as readonly string[];
+    if (!allowed.includes(t.data.subtype)) return false;
+
+    // Additional platform/level-crossing restrictions
+    if (t.hasPlatform()) return false;
+    if (t.data.kind === "straight" && t.hasLevelCrossing()) return false;
+
     return true;
   }
 
   // ====================================================================
-  // Private add methods
+  // Generic add / remove (single source of truth)
   // ====================================================================
 
-  private addStraightTrack(newStraightTrack: StraightTrack): void {
-    const x = newStraightTrack.getLocationX();
-    const y = newStraightTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.straightTrackList.push(newStraightTrack);
-      ++this.totalTrack;
-    }
+  private indexElement(el: Element): void {
+    this.elementsByCoord.set(coordKey(el.getLocationX(), el.getLocationY()), el);
   }
 
-  private addDirectedTrack(newDirectedTrack: DirectedTrack): void {
-    const x = newDirectedTrack.getLocationX();
-    const y = newDirectedTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.directedTrackList.push(newDirectedTrack);
-      ++this.totalTrack;
-    }
+  private unindexElement(x: number, y: number): void {
+    this.elementsByCoord.delete(coordKey(x, y));
   }
 
-  private addCurvedTrack(newCurvedTrack: CurvedTrack): void {
-    const x = newCurvedTrack.getLocationX();
-    const y = newCurvedTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.curvedTrackList.push(newCurvedTrack);
-      ++this.totalTrack;
+  // ── Add Track ───────────────────────────────────────────────────────
+
+  addTrack(data: TrackData, x: number, y: number): Track {
+    // Guard against any existing element (not just tracks) at this coordinate
+    if (this.checkElementExists(x, y)) {
+      const existing = this.getTrackAt(x, y);
+      if (existing) return existing;
+      // A non-track element occupies this coordinate — refuse to overwrite
+      throw new Error(
+        `Cannot add track at (${x}, ${y}): a non-track element already exists.`,
+      );
     }
+    const track = new Track(data, x, y);
+    this.indexElement(track);
+    this.getOrCreateKindArray(data.kind).push(track);
+    this.totalTrack++;
+    return track;
   }
 
-  private addLinkedTrack(newLinkedTrack: LinkedTrack): void {
-    const x = newLinkedTrack.getLocationX();
-    const y = newLinkedTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.linkedTrackList.push(newLinkedTrack);
-      ++this.totalTrack;
-    }
-  }
+  // ── Add NamedLocation ───────────────────────────────────────────────
 
-  private addExitTrack(newExitTrack: ExitTrack): void {
-    const x = newExitTrack.getLocationX();
-    const y = newExitTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.exitTrackList.push(newExitTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addBufferTrack(newBufferTrack: BufferTrack): void {
-    const x = newBufferTrack.getLocationX();
-    const y = newBufferTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.bufferTrackList.push(newBufferTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addSignalTrack(newSignalTrack: SignalTrack): void {
-    const x = newSignalTrack.getLocationX();
-    const y = newSignalTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.signalTrackList.push(newSignalTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addBridgeUnderpassTrack(
-    newBridgeUnderpassTrack: BridgeUnderpassTrack,
-  ): void {
-    const x = newBridgeUnderpassTrack.getLocationX();
-    const y = newBridgeUnderpassTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.bridgeUnderpassTrackList.push(newBridgeUnderpassTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addSwitchTrack(newSwitchTrack: SwitchTrack): void {
-    const x = newSwitchTrack.getLocationX();
-    const y = newSwitchTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.switchTrackList.push(newSwitchTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addCrossoverTrack(newCrossoverTrack: CrossoverTrack): void {
-    const x = newCrossoverTrack.getLocationX();
-    const y = newCrossoverTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.crossoverTrackList.push(newCrossoverTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addFlyoverTrack(newFlyoverTrack: FlyoverTrack): void {
-    const x = newFlyoverTrack.getLocationX();
-    const y = newFlyoverTrack.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.flyoverTrackList.push(newFlyoverTrack);
-      ++this.totalTrack;
-    }
-  }
-
-  private addNamedLocation(newNamedLocation: NamedLocation): void {
-    const x = newNamedLocation.getLocationX();
-    const y = newNamedLocation.getLocationY();
+  addNamedLocation(nl: NamedLocation): void {
+    const x = nl.getLocationX();
+    const y = nl.getLocationY();
     if (this.checkCanAddNamedLocation(x, y)) {
-      this.namedLocationList.push(newNamedLocation);
+      this.namedLocationList.push(nl);
+      this.indexElement(nl);
       const track = this.getTrackAt(x, y);
-      if (track !== null) {
-        track.setLinkedNamedLocation(newNamedLocation);
+      if (track) {
+        track.setLinkedNamedLocation(nl);
       }
     }
   }
 
-  private addConcourse(newConcourse: Concourse): void {
-    const x = newConcourse.getLocationX();
-    const y = newConcourse.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.concourseList.push(newConcourse);
+  createAddNamedLocation(x: number, y: number): void {
+    const nl = new NamedLocation(x, y);
+    this.addNamedLocation(nl);
+    this.linkNewElementToText(x, y);
+  }
+
+  // ── Add Concourse ───────────────────────────────────────────────────
+
+  addConcourse(c: Concourse): void {
+    if (!this.checkElementExists(c.getLocationX(), c.getLocationY())) {
+      this.concourseList.push(c);
+      this.indexElement(c);
     }
   }
 
-  private addParapet(newParapet: Parapet): void {
-    const x = newParapet.getLocationX();
-    const y = newParapet.getLocationY();
-    if (!this.checkElementExists(x, y)) {
-      this.parapetList.push(newParapet);
+  createAddConcourse(x: number, y: number): void {
+    const c = new Concourse(x, y);
+    this.addConcourse(c);
+    this.linkNewElementToText(x, y);
+  }
+
+  // ── Add Parapet ─────────────────────────────────────────────────────
+
+  addParapet(p: Parapet): void {
+    if (!this.checkElementExists(p.getLocationX(), p.getLocationY())) {
+      this.parapetList.push(p);
+      this.indexElement(p);
     }
   }
 
-  private addText(newText: Text): void {
-    this.textList.push(newText);
+  createAddParapet(parapetType: import("../enums").ParapetType, x: number, y: number): void {
+    const p = new Parapet(parapetType, x, y);
+    this.addParapet(p);
   }
 
-  // ====================================================================
-  // Private remove methods
-  // ====================================================================
+  // ── Text ────────────────────────────────────────────────────────────
 
-  private removeStraightTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.straightTrackList.length; i++) {
-      const el = this.straightTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.straightTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
+  addText(t: Text): void {
+    this.textList.push(t);
   }
 
-  private removeDirectedTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.directedTrackList.length; i++) {
-      const el = this.directedTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.directedTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeCurvedTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.curvedTrackList.length; i++) {
-      const el = this.curvedTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.curvedTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeLinkedTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.linkedTrackList.length; i++) {
-      const el = this.linkedTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        if (el.getOtherLinkedTrack() !== null) {
-          this.disconnectLinkedTrack(
-            el,
-            el.getOtherLinkedTrack()!,
-          );
-        }
-        this.linkedTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeExitTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.exitTrackList.length; i++) {
-      const el = this.exitTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.exitTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeBufferTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.bufferTrackList.length; i++) {
-      const el = this.bufferTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.bufferTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeSignalTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.signalTrackList.length; i++) {
-      const el = this.signalTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.signalTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeBridgeUnderpassTrack(
-    xLocation: number,
-    yLocation: number,
-  ): boolean {
-    for (let i = 0; i < this.bridgeUnderpassTrackList.length; i++) {
-      const el = this.bridgeUnderpassTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.bridgeUnderpassTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeSwitchTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.switchTrackList.length; i++) {
-      const el = this.switchTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.switchTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeCrossoverTrack(
-    xLocation: number,
-    yLocation: number,
-  ): boolean {
-    for (let i = 0; i < this.crossoverTrackList.length; i++) {
-      const el = this.crossoverTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.crossoverTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeFlyoverTrack(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.flyoverTrackList.length; i++) {
-      const el = this.flyoverTrackList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.flyoverTrackList.splice(i, 1);
-        --this.totalTrack;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeNamedLocation(
-    xLocation: number,
-    yLocation: number,
-  ): boolean {
-    for (let i = 0; i < this.namedLocationList.length; i++) {
-      const el = this.namedLocationList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.namedLocationList.splice(i, 1);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeConcourse(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.concourseList.length; i++) {
-      const el = this.concourseList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.concourseList.splice(i, 1);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private removeParapet(xLocation: number, yLocation: number): boolean {
-    for (let i = 0; i < this.parapetList.length; i++) {
-      const el = this.parapetList[i];
-      if (el.getLocationX() === xLocation && el.getLocationY() === yLocation) {
-        this.parapetList.splice(i, 1);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // ====================================================================
-  // Linked Track private methods
-  // ====================================================================
-
-  private connectLinkedTrack(): void {
-    this.linkedTrack1!.setOtherLinkedTrack(this.linkedTrack2);
-    this.linkedTrack2!.setOtherLinkedTrack(this.linkedTrack1);
-    this.resetConnectLinkedTrack();
-  }
-
-  private disconnectLinkedTrack(
-    alreadyLinkedTrack1: LinkedTrack,
-    alreadyLinkedTrack2: LinkedTrack,
-  ): void {
-    alreadyLinkedTrack1.removeOtherLinkedTrack();
-    alreadyLinkedTrack2.removeOtherLinkedTrack();
-  }
-
-  private resetConnectLinkedTrack(): void {
-    this.linkedTrack1 = null;
-    this.linkedTrack2 = null;
-  }
-
-  // ====================================================================
-  // Public — StraightTrack
-  // ====================================================================
-
-  getStraightTrackList(): StraightTrack[] {
-    return this.straightTrackList;
-  }
-
-  setStraightTrackList(newList: StraightTrack[]): void {
-    this.straightTrackList = newList;
-  }
-
-  createAddStraightTrack(
-    straightType: StraightType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new StraightTrack(straightType, overallX, overallY);
-    this.addStraightTrack(track);
-  }
-
-  getStraightTrackAt(
-    locationX: number,
-    locationY: number,
-  ): StraightTrack | null {
-    for (const el of this.straightTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkStraightTrackAt(locationX: number, locationY: number): boolean {
-    return this.getStraightTrackAt(locationX, locationY) !== null;
-  }
-
-  straightTrackListToSaveString(): string {
-    return this.straightTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ DirectedTrack ═══════════════════════════════════════════════════
-
-  getDirectedTrackList(): DirectedTrack[] {
-    return this.directedTrackList;
-  }
-
-  setDirectedTrackList(newList: DirectedTrack[]): void {
-    this.directedTrackList = newList;
-  }
-
-  createAddDirectedTrack(
-    directedType: DirectedType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new DirectedTrack(directedType, overallX, overallY);
-    this.addDirectedTrack(track);
-  }
-
-  getDirectedTrackAt(
-    locationX: number,
-    locationY: number,
-  ): DirectedTrack | null {
-    for (const el of this.directedTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkDirectedTrackAt(locationX: number, locationY: number): boolean {
-    return this.getDirectedTrackAt(locationX, locationY) !== null;
-  }
-
-  directedTrackListToSaveString(): string {
-    return this.directedTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ CurvedTrack ═════════════════════════════════════════════════════
-
-  getCurvedTrackList(): CurvedTrack[] {
-    return this.curvedTrackList;
-  }
-
-  setCurvedTrackList(newList: CurvedTrack[]): void {
-    this.curvedTrackList = newList;
-  }
-
-  createAddCurvedTrack(
-    curvedType: CurvedType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new CurvedTrack(curvedType, overallX, overallY);
-    this.addCurvedTrack(track);
-  }
-
-  getCurvedTrackAt(
-    locationX: number,
-    locationY: number,
-  ): CurvedTrack | null {
-    for (const el of this.curvedTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkCurvedTrackAt(locationX: number, locationY: number): boolean {
-    return this.getCurvedTrackAt(locationX, locationY) !== null;
-  }
-
-  curvedTrackListToSaveString(): string {
-    return this.curvedTrackList.map((t) => t.toSaveString()).join("\n");
-  }
-
-  // ══ LinkedTrack ═════════════════════════════════════════════════════
-
-  getLinkedTrackList(): LinkedTrack[] {
-    return this.linkedTrackList;
-  }
-
-  setLinkedTrackList(newList: LinkedTrack[]): void {
-    this.linkedTrackList = newList;
-  }
-
-  createAddLinkedTrack(
-    linkedType: LinkedType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new LinkedTrack(linkedType, overallX, overallY);
-    this.addLinkedTrack(track);
-  }
-
-  getLinkedTrackAt(
-    locationX: number,
-    locationY: number,
-  ): LinkedTrack | null {
-    for (const el of this.linkedTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkLinkedTrackAt(locationX: number, locationY: number): boolean {
-    return this.getLinkedTrackAt(locationX, locationY) !== null;
-  }
-
-  // ── LinkedTrack connection ──────────────────────────────────────────
-
-  getLinkedTrack1(): LinkedTrack | null {
-    return this.linkedTrack1;
-  }
-
-  setLinkedTrack1(newLinkedTrack1: LinkedTrack | null): void {
-    this.linkedTrack1 = newLinkedTrack1;
-  }
-
-  getLinkedTrack2(): LinkedTrack | null {
-    return this.linkedTrack2;
-  }
-
-  setLinkedTrack2(newLinkedTrack2: LinkedTrack | null): void {
-    this.linkedTrack2 = newLinkedTrack2;
-  }
-
-  hasLinkedTrackAt(locationX: number, locationY: number): boolean {
-    return this.getLinkedTrackAt(locationX, locationY) !== null;
-  }
-
-  connectTwoLinkedTracks(locationX: number, locationY: number): void {
-    if (this.linkedTrack1 === null) {
-      if (this.hasLinkedTrackAt(locationX, locationY)) {
-        this.linkedTrack1 = this.getLinkedTrackAt(locationX, locationY);
-      }
-    } else if (
-      this.linkedTrack2 === null &&
-      this.linkedTrack1 !== null
-    ) {
-      if (this.hasLinkedTrackAt(locationX, locationY)) {
-        const temp2 = this.getLinkedTrackAt(locationX, locationY)!;
-        if (temp2 !== this.linkedTrack1) {
-          this.linkedTrack2 = temp2;
-          if (!temp2.isLinked()) {
-            this.connectLinkedTrack();
-          } else {
-            if (this.linkedTrack1.isLinked()) {
-              this.disconnectLinkedTrack(
-                this.linkedTrack1,
-                this.linkedTrack1.getOtherLinkedTrack()!,
-              );
-            }
-            if (this.linkedTrack2.isLinked()) {
-              this.disconnectLinkedTrack(
-                this.linkedTrack2,
-                this.linkedTrack2.getOtherLinkedTrack()!,
-              );
-            }
-            this.connectLinkedTrack();
-          }
-        }
-      }
-    }
-  }
-
-  checkAllLinkedTrackLinked(): boolean {
-    if (this.linkedTrackList.length % 2 === 0) {
-      for (const linkedTrack of this.linkedTrackList) {
-        if (!linkedTrack.isLinked()) return false;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  linkedTrackListToSaveString(): string {
-    return this.linkedTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ ExitTrack ═══════════════════════════════════════════════════════
-
-  getExitTrackList(): ExitTrack[] {
-    return this.exitTrackList;
-  }
-
-  setExitTrackList(newList: ExitTrack[]): void {
-    this.exitTrackList = newList;
-  }
-
-  createAddExitTrack(
-    exitType: ExitType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new ExitTrack(exitType, overallX, overallY);
-    this.addExitTrack(track);
-  }
-
-  getExitTrackAt(
-    locationX: number,
-    locationY: number,
-  ): ExitTrack | null {
-    for (const el of this.exitTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkExitTrackAt(locationX: number, locationY: number): boolean {
-    return this.getExitTrackAt(locationX, locationY) !== null;
-  }
-
-  exitTrackListToSaveString(): string {
-    return this.exitTrackList.map((t) => t.toSaveString()).join("\n");
-  }
-
-  // ══ BufferTrack ═════════════════════════════════════════════════════
-
-  getBufferTrackList(): BufferTrack[] {
-    return this.bufferTrackList;
-  }
-
-  setBufferTrackList(newList: BufferTrack[]): void {
-    this.bufferTrackList = newList;
-  }
-
-  createAddBufferTrack(
-    bufferType: BufferType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new BufferTrack(bufferType, overallX, overallY);
-    this.addBufferTrack(track);
-  }
-
-  getBufferTrackAt(
-    locationX: number,
-    locationY: number,
-  ): BufferTrack | null {
-    for (const el of this.bufferTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkBufferTrackAt(locationX: number, locationY: number): boolean {
-    return this.getBufferTrackAt(locationX, locationY) !== null;
-  }
-
-  bufferTrackListToSaveString(): string {
-    return this.bufferTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ SignalTrack ═════════════════════════════════════════════════════
-
-  getSignalTrackList(): SignalTrack[] {
-    return this.signalTrackList;
-  }
-
-  setSignalTrackList(newList: SignalTrack[]): void {
-    this.signalTrackList = newList;
-  }
-
-  createAddSignalTrack(
-    signalType: SignalType,
-    aspect: number,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new SignalTrack(signalType, aspect, overallX, overallY);
-    this.addSignalTrack(track);
-  }
-
-  getSignalTrackAt(
-    locationX: number,
-    locationY: number,
-  ): SignalTrack | null {
-    for (const el of this.signalTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkSignalTrackAt(locationX: number, locationY: number): boolean {
-    return this.getSignalTrackAt(locationX, locationY) !== null;
-  }
-
-  signalTrackListToSaveString(): string {
-    return this.signalTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ BridgeUnderpassTrack ════════════════════════════════════════════
-
-  getBridgeUnderpassTrackList(): BridgeUnderpassTrack[] {
-    return this.bridgeUnderpassTrackList;
-  }
-
-  setBridgeUnderpassTrackList(newList: BridgeUnderpassTrack[]): void {
-    this.bridgeUnderpassTrackList = newList;
-  }
-
-  createAddBridgeUnderpassTrack(
-    bridgeUnderpassType: BridgeUnderpassType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new BridgeUnderpassTrack(
-      bridgeUnderpassType,
-      overallX,
-      overallY,
-    );
-    this.addBridgeUnderpassTrack(track);
-  }
-
-  getBridgeUnderpassTrack(
-    locationX: number,
-    locationY: number,
-  ): BridgeUnderpassTrack | null {
-    for (const el of this.bridgeUnderpassTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkBridgeUnderpassTrackAt(
-    locationX: number,
-    locationY: number,
-  ): boolean {
-    return this.getBridgeUnderpassTrack(locationX, locationY) !== null;
-  }
-
-  bridgeUnderpassTrackListToSaveString(): string {
-    return this.bridgeUnderpassTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ SwitchTrack ═════════════════════════════════════════════════════
-
-  getSwitchTrackList(): SwitchTrack[] {
-    return this.switchTrackList;
-  }
-
-  setSwitchTrackList(newList: SwitchTrack[]): void {
-    this.switchTrackList = newList;
-  }
-
-  createAddSwitchTrack(
-    switchType: SwitchType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new SwitchTrack(switchType, overallX, overallY);
-    this.addSwitchTrack(track);
-  }
-
-  getSwitchTrackAt(
-    locationX: number,
-    locationY: number,
-  ): SwitchTrack | null {
-    for (const el of this.switchTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkSwitchTrackAt(locationX: number, locationY: number): boolean {
-    return this.getSwitchTrackAt(locationX, locationY) !== null;
-  }
-
-  switchTrackListToSaveString(): string {
-    return this.switchTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ CrossoverTrack ══════════════════════════════════════════════════
-
-  getCrossoverTrackList(): CrossoverTrack[] {
-    return this.crossoverTrackList;
-  }
-
-  setCrossoverTrackList(newList: CrossoverTrack[]): void {
-    this.crossoverTrackList = newList;
-  }
-
-  createAddCrossoverTrack(
-    crossoverType: CrossoverType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new CrossoverTrack(crossoverType, overallX, overallY);
-    this.addCrossoverTrack(track);
-  }
-
-  getCrossoverTrackAt(
-    locationX: number,
-    locationY: number,
-  ): CrossoverTrack | null {
-    for (const el of this.crossoverTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkCrossoverTrackAt(
-    locationX: number,
-    locationY: number,
-  ): boolean {
-    return this.getCrossoverTrackAt(locationX, locationY) !== null;
-  }
-
-  crossoverTrackListToSaveString(): string {
-    return this.crossoverTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ FlyoverTrack ════════════════════════════════════════════════════
-
-  getFlyoverTrackList(): FlyoverTrack[] {
-    return this.flyoverTrackList;
-  }
-
-  setFlyoverTrackList(newList: FlyoverTrack[]): void {
-    this.flyoverTrackList = newList;
-  }
-
-  createAddFlyoverTrack(
-    flyoverType: FlyoverType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const track = new FlyoverTrack(flyoverType, overallX, overallY);
-    this.addFlyoverTrack(track);
-  }
-
-  getFlyoverTrackAt(
-    locationX: number,
-    locationY: number,
-  ): FlyoverTrack | null {
-    for (const el of this.flyoverTrackList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkFlyoverTrackAt(locationX: number, locationY: number): boolean {
-    return this.getFlyoverTrackAt(locationX, locationY) !== null;
-  }
-
-  flyoverTrackListToSaveString(): string {
-    return this.flyoverTrackList
-      .map((t) => t.toSaveString())
-      .join("\n");
-  }
-
-  // ══ NamedLocation ═══════════════════════════════════════════════════
-
-  getNamedLocationList(): NamedLocation[] {
-    return this.namedLocationList;
-  }
-
-  setNamedLocationList(newList: NamedLocation[]): void {
-    this.namedLocationList = newList;
-  }
-
-  createAddNamedLocation(overallX: number, overallY: number): void {
-    const namedLocation = new NamedLocation(overallX, overallY);
-    this.addNamedLocation(namedLocation);
-    this.linkNewElementToText(overallX, overallY);
-  }
-
-  getNamedLocationAt(
-    locationX: number,
-    locationY: number,
-  ): NamedLocation | null {
-    for (const el of this.namedLocationList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkNamedLocationAt(locationX: number, locationY: number): boolean {
-    return this.getNamedLocationAt(locationX, locationY) !== null;
-  }
-
-  namedLocationListToSaveString(): string {
-    return this.namedLocationList
-      .map((el) => el.toSaveString())
-      .join("\n");
-  }
-
-  // ══ Concourse ═══════════════════════════════════════════════════════
-
-  getConcourseList(): Concourse[] {
-    return this.concourseList;
-  }
-
-  setConcourseList(newList: Concourse[]): void {
-    this.concourseList = newList;
-  }
-
-  createAddConcourse(overallX: number, overallY: number): void {
-    const concourse = new Concourse(overallX, overallY);
-    this.addConcourse(concourse);
-    this.linkNewElementToText(overallX, overallY);
-  }
-
-  getConcourseAt(
-    locationX: number,
-    locationY: number,
-  ): Concourse | null {
-    for (const el of this.concourseList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkConcourseAt(locationX: number, locationY: number): boolean {
-    return this.getConcourseAt(locationX, locationY) !== null;
-  }
-
-  concourseListToSaveString(): string {
-    return this.concourseList
-      .map((el) => el.toSaveString())
-      .join("\n");
-  }
-
-  // ══ Parapet ═════════════════════════════════════════════════════════
-
-  getParapetList(): Parapet[] {
-    return this.parapetList;
-  }
-
-  setParapetList(newList: Parapet[]): void {
-    this.parapetList = newList;
-  }
-
-  createAddParapet(
-    parapetType: ParapetType,
-    overallX: number,
-    overallY: number,
-  ): void {
-    const parapet = new Parapet(parapetType, overallX, overallY);
-    this.addParapet(parapet);
-  }
-
-  getParapetAt(
-    locationX: number,
-    locationY: number,
-  ): Parapet | null {
-    for (const el of this.parapetList) {
-      if (
-        el.getLocationX() === locationX &&
-        el.getLocationY() === locationY
-      )
-        return el;
-    }
-    return null;
-  }
-
-  checkParapetAt(locationX: number, locationY: number): boolean {
-    return this.getParapetAt(locationX, locationY) !== null;
-  }
-
-  parapetListToSaveString(): string {
-    return this.parapetList.map((el) => el.toSaveString()).join("\n");
-  }
-
-  // ══ Text ════════════════════════════════════════════════════════════
-
-  getTextList(): Text[] {
-    return this.textList;
-  }
-
-  setTextList(newTextList: Text[]): void {
-    this.textList = newTextList;
-  }
-
-  createAddText(
-    overallX: number,
-    overallY: number,
-    readableBit: string,
-    currentFont: FontInfo,
-  ): Text {
-    const text = new Text(overallX, overallY, readableBit, currentFont);
-    this.addText(text);
-    return text;
+  createAddText(x: number, y: number, readableBit: string, font: FontInfo): Text {
+    const t = new Text(x, y, readableBit, font);
+    this.addText(t);
+    return t;
   }
 
   createAddLinkText(
-    overallX: number,
-    overallY: number,
+    x: number,
+    y: number,
     readableBit: string,
     ok: boolean,
-    currentFont: FontInfo,
+    font: FontInfo,
   ): void {
     let text = readableBit;
     if (text.startsWith(" ")) text = "";
     if (text !== "" && ok) {
-      const t = this.createAddText(overallX, overallY, text, currentFont);
-      this.linkLocalText(overallX, overallY, t);
+      const t = this.createAddText(x, y, text, font);
+      this.linkLocalText(x, y, t);
     }
   }
 
-  getTextAt(locationX: number, locationY: number): Text | null {
-    for (const currentText of this.textList) {
-      const textX = currentText.getLocationX();
-      const textY = currentText.getLocationY();
-      const editableX = currentText.getEditableX();
-      const editableY = currentText.getEditableY();
-      if (locationX >= textX && locationX <= editableX) {
-        if (locationY >= textY && locationY <= editableY) {
-          return currentText;
+  getTextAt(x: number, y: number): Text | null {
+    for (const t of this.textList) {
+      if (x >= t.getLocationX() && x <= t.getEditableX()) {
+        if (y >= t.getLocationY() && y <= t.getEditableY()) {
+          return t;
         }
       }
     }
     return null;
   }
 
-  checkTextExists(locationX: number, locationY: number): boolean {
-    for (const currentText of this.textList) {
-      const textX = currentText.getLocationX();
-      const textY = currentText.getLocationY();
-      const editableX = currentText.getEditableX();
-      const editableY = currentText.getEditableY();
-      if (locationX >= textX && locationX <= editableX) {
-        if (locationY >= textY && locationY <= editableY) {
-          return true;
-        }
-      }
-    }
-    return false;
+  checkTextExists(x: number, y: number): boolean {
+    return this.getTextAt(x, y) !== null;
   }
 
-  deleteText(textToDelete: Text): boolean {
+  deleteText(t: Text): boolean {
     for (let i = 0; i < this.textList.length; i++) {
-      if (this.textList[i] === textToDelete) {
+      if (this.textList[i] === t) {
         this.textList.splice(i, 1);
         return true;
       }
@@ -1320,11 +338,8 @@ export class Map_ {
   }
 
   setTextToMove(exactX: number, exactY: number): boolean;
-  setTextToMove(newTextToMove: Text | null): void;
-  setTextToMove(
-    arg1: number | Text | null,
-    arg2?: number,
-  ): boolean | void {
+  setTextToMove(t: Text | null): void;
+  setTextToMove(arg1: number | Text | null, arg2?: number): boolean | void {
     if (typeof arg1 === "number" && typeof arg2 === "number") {
       if (this.checkTextExists(arg1, arg2)) {
         this.textToMove = this.getTextAt(arg1, arg2);
@@ -1336,46 +351,127 @@ export class Map_ {
     this.textToMove = arg1 as Text | null;
   }
 
-  moveText(exactX: number, exactY: number): void {
-    if (this.textToMove !== null) {
-      const fontSize = this.textToMove.getFontSize();
-      this.textToMove.setLocationX(exactX);
-      this.textToMove.setLocationY(exactY);
-      this.textToMove.setEditableX(exactX + fontSize);
-      this.textToMove.setEditableY(exactY + fontSize);
+  moveText(x: number, y: number): void {
+    if (this.textToMove) {
+      const fs = this.textToMove.getFontSize();
+      this.textToMove.setLocationX(x);
+      this.textToMove.setLocationY(y);
+      this.textToMove.setEditableX(x + fs);
+      this.textToMove.setEditableY(y + fs);
     }
   }
 
-  // ====================================================================
-  // Text linking (delegated to map-text-linking)
-  // ====================================================================
+  // ── Remove ──────────────────────────────────────────────────────────
 
-  /** @see map-text-linking.linkLocalText */
-  linkLocalText(
-    locationX: number,
-    locationY: number,
-    linkedText: Text,
-  ): void {
-    linkLocalText(this, locationX, locationY, linkedText);
+  deleteElement(x: number, y: number): boolean {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (!el) return false;
+
+    // Handle text cleanup for named elements
+    if (el instanceof NamedElement && el.getNamed()) {
+      const txt = el.getText();
+      if (txt) {
+        this.deleteTextFromAllElements(txt);
+        this.deleteText(txt);
+      }
+    }
+
+    if (el instanceof Track) {
+      // Handle linked track cleanup
+      if (el.data.kind === "linked" && el.getOtherLinkedTrack()) {
+        this.disconnectLinkedTrack(el, el.getOtherLinkedTrack()!);
+      }
+
+      // Remove from kind array
+      const kindArr = this.tracksByKind.get(el.data.kind);
+      if (kindArr) {
+        const idx = kindArr.indexOf(el);
+        if (idx !== -1) kindArr.splice(idx, 1);
+      }
+      this.totalTrack--;
+    } else if (el instanceof NamedLocation) {
+      const idx = this.namedLocationList.indexOf(el);
+      if (idx !== -1) this.namedLocationList.splice(idx, 1);
+    } else if (el instanceof Concourse) {
+      const idx = this.concourseList.indexOf(el);
+      if (idx !== -1) this.concourseList.splice(idx, 1);
+    } else if (el instanceof Parapet) {
+      const idx = this.parapetList.indexOf(el);
+      if (idx !== -1) this.parapetList.splice(idx, 1);
+    }
+
+    this.unindexElement(x, y);
+    return true;
   }
 
-  /** @see map-text-linking.deleteTextFromAllElements */
-  deleteTextFromAllElements(textToDelete: Text): void {
-    deleteTextFromAllElements(this, textToDelete);
+  // ══ NamedLocation accessors ══════════════════════════════════════════
+
+  getNamedLocationList(): NamedLocation[] {
+    return this.namedLocationList;
   }
 
-  /** @see map-text-linking.linkNewElementToText */
-  linkNewElementToText(locationX: number, locationY: number): void {
-    linkNewElementToText(this, locationX, locationY);
+  getNamedLocationAt(x: number, y: number): NamedLocation | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el instanceof NamedLocation) return el;
+    return null;
   }
 
-  /** @see map-text-linking.changeDeleteText */
-  changeDeleteText(
-    readableBit: string,
-    ok: boolean,
-    text: Text,
-  ): void {
-    changeDeleteText(this, readableBit, ok, text);
+  checkNamedLocationAt(x: number, y: number): boolean {
+    return this.getNamedLocationAt(x, y) !== null;
+  }
+
+  namedLocationListToSaveString(): string {
+    return this.namedLocationList.map((e) => e.toSaveString()).join("\n");
+  }
+
+  // ══ Concourse accessors ══════════════════════════════════════════════
+
+  getConcourseList(): Concourse[] {
+    return this.concourseList;
+  }
+
+  getConcourseAt(x: number, y: number): Concourse | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el instanceof Concourse) return el;
+    return null;
+  }
+
+  checkConcourseAt(x: number, y: number): boolean {
+    return this.getConcourseAt(x, y) !== null;
+  }
+
+  concourseListToSaveString(): string {
+    return this.concourseList.map((e) => e.toSaveString()).join("\n");
+  }
+
+  // ══ Parapet accessors ════════════════════════════════════════════════
+
+  getParapetList(): Parapet[] {
+    return this.parapetList;
+  }
+
+  getParapetAt(x: number, y: number): Parapet | null {
+    const el = this.elementsByCoord.get(coordKey(x, y));
+    if (el instanceof Parapet) return el;
+    return null;
+  }
+
+  checkParapetAt(x: number, y: number): boolean {
+    return this.getParapetAt(x, y) !== null;
+  }
+
+  parapetListToSaveString(): string {
+    return this.parapetList.map((e) => e.toSaveString()).join("\n");
+  }
+
+  // ══ Text accessors ═══════════════════════════════════════════════════
+
+  getTextList(): Text[] {
+    return this.textList;
+  }
+
+  setTextList(list: Text[]): void {
+    this.textList = list;
   }
 
   textListToSaveString(): string {
@@ -1383,207 +479,146 @@ export class Map_ {
   }
 
   // ====================================================================
-  // Platform & level crossing (delegated to map-platform)
+  // Linked track connection state machine
   // ====================================================================
 
-  /** @see map-platform.addPlatform */
-  addPlatform(
-    side: Platform,
-    locationX: number,
-    locationY: number,
-  ): void {
-    addPlatformFn(this, side, locationX, locationY);
-  }
-
-  /** @see map-platform.addLevelCrossing */
-  addLevelCrossing(locationX: number, locationY: number): void {
-    addLevelCrossingFn(this, locationX, locationY);
-  }
-
-  // ══ Delete Element ══════════════════════════════════════════════════
-
-  deleteElement(locationX: number, locationY: number): boolean {
-    let deleted = false;
-    const track = this.getTrackAt(locationX, locationY);
-    const namedLocation = this.getNamedLocationAt(locationX, locationY);
-    const concourse = this.getConcourseAt(locationX, locationY);
-
-    if (track !== null && track.getNamed()) {
-      const txt = track.getText();
-      if (txt !== null) {
-        this.deleteTextFromAllElements(txt);
-        this.deleteText(txt);
-      }
-    } else if (namedLocation !== null && namedLocation.getNamed()) {
-      const txt = namedLocation.getText();
-      if (txt !== null) {
-        this.deleteTextFromAllElements(txt);
-        this.deleteText(txt);
-      }
-    } else if (concourse !== null && concourse.getNamed()) {
-      const txt = concourse.getText();
-      if (txt !== null) {
-        this.deleteTextFromAllElements(txt);
-        this.deleteText(txt);
-      }
+  private connectLinkedTrack(): void {
+    if (this.linkedTrack1 && this.linkedTrack2) {
+      this.linkedTrack1.setOtherLinkedTrack(this.linkedTrack2);
+      this.linkedTrack2.setOtherLinkedTrack(this.linkedTrack1);
     }
-
-    if (!deleted)
-      deleted = this.removeStraightTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeDirectedTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeCurvedTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeLinkedTrack(locationX, locationY);
-    if (!deleted) deleted = this.removeExitTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeBufferTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeSignalTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeBridgeUnderpassTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeSwitchTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeCrossoverTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeFlyoverTrack(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeNamedLocation(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeConcourse(locationX, locationY);
-    if (!deleted)
-      deleted = this.removeParapet(locationX, locationY);
-
-    return deleted;
+    this.resetConnectLinkedTrack();
   }
 
-  // ══ General lookups ═════════════════════════════════════════════════
-
-  getElementAt(locationX: number, locationY: number): Element | null {
-    const el = this.getElementExcludingTrackAt(locationX, locationY);
-    if (el !== null) return el;
-    return this.getTrackAt(locationX, locationY);
+  private disconnectLinkedTrack(a: Track, b: Track): void {
+    a.removeOtherLinkedTrack();
+    b.removeOtherLinkedTrack();
   }
 
-  hasElementAt(locationX: number, locationY: number): boolean {
-    return this.getElementAt(locationX, locationY) !== null;
+  private resetConnectLinkedTrack(): void {
+    this.linkedTrack1 = null;
+    this.linkedTrack2 = null;
   }
 
-  getElementExcludingTrackAt(
-    locationX: number,
-    locationY: number,
-  ): Element | null {
-    // prettier-ignore
-    for (const el of this.namedLocationList)
-      if (el.getLocationX() === locationX && el.getLocationY() === locationY) return el;
-    for (const el of this.concourseList)
-      if (el.getLocationX() === locationX && el.getLocationY() === locationY) return el;
-    for (const el of this.parapetList)
-      if (el.getLocationX() === locationX && el.getLocationY() === locationY) return el;
-    return null;
+  getLinkedTrack1(): Track | null {
+    return this.linkedTrack1;
   }
 
-  hasElementExcludingTrack(
-    locationX: number,
-    locationY: number,
-  ): boolean {
-    return (
-      this.getElementExcludingTrackAt(locationX, locationY) !== null
-    );
+  setLinkedTrack1(t: Track | null): void {
+    this.linkedTrack1 = t;
   }
 
-  getNamedElementAt(
-    locationX: number,
-    locationY: number,
-  ): NamedElement | null {
-    for (const el of this.namedLocationList)
-      if (el.getLocationX() === locationX && el.getLocationY() === locationY) return el;
-    for (const el of this.concourseList)
-      if (el.getLocationX() === locationX && el.getLocationY() === locationY) return el;
-    return null;
+  getLinkedTrack2(): Track | null {
+    return this.linkedTrack2;
   }
 
-  getTrackAt(locationX: number, locationY: number): Track | null {
-    // prettier-ignore
-    for (const t of this.straightTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.directedTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.curvedTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.linkedTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.exitTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.bufferTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.signalTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.bridgeUnderpassTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.switchTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.crossoverTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.flyoverTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    return null;
+  setLinkedTrack2(t: Track | null): void {
+    this.linkedTrack2 = t;
   }
 
-  hasTrackAt(locationX: number, locationY: number): boolean {
-    return this.getTrackAt(locationX, locationY) !== null;
+  connectTwoLinkedTracks(x: number, y: number): void {
+    const clicked = this.getTrackAt(x, y);
+    if (!clicked || clicked.data.kind !== "linked") return;
+
+    if (!this.linkedTrack1) {
+      this.linkedTrack1 = clicked;
+    } else if (!this.linkedTrack2 && clicked !== this.linkedTrack1) {
+      this.linkedTrack2 = clicked;
+      // If either is already linked, disconnect first
+      if (clicked.isLinked()) {
+        this.disconnectLinkedTrack(clicked, clicked.getOtherLinkedTrack()!);
+      }
+      if (this.linkedTrack1.isLinked()) {
+        this.disconnectLinkedTrack(
+          this.linkedTrack1,
+          this.linkedTrack1.getOtherLinkedTrack()!,
+        );
+      }
+      this.connectLinkedTrack();
+    }
   }
 
-  getTrackHasPlatformAt(
-    locationX: number,
-    locationY: number,
-  ): StraightTrack | null {
-    for (const t of this.straightTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.directedTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.bufferTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.signalTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    for (const t of this.switchTrackList)
-      if (t.getLocationX() === locationX && t.getLocationY() === locationY) return t;
-    return null;
+  checkAllLinkedTrackLinked(): boolean {
+    const linkedTracks = this.getTracksOfKind("linked");
+    if (linkedTracks.length % 2 === 0) {
+      for (const lt of linkedTracks) {
+        if (!lt.isLinked()) return false;
+      }
+      return true;
+    }
+    return false;
   }
 
-  // ══ Unified track list ══════════════════════════════════════════════
+  // ====================================================================
+  // Save strings (delegated to individual element methods)
+  // ====================================================================
+
+  /** Generates save strings for all track kinds. */
+  tracksToSaveStrings(): Map<TrackKind, string> {
+    const result = new Map<TrackKind, string>();
+    for (const [kind, tracks] of this.tracksByKind) {
+      result.set(kind, tracks.map((t) => t.toSaveString()).join("\n"));
+    }
+    return result;
+  }
+
+  // ====================================================================
+  // Unified track list
+  // ====================================================================
 
   getTrackList(): Track[] {
     return this.trackList;
   }
 
-  setTrackList(newTrackList: Track[]): void {
-    this.trackList = newTrackList;
+  setTrackList(list: Track[]): void {
+    this.trackList = list;
   }
 
+  /** Rebuild the unified track list from all kind arrays. */
   makeTrackList(): void {
-    const temp: Track[] = [];
-    for (const t of this.straightTrackList) temp.push(t);
-    for (const t of this.directedTrackList) temp.push(t);
-    for (const t of this.curvedTrackList) temp.push(t);
-    for (const t of this.linkedTrackList) temp.push(t);
-    for (const t of this.exitTrackList) temp.push(t);
-    for (const t of this.bufferTrackList) temp.push(t);
-    for (const t of this.signalTrackList) temp.push(t);
-    for (const t of this.bridgeUnderpassTrackList) temp.push(t);
-    for (const t of this.switchTrackList) temp.push(t);
-    for (const t of this.crossoverTrackList) temp.push(t);
-    for (const t of this.flyoverTrackList) temp.push(t);
-    this.trackList = temp;
+    const all: Track[] = [];
+    for (const arr of this.tracksByKind.values()) {
+      for (const t of arr) all.push(t);
+    }
+    this.trackList = all;
   }
 
   // ====================================================================
-  // Connectivity (delegated to map-connectivity)
+  // Text linking (delegated)
   // ====================================================================
 
-  /** @see map-connectivity.checkAllTracksConnected */
+  linkLocalText(x: number, y: number, linkedText: Text): void {
+    linkLocalText(this, x, y, linkedText);
+  }
+
+  deleteTextFromAllElements(t: Text): void {
+    deleteTextFromAllElements(this, t);
+  }
+
+  linkNewElementToText(x: number, y: number): void {
+    linkNewElementToText(this, x, y);
+  }
+
+  changeDeleteText(readableBit: string, ok: boolean, text: Text): void {
+    changeDeleteText(this, readableBit, ok, text);
+  }
+
+  // ====================================================================
+  // Platform & level crossing (delegated)
+  // ====================================================================
+
+  addPlatform(side: Platform, x: number, y: number): void {
+    addPlatformFn(this, side, x, y);
+  }
+
+  addLevelCrossing(x: number, y: number): void {
+    addLevelCrossingFn(this, x, y);
+  }
+
+  // ====================================================================
+  // Connectivity (delegated)
+  // ====================================================================
+
   checkAllTracksConnected(): boolean {
     return checkAllTracksConnectedFn(this);
   }

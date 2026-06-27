@@ -176,8 +176,9 @@ export abstract class NamedElement extends Element {
   /** @returns "NamedElement,x,y[,Text,...]" */
   toString(): string {
     let result = `NamedElement,${this.locationToString()}`;
-    if (this.getNamed()) {
-      result += `,${this.text!.toString()}`;
+    const txt = this.getText();
+    if (txt) {
+      result += `,${txt.toString()}`;
     }
     return result;
   }
@@ -202,8 +203,9 @@ export class NamedLocation extends NamedElement {
   /** @returns "NamedLocation,x,y[,Text,...]" */
   toString(): string {
     let result = `NamedLocation,${this.locationToString()}`;
-    if (this.getNamed()) {
-      result += `,${this.text!.toString()}`;
+    const txt = this.getText();
+    if (txt) {
+      result += `,${txt.toString()}`;
     }
     return result;
   }
@@ -211,8 +213,9 @@ export class NamedLocation extends NamedElement {
   /** @returns "x,y[,readableText]" */
   toSaveString(): string {
     let result = this.locationToString();
-    if (this.getNamed()) {
-      result += `,${this.text!.getReadableText()}`;
+    const txt = this.getText();
+    if (txt) {
+      result += `,${txt.getReadableText()}`;
     }
     return result;
   }
@@ -235,8 +238,9 @@ export class Concourse extends NamedElement {
   /** @returns "Concourse,x,y[,Text,...]" */
   toString(): string {
     let result = `Concourse,${this.locationToString()}`;
-    if (this.getNamed()) {
-      result += `,${this.text!.toString()}`;
+    const txt = this.getText();
+    if (txt) {
+      result += `,${txt.toString()}`;
     }
     return result;
   }
@@ -244,8 +248,9 @@ export class Concourse extends NamedElement {
   /** @returns "x,y[,readableText]" */
   toSaveString(): string {
     let result = this.locationToString();
-    if (this.getNamed()) {
-      result += `,${this.text!.getReadableText()}`;
+    const txt = this.getText();
+    if (txt) {
+      result += `,${txt.getReadableText()}`;
     }
     return result;
   }
