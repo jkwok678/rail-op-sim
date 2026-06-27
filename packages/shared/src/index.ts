@@ -1,1 +1,2 @@
-export const sayHello = () => "Hello from shared!";
+// Re-export everything from the railway module
+export * from "./railway/index";

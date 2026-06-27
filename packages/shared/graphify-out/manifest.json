@@ -1,0 +1,172 @@
+{
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/package.json": {
+    "mtime": 1782566422.8420348,
+    "ast_hash": "f98be7f0fb36beda2b5edfc01c3f6413",
+    "semantic_hash": "f98be7f0fb36beda2b5edfc01c3f6413"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/index.ts": {
+    "mtime": 1782569017.7412074,
+    "ast_hash": "1b1234493f1d9677936c00cb74b11981",
+    "semantic_hash": "1b1234493f1d9677936c00cb74b11981"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/element.test.ts": {
+    "mtime": 1782574551.8472843,
+    "ast_hash": "540773fb326a6ccd6337db1cd195d3a7",
+    "semantic_hash": "540773fb326a6ccd6337db1cd195d3a7"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/enums.test.ts": {
+    "mtime": 1782574493.6760018,
+    "ast_hash": "5b508efc104b35eb564de1001487b316",
+    "semantic_hash": "5b508efc104b35eb564de1001487b316"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/errors.test.ts": {
+    "mtime": 1782574450.3219674,
+    "ast_hash": "e8c3bd9131f5fc2d00b122d7cad69833",
+    "semantic_hash": "e8c3bd9131f5fc2d00b122d7cad69833"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/map-connectivity.test.ts": {
+    "mtime": 1782575112.577985,
+    "ast_hash": "a8f214073b6f2fce2353b732bda85e65",
+    "semantic_hash": "a8f214073b6f2fce2353b732bda85e65"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/map-platform.test.ts": {
+    "mtime": 1782574906.4507244,
+    "ast_hash": "5f8b19f2dc1417780027f349b8ab9430",
+    "semantic_hash": "5f8b19f2dc1417780027f349b8ab9430"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/map-text-linking.test.ts": {
+    "mtime": 1782574921.3606622,
+    "ast_hash": "8f28f2786c3e040877cda59ca2a85fe1",
+    "semantic_hash": "8f28f2786c3e040877cda59ca2a85fe1"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/map.test.ts": {
+    "mtime": 1782574815.9950745,
+    "ast_hash": "7bf2de50f383100b37bf4f2bd2bf4de4",
+    "semantic_hash": "7bf2de50f383100b37bf4f2bd2bf4de4"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/__tests__/track.test.ts": {
+    "mtime": 1782574692.3227842,
+    "ast_hash": "4836a98e0e076676f5ddc41bc89fe8d1",
+    "semantic_hash": "4836a98e0e076676f5ddc41bc89fe8d1"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/element.ts": {
+    "mtime": 1782568469.8546615,
+    "ast_hash": "d205e613b8b152bc0a557f220fad4f64",
+    "semantic_hash": "d205e613b8b152bc0a557f220fad4f64"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/enums.ts": {
+    "mtime": 1782568415.175343,
+    "ast_hash": "f67c35e396d8e2c3fc4ee3a53af91fab",
+    "semantic_hash": "f67c35e396d8e2c3fc4ee3a53af91fab"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/errors.ts": {
+    "mtime": 1782568419.144205,
+    "ast_hash": "94226a7a164c704133bde026f64376c1",
+    "semantic_hash": "94226a7a164c704133bde026f64376c1"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/index.ts": {
+    "mtime": 1782569010.4792707,
+    "ast_hash": "360685fe9a8dab87c92af28ec7287ede",
+    "semantic_hash": "360685fe9a8dab87c92af28ec7287ede"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/index.ts": {
+    "mtime": 1782573453.7477164,
+    "ast_hash": "d061dfb39c79c59be43f20542b1ec695",
+    "semantic_hash": "d061dfb39c79c59be43f20542b1ec695"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/map-connectivity.ts": {
+    "mtime": 1782573344.4408712,
+    "ast_hash": "936189a5438cfa4a07ddc0c505b56eff",
+    "semantic_hash": "936189a5438cfa4a07ddc0c505b56eff"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/map-platform.ts": {
+    "mtime": 1782573339.5321803,
+    "ast_hash": "8fb4f0e94f806853c889b218ecee5804",
+    "semantic_hash": "8fb4f0e94f806853c889b218ecee5804"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/map-text-linking.ts": {
+    "mtime": 1782573323.3336008,
+    "ast_hash": "98ce34ab88c6ae5f4e024782a8f99118",
+    "semantic_hash": "98ce34ab88c6ae5f4e024782a8f99118"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/map.ts": {
+    "mtime": 1782573450.3757846,
+    "ast_hash": "eeb1e5eaca1ae4ce9b2d1fb2bfb54ba7",
+    "semantic_hash": "eeb1e5eaca1ae4ce9b2d1fb2bfb54ba7"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/bridge-underpass-track.ts": {
+    "mtime": 1782573183.3153148,
+    "ast_hash": "639c7b3319184fc0f6cbdc2f17e18633",
+    "semantic_hash": "639c7b3319184fc0f6cbdc2f17e18633"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/buffer-track.ts": {
+    "mtime": 1782573170.6258383,
+    "ast_hash": "1ba4f990c8c4a3e3b437c1d5cf21fbe4",
+    "semantic_hash": "1ba4f990c8c4a3e3b437c1d5cf21fbe4"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/crossover-track.ts": {
+    "mtime": 1782573209.5018437,
+    "ast_hash": "20a2e2b5f6e40ab0b1f57a4106c87453",
+    "semantic_hash": "20a2e2b5f6e40ab0b1f57a4106c87453"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/curved-track.ts": {
+    "mtime": 1782573149.045536,
+    "ast_hash": "e12a3c145cb227f02f16401e2a100484",
+    "semantic_hash": "e12a3c145cb227f02f16401e2a100484"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/directed-track.ts": {
+    "mtime": 1782573140.6719742,
+    "ast_hash": "63f13d3a9a976c928ee1148c347cf567",
+    "semantic_hash": "63f13d3a9a976c928ee1148c347cf567"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/exit-track.ts": {
+    "mtime": 1782573164.2773905,
+    "ast_hash": "bdc5cee0d9dae482479e1d4752eeac3b",
+    "semantic_hash": "bdc5cee0d9dae482479e1d4752eeac3b"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/flyover-track.ts": {
+    "mtime": 1782573217.2144926,
+    "ast_hash": "f7a59f0b168e15728aad570dd7b432a2",
+    "semantic_hash": "f7a59f0b168e15728aad570dd7b432a2"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/index.ts": {
+    "mtime": 1782573218.7397857,
+    "ast_hash": "6a5d83a54ccfe77c57757c89979aceb3",
+    "semantic_hash": "6a5d83a54ccfe77c57757c89979aceb3"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/linked-track.ts": {
+    "mtime": 1782573158.249856,
+    "ast_hash": "ebe83ee4113651b4dad750b9ef7fccae",
+    "semantic_hash": "ebe83ee4113651b4dad750b9ef7fccae"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/signal-track.ts": {
+    "mtime": 1782573177.7137754,
+    "ast_hash": "ec6c30d0ee3e4e5a6e3edb63aa107bd5",
+    "semantic_hash": "ec6c30d0ee3e4e5a6e3edb63aa107bd5"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/straight-track.ts": {
+    "mtime": 1782573134.1549754,
+    "ast_hash": "56af69a69358b357e83ac7da48ed30af",
+    "semantic_hash": "56af69a69358b357e83ac7da48ed30af"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/switch-track.ts": {
+    "mtime": 1782573202.5890048,
+    "ast_hash": "b039b4be5069a1ed604dd80e1b0663d4",
+    "semantic_hash": "b039b4be5069a1ed604dd80e1b0663d4"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/track-base.ts": {
+    "mtime": 1782573125.8881702,
+    "ast_hash": "a8243f5149c82f5d0fb257e9dbfc6823",
+    "semantic_hash": "a8243f5149c82f5d0fb257e9dbfc6823"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/types.ts": {
+    "mtime": 1782568400.8768594,
+    "ast_hash": "79a186fddbb6d1030823caf99a63dda7",
+    "semantic_hash": "79a186fddbb6d1030823caf99a63dda7"
+  },
+  "/Users/jonathankwok/projects/rail-op-sim/packages/shared/tsconfig.json": {
+    "mtime": 1782555999.37945,
+    "ast_hash": "ed78d66e53fbe96f8e5b08cb930cf919",
+    "semantic_hash": "ed78d66e53fbe96f8e5b08cb930cf919"
+  }
+}
