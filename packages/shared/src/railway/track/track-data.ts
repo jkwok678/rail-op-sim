@@ -350,6 +350,14 @@ export function getLinksForSubtype(
 	return LINK_TABLES[kind]?.[subtype] ?? [];
 }
 
+/** Whether a subtype string is a recognised value for the given track kind. */
+export function isValidSubtype(
+	kind: TrackKind,
+	subtype: SubtypeKey,
+): boolean {
+	return Object.prototype.hasOwnProperty.call(LINK_TABLES[kind] ?? {}, subtype);
+}
+
 /** Whether a track kind has a secondary path (separate speed/length). */
 export function hasSecondaryPath(kind: TrackKind): boolean {
 	return KIND_META[kind].hasSecondaryPath;

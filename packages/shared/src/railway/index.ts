@@ -38,13 +38,22 @@ export {
 } from "./errors";
 // Map class
 export { Map_ as Map } from "./map";
-export type { TrackData, TrackKind, TrackKindMeta } from "./track";
+export type {
+	CreateTrackDataOptions,
+	SignalAspectValue,
+	TrackData,
+	TrackKind,
+	TrackKindMeta,
+} from "./track";
 // Track class
 export {
+	createTrackData,
 	getLinksForSubtype,
 	hasSecondaryPath,
+	isValidSubtype,
 	KIND_META,
 	kindToLabel,
+	SignalAspect,
 	subtypeToCode,
 	supportsLevelCrossing,
 	supportsPlatforms,

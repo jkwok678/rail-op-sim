@@ -13,6 +13,13 @@ export interface GroundLayerOptions {
 	showAxes?: boolean;
 	/** Target screen pixels between grid lines (default ~100). */
 	targetSpacing?: number;
+	/**
+	 * When set, draw grid lines at this fixed world-unit spacing (one line per
+	 * cell boundary) instead of the adaptive `targetSpacing` behaviour, so the
+	 * visible grid coincides with the discrete placement cells. Lines are offset
+	 * by half a cell so integer grid coordinates land at cell centres.
+	 */
+	fixedSpacing?: number;
 }
 
 const DEFAULTS: {
@@ -68,6 +75,10 @@ export function createGroundLayer(options?: GroundLayerOptions): GroundLayer {
 	const gridWidth = options?.gridWidth ?? DEFAULTS.gridWidth;
 	const showAxes = options?.showAxes ?? DEFAULTS.showAxes;
 	const targetSpacing = options?.targetSpacing ?? DEFAULTS.targetSpacing;
+	const fixedSpacing = options?.fixedSpacing;
+
+	/** Below this on-screen line spacing (px), skip the grid to avoid a dense blur. */
+	const MIN_SCREEN_SPACING = 4;
 
 	const layer = new Container();
 	layer.label = "ground-layer";
@@ -94,27 +105,31 @@ export function createGroundLayer(options?: GroundLayerOptions): GroundLayer {
 		const top = (0 - wy - screenH * pad) / zoom;
 		const bottom = (screenH - wy + screenH * pad) / zoom;
 
-		const spacing = niceSpacing(targetSpacing, zoom);
+		const spacing = fixedSpacing ?? niceSpacing(targetSpacing, zoom);
+		// In fixed-cell mode, offset lines by half a cell so integer grid
+		// coordinates (cell centres) sit between the lines.
+		const offset = fixedSpacing !== undefined ? spacing / 2 : 0;
 
 		// ── Grid lines ──
 		gridGfx.clear();
-		const startX = Math.floor(left / spacing) * spacing;
-		const endX = Math.ceil(right / spacing) * spacing;
-		for (let x = startX; x <= endX; x += spacing) {
-			gridGfx.moveTo(x, top);
-			gridGfx.lineTo(x, bottom);
+		// Skip dense grids that would smear into a solid fill when zoomed far out.
+		if (fixedSpacing === undefined || spacing * zoom >= MIN_SCREEN_SPACING) {
+			const startX = Math.floor((left - offset) / spacing) * spacing + offset;
+			for (let x = startX; x <= right; x += spacing) {
+				gridGfx.moveTo(x, top);
+				gridGfx.lineTo(x, bottom);
+			}
+			const startY = Math.floor((top - offset) / spacing) * spacing + offset;
+			for (let y = startY; y <= bottom; y += spacing) {
+				gridGfx.moveTo(left, y);
+				gridGfx.lineTo(right, y);
+			}
+			gridGfx.stroke({
+				width: gridWidth,
+				color: resolve(gridColor),
+				alpha: gridAlpha,
+			});
 		}
-		const startY = Math.floor(top / spacing) * spacing;
-		const endY = Math.ceil(bottom / spacing) * spacing;
-		for (let y = startY; y <= endY; y += spacing) {
-			gridGfx.moveTo(left, y);
-			gridGfx.lineTo(right, y);
-		}
-		gridGfx.stroke({
-			width: gridWidth,
-			color: resolve(gridColor),
-			alpha: gridAlpha,
-		});
 
 		// ── Axes (always full viewport span) ──
 		if (!showAxes) return;

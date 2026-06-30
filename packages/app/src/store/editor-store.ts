@@ -1,0 +1,105 @@
+import { SignalAspect, type SignalAspectValue, type TrackKind } from "@rail-op-sim/shared";
+import { create } from "zustand";
+import { debugLog } from "#/lib/debugLogger";
+
+/** The active editing tool. */
+export type Tool = "select" | "add" | "delete";
+
+/** Non-track element types placeable from the Add palette. */
+export type ElementKind =
+	| "namedLocation"
+	| "concourse"
+	| "parapet"
+	| "text"
+	| "platform"
+	| "levelCrossing";
+
+/** Union of all placeable categories (tracks + elements). */
+export type AddKind = TrackKind | ElementKind;
+
+/** Returns true when `kind` is a track category (not an element). */
+export function isTrackKind(kind: AddKind): kind is TrackKind {
+	const TRACK_KINDS: Set<string> = new Set([
+		"straight",
+		"directed",
+		"curved",
+		"linked",
+		"exit",
+		"buffer",
+		"signal",
+		"bridgeUnderpass",
+		"switch",
+		"crossover",
+		"flyover",
+	]);
+	return TRACK_KINDS.has(kind);
+}
+
+export interface EditorState {
+	/** Current tool. */
+	tool: Tool;
+	/** Category chosen in the Add palette (null = showing categories). */
+	selectedKind: AddKind | null;
+	/** Subtype chosen in the Add palette (the thing that gets placed). */
+	selectedSubtype: string | null;
+	/** Signal capability type (only meaningful when selectedKind === "signal"). */
+	selectedAspect: SignalAspectValue;
+
+	/**
+	 * World coordinates where the user clicked to place text.
+	 * When non-null, the text input dialog opens to collect content.
+	 */
+	pendingTextLocation: { x: number; y: number } | null;
+
+	/** Switch the active tool. Leaving "add" clears the palette selection. */
+	setTool: (tool: Tool) => void;
+	/** Choose a category (clears any subtype). Pass null to go back to categories. */
+	selectKind: (kind: AddKind | null) => void;
+	/** Choose the subtype to place. */
+	selectSubtype: (subtype: string | null) => void;
+	/** Set the signal aspect type. */
+	setAspect: (aspect: SignalAspectValue) => void;
+	/** Store the world-coordinate location where text should be placed, triggering the dialog. */
+	setPendingTextLocation: (loc: { x: number; y: number } | null) => void;
+}
+
+export const useEditorStore = create<EditorState>((set) => ({
+	tool: "select",
+	selectedKind: null,
+	selectedSubtype: null,
+	selectedAspect: SignalAspect.FOUR_ASPECT,
+	pendingTextLocation: null,
+
+	setTool: (tool) => {
+		debugLog("store", `setTool: ${tool}`);
+		set(
+			tool === "add"
+				? { tool }
+				: { tool, selectedKind: null, selectedSubtype: null },
+		);
+	},
+
+	selectKind: (kind) => {
+		debugLog("store", `selectKind: ${kind ?? "null"}`);
+		set({
+			selectedKind: kind,
+			selectedSubtype: null,
+			selectedAspect: SignalAspect.FOUR_ASPECT,
+		});
+	},
+
+	selectSubtype: (subtype) => {
+		debugLog("store", `selectSubtype: ${subtype ?? "null"}`);
+		set({ selectedSubtype: subtype });
+	},
+
+	setAspect: (aspect) => {
+		debugLog("store", `setAspect: ${aspect}`);
+		set({ selectedAspect: aspect });
+	},
+
+	setPendingTextLocation: (loc) => {
+		debugLog("store", `setPendingTextLocation: ${loc ? `(${loc.x.toFixed(1)},${loc.y.toFixed(1)})` : "null"}`);
+		set({ pendingTextLocation: loc });
+	},
+}));

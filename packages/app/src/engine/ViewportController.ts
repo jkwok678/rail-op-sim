@@ -6,9 +6,17 @@ export interface ViewportState {
 	zoom: number;
 }
 
-const MIN_ZOOM = 0.05;
-const MAX_ZOOM = 20;
+const DEFAULT_MIN_ZOOM = 0.5;
+const DEFAULT_MAX_ZOOM = 2;
 const ZOOM_FACTOR = 1.1;
+
+export interface ViewportControllerOptions {
+	world: Container;
+	app: Application;
+	onChange?: () => void;
+	minZoom?: number;
+	maxZoom?: number;
+}
 
 /**
  * Handles pan (middle-mouse drag or Space+LMB drag),
@@ -20,8 +28,10 @@ export class ViewportController {
 	private app: Application;
 	private canvas: HTMLCanvasElement;
 	private onChange?: () => void;
+	private minZoom: number;
+	private maxZoom: number;
 
-	private isPanning = false;
+	private panning = false;
 	private spaceHeld = false;
 	private lastX = 0;
 	private lastY = 0;
@@ -35,11 +45,13 @@ export class ViewportController {
 	private onKeyDown: (e: KeyboardEvent) => void;
 	private onKeyUp: (e: KeyboardEvent) => void;
 
-	constructor(world: Container, app: Application, onChange?: () => void) {
-		this.world = world;
-		this.app = app;
-		this.canvas = app.canvas;
-		this.onChange = onChange;
+	constructor(opts: ViewportControllerOptions) {
+		this.world = opts.world;
+		this.app = opts.app;
+		this.canvas = opts.app.canvas;
+		this.onChange = opts.onChange;
+		this.minZoom = opts.minZoom ?? DEFAULT_MIN_ZOOM;
+		this.maxZoom = opts.maxZoom ?? DEFAULT_MAX_ZOOM;
 
 		this.onPointerDown = this.handlePointerDown.bind(this);
 		this.onPointerMove = this.handlePointerMove.bind(this);
@@ -57,6 +69,11 @@ export class ViewportController {
 			y: this.world.position.y,
 			zoom: this.world.scale.x,
 		};
+	}
+
+	/** Whether a pan drag is currently in progress. */
+	get isPanning(): boolean {
+		return this.panning;
 	}
 
 	/** Attach DOM event listeners. Call after the canvas is in the DOM. */
@@ -94,7 +111,7 @@ export class ViewportController {
 			availableWidth / worldWidth,
 			availableHeight / worldHeight,
 		);
-		const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+		const clampedZoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 
 		this.world.scale.set(clampedZoom);
 		this.world.position.set(
@@ -109,7 +126,7 @@ export class ViewportController {
 	zoomTo(zoom: number, screenX?: number, screenY?: number): void {
 		const sx = screenX !== undefined ? screenX : this.app.screen.width / 2;
 		const sy = screenY !== undefined ? screenY : this.app.screen.height / 2;
-		const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+		const clamped = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 		this.applyZoom(clamped, sx, sy);
 		this.notify();
 	}
@@ -130,7 +147,7 @@ export class ViewportController {
 		const shouldPan = e.button === 1 || (e.button === 0 && this.spaceHeld);
 
 		if (shouldPan) {
-			this.isPanning = true;
+			this.panning = true;
 			this.lastX = e.clientX;
 			this.lastY = e.clientY;
 			this.canvas.setPointerCapture(e.pointerId);
@@ -139,7 +156,7 @@ export class ViewportController {
 	}
 
 	private handlePointerMove(e: PointerEvent): void {
-		if (!this.isPanning) return;
+		if (!this.panning) return;
 
 		const dx = e.clientX - this.lastX;
 		const dy = e.clientY - this.lastY;
@@ -152,9 +169,9 @@ export class ViewportController {
 	}
 
 	private handlePointerUp(e: PointerEvent): void {
-		if (!this.isPanning) return;
+		if (!this.panning) return;
 
-		this.isPanning = false;
+		this.panning = false;
 		this.canvas.releasePointerCapture(e.pointerId);
 		this.updateCursor();
 	}
@@ -166,8 +183,8 @@ export class ViewportController {
 
 		const factor = e.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
 		const newZoom = Math.max(
-			MIN_ZOOM,
-			Math.min(MAX_ZOOM, this.world.scale.x * factor),
+			this.minZoom,
+			Math.min(this.maxZoom, this.world.scale.x * factor),
 		);
 		this.applyZoom(newZoom, e.offsetX, e.offsetY);
 		this.notify();
@@ -205,7 +222,7 @@ export class ViewportController {
 	}
 
 	private updateCursor(): void {
-		if (this.isPanning) {
+		if (this.panning) {
 			this.canvas.style.cursor = "grabbing";
 		} else if (this.spaceHeld) {
 			this.canvas.style.cursor = "grab";

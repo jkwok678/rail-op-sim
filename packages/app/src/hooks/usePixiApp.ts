@@ -1,6 +1,11 @@
 import type { Application } from "pixi.js";
 import { useEffect, useRef } from "react";
+import type { PlacementController } from "#/engine/PlacementController";
 import type { ViewportController } from "#/engine/ViewportController";
+import { debugLog } from "#/lib/debugLogger";
+import { CELL_SIZE } from "#/lib/grid";
+import { buildThemeColorMap } from "#/lib/svgColors";
+import { SVG_MAP } from "#/lib/svgMap";
 
 export interface UsePixiAppReturn {
 	/** Attach to a `<div>` in JSX. The PixiJS canvas mounts inside it. */
@@ -9,40 +14,55 @@ export interface UsePixiAppReturn {
 	appRef: React.MutableRefObject<Application | null>;
 	/** The viewport controller for imperative control. */
 	viewportRef: React.MutableRefObject<ViewportController | null>;
+	/** The placement controller (owns the Map and placement interaction). */
+	placementRef: React.MutableRefObject<PlacementController | null>;
 }
 
+const themeKey = (): string =>
+	document.documentElement.classList.contains("dark") ? "dark" : "light";
+
 /**
- * Initializes a PixiJS Application with a dynamic ground grid layer and
- * viewport controller. Handles resize, cleanup, and React Strict Mode safely.
- *
- * All pixi.js-dependent modules are dynamically imported to avoid
- * SSR evaluation of browser-only code.
+ * Initializes a PixiJS Application with a fixed-cell ground grid, a track layer
+ * driven by a shared texture cache, viewport controls, and click-to-place
+ * interaction. All pixi.js-dependent modules are dynamically imported to keep
+ * browser-only code out of the SSR module graph.
  */
 export function usePixiApp(): UsePixiAppReturn {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const appRef = useRef<Application | null>(null);
 	const viewportRef = useRef<ViewportController | null>(null);
+	const placementRef = useRef<PlacementController | null>(null);
 
 	useEffect(() => {
 		let destroyed = false;
 		let observer: ResizeObserver | null = null;
 		let themeObserver: MutationObserver | null = null;
+		let textures: ReturnType<typeof import("#/renderer/textureCache").createTextureCache> | null = null;
 
 		const container = containerRef.current;
 		if (!container) return;
 
 		const init = async () => {
-			// Dynamic imports — keep pixi.js out of the SSR module graph
+			debugLog("pixi", "init started — dynamic imports…");
+
 			const [
 				{ createPixiApp },
 				{ createGroundLayer },
 				{ ViewportController: VC },
 				{ Container },
+				{ createTrackLayer },
+				{ createElementLayer },
+				{ createTextureCache },
+				{ PlacementController: PC },
 			] = await Promise.all([
 				import("#/engine/PixiApp"),
 				import("#/engine/GroundLayer"),
 				import("#/engine/ViewportController"),
 				import("pixi.js"),
+				import("#/renderer/layers/TrackLayer"),
+				import("#/renderer/layers/ElementLayer"),
+				import("#/renderer/textureCache"),
+				import("#/engine/PlacementController"),
 			]);
 
 			if (destroyed) return;
@@ -50,13 +70,15 @@ export function usePixiApp(): UsePixiAppReturn {
 			const width = container.clientWidth || 800;
 			const height = container.clientHeight || 600;
 
+			debugLog("pixi", `creating app — ${width}x${height}`);
 			const app = await createPixiApp({ width, height });
 			if (destroyed) {
 				app.destroy(true);
 				return;
 			}
+			debugLog("pixi", "app created");
 
-			// Build the scene graph: stage → world → grid
+			// Scene graph: stage → world → { ground, tracks, ghost }
 			const world = new Container();
 			world.label = "world";
 
@@ -66,7 +88,6 @@ export function usePixiApp(): UsePixiAppReturn {
 					.trim();
 
 			// Cache colours so getComputedStyle isn't called on every pan/zoom frame.
-			// The getter closures read the cached variables cheaply.
 			let gridColor = cssVar("--sea-ink");
 			let axisColor = cssVar("--lagoon");
 
@@ -74,33 +95,72 @@ export function usePixiApp(): UsePixiAppReturn {
 				gridColor: () => gridColor,
 				axisColor: () => axisColor,
 				gridAlpha: 0.2,
+				fixedSpacing: CELL_SIZE,
+				showAxes: false,
 			});
 			world.addChild(ground.container);
-			app.stage.addChild(world);
 
-			// Redraw helper
+			// Shared texture cache + track layer + element layer
+			textures = createTextureCache(
+				themeKey(),
+				buildThemeColorMap(),
+			);
+			const trackLayer = createTrackLayer(textures);
+			world.addChild(trackLayer.container);
+
+			const elementLayer = createElementLayer(textures);
+			world.addChild(elementLayer.container);
+
+			app.stage.addChild(world);
+			debugLog("pixi", `scene graph assembled — world children: ${world.children.map(c => c.label).join(", ")}`);
+
 			const redrawGrid = () => {
 				ground.redraw(world.scale.x, app.screen.width, app.screen.height);
 			};
 
-			// Set canvas display style
 			const canvas = app.canvas;
 			canvas.style.display = "block";
 			canvas.style.width = "100%";
 			canvas.style.height = "100%";
-
 			container.appendChild(canvas);
 
-			// Viewport controls — redraw grid on every transform
-			const viewport = new VC(world, app, redrawGrid);
+			const viewport = new VC({ world, app, onChange: redrawGrid });
 			viewport.attach();
-			viewport.fitToView();
+			// A tile-scale starting view (≈ origin centred, cells ~cell-size on screen).
+			viewport.fitToView(320, 40);
+			debugLog("pixi", `viewport attached — fitToView(320,40), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`);
 			redrawGrid();
 
-			// Theme observer — refresh cached colours and redraw when theme toggles
+			// Placement interaction (owns the Map; ghost lives on top of the tracks)
+			const placement = new PC({ app, world, trackLayer, elementLayer, textures, viewport });
+			world.addChild(placement.ghost);
+			placement.attach();
+			debugLog("pixi", "placement controller attached");
+
+			// Preload all track art, then backfill anything placed meanwhile.
+			const allSubtypes = Object.keys(SVG_MAP);
+			debugLog("pixi", `starting texture preload — ${allSubtypes.length} subtypes`);
+			textures.preload(allSubtypes).then(() => {
+				if (destroyed) return;
+				debugLog("pixi", "texture preload complete — syncing layers");
+				trackLayer.sync(placement.map);
+				elementLayer.sync(placement.map);
+				placement.refreshGhost();
+				debugLog("pixi", "init complete — ready for interaction");
+			});
+
+			// Theme: rebuild grid colours and re-bake track/ghost textures.
 			themeObserver = new MutationObserver(() => {
+				if (!textures) return;
+				debugLog("pixi", `theme change → ${themeKey()}`);
 				gridColor = cssVar("--sea-ink");
 				axisColor = cssVar("--lagoon");
+				textures.setTheme(themeKey(), buildThemeColorMap());
+				trackLayer.clear();
+				elementLayer.clear();
+				trackLayer.sync(placement.map);
+				elementLayer.sync(placement.map);
+				placement.refreshGhost();
 				redrawGrid();
 			});
 			themeObserver.observe(document.documentElement, {
@@ -108,7 +168,6 @@ export function usePixiApp(): UsePixiAppReturn {
 				attributeFilter: ["class"],
 			});
 
-			// Resize observer — also triggers grid redraw
 			observer = new ResizeObserver((entries) => {
 				const entry = entries[0];
 				if (!entry) return;
@@ -123,20 +182,26 @@ export function usePixiApp(): UsePixiAppReturn {
 
 			appRef.current = app;
 			viewportRef.current = viewport;
+			placementRef.current = placement;
 		};
 
 		init();
 
 		return () => {
+			debugLog("pixi", "cleanup — destroying");
 			destroyed = true;
 			if (observer) observer.disconnect();
 			if (themeObserver) themeObserver.disconnect();
-			if (viewportRef.current) viewportRef.current.detach();
-			if (appRef.current) appRef.current.destroy(true);
+			placementRef.current?.detach();
+			viewportRef.current?.detach();
+			textures?.destroy();
+			appRef.current?.destroy(true);
 			appRef.current = null;
 			viewportRef.current = null;
+			placementRef.current = null;
+			textures = null;
 		};
 	}, []);
 
-	return { containerRef, appRef, viewportRef };
+	return { containerRef, appRef, viewportRef, placementRef };
 }

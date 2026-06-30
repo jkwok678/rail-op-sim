@@ -32,6 +32,21 @@ function coordKey(x: number, y: number): string {
 	return `${x},${y}`;
 }
 
+/** Lightweight debug log — gated so production builds are silent by default. */
+const MAP_DEBUG = (() => {
+	try {
+		// Vite / Vitest: import.meta.env.DEV is true in development.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return (import.meta as any).env?.DEV === true;
+	} catch {
+		return false;
+	}
+})();
+
+function mapDebug(msg: string, ...data: unknown[]): void {
+	if (MAP_DEBUG) console.debug(`[map] ${msg}`, ...data);
+}
+
 /**
  * @brief Data structure for storing all user-placed content.
  * Ported from RailwayBuilder map.h / map.cpp Map class.
@@ -227,6 +242,7 @@ export class Map_ {
 	// ── Add Track ───────────────────────────────────────────────────────
 
 	addTrack(data: TrackData, x: number, y: number): Track {
+		mapDebug(`addTrack — kind=${data.kind} subtype=${data.subtype} at (${x},${y})`);
 		// Guard against any existing element (not just tracks) at this coordinate
 		if (this.checkElementExists(x, y)) {
 			const existing = this.getTrackAt(x, y);
@@ -236,11 +252,14 @@ export class Map_ {
 					existing.data.kind === data.kind &&
 					existing.data.subtype === data.subtype
 				) {
+					mapDebug(`addTrack — idempotent return (same kind/subtype already at (${x},${y}))`);
 					return existing;
 				}
+				mapDebug(`addTrack — ELEMENT_EXISTS at (${x},${y})`);
 				throw new ElementAlreadyExistsError(x, y);
 			}
 			// A non-track element occupies this coordinate — refuse to overwrite
+			mapDebug(`addTrack — REJECTED: non-track element at (${x},${y})`);
 			throw new Error(
 				`Cannot add track at (${x}, ${y}): a non-track element already exists.`,
 			);
@@ -249,6 +268,7 @@ export class Map_ {
 		this.indexElement(track);
 		this.getOrCreateKindArray(data.kind).push(track);
 		this.totalTrack++;
+		mapDebug(`addTrack — OK, totalTrack=${this.totalTrack}`);
 		return track;
 	}
 
