@@ -52,6 +52,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ Container },
 				{ createTrackLayer },
 				{ createElementLayer },
+				{ createTextLayer },
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
@@ -61,6 +62,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("pixi.js"),
 				import("#/renderer/layers/TrackLayer"),
 				import("#/renderer/layers/ElementLayer"),
+				import("#/renderer/layers/TextLayer"),
 				import("#/renderer/textureCache"),
 				import("#/engine/PlacementController"),
 			]);
@@ -111,6 +113,9 @@ export function usePixiApp(): UsePixiAppReturn {
 			const elementLayer = createElementLayer(textures);
 			world.addChild(elementLayer.container);
 
+			const textLayer = createTextLayer();
+			world.addChild(textLayer.container);
+
 			app.stage.addChild(world);
 			debugLog("pixi", `scene graph assembled — world children: ${world.children.map(c => c.label).join(", ")}`);
 
@@ -132,7 +137,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			redrawGrid();
 
 			// Placement interaction (owns the Map; ghost lives on top of the tracks)
-			const placement = new PC({ app, world, trackLayer, elementLayer, textures, viewport });
+			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, textures, viewport });
 			world.addChild(placement.ghost);
 			placement.attach();
 			debugLog("pixi", "placement controller attached");
@@ -145,6 +150,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				debugLog("pixi", "texture preload complete — syncing layers");
 				trackLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
+				textLayer.sync(placement.map);
 				placement.refreshGhost();
 				debugLog("pixi", "init complete — ready for interaction");
 			});
@@ -158,8 +164,10 @@ export function usePixiApp(): UsePixiAppReturn {
 				textures.setTheme(themeKey(), buildThemeColorMap());
 				trackLayer.clear();
 				elementLayer.clear();
+				textLayer.clear();
 				trackLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
+				textLayer.sync(placement.map);
 				placement.refreshGhost();
 				redrawGrid();
 			});

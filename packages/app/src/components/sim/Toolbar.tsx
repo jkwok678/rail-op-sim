@@ -1,11 +1,12 @@
-import { Cursor, Plus, Trash } from "@phosphor-icons/react";
 import type { Icon } from "@phosphor-icons/react";
+import { Cursor, Plus, Tag, Trash } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { type Tool, useEditorStore } from "#/store/editor-store";
 
 const TOOLS: { tool: Tool; label: string; Icon: Icon }[] = [
 	{ tool: "select", label: "Select", Icon: Cursor },
 	{ tool: "add", label: "Add track", Icon: Plus },
+	{ tool: "name", label: "Name", Icon: Tag },
 	{ tool: "delete", label: "Delete", Icon: Trash },
 ];
 

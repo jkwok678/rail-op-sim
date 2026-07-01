@@ -1,9 +1,13 @@
-import { SignalAspect, type SignalAspectValue, type TrackKind } from "@rail-op-sim/shared";
+import {
+	SignalAspect,
+	type SignalAspectValue,
+	type TrackKind,
+} from "@rail-op-sim/shared";
 import { create } from "zustand";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
-export type Tool = "select" | "add" | "delete";
+export type Tool = "select" | "add" | "delete" | "name";
 
 /** Non-track element types placeable from the Add palette. */
 export type ElementKind =
@@ -51,6 +55,12 @@ export interface EditorState {
 	 */
 	pendingTextLocation: { x: number; y: number } | null;
 
+	/**
+	 * Grid coordinates of a NamedLocation the user clicked with the "name" tool.
+	 * When non-null, the NameElementDialog opens to set/change/delete its label.
+	 */
+	pendingNameTarget: { gx: number; gy: number } | null;
+
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
 	/** Choose a category (clears any subtype). Pass null to go back to categories. */
@@ -61,6 +71,8 @@ export interface EditorState {
 	setAspect: (aspect: SignalAspectValue) => void;
 	/** Store the world-coordinate location where text should be placed, triggering the dialog. */
 	setPendingTextLocation: (loc: { x: number; y: number } | null) => void;
+	/** Store the grid-coordinate target for the "name" tool, triggering the dialog. */
+	setPendingNameTarget: (loc: { gx: number; gy: number } | null) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -69,13 +81,19 @@ export const useEditorStore = create<EditorState>((set) => ({
 	selectedSubtype: null,
 	selectedAspect: SignalAspect.FOUR_ASPECT,
 	pendingTextLocation: null,
+	pendingNameTarget: null,
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
 		set(
 			tool === "add"
-				? { tool }
-				: { tool, selectedKind: null, selectedSubtype: null },
+				? { tool, pendingNameTarget: null }
+				: {
+						tool,
+						selectedKind: null,
+						selectedSubtype: null,
+						pendingNameTarget: null,
+					},
 		);
 	},
 
@@ -99,7 +117,18 @@ export const useEditorStore = create<EditorState>((set) => ({
 	},
 
 	setPendingTextLocation: (loc) => {
-		debugLog("store", `setPendingTextLocation: ${loc ? `(${loc.x.toFixed(1)},${loc.y.toFixed(1)})` : "null"}`);
+		debugLog(
+			"store",
+			`setPendingTextLocation: ${loc ? `(${loc.x.toFixed(1)},${loc.y.toFixed(1)})` : "null"}`,
+		);
 		set({ pendingTextLocation: loc });
+	},
+
+	setPendingNameTarget: (loc) => {
+		debugLog(
+			"store",
+			`setPendingNameTarget: ${loc ? `(${loc.gx},${loc.gy})` : "null"}`,
+		);
+		set({ pendingNameTarget: loc });
 	},
 }));

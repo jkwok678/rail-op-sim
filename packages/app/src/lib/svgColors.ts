@@ -118,6 +118,9 @@ function rgbToHex(rgb: string): string | null {
  * legible against either theme.
  */
 export function buildThemeColorMap(): ColorMap {
+	// Invalidate the per-input cache so callers like TextLayer re-resolve
+	// against the new theme instead of returning the previous theme's hex.
+	normalizedCache.clear();
 	return {
 		[SOURCE_FILLS.rail]: normalizeCssColor("var(--foreground)"),
 		[SOURCE_FILLS.platform]: normalizeCssColor("var(--muted-foreground)"),

@@ -1,4 +1,4 @@
-import { Container, Sprite, Text as PixiText, TextStyle, Texture } from "pixi.js";
+import { Container, Sprite, Texture } from "pixi.js";
 import { Map as Map_ } from "@rail-op-sim/shared";
 import type { Track } from "@rail-op-sim/shared";
 import { CELL_SIZE, gridToWorld } from "#/lib/grid";
@@ -102,11 +102,6 @@ interface SpriteEntry {
 	lookupKey: string;
 }
 
-interface TextEntry {
-	text: PixiText;
-	index: number; // position in textList for matching
-}
-
 // ============================================================================
 // Layer interface
 // ============================================================================
@@ -126,15 +121,14 @@ export interface ElementLayer {
 
 /**
  * Renders non-track elements (NamedLocation, Concourse, Parapet), platform
- * overlays, bridge/underpass Set/Unset variants, level crossing icons, and text
- * labels. Lives above TrackLayer in the scene graph.
+ * overlays, bridge/underpass Set/Unset variants, and level crossing icons.
+ * Lives above TrackLayer in the scene graph.
  */
 export function createElementLayer(textures: TextureCache): ElementLayer {
 	const container = new Container();
 	container.label = "element-layer";
 
 	const spriteEntries = new Map<string, SpriteEntry>();
-	const textEntries: TextEntry[] = [];
 
 	/** Remove a sprite entry and its display object. */
 	const removeSpriteEntry = (key: string, entry: SpriteEntry) => {
@@ -250,36 +244,6 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				}
 			});
 
-			// ── 7. Text elements ──
-				// Read the theme-aware foreground color so text is visible on any background.
-				const textColor =
-					getComputedStyle(document.documentElement)
-						.getPropertyValue("--foreground")
-						.trim() || "#ffffff";
-			// Remove old text objects
-			for (const entry of textEntries) {
-				container.removeChild(entry.text);
-				entry.text.destroy();
-			}
-			textEntries.length = 0;
-
-			const textList = map.getTextList();
-			for (let i = 0; i < textList.length; i++) {
-				const t = textList[i];
-				const style = new TextStyle({
-					fontFamily: t.getFont().family,
-					fontSize: t.getFont().pointSize * 2, // scale up from point size to pixel size
-					fill: textColor,
-				});
-				const pixiText = new PixiText({ text: t.getReadableText(), style });
-				const { x, y } = gridToWorld(t.getLocationX(), t.getLocationY());
-				pixiText.position.set(x, y);
-				pixiText.anchor.set(0, 0.5);
-				pixiText.label = `text-${i}`;
-				container.addChild(pixiText);
-				textEntries.push({ text: pixiText, index: i });
-			}
-
 			// ── Remove sprites no longer in the map ──
 			let removed = 0;
 			for (const [key, entry] of spriteEntries) {
@@ -289,7 +253,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				}
 			}
 
-			debugLog("trackLayer", `elementLayer sync complete — ${spriteEntries.size} sprites, ${textEntries.length} texts, ${removed} removed`);
+			debugLog("trackLayer", `elementLayer sync complete — ${spriteEntries.size} sprites, ${removed} removed`);
 		},
 
 		upsertElement(lookupKey, gx, gy) {
@@ -305,11 +269,6 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 
 		clear() {
 			for (const [key, entry] of spriteEntries) removeSpriteEntry(key, entry);
-			for (const entry of textEntries) {
-				container.removeChild(entry.text);
-				entry.text.destroy();
-			}
-			textEntries.length = 0;
 		},
 
 		destroy() {

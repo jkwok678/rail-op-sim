@@ -1,23 +1,28 @@
 import {
-	type Application,
-	Container,
-	type Sprite as SpriteType,
-} from "pixi.js";
-import {
 	createTrackData,
 	ElementAlreadyExistsError,
 	Map as Map_,
 	type ParapetType,
 	Platform,
 } from "@rail-op-sim/shared";
+import {
+	type Application,
+	Container,
+	type Sprite as SpriteType,
+} from "pixi.js";
 import type { ViewportController } from "#/engine/ViewportController";
-import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
-import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
-import type { TrackLayer } from "#/renderer/layers/TrackLayer";
-import type { ElementLayer } from "#/renderer/layers/ElementLayer";
-import type { TextureCache } from "#/renderer/textureCache";
-import { type ElementKind, isTrackKind, useEditorStore } from "#/store/editor-store";
 import { debugLog } from "#/lib/debugLogger";
+import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
+import type { ElementLayer } from "#/renderer/layers/ElementLayer";
+import type { TextLayer } from "#/renderer/layers/TextLayer";
+import type { TrackLayer } from "#/renderer/layers/TrackLayer";
+import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
+import type { TextureCache } from "#/renderer/textureCache";
+import {
+	type ElementKind,
+	isTrackKind,
+	useEditorStore,
+} from "#/store/editor-store";
 
 /** Pointer travel (CSS px) above which a release counts as a drag, not a click. */
 const DRAG_THRESHOLD = 3;
@@ -28,6 +33,7 @@ export interface PlacementControllerOptions {
 	world: Container;
 	trackLayer: TrackLayer;
 	elementLayer: ElementLayer;
+	textLayer: TextLayer;
 	textures: TextureCache;
 	viewport: ViewportController;
 }
@@ -35,11 +41,16 @@ export interface PlacementControllerOptions {
 /** Map a platform subtype string from the palette to the Platform enum. */
 function platformSubtypeToSide(subtype: string): Platform | null {
 	switch (subtype) {
-		case "PLATFORM_LEFT_SET": return Platform.LEFT;
-		case "PLATFORM_RIGHT_SET": return Platform.RIGHT;
-		case "PLATFORM_UP_SET": return Platform.UP;
-		case "PLATFORM_DOWN_SET": return Platform.DOWN;
-		default: return null;
+		case "PLATFORM_LEFT_SET":
+			return Platform.LEFT;
+		case "PLATFORM_RIGHT_SET":
+			return Platform.RIGHT;
+		case "PLATFORM_UP_SET":
+			return Platform.UP;
+		case "PLATFORM_DOWN_SET":
+			return Platform.DOWN;
+		default:
+			return null;
 	}
 }
 
@@ -63,6 +74,7 @@ export class PlacementController {
 	private readonly world: Container;
 	private readonly trackLayer: TrackLayer;
 	private readonly elementLayer: ElementLayer;
+	private readonly textLayer: TextLayer;
 	private readonly textures: TextureCache;
 	private readonly viewport: ViewportController;
 
@@ -84,8 +96,13 @@ export class PlacementController {
 		this.world = opts.world;
 		this.trackLayer = opts.trackLayer;
 		this.elementLayer = opts.elementLayer;
+		this.textLayer = opts.textLayer;
 		this.textures = opts.textures;
 		this.viewport = opts.viewport;
+
+		// Phase 0: fix coordinate-unit mismatch so neighbor-math (grid ± 1)
+		// matches app's integer-grid stored coordinates.
+		this.map.setImageSize(1);
 
 		this.ghost.label = "ghost";
 		this.ghost.alpha = 0.5;
@@ -98,7 +115,10 @@ export class PlacementController {
 	/** Attach pointer listeners and subscribe to tool/selection changes. */
 	attach(): void {
 		const { tool, selectedKind, selectedSubtype } = useEditorStore.getState();
-		debugLog("placement", `attached — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"}`);
+		debugLog(
+			"placement",
+			`attached — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"}`,
+		);
 
 		const canvas = this.app.canvas;
 		this.abort = new AbortController();
@@ -117,7 +137,10 @@ export class PlacementController {
 				state.selectedAspect === prevState.selectedAspect
 			)
 				return;
-			debugLog("placement", `store change — tool=${state.tool} kind=${state.selectedKind ?? "null"} subtype=${state.selectedSubtype ?? "null"}`);
+			debugLog(
+				"placement",
+				`store change — tool=${state.tool} kind=${state.selectedKind ?? "null"} subtype=${state.selectedSubtype ?? "null"}`,
+			);
 			this.applyCursor();
 			this.refreshGhostSprite();
 		});
@@ -161,20 +184,29 @@ export class PlacementController {
 		this.downRect = null;
 
 		const { tool, selectedKind, selectedSubtype } = useEditorStore.getState();
-		debugLog("placement", `pointerup — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"} downWasPanning=${this.downWasPanning} isPanning=${this.viewport.isPanning}`);
+		debugLog(
+			"placement",
+			`pointerup — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"} downWasPanning=${this.downWasPanning} isPanning=${this.viewport.isPanning}`,
+		);
 
 		if (this.downWasPanning || this.viewport.isPanning) {
 			debugLog("placement", "pointerup ignored — was panning");
 			return;
 		}
 		if (!down) {
-			debugLog("placement", "pointerup ignored — no matching pointerdown on canvas");
+			debugLog(
+				"placement",
+				"pointerup ignored — no matching pointerdown on canvas",
+			);
 			return;
 		}
 		const dx = e.clientX - down.x;
 		const dy = e.clientY - down.y;
 		if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-			debugLog("placement", `pointerup ignored — drag distance (${dx.toFixed(1)}, ${dy.toFixed(1)}) > threshold`);
+			debugLog(
+				"placement",
+				`pointerup ignored — drag distance (${dx.toFixed(1)}, ${dy.toFixed(1)}) > threshold`,
+			);
 			return;
 		}
 
@@ -183,19 +215,45 @@ export class PlacementController {
 			const wp = this.screenToWorld(e.clientX, e.clientY);
 			if (wp) {
 				useEditorStore.getState().setPendingTextLocation({ x: wp.x, y: wp.y });
-				debugLog("placement", `text click → world(${wp.x.toFixed(1)},${wp.y.toFixed(1)}) — opening dialog`);
+				debugLog(
+					"placement",
+					`text click → world(${wp.x.toFixed(1)},${wp.y.toFixed(1)}) — opening dialog`,
+				);
+			}
+			return;
+		}
+
+		// Name tool — click a NamedLocation to open the naming dialog.
+		if (tool === "name") {
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (!cell) return;
+			const nl = this.map.getNamedLocationAt(cell.gx, cell.gy);
+			if (nl) {
+				useEditorStore
+					.getState()
+					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy });
+				debugLog(
+					"placement",
+					`name click → NamedLocation at (${cell.gx},${cell.gy}) — opening dialog`,
+				);
 			}
 			return;
 		}
 
 		const cell = this.screenToGrid(e.clientX, e.clientY);
 		if (!cell) {
-			debugLog("placement", `pointerup — screenToGrid returned null for (${e.clientX}, ${e.clientY})`);
+			debugLog(
+				"placement",
+				`pointerup — screenToGrid returned null for (${e.clientX}, ${e.clientY})`,
+			);
 			return;
 		}
 
 		const worldPos = gridToWorld(cell.gx, cell.gy);
-		debugLog("placement", `click — screen(${e.clientX},${e.clientY}) → grid(${cell.gx},${cell.gy}) → world(${worldPos.x.toFixed(1)},${worldPos.y.toFixed(1)})`);
+		debugLog(
+			"placement",
+			`click — screen(${e.clientX},${e.clientY}) → grid(${cell.gx},${cell.gy}) → world(${worldPos.x.toFixed(1)},${worldPos.y.toFixed(1)})`,
+		);
 
 		if (tool === "add" && selectedKind && selectedSubtype) {
 			if (isTrackKind(selectedKind)) {
@@ -204,12 +262,22 @@ export class PlacementController {
 					const { selectedAspect } = useEditorStore.getState();
 					const options =
 						selectedKind === "signal" ? { aspect: selectedAspect } : undefined;
-					const trackData = createTrackData(selectedKind, selectedSubtype, options);
+					const trackData = createTrackData(
+						selectedKind,
+						selectedSubtype,
+						options,
+					);
 					this.map.addTrack(trackData, cell.gx, cell.gy);
-					debugLog("placement", `addTrack OK — kind=${selectedKind} subtype=${selectedSubtype} at (${cell.gx},${cell.gy})`);
+					debugLog(
+						"placement",
+						`addTrack OK — kind=${selectedKind} subtype=${selectedSubtype} at (${cell.gx},${cell.gy})`,
+					);
 				} catch (err) {
 					if (err instanceof ElementAlreadyExistsError) {
-						debugLog("placement", `addTrack SKIP — element already exists at (${cell.gx},${cell.gy})`);
+						debugLog(
+							"placement",
+							`addTrack SKIP — element already exists at (${cell.gx},${cell.gy})`,
+						);
 						return;
 					}
 					console.error("PlacementController: addTrack failed", err);
@@ -219,7 +287,12 @@ export class PlacementController {
 					selectedKind === "signal"
 						? useEditorStore.getState().selectedAspect
 						: undefined;
-				this.trackLayer.upsertCell(selectedSubtype, cell.gx, cell.gy, aspectArg);
+				this.trackLayer.upsertCell(
+					selectedSubtype,
+					cell.gx,
+					cell.gy,
+					aspectArg,
+				);
 			} else {
 				// ── Element placement ──
 				this.handleElementPlacement(
@@ -231,10 +304,14 @@ export class PlacementController {
 			}
 		} else if (tool === "delete") {
 			const deleted = this.map.deleteElement(cell.gx, cell.gy);
-			debugLog("placement", `deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`);
+			debugLog(
+				"placement",
+				`deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
+			);
 			if (deleted) {
 				this.trackLayer.removeCell(cell.gx, cell.gy);
 				this.elementLayer.sync(this.map);
+				this.textLayer.sync(this.map);
 			}
 		}
 	};
@@ -258,7 +335,10 @@ export class PlacementController {
 					break;
 				case "parapet":
 					this.map.createAddParapet(subtype as ParapetType, gx, gy);
-					debugLog("placement", `createAddParapet type=${subtype} at (${gx},${gy})`);
+					debugLog(
+						"placement",
+						`createAddParapet type=${subtype} at (${gx},${gy})`,
+					);
 					break;
 				// Text is handled via early return in onPointerUp (free pixel placement).
 				case "platform": {
@@ -279,8 +359,10 @@ export class PlacementController {
 			debugLog("placement", `handleElementPlacement SKIP — ${err}`);
 			return;
 		}
-		// Re-sync the element layer to pick up new/changed sprites.
+		// Re-sync both layers — placing a NamedLocation can create/delete
+		// text objects via linkNewElementToText.
 		this.elementLayer.sync(this.map);
+		this.textLayer.sync(this.map);
 	}
 
 	/**
@@ -294,8 +376,38 @@ export class PlacementController {
 			family: "JetBrains Mono",
 			pointSize: 12,
 		});
+		this.textLayer.sync(this.map);
+		debugLog(
+			"placement",
+			`placeText "${content}" at world(${wx.toFixed(1)},${wy.toFixed(1)}) grid(${gx.toFixed(2)},${gy.toFixed(2)})`,
+		);
+	}
+
+	/**
+	 * Name (or rename/delete) a NamedLocation at the given grid coordinates.
+	 * The shared-text flood to adjacent NamedLocations is handled by the model.
+	 */
+	nameNamedLocation(gx: number, gy: number, content: string): void {
+		const nl = this.map.getNamedLocationAt(gx, gy);
+		if (!nl) return;
+
+		const trimmed = content.trim();
+
+		if (nl.getNamed()) {
+			const text = nl.getText();
+			if (text) {
+				this.map.changeDeleteText(trimmed, trimmed !== "", text);
+			}
+		} else if (trimmed !== "") {
+			this.map.createAddLinkText(gx, gy, trimmed, true, {
+				family: "JetBrains Mono",
+				pointSize: 12,
+			});
+		}
+
+		this.textLayer.sync(this.map);
 		this.elementLayer.sync(this.map);
-		debugLog("placement", `placeText "${content}" at world(${wx.toFixed(1)},${wy.toFixed(1)}) grid(${gx.toFixed(2)},${gy.toFixed(2)})`);
+		debugLog("placement", `nameNamedLocation "${trimmed}" at (${gx},${gy})`);
 	}
 
 	private onPointerMove = (e: PointerEvent): void => {
@@ -355,7 +467,10 @@ export class PlacementController {
 		const wy = (sy - this.world.position.y) / this.world.scale.y;
 		const result = worldToGrid(wx, wy);
 		if (!result) {
-			debugLog("placement", `screenToGrid(${clientX},${clientY}) → null — rect=(${rect.left},${rect.top},${rect.width}x${rect.height}) worldPos=(${this.world.position.x.toFixed(1)},${this.world.position.y.toFixed(1)}) worldScale=(${this.world.scale.x.toFixed(3)},${this.world.scale.y.toFixed(3)})`);
+			debugLog(
+				"placement",
+				`screenToGrid(${clientX},${clientY}) → null — rect=(${rect.left},${rect.top},${rect.width}x${rect.height}) worldPos=(${this.world.position.x.toFixed(1)},${this.world.position.y.toFixed(1)}) worldScale=(${this.world.scale.x.toFixed(3)},${this.world.scale.y.toFixed(3)})`,
+			);
 		}
 		return result;
 	}
@@ -366,8 +481,12 @@ export class PlacementController {
 		let cursor = "";
 		if (tool === "add" && selectedSubtype) cursor = "crosshair";
 		else if (tool === "delete") cursor = "pointer";
+		else if (tool === "name") cursor = "text";
 		canvas.style.cursor = cursor;
-		debugLog("placement", `cursor → "${cursor}" (tool=${tool} subtype=${selectedSubtype ?? "null"})`);
+		debugLog(
+			"placement",
+			`cursor → "${cursor}" (tool=${tool} subtype=${selectedSubtype ?? "null"})`,
+		);
 	}
 
 	/** Rebuild the ghost sprite to match the current subtype and aspect, or hide it. */
@@ -375,9 +494,11 @@ export class PlacementController {
 		const { tool, selectedSubtype, selectedKind, selectedAspect } =
 			useEditorStore.getState();
 
-		if (tool !== "add" || !selectedSubtype ||
-			(selectedKind === "text")) {
-			debugLog("placement", `refreshGhost — hiding (tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"})`);
+		if (tool !== "add" || !selectedSubtype || selectedKind === "text") {
+			debugLog(
+				"placement",
+				`refreshGhost — hiding (tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"})`,
+			);
 			this.clearGhostSprite();
 			this.ghost.visible = false;
 			return;
@@ -389,17 +510,26 @@ export class PlacementController {
 			aspect === this.ghostAspect &&
 			this.ghostSprite
 		) {
-			debugLog("placement", `refreshGhost — unchanged (subtype=${selectedSubtype} aspect=${aspect})`);
+			debugLog(
+				"placement",
+				`refreshGhost — unchanged (subtype=${selectedSubtype} aspect=${aspect})`,
+			);
 			return;
 		}
 
 		const texture = this.textures.get(selectedSubtype, aspect);
 		if (!texture) {
-			debugLog("placement", `refreshGhost — no texture for "${selectedSubtype}" aspect=${aspect} (not preloaded yet)`);
+			debugLog(
+				"placement",
+				`refreshGhost — no texture for "${selectedSubtype}" aspect=${aspect} (not preloaded yet)`,
+			);
 			return;
 		}
 
-		debugLog("placement", `refreshGhost — building sprite for "${selectedSubtype}" aspect=${aspect}`);
+		debugLog(
+			"placement",
+			`refreshGhost — building sprite for "${selectedSubtype}" aspect=${aspect}`,
+		);
 		this.clearGhostSprite();
 		const sprite = makeTrackSprite(texture, 0, 0);
 		this.ghost.addChild(sprite);

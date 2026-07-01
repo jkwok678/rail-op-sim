@@ -188,3 +188,157 @@ describe("changeDeleteText", () => {
 		expect(map.getTrackAt(0, 0)!.getText()).toBeNull();
 	});
 });
+
+// ============================================================================
+// createAddLinkText — multi-cell spread for NamedLocation
+// ============================================================================
+
+describe("createAddLinkText — NamedLocation multi-cell spread", () => {
+	it("spreads to adjacent unnamed NamedLocations via createAddLinkText", () => {
+		const map = new Map_();
+		map.setImageSize(1); // Phase 0: match integer-grid storage
+
+		// Place three NamedLocations in a row at (0,0), (1,0), (2,0)
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(1, 0);
+		map.createAddNamedLocation(2, 0);
+
+		// Name the middle one — should flood to all three
+		map.createAddLinkText(1, 0, "Station", true, testFont);
+
+		const nl0 = map.getNamedLocationAt(0, 0)!;
+		const nl1 = map.getNamedLocationAt(1, 0)!;
+		const nl2 = map.getNamedLocationAt(2, 0)!;
+
+		// All three should be named
+		expect(nl0.getNamed()).toBe(true);
+		expect(nl1.getNamed()).toBe(true);
+		expect(nl2.getNamed()).toBe(true);
+
+		// All three share the SAME Text instance
+		const t0 = nl0.getText()!;
+		const t1 = nl1.getText()!;
+		const t2 = nl2.getText()!;
+		expect(t1).toBe(t0);
+		expect(t2).toBe(t0);
+
+		// Same readable text
+		expect(t0.getReadableText()).toBe("Station");
+
+		// Only ONE Text object was created
+		expect(map.getTextList()).toHaveLength(1);
+	});
+
+	it("spreads across a 2x2 block of NamedLocations", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+
+		// 2x2 block
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(1, 0);
+		map.createAddNamedLocation(0, 1);
+		map.createAddNamedLocation(1, 1);
+
+		// Name top-left — edge-connected flood should cover all four
+		map.createAddLinkText(0, 0, "Depot", true, testFont);
+
+		for (const [gx, gy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+			const nl = map.getNamedLocationAt(gx, gy)!;
+			expect(nl.getNamed()).toBe(true);
+			expect(nl.getText()!.getReadableText()).toBe("Depot");
+			expect(nl.getText()).toBe(map.getNamedLocationAt(0, 0)!.getText());
+		}
+
+		expect(map.getTextList()).toHaveLength(1);
+	});
+
+	it("deleting shared text clears all linked NamedLocations", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(1, 0);
+		map.createAddNamedLocation(2, 0);
+		map.createAddLinkText(1, 0, "Ghost Town", true, testFont);
+
+		const nl1 = map.getNamedLocationAt(1, 0)!;
+		const sharedText = nl1.getText()!;
+
+		// Delete via changeDeleteText with empty string
+		changeDeleteText(map, "", true, sharedText);
+
+		// All three should be unnamed
+		for (let gx = 0; gx <= 2; gx++) {
+			const nl = map.getNamedLocationAt(gx, 0)!;
+			expect(nl.getNamed()).toBe(false);
+			expect(nl.getText()).toBeNull();
+		}
+
+		// Text removed from map
+		expect(map.getTextList()).toHaveLength(0);
+	});
+
+	it("editing shared text updates all linked NamedLocations", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(1, 0);
+		map.createAddNamedLocation(2, 0);
+		map.createAddLinkText(1, 0, "Old Name", true, testFont);
+
+		const sharedText = map.getNamedLocationAt(1, 0)!.getText()!;
+
+		// Edit the shared text
+		changeDeleteText(map, "New Name", true, sharedText);
+
+		// All three still named, now with new text
+		for (let gx = 0; gx <= 2; gx++) {
+			const nl = map.getNamedLocationAt(gx, 0)!;
+			expect(nl.getNamed()).toBe(true);
+			expect(nl.getText()).toBe(sharedText);
+		}
+		expect(sharedText.getReadableText()).toBe("New Name");
+		expect(map.getTextList()).toHaveLength(1);
+	});
+
+	it("new adjacent NamedLocation inherits neighbor text via linkNewElementToText", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+
+		// Place and name two adjacent NamedLocations
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(1, 0);
+		map.createAddLinkText(1, 0, "Hub", true, testFont);
+
+		// Place a NEW NamedLocation adjacent to the named group
+		map.createAddNamedLocation(2, 0);
+
+		const nl2 = map.getNamedLocationAt(2, 0)!;
+		// createAddNamedLocation calls linkNewElementToText -> should inherit
+		expect(nl2.getNamed()).toBe(true);
+		expect(nl2.getText()).toBe(map.getNamedLocationAt(1, 0)!.getText());
+		expect(nl2.getText()!.getReadableText()).toBe("Hub");
+	});
+
+	it("does NOT spread to non-adjacent NamedLocations (no diagonal spread)", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+
+		// (1,1) is diagonally adjacent to (0,0) and (2,0) — should NOT spread
+		map.createAddNamedLocation(0, 0);
+		map.createAddNamedLocation(2, 0);
+		map.createAddNamedLocation(1, 1);
+
+		map.createAddLinkText(0, 0, "Diagonal", true, testFont);
+
+		// (0,0) should be named
+		expect(map.getNamedLocationAt(0, 0)!.getNamed()).toBe(true);
+
+		// (2,0) is not cardinally adjacent to (0,0), so not linked
+		expect(map.getNamedLocationAt(2, 0)!.getNamed()).toBe(false);
+
+		// (1,1) is not cardinally adjacent to (0,0), so not linked
+		expect(map.getNamedLocationAt(1, 1)!.getNamed()).toBe(false);
+	});
+});
