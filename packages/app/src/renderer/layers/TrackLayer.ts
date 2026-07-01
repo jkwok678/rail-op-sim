@@ -89,8 +89,15 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			map.forEachTrack((track) => {
 				trackCount++;
 				const key = track.locationToString();
-				const subtype = track.data.subtype;
+				let subtype: string = track.data.subtype;
 				const aspect = track.getAspect() >= 0 ? track.getAspect() : undefined;
+
+				// Bridge / Underpass: use Unset variant when not named,
+				// mirroring how Concourse and NamedLocation behave.
+				if (track.data.kind === "bridgeUnderpass" && !track.getNamed()) {
+					subtype = `${subtype}_UNSET`;
+				}
+
 				seen.add(key);
 
 				const lookupKey = entryKey(subtype, aspect);
@@ -111,14 +118,26 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		},
 
 		upsertCell(subtype, gx, gy, aspect) {
+			// Bridge / Underpass: tracks are always unnamed at creation time,
+			// so use the Unset variant. sync() handles the Set swap when named.
+			let resolvedSubtype = subtype;
+			if (
+				subtype === "BRIDGE1" ||
+				subtype === "BRIDGE2" ||
+				subtype === "UNDERPASS1" ||
+				subtype === "UNDERPASS2"
+			) {
+				resolvedSubtype = `${subtype}_UNSET`;
+			}
+
 			const key = cellKey(gx, gy);
-			const lk = entryKey(subtype, aspect);
+			const lk = entryKey(resolvedSubtype, aspect);
 			const existing = entries.get(key);
 			if (existing) {
 				if (existing.lookupKey === lk) return;
 				removeEntry(key, existing);
 			}
-			addSprite(key, subtype, gx, gy, aspect);
+			addSprite(key, resolvedSubtype, gx, gy, aspect);
 		},
 
 		removeCell(gx, gy) {

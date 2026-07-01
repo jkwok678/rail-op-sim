@@ -18,6 +18,13 @@ export type ElementKind =
 	| "platform"
 	| "levelCrossing";
 
+/** Element types that can be named with the "name" tool. */
+export type NameableKind =
+	| "namedLocation"
+	| "concourse"
+	| "platform"
+	| "bridgeUnderpass";
+
 /** Union of all placeable categories (tracks + elements). */
 export type AddKind = TrackKind | ElementKind;
 
@@ -56,10 +63,11 @@ export interface EditorState {
 	pendingTextLocation: { x: number; y: number } | null;
 
 	/**
-	 * Grid coordinates of a NamedLocation the user clicked with the "name" tool.
-	 * When non-null, the NameElementDialog opens to set/change/delete its label.
+	 * Grid coordinates and element kind of the element the user clicked with the
+	 * "name" tool. When non-null, the NameElementDialog opens to set/change/delete
+	 * its label.
 	 */
-	pendingNameTarget: { gx: number; gy: number } | null;
+	pendingNameTarget: { gx: number; gy: number; kind: NameableKind } | null;
 
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
@@ -72,7 +80,7 @@ export interface EditorState {
 	/** Store the world-coordinate location where text should be placed, triggering the dialog. */
 	setPendingTextLocation: (loc: { x: number; y: number } | null) => void;
 	/** Store the grid-coordinate target for the "name" tool, triggering the dialog. */
-	setPendingNameTarget: (loc: { gx: number; gy: number } | null) => void;
+	setPendingNameTarget: (loc: { gx: number; gy: number; kind: NameableKind } | null) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -127,7 +135,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	setPendingNameTarget: (loc) => {
 		debugLog(
 			"store",
-			`setPendingNameTarget: ${loc ? `(${loc.gx},${loc.gy})` : "null"}`,
+			`setPendingNameTarget: ${loc ? `(${loc.gx},${loc.gy},${loc.kind})` : "null"}`,
 		);
 		set({ pendingNameTarget: loc });
 	},

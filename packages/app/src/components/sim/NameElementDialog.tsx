@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { NamedElement } from "@rail-op-sim/shared";
 import { Button } from "#/components/ui/button";
 import {
 	Dialog,
@@ -9,6 +10,7 @@ import {
 } from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
 import { PlacementController } from "#/engine/PlacementController";
+import type { NameableKind } from "#/store/editor-store";
 import { useEditorStore } from "#/store/editor-store";
 
 interface NameElementDialogProps {
@@ -16,10 +18,40 @@ interface NameElementDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
+/** Human-readable dialog title for each nameable element kind. */
+const KIND_TITLES: Record<NameableKind, string> = {
+	namedLocation: "Name Location",
+	concourse: "Name Concourse",
+	platform: "Name Platform",
+	bridgeUnderpass: "Name Bridge / Underpass",
+};
+
 /**
- * Modal dialog shown after the user clicks a NamedLocation with the "name" tool
- * active. Allows setting, changing, or deleting the label on a NamedLocation
- * and its cardinally-adjacent group.
+ * Look up the NamedElement at (gx, gy) for the given kind.
+ * Returns null if no matching element exists.
+ */
+function getElementAt(
+	map: NonNullable<PlacementController["map"]>,
+	gx: number,
+	gy: number,
+	kind: NameableKind,
+): NamedElement | null {
+	switch (kind) {
+		case "namedLocation":
+			return map.getNamedLocationAt(gx, gy);
+		case "concourse":
+			return map.getConcourseAt(gx, gy);
+		case "platform":
+		case "bridgeUnderpass":
+			return map.getTrackAt(gx, gy);
+	}
+}
+
+/**
+ * Modal dialog shown after the user clicks a nameable element (NamedLocation,
+ * Concourse, platform track, or bridge/underpass) with the "name" tool active.
+ * Allows setting, changing, or deleting the label on the element and its
+ * cardinally-adjacent group.
  */
 export function NameElementDialog({
 	open,
@@ -43,11 +75,13 @@ export function NameElementDialog({
 			setContent("");
 			return;
 		}
-		const nl = map.getNamedLocationAt(
+		const element = getElementAt(
+			map,
 			pendingNameTarget.gx,
 			pendingNameTarget.gy,
+			pendingNameTarget.kind,
 		);
-		setContent(nl?.getText()?.getReadableText() ?? "");
+		setContent(element?.getText()?.getReadableText() ?? "");
 	}, [pendingNameTarget, map]);
 
 	const handleConfirm = () => {
@@ -61,10 +95,11 @@ export function NameElementDialog({
 		const trimmed = content.trim();
 
 		try {
-			controller?.nameNamedLocation(
+			controller?.nameElementAt(
 				pendingNameTarget.gx,
 				pendingNameTarget.gy,
 				trimmed,
+				pendingNameTarget.kind,
 			);
 		} finally {
 			// Always clean up dialog state, even if the model call or PixiJS
@@ -82,6 +117,10 @@ export function NameElementDialog({
 		onOpenChange(false);
 	};
 
+	const title = pendingNameTarget
+		? KIND_TITLES[pendingNameTarget.kind]
+		: "Name Element";
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
@@ -90,7 +129,7 @@ export function NameElementDialog({
 				onPointerDownOutside={handleCancel}
 			>
 				<DialogHeader>
-					<DialogTitle>Name Location</DialogTitle>
+					<DialogTitle>{title}</DialogTitle>
 				</DialogHeader>
 
 				<div className="flex flex-col gap-1.5">

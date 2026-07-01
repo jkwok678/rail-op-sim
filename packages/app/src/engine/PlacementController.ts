@@ -21,6 +21,7 @@ import type { TextureCache } from "#/renderer/textureCache";
 import {
 	type ElementKind,
 	isTrackKind,
+	type NameableKind,
 	useEditorStore,
 } from "#/store/editor-store";
 
@@ -223,19 +224,58 @@ export class PlacementController {
 			return;
 		}
 
-		// Name tool — click a NamedLocation to open the naming dialog.
+		// Name tool — click an element to open the naming dialog.
 		if (tool === "name") {
 			const cell = this.screenToGrid(e.clientX, e.clientY);
 			if (!cell) return;
+
+			// Priority order: NamedLocation > Concourse > bridgeUnderpass > platform track
 			const nl = this.map.getNamedLocationAt(cell.gx, cell.gy);
 			if (nl) {
 				useEditorStore
 					.getState()
-					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy });
+					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "namedLocation" });
 				debugLog(
 					"placement",
 					`name click → NamedLocation at (${cell.gx},${cell.gy}) — opening dialog`,
 				);
+				return;
+			}
+
+			const concourse = this.map.getConcourseAt(cell.gx, cell.gy);
+			if (concourse) {
+				useEditorStore
+					.getState()
+					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "concourse" });
+				debugLog(
+					"placement",
+					`name click → Concourse at (${cell.gx},${cell.gy}) — opening dialog`,
+				);
+				return;
+			}
+
+			const track = this.map.getTrackAt(cell.gx, cell.gy);
+			if (track) {
+				if (track.data.kind === "bridgeUnderpass") {
+					useEditorStore
+						.getState()
+						.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "bridgeUnderpass" });
+					debugLog(
+						"placement",
+						`name click → bridgeUnderpass at (${cell.gx},${cell.gy}) — opening dialog`,
+					);
+					return;
+				}
+				if (track.hasPlatform()) {
+					useEditorStore
+						.getState()
+						.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "platform" });
+					debugLog(
+						"placement",
+						`name click → platform track at (${cell.gx},${cell.gy}) — opening dialog`,
+					);
+					return;
+				}
 			}
 			return;
 		}
@@ -384,17 +424,38 @@ export class PlacementController {
 	}
 
 	/**
-	 * Name (or rename/delete) a NamedLocation at the given grid coordinates.
-	 * The shared-text flood to adjacent NamedLocations is handled by the model.
+	 * Name (or rename/delete) any nameable element at the given grid coordinates.
+	 *
+	 * For unnamed elements with non-empty content this calls
+	 * {@link Map_.createAddLinkText}, which flood-fills the text to adjacent
+	 * elements of the same domain (NamedLocations stay in the NamedLocation
+	 * domain; tracks/concourses/bridges share the other domain).
 	 */
-	nameNamedLocation(gx: number, gy: number, content: string): void {
-		const nl = this.map.getNamedLocationAt(gx, gy);
-		if (!nl) return;
+	nameElementAt(
+		gx: number,
+		gy: number,
+		content: string,
+		kind: NameableKind,
+	): void {
+		let element: import("@rail-op-sim/shared").NamedElement | null = null;
+		switch (kind) {
+			case "namedLocation":
+				element = this.map.getNamedLocationAt(gx, gy);
+				break;
+			case "concourse":
+				element = this.map.getConcourseAt(gx, gy);
+				break;
+			case "platform":
+			case "bridgeUnderpass":
+				element = this.map.getTrackAt(gx, gy);
+				break;
+		}
+		if (!element) return;
 
 		const trimmed = content.trim();
 
-		if (nl.getNamed()) {
-			const text = nl.getText();
+		if (element.getNamed()) {
+			const text = element.getText();
 			if (text) {
 				this.map.changeDeleteText(trimmed, trimmed !== "", text);
 			}
@@ -407,7 +468,23 @@ export class PlacementController {
 
 		this.textLayer.sync(this.map);
 		this.elementLayer.sync(this.map);
-		debugLog("placement", `nameNamedLocation "${trimmed}" at (${gx},${gy})`);
+		// Bridge / Underpass base sprites live in the track layer and swap
+		// between Set/Unset based on named state — re-sync when naming.
+		if (kind === "bridgeUnderpass") {
+			this.trackLayer.sync(this.map);
+		}
+		debugLog(
+			"placement",
+			`nameElementAt "${trimmed}" kind=${kind} at (${gx},${gy})`,
+		);
+	}
+
+	/**
+	 * Name (or rename/delete) a NamedLocation at the given grid coordinates.
+	 * Delegates to {@link nameElementAt} for backward compatibility.
+	 */
+	nameNamedLocation(gx: number, gy: number, content: string): void {
+		this.nameElementAt(gx, gy, content, "namedLocation");
 	}
 
 	private onPointerMove = (e: PointerEvent): void => {

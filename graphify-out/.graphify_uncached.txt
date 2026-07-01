@@ -1,0 +1,5 @@
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/NameElementDialog.tsx
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimLayout.tsx
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/PlacementController.ts
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/lib/svgColors.ts
+/Users/jonathankwok/projects/rail-op-sim/packages/app/src/renderer/layers/TextLayer.ts

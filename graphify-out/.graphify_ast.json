@@ -1,0 +1,1456 @@
+{
+  "nodes": [
+    {
+      "id": "sim_nameelementdialog",
+      "label": "NameElementDialog.tsx",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_nameelementdialog_nameelementdialogprops",
+      "label": "NameElementDialogProps",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L14",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_nameelementdialog_nameelementdialog",
+      "label": "NameElementDialog()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L24",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_simlayout",
+      "label": "SimLayout.tsx",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_simlayout_simlayout",
+      "label": "SimLayout()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L14",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller",
+      "label": "PlacementController.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontrolleroptions",
+      "label": "PlacementControllerOptions",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L30",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_platformsubtypetoside",
+      "label": "platformSubtypeToSide()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L42",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller",
+      "label": "PlacementController",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L64",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L94",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_attach",
+      "label": ".attach()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L116",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_detach",
+      "label": ".detach()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L152",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_refreshghost",
+      "label": ".refreshGhost()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L163",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_onpointerdown",
+      "label": ".onPointerDown()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L171",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_onpointerup",
+      "label": ".onPointerUp()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L179",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "label": ".handleElementPlacement()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L320",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_placetext",
+      "label": ".placeText()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L372",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_namenamedlocation",
+      "label": ".nameNamedLocation()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L390",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_onpointermove",
+      "label": ".onPointerMove()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L413",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_onpointerleave",
+      "label": ".onPointerLeave()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L429",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_onpointercancel",
+      "label": ".onPointerCancel()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L433",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_screentoworld",
+      "label": ".screenToWorld()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L446",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_screentogrid",
+      "label": ".screenToGrid()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L459",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_applycursor",
+      "label": ".applyCursor()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L478",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "label": ".refreshGhostSprite()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L493",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_clearghostsprite",
+      "label": ".clearGhostSprite()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L541",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors",
+      "label": "svgColors.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_colormap",
+      "label": "ColorMap",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L13",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_source_fills",
+      "label": "SOURCE_FILLS",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L16",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_recolorsvg",
+      "label": "recolorSvg()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L31",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_escaperegexp",
+      "label": "escapeRegExp()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L40",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_normalizedcache",
+      "label": "normalizedCache",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L45",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_normalizecsscolor",
+      "label": "normalizeCssColor()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L66",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_rgbtohex",
+      "label": "rgbToHex()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L107",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_buildthemecolormap",
+      "label": "buildThemeColorMap()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L120",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgcolors_builddomcolormap",
+      "label": "buildDomColorMap()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L135",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_textlayer",
+      "label": "TextLayer.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_textlayer_textlayer",
+      "label": "TextLayer",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L11",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_textlayer_createtextlayer",
+      "label": "createTextLayer()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L23",
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "sim_nameelementdialog",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_button_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_button_button",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_dialog_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_dialog_dialog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_dialog_dialogcontent",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_dialog_dialogfooter",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_dialog_dialogheader",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_dialog_dialogtitle",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_input_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "ui_input_input",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "engine_placementcontroller",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "engine_placementcontroller_placementcontroller",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "sim_nameelementdialog_nameelementdialogprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "sim_nameelementdialog_nameelementdialog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_button_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "ui_button_button",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_hooks_usetheme_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "hooks_usetheme_usetheme",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_sim_addpalette_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_addpalette_addpalette",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_nameelementdialog",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_nameelementdialog_nameelementdialog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_sim_simcanvas_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_simcanvas_simcanvas",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_sim_toolbar_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_toolbar_toolbar",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout",
+      "target": "sim_simlayout_simlayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "src_index_createtrackdata",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "src_index_elementalreadyexistserror",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "src_index_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "src_index_parapettype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "src_index_platform",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "pixi_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_engine_viewportcontroller_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "engine_viewportcontroller_viewportcontroller",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_debuglogger_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "lib_debuglogger_debuglog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "lib_grid_cell_size",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "lib_grid_gridtoworld",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "lib_grid_worldtogrid",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_elementlayer_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_elementlayer_elementlayer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_textlayer",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_textlayer_textlayer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_tracklayer_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_tracklayer_tracklayer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_tracklayer_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_tracklayer_maketracksprite",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_texturecache_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "renderer_texturecache_texturecache",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "store_editor_store_elementkind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "store_editor_store_istrackkind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "engine_placementcontroller_placementcontrolleroptions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "engine_placementcontroller_platformsubtypetoside",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_attach",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_detach",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L152",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_refreshghost",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L163",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_onpointerdown",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_onpointerup",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L320",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_placetext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L372",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_namenamedlocation",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L390",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_onpointermove",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L413",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_onpointerleave",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L429",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_onpointercancel",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L433",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_screentoworld",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L446",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_screentogrid",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L459",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_applycursor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L478",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L493",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_clearghostsprite",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L541",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_attach",
+      "target": "engine_placementcontroller_placementcontroller_applycursor",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_attach",
+      "target": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_refreshghost",
+      "target": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointerup",
+      "target": "engine_placementcontroller_placementcontroller_screentoworld",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointerup",
+      "target": "engine_placementcontroller_placementcontroller_screentogrid",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L228",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointerup",
+      "target": "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L298",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "target": "engine_placementcontroller_platformsubtypetoside",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L345",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointermove",
+      "target": "engine_placementcontroller_placementcontroller_screentogrid",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L419",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "target": "engine_placementcontroller_placementcontroller_clearghostsprite",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L502",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_colormap",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_source_fills",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_recolorsvg",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_escaperegexp",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_normalizedcache",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_normalizecsscolor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_rgbtohex",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_buildthemecolormap",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L120",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors",
+      "target": "lib_svgcolors_builddomcolormap",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors_recolorsvg",
+      "target": "lib_svgcolors_escaperegexp",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors_normalizecsscolor",
+      "target": "lib_svgcolors_rgbtohex",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgcolors_buildthemecolormap",
+      "target": "lib_svgcolors_normalizecsscolor",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "pixi_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "src_index_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "lib_grid_gridtoworld",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "lib_svgcolors",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "lib_svgcolors_normalizecsscolor",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_debuglogger_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "lib_debuglogger_debuglog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "layers_textlayer_textlayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_textlayer",
+      "target": "layers_textlayer_createtextlayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontrolleroptions",
+      "target": "layers_textlayer_textlayer",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "layers_textlayer_textlayer",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L77",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
