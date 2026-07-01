@@ -12,7 +12,15 @@ import { Track } from "../track/track";
 import type { TrackData, TrackKind } from "../track/track-data";
 import { KIND_META, supportsPlatforms } from "../track/track-data";
 import type { FontInfo, MessageCallback, TextSelectionPrompt } from "../types";
-import { checkAllTracksConnected as checkAllTracksConnectedFn } from "./map-connectivity";
+import {
+	checkAllTracksConnected as checkAllTracksConnectedFn,
+	findAllLinkedTracks as findAllLinkedTracksFn,
+	findUnpairedLinkedTracks as findUnpairedLinkedTracksFn,
+	getLinkedTrackPairs as getLinkedTrackPairsFn,
+	getLinkedTrackReport as getLinkedTrackReportFn,
+	type LinkedTrackPair,
+	type LinkedTrackReport,
+} from "./map-connectivity";
 import {
 	addLevelCrossing as addLevelCrossingFn,
 	addPlatform as addPlatformFn,
@@ -684,5 +692,21 @@ export class Map_ {
 
 	checkAllTracksConnected(): boolean {
 		return checkAllTracksConnectedFn(this);
+	}
+
+	findAllLinkedTracks(): Track[] {
+		return findAllLinkedTracksFn(this);
+	}
+
+	findUnpairedLinkedTracks(): Track[] {
+		return findUnpairedLinkedTracksFn(this);
+	}
+
+	getLinkedTrackPairs(): LinkedTrackPair[] {
+		return getLinkedTrackPairsFn(this);
+	}
+
+	getLinkedTrackReport(): LinkedTrackReport {
+		return getLinkedTrackReportFn(this);
 	}
 }

@@ -98,6 +98,11 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 					subtype = `${subtype}_UNSET`;
 				}
 
+				// Linked tracks: use Unset variant when not paired
+				if (track.data.kind === "linked" && !track.isLinked()) {
+					subtype = `${subtype}_UNSET`;
+				}
+
 				seen.add(key);
 
 				const lookupKey = entryKey(subtype, aspect);
@@ -127,6 +132,11 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 				subtype === "UNDERPASS1" ||
 				subtype === "UNDERPASS2"
 			) {
+				resolvedSubtype = `${subtype}_UNSET`;
+			}
+
+			// Linked tracks are always unpaired at placement time
+			if (subtype.startsWith("LINK") && !subtype.endsWith("_UNSET")) {
 				resolvedSubtype = `${subtype}_UNSET`;
 			}
 

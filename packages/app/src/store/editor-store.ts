@@ -7,7 +7,7 @@ import { create } from "zustand";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
-export type Tool = "select" | "add" | "delete" | "name";
+export type Tool = "select" | "add" | "delete" | "name" | "link";
 
 /** Non-track element types placeable from the Add palette. */
 export type ElementKind =
@@ -69,6 +69,9 @@ export interface EditorState {
 	 */
 	pendingNameTarget: { gx: number; gy: number; kind: NameableKind } | null;
 
+	/** Whether the linked track highlight overlay is visible. */
+	showLinkHighlights: boolean;
+
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
 	/** Choose a category (clears any subtype). Pass null to go back to categories. */
@@ -81,6 +84,8 @@ export interface EditorState {
 	setPendingTextLocation: (loc: { x: number; y: number } | null) => void;
 	/** Store the grid-coordinate target for the "name" tool, triggering the dialog. */
 	setPendingNameTarget: (loc: { gx: number; gy: number; kind: NameableKind } | null) => void;
+	/** Toggle the linked track highlight overlay on/off. */
+	toggleLinkHighlights: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -90,6 +95,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	selectedAspect: SignalAspect.FOUR_ASPECT,
 	pendingTextLocation: null,
 	pendingNameTarget: null,
+	showLinkHighlights: false,
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
@@ -139,4 +145,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 		);
 		set({ pendingNameTarget: loc });
 	},
+
+	toggleLinkHighlights: () =>
+		set((s) => ({ showLinkHighlights: !s.showLinkHighlights })),
 }));

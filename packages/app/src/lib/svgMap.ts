@@ -44,7 +44,7 @@ export const SVG_MAP: Record<string, string> = {
 	...numbered("TIGHTCURVE", "tightCurve", 4),
 	...numbered("CURVE", "curve", 8),
 
-	// ── Linked (default to the unconnected "Unset" art) ──
+	// ── Linked (default to the unpaired "Unset" art; placement always renders Unset) ──
 	LINKLEFT: "linkLeftUnset.svg",
 	LINKRIGHT: "linkRightUnset.svg",
 	LINKDOWN: "linkDownUnset.svg",
@@ -121,6 +121,16 @@ export const SVG_MAP: Record<string, string> = {
 	PLATFORM_UP_UNSET: "platformUpUnset.svg",
 	PLATFORM_DOWN_SET: "platformDownSet.svg",
 	PLATFORM_DOWN_UNSET: "platformDownUnset.svg",
+
+	// ── Linked Unset variants (Set variants mapped above) ──
+	LINKLEFT_UNSET: "linkLeftUnset.svg",
+	LINKRIGHT_UNSET: "linkRightUnset.svg",
+	LINKDOWN_UNSET: "linkDownUnset.svg",
+	LINKUP_UNSET: "linkUpUnset.svg",
+	LINKLEFTUP_UNSET: "linkLeftUpUnset.svg",
+	LINKRIGHTUP_UNSET: "linkRightUpUnset.svg",
+	LINKLEFTDOWN_UNSET: "linkLeftDownUnset.svg",
+	LINKRIGHTDOWN_UNSET: "linkRightDownUnset.svg",
 
 	// ── Bridge / Underpass Unset variants (Set variants mapped above) ──
 	BRIDGE1_UNSET: "bridgeUnset1.svg",
@@ -206,10 +216,7 @@ export const ASPECT_SVG_MAP: Record<number, string> = {
  * and aspect. Shunt signals use the shunt SVG; all others use the normal
  * signal SVG.
  */
-export function svgFilenameForSignal(
-	subtype: string,
-	aspect: number,
-): string {
+export function svgFilenameForSignal(subtype: string, aspect: number): string {
 	if (aspect === SignalAspect.SHUNT) {
 		return SHUNT_SVG_MAP[subtype] ?? SVG_MAP[subtype];
 	}

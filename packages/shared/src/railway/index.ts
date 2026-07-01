@@ -38,6 +38,7 @@ export {
 } from "./errors";
 // Map class
 export { Map_ as Map } from "./map";
+export type { LinkedTrackPair, LinkedTrackReport } from "./map/map-connectivity";
 export type {
 	CreateTrackDataOptions,
 	SignalAspectValue,

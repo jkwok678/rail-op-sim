@@ -14,6 +14,7 @@ import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
+import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
 import type { TextLayer } from "#/renderer/layers/TextLayer";
 import type { TrackLayer } from "#/renderer/layers/TrackLayer";
 import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
@@ -35,6 +36,7 @@ export interface PlacementControllerOptions {
 	trackLayer: TrackLayer;
 	elementLayer: ElementLayer;
 	textLayer: TextLayer;
+	linkHighlightLayer: LinkHighlightLayer;
 	textures: TextureCache;
 	viewport: ViewportController;
 }
@@ -76,6 +78,7 @@ export class PlacementController {
 	private readonly trackLayer: TrackLayer;
 	private readonly elementLayer: ElementLayer;
 	private readonly textLayer: TextLayer;
+	private readonly linkHighlightLayer: LinkHighlightLayer;
 	private readonly textures: TextureCache;
 	private readonly viewport: ViewportController;
 
@@ -98,6 +101,7 @@ export class PlacementController {
 		this.trackLayer = opts.trackLayer;
 		this.elementLayer = opts.elementLayer;
 		this.textLayer = opts.textLayer;
+		this.linkHighlightLayer = opts.linkHighlightLayer;
 		this.textures = opts.textures;
 		this.viewport = opts.viewport;
 
@@ -132,12 +136,48 @@ export class PlacementController {
 		canvas.addEventListener("pointercancel", this.onPointerCancel, { signal });
 
 		this.unsubStore = useEditorStore.subscribe((state, prevState) => {
+			const toolChanged = state.tool !== prevState.tool;
+			const highlightsChanged =
+				state.showLinkHighlights !== prevState.showLinkHighlights;
+
+			// Toggle: show/hide paired+unpaired highlights
+			if (highlightsChanged) {
+				if (state.showLinkHighlights) {
+					this.linkHighlightLayer.sync(this.map);
+					this.linkHighlightLayer.container.visible = true;
+				} else if (state.tool !== "link") {
+					this.linkHighlightLayer.container.visible = false;
+				}
+			}
+
+			// Tool change: manage selection highlight for link tool
+			if (toolChanged) {
+				if (state.tool === "link") {
+					this.linkHighlightLayer.container.visible = true;
+					this.linkHighlightLayer.sync(this.map);
+					this.linkHighlightLayer.syncSelection(this.map);
+				} else if (prevState.tool === "link") {
+					// Leaving link tool — reset selection state machine
+					this.map.setLinkedTrack1(null);
+					this.map.setLinkedTrack2(null);
+					if (!state.showLinkHighlights) {
+						this.linkHighlightLayer.container.visible = false;
+					} else {
+						// Keep highlights visible, but clear selection
+						this.linkHighlightLayer.sync(this.map);
+						this.linkHighlightLayer.syncSelection(this.map);
+					}
+				}
+			}
+
 			if (
-				state.tool === prevState.tool &&
+				!toolChanged &&
 				state.selectedSubtype === prevState.selectedSubtype &&
-				state.selectedAspect === prevState.selectedAspect
+				state.selectedAspect === prevState.selectedAspect &&
+				!highlightsChanged
 			)
 				return;
+
 			debugLog(
 				"placement",
 				`store change — tool=${state.tool} kind=${state.selectedKind ?? "null"} subtype=${state.selectedSubtype ?? "null"}`,
@@ -224,6 +264,19 @@ export class PlacementController {
 			return;
 		}
 
+		// Link tool — click a linked track to pair it.
+		if (tool === "link") {
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (!cell) return;
+			this.map.connectTwoLinkedTracks(cell.gx, cell.gy);
+			this.trackLayer.sync(this.map);
+			// Always keep highlight data fresh; visibility controls display
+			this.linkHighlightLayer.sync(this.map);
+			this.linkHighlightLayer.syncSelection(this.map);
+			debugLog("placement", `link click → grid(${cell.gx},${cell.gy})`);
+			return;
+		}
+
 		// Name tool — click an element to open the naming dialog.
 		if (tool === "name") {
 			const cell = this.screenToGrid(e.clientX, e.clientY);
@@ -234,7 +287,11 @@ export class PlacementController {
 			if (nl) {
 				useEditorStore
 					.getState()
-					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "namedLocation" });
+					.setPendingNameTarget({
+						gx: cell.gx,
+						gy: cell.gy,
+						kind: "namedLocation",
+					});
 				debugLog(
 					"placement",
 					`name click → NamedLocation at (${cell.gx},${cell.gy}) — opening dialog`,
@@ -246,7 +303,11 @@ export class PlacementController {
 			if (concourse) {
 				useEditorStore
 					.getState()
-					.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "concourse" });
+					.setPendingNameTarget({
+						gx: cell.gx,
+						gy: cell.gy,
+						kind: "concourse",
+					});
 				debugLog(
 					"placement",
 					`name click → Concourse at (${cell.gx},${cell.gy}) — opening dialog`,
@@ -259,7 +320,11 @@ export class PlacementController {
 				if (track.data.kind === "bridgeUnderpass") {
 					useEditorStore
 						.getState()
-						.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "bridgeUnderpass" });
+						.setPendingNameTarget({
+							gx: cell.gx,
+							gy: cell.gy,
+							kind: "bridgeUnderpass",
+						});
 					debugLog(
 						"placement",
 						`name click → bridgeUnderpass at (${cell.gx},${cell.gy}) — opening dialog`,
@@ -269,7 +334,11 @@ export class PlacementController {
 				if (track.hasPlatform()) {
 					useEditorStore
 						.getState()
-						.setPendingNameTarget({ gx: cell.gx, gy: cell.gy, kind: "platform" });
+						.setPendingNameTarget({
+							gx: cell.gx,
+							gy: cell.gy,
+							kind: "platform",
+						});
 					debugLog(
 						"placement",
 						`name click → platform track at (${cell.gx},${cell.gy}) — opening dialog`,
@@ -333,6 +402,7 @@ export class PlacementController {
 					cell.gy,
 					aspectArg,
 				);
+				this.linkHighlightLayer.sync(this.map);
 			} else {
 				// ── Element placement ──
 				this.handleElementPlacement(
@@ -352,6 +422,7 @@ export class PlacementController {
 				this.trackLayer.removeCell(cell.gx, cell.gy);
 				this.elementLayer.sync(this.map);
 				this.textLayer.sync(this.map);
+				this.linkHighlightLayer.sync(this.map);
 			}
 		}
 	};
@@ -559,6 +630,7 @@ export class PlacementController {
 		if (tool === "add" && selectedSubtype) cursor = "crosshair";
 		else if (tool === "delete") cursor = "pointer";
 		else if (tool === "name") cursor = "text";
+		else if (tool === "link") cursor = "pointer";
 		canvas.style.cursor = cursor;
 		debugLog(
 			"placement",

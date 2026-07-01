@@ -53,6 +53,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ createTrackLayer },
 				{ createElementLayer },
 				{ createTextLayer },
+				{ createLinkHighlightLayer },
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
@@ -63,6 +64,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("#/renderer/layers/TrackLayer"),
 				import("#/renderer/layers/ElementLayer"),
 				import("#/renderer/layers/TextLayer"),
+				import("#/renderer/layers/LinkHighlightLayer"),
 				import("#/renderer/textureCache"),
 				import("#/engine/PlacementController"),
 			]);
@@ -116,6 +118,9 @@ export function usePixiApp(): UsePixiAppReturn {
 			const textLayer = createTextLayer();
 			world.addChild(textLayer.container);
 
+			const linkHighlightLayer = createLinkHighlightLayer();
+			world.addChild(linkHighlightLayer.container);
+
 			app.stage.addChild(world);
 			debugLog("pixi", `scene graph assembled — world children: ${world.children.map(c => c.label).join(", ")}`);
 
@@ -137,7 +142,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			redrawGrid();
 
 			// Placement interaction (owns the Map; ghost lives on top of the tracks)
-			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, textures, viewport });
+			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, linkHighlightLayer, textures, viewport });
 			world.addChild(placement.ghost);
 			placement.attach();
 			debugLog("pixi", "placement controller attached");

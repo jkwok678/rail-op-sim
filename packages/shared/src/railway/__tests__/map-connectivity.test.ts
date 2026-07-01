@@ -7,7 +7,13 @@ import {
 	SwitchType,
 } from "../enums";
 import { Map_ } from "../map";
-import { checkAllTracksConnected } from "../map/map-connectivity";
+import {
+	checkAllTracksConnected,
+	findAllLinkedTracks,
+	findUnpairedLinkedTracks,
+	getLinkedTrackPairs,
+	getLinkedTrackReport,
+} from "../map/map-connectivity";
 
 // ============================================================================
 // checkAllTracksConnected
@@ -266,5 +272,160 @@ describe("checkAllTracksConnected", () => {
 		checkAllTracksConnected(map);
 		// onMessage should not be called because trackList is not empty
 		expect(onMessage).not.toHaveBeenCalled();
+	});
+});
+
+// ============================================================================
+// Linked track diagnostics
+// ============================================================================
+
+describe("findAllLinkedTracks", () => {
+	it("returns empty array when no linked tracks exist", () => {
+		const map = new Map_();
+		expect(findAllLinkedTracks(map)).toEqual([]);
+	});
+
+	it("returns all linked tracks but not other kinds", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			32,
+			0,
+		);
+		const result = findAllLinkedTracks(map);
+		expect(result).toHaveLength(2);
+		expect(result.every((t) => t.data.kind === "linked")).toBe(true);
+	});
+});
+
+describe("findUnpairedLinkedTracks", () => {
+	it("returns empty array when no linked tracks", () => {
+		const map = new Map_();
+		expect(findUnpairedLinkedTracks(map)).toEqual([]);
+	});
+
+	it("returns all linked tracks when none are paired", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		expect(findUnpairedLinkedTracks(map)).toHaveLength(2);
+	});
+
+	it("returns empty array when all are paired", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		expect(findUnpairedLinkedTracks(map)).toEqual([]);
+	});
+
+	it("returns only unpaired tracks when mixed", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKUP }, 0, 16);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		const unpaired = findUnpairedLinkedTracks(map);
+		expect(unpaired).toHaveLength(1);
+		expect(unpaired[0].data.subtype).toBe(LinkedType.LINKUP);
+	});
+});
+
+describe("getLinkedTrackPairs", () => {
+	it("returns empty array when no linked tracks", () => {
+		const map = new Map_();
+		expect(getLinkedTrackPairs(map)).toEqual([]);
+	});
+
+	it("returns empty array when none are paired", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		expect(getLinkedTrackPairs(map)).toEqual([]);
+	});
+
+	it("returns one pair for two paired tracks", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		const pairs = getLinkedTrackPairs(map);
+		expect(pairs).toHaveLength(1);
+		expect(pairs[0].a.isLinked()).toBe(true);
+		expect(pairs[0].b.isLinked()).toBe(true);
+	});
+
+	it("returns only paired tracks when mixed with unpaired", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKUP }, 0, 16);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKDOWN }, 0, 32);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		const pairs = getLinkedTrackPairs(map);
+		expect(pairs).toHaveLength(1);
+	});
+});
+
+describe("getLinkedTrackReport", () => {
+	it("produces correct report for empty map", () => {
+		const map = new Map_();
+		const report = getLinkedTrackReport(map);
+		expect(report.total).toBe(0);
+		expect(report.paired).toBe(0);
+		expect(report.unpaired).toBe(0);
+		expect(report.allPaired).toBe(true);
+	});
+
+	it("produces correct report for fully paired map", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		const report = getLinkedTrackReport(map);
+		expect(report.total).toBe(2);
+		expect(report.paired).toBe(2);
+		expect(report.unpaired).toBe(0);
+		expect(report.allPaired).toBe(true);
+		expect(report.pairedPairs).toHaveLength(1);
+		expect(report.unpairedTracks).toEqual([]);
+	});
+
+	it("produces correct report for fully unpaired map", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		const report = getLinkedTrackReport(map);
+		expect(report.total).toBe(2);
+		expect(report.paired).toBe(0);
+		expect(report.unpaired).toBe(2);
+		expect(report.allPaired).toBe(false);
+	});
+
+	it("produces correct report for partially paired map", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKUP }, 0, 16);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		const report = getLinkedTrackReport(map);
+		expect(report.total).toBe(3);
+		expect(report.paired).toBe(2);
+		expect(report.unpaired).toBe(1);
+		expect(report.allPaired).toBe(false);
 	});
 });
