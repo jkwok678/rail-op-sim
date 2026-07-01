@@ -115,6 +115,22 @@ export class PlacementController {
 		this.ghost.eventMode = "none";
 
 		PlacementController.instance = this;
+		// Publish the initial (empty) status so the UI leaves its "loading" state.
+		this.publishTrackStatus();
+	}
+
+	/**
+	 * Recompute the track connectivity summary and push it to the editor store as
+	 * plain data. This is the single place that reads pixi/map connectivity for
+	 * the UI, keeping browser-only code out of React components (and the SSR
+	 * module graph).
+	 */
+	private publishTrackStatus(): void {
+		const total = this.map.getTotalTrack();
+		useEditorStore.getState().setTrackStatus({
+			total,
+			connected: total > 0 && this.map.checkAllTracksConnected(),
+		});
 	}
 
 	/** Attach pointer listeners and subscribe to tool/selection changes. */
@@ -269,6 +285,7 @@ export class PlacementController {
 			const cell = this.screenToGrid(e.clientX, e.clientY);
 			if (!cell) return;
 			this.map.connectTwoLinkedTracks(cell.gx, cell.gy);
+			this.publishTrackStatus();
 			this.trackLayer.sync(this.map);
 			// Always keep highlight data fresh; visibility controls display
 			this.linkHighlightLayer.sync(this.map);
@@ -377,6 +394,7 @@ export class PlacementController {
 						options,
 					);
 					this.map.addTrack(trackData, cell.gx, cell.gy);
+					this.publishTrackStatus();
 					debugLog(
 						"placement",
 						`addTrack OK — kind=${selectedKind} subtype=${selectedSubtype} at (${cell.gx},${cell.gy})`,
@@ -423,6 +441,7 @@ export class PlacementController {
 				this.elementLayer.sync(this.map);
 				this.textLayer.sync(this.map);
 				this.linkHighlightLayer.sync(this.map);
+				this.publishTrackStatus();
 			}
 		}
 	};

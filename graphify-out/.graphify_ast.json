@@ -13,7 +13,23 @@
       "label": "NameElementDialogProps",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L14",
+      "source_location": "L16",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_nameelementdialog_kind_titles",
+      "label": "KIND_TITLES",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L22",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_nameelementdialog_getelementat",
+      "label": "getElementAt()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L33",
       "_origin": "ast"
     },
     {
@@ -21,7 +37,7 @@
       "label": "NameElementDialog()",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L24",
+      "source_location": "L56",
       "_origin": "ast"
     },
     {
@@ -41,6 +57,30 @@
       "_origin": "ast"
     },
     {
+      "id": "sim_toolbar",
+      "label": "Toolbar.tsx",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_toolbar_tools",
+      "label": "TOOLS",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L6",
+      "_origin": "ast"
+    },
+    {
+      "id": "sim_toolbar_toolbar",
+      "label": "Toolbar()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L15",
+      "_origin": "ast"
+    },
+    {
       "id": "engine_placementcontroller",
       "label": "PlacementController.ts",
       "file_type": "code",
@@ -53,7 +93,7 @@
       "label": "PlacementControllerOptions",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L30",
+      "source_location": "L32",
       "_origin": "ast"
     },
     {
@@ -61,7 +101,7 @@
       "label": "platformSubtypeToSide()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L42",
+      "source_location": "L45",
       "_origin": "ast"
     },
     {
@@ -69,7 +109,7 @@
       "label": "PlacementController",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L64",
+      "source_location": "L67",
       "_origin": "ast"
     },
     {
@@ -77,7 +117,15 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L94",
+      "source_location": "L98",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_publishtrackstatus",
+      "label": ".publishTrackStatus()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L128",
       "_origin": "ast"
     },
     {
@@ -85,7 +133,7 @@
       "label": ".attach()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L116",
+      "source_location": "L137",
       "_origin": "ast"
     },
     {
@@ -93,7 +141,7 @@
       "label": ".detach()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L152",
+      "source_location": "L209",
       "_origin": "ast"
     },
     {
@@ -101,7 +149,7 @@
       "label": ".refreshGhost()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L163",
+      "source_location": "L220",
       "_origin": "ast"
     },
     {
@@ -109,7 +157,7 @@
       "label": ".onPointerDown()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L171",
+      "source_location": "L228",
       "_origin": "ast"
     },
     {
@@ -117,7 +165,7 @@
       "label": ".onPointerUp()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L179",
+      "source_location": "L236",
       "_origin": "ast"
     },
     {
@@ -125,7 +173,7 @@
       "label": ".handleElementPlacement()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L320",
+      "source_location": "L450",
       "_origin": "ast"
     },
     {
@@ -133,7 +181,15 @@
       "label": ".placeText()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L372",
+      "source_location": "L502",
+      "_origin": "ast"
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller_nameelementat",
+      "label": ".nameElementAt()",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L524",
       "_origin": "ast"
     },
     {
@@ -141,7 +197,7 @@
       "label": ".nameNamedLocation()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L390",
+      "source_location": "L576",
       "_origin": "ast"
     },
     {
@@ -149,7 +205,7 @@
       "label": ".onPointerMove()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L413",
+      "source_location": "L580",
       "_origin": "ast"
     },
     {
@@ -157,7 +213,7 @@
       "label": ".onPointerLeave()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L429",
+      "source_location": "L596",
       "_origin": "ast"
     },
     {
@@ -165,7 +221,7 @@
       "label": ".onPointerCancel()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L433",
+      "source_location": "L600",
       "_origin": "ast"
     },
     {
@@ -173,7 +229,7 @@
       "label": ".screenToWorld()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L446",
+      "source_location": "L613",
       "_origin": "ast"
     },
     {
@@ -181,7 +237,7 @@
       "label": ".screenToGrid()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L459",
+      "source_location": "L626",
       "_origin": "ast"
     },
     {
@@ -189,7 +245,7 @@
       "label": ".applyCursor()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L478",
+      "source_location": "L645",
       "_origin": "ast"
     },
     {
@@ -197,7 +253,7 @@
       "label": ".refreshGhostSprite()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L493",
+      "source_location": "L661",
       "_origin": "ast"
     },
     {
@@ -205,111 +261,1063 @@
       "label": ".clearGhostSprite()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L541",
+      "source_location": "L709",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors",
-      "label": "svgColors.ts",
+      "id": "hooks_usepixiapp",
+      "label": "usePixiApp.ts",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L1",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_colormap",
-      "label": "ColorMap",
+      "id": "hooks_usepixiapp_usepixiappreturn",
+      "label": "UsePixiAppReturn",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L13",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L10",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_source_fills",
-      "label": "SOURCE_FILLS",
+      "id": "hooks_usepixiapp_themekey",
+      "label": "themeKey()",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L16",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L21",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_recolorsvg",
-      "label": "recolorSvg()",
+      "id": "hooks_usepixiapp_usepixiapp",
+      "label": "usePixiApp()",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L31",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L30",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_escaperegexp",
-      "label": "escapeRegExp()",
+      "id": "tests_svgmap_test",
+      "label": "svgMap.test.ts",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_svgmap_test_track_enums",
+      "label": "TRACK_ENUMS",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L21",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_svgmap_test_all_track_subtypes",
+      "label": "ALL_TRACK_SUBTYPES",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L35",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_svgmap_test_element_keys",
+      "label": "ELEMENT_KEYS",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
       "source_location": "L40",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_normalizedcache",
-      "label": "normalizedCache",
+      "id": "tests_svgmap_test_graphics_dir",
+      "label": "GRAPHICS_DIR",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L45",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L81",
       "_origin": "ast"
     },
     {
-      "id": "lib_svgcolors_normalizecsscolor",
-      "label": "normalizeCssColor()",
+      "id": "lib_svgmap",
+      "label": "svgMap.ts",
       "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L66",
-      "_origin": "ast"
-    },
-    {
-      "id": "lib_svgcolors_rgbtohex",
-      "label": "rgbToHex()",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L107",
-      "_origin": "ast"
-    },
-    {
-      "id": "lib_svgcolors_buildthemecolormap",
-      "label": "buildThemeColorMap()",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L120",
-      "_origin": "ast"
-    },
-    {
-      "id": "lib_svgcolors_builddomcolormap",
-      "label": "buildDomColorMap()",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L135",
-      "_origin": "ast"
-    },
-    {
-      "id": "layers_textlayer",
-      "label": "TextLayer.ts",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/lib/svgMap.ts",
       "source_location": "L1",
       "_origin": "ast"
     },
     {
-      "id": "layers_textlayer_textlayer",
-      "label": "TextLayer",
+      "id": "lib_svgmap_numbered",
+      "label": "numbered()",
       "file_type": "code",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
-      "source_location": "L11",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L14",
       "_origin": "ast"
     },
     {
-      "id": "layers_textlayer_createtextlayer",
-      "label": "createTextLayer()",
+      "id": "lib_svgmap_svg_map",
+      "label": "SVG_MAP",
       "file_type": "code",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
-      "source_location": "L23",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L26",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_svgurlfor",
+      "label": "svgUrlFor()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L151",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_rawcache",
+      "label": "rawCache",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L161",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_loadrawsvg",
+      "label": "loadRawSvg()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L167",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_shunt_svg_map",
+      "label": "SHUNT_SVG_MAP",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L193",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_aspect_svg_map",
+      "label": "ASPECT_SVG_MAP",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L207",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_svgfilenameforsignal",
+      "label": "svgFilenameForSignal()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L219",
+      "_origin": "ast"
+    },
+    {
+      "id": "lib_svgmap_loadrawsvgbyfilename",
+      "label": "loadRawSvgByFilename()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L230",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_linkhighlightlayer",
+      "label": "LinkHighlightLayer.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_linkhighlightlayer_linkhighlightlayer",
+      "label": "LinkHighlightLayer",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L15",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_linkhighlightlayer_createlinkhighlightlayer",
+      "label": "createLinkHighlightLayer()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L28",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer",
+      "label": "TrackLayer.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_entry",
+      "label": "Entry",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L7",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_cellkey",
+      "label": "cellKey()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L13",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_entrykey",
+      "label": "entryKey()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L18",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_maketracksprite",
+      "label": "makeTrackSprite()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L27",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_tracklayer",
+      "label": "TrackLayer",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L37",
+      "_origin": "ast"
+    },
+    {
+      "id": "layers_tracklayer_createtracklayer",
+      "label": "createTrackLayer()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L55",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store",
+      "label": "editor-store.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_tool",
+      "label": "Tool",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L10",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_elementkind",
+      "label": "ElementKind",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L13",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_nameablekind",
+      "label": "NameableKind",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L22",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_addkind",
+      "label": "AddKind",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L29",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_istrackkind",
+      "label": "isTrackKind()",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L32",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_editorstate",
+      "label": "EditorState",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L49",
+      "_origin": "ast"
+    },
+    {
+      "id": "store_editor_store_useeditorstore",
+      "label": "useEditorStore",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L102",
+      "_origin": "ast"
+    },
+    {
+      "id": "tests_map_connectivity_test",
+      "label": "map-connectivity.test.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "railway_index",
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity",
+      "label": "map-connectivity.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_link_offsets",
+      "label": "LINK_OFFSETS",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L12",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_checkalltracksconnected",
+      "label": "checkAllTracksConnected()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L27",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_linkedtrackpair",
+      "label": "LinkedTrackPair",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L67",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_linkedtrackreport",
+      "label": "LinkedTrackReport",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L72",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_findalllinkedtracks",
+      "label": "findAllLinkedTracks()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L82",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_findunpairedlinkedtracks",
+      "label": "findUnpairedLinkedTracks()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L87",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_getlinkedtrackpairs",
+      "label": "getLinkedTrackPairs()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L92",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_connectivity_getlinkedtrackreport",
+      "label": "getLinkedTrackReport()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L113",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map",
+      "label": "map.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_coordkey",
+      "label": "coordKey()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L39",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_debug",
+      "label": "MAP_DEBUG",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L44",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_mapdebug",
+      "label": "mapDebug()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L54",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map",
+      "label": "Map_",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L62",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L93",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettextselectionprompt",
+      "label": ".getTextSelectionPrompt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L105",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getonmessage",
+      "label": ".getOnMessage()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L109",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getimagesize",
+      "label": ".getImageSize()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L117",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_setimagesize",
+      "label": ".setImageSize()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L121",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettotaltrack",
+      "label": ".getTotalTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L125",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_settotaltrack",
+      "label": ".setTotalTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L129",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getorcreatekindarray",
+      "label": ".getOrCreateKindArray()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L136",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettracksofkind",
+      "label": ".getTracksOfKind()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L146",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_foreachtrack",
+      "label": ".forEachTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L151",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkelementexists",
+      "label": ".checkElementExists()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L159",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checktrackconcourseparapetexists",
+      "label": ".checkTrackConcourseParapetExists()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L163",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_haselementat",
+      "label": ".hasElementAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L170",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_hastrackat",
+      "label": ".hasTrackAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L174",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_haselementexcludingtrack",
+      "label": ".hasElementExcludingTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L179",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getelementat",
+      "label": ".getElementAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L186",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getelementexcludingtrackat",
+      "label": ".getElementExcludingTrackAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L190",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getnamedelementat",
+      "label": ".getNamedElementAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L196",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettrackat",
+      "label": ".getTrackAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L202",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettrackhasplatformat",
+      "label": ".getTrackHasPlatformAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L209",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkcanaddnamedlocation",
+      "label": ".checkCanAddNamedLocation()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L219",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_indexelement",
+      "label": ".indexElement()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L242",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_unindexelement",
+      "label": ".unindexElement()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L246",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addtrack",
+      "label": ".addTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L252",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addnamedlocation",
+      "label": ".addNamedLocation()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L285",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_createaddnamedlocation",
+      "label": ".createAddNamedLocation()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L299",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addconcourse",
+      "label": ".addConcourse()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L307",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_createaddconcourse",
+      "label": ".createAddConcourse()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L314",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addparapet",
+      "label": ".addParapet()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L322",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_createaddparapet",
+      "label": ".createAddParapet()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L329",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addtext",
+      "label": ".addText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L340",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_createaddtext",
+      "label": ".createAddText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L344",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_createaddlinktext",
+      "label": ".createAddLinkText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L355",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettextat",
+      "label": ".getTextAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L370",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checktextexists",
+      "label": ".checkTextExists()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L381",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_deletetext",
+      "label": ".deleteText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L385",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettexttomove",
+      "label": ".getTextToMove()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L395",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_settexttomove",
+      "label": ".setTextToMove()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L401",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_movetext",
+      "label": ".moveText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L413",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_deleteelement",
+      "label": ".deleteElement()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L425",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getnamedlocationlist",
+      "label": ".getNamedLocationList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L480",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getnamedlocationat",
+      "label": ".getNamedLocationAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L484",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checknamedlocationat",
+      "label": ".checkNamedLocationAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L490",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_namedlocationlisttosavestring",
+      "label": ".namedLocationListToSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L494",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getconcourselist",
+      "label": ".getConcourseList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L500",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getconcourseat",
+      "label": ".getConcourseAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L504",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkconcourseat",
+      "label": ".checkConcourseAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L510",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_concourselisttosavestring",
+      "label": ".concourseListToSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L514",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getparapetlist",
+      "label": ".getParapetList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L520",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getparapetat",
+      "label": ".getParapetAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L524",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkparapetat",
+      "label": ".checkParapetAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L530",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_parapetlisttosavestring",
+      "label": ".parapetListToSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L534",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettextlist",
+      "label": ".getTextList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L540",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_settextlist",
+      "label": ".setTextList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L544",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_textlisttosavestring",
+      "label": ".textListToSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L548",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_connectlinkedtrack",
+      "label": ".connectLinkedTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L556",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_disconnectlinkedtrack",
+      "label": ".disconnectLinkedTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L564",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_resetconnectlinkedtrack",
+      "label": ".resetConnectLinkedTrack()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L569",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getlinkedtrack1",
+      "label": ".getLinkedTrack1()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L574",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_setlinkedtrack1",
+      "label": ".setLinkedTrack1()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L578",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getlinkedtrack2",
+      "label": ".getLinkedTrack2()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L582",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_setlinkedtrack2",
+      "label": ".setLinkedTrack2()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L586",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_connecttwolinkedtracks",
+      "label": ".connectTwoLinkedTracks()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L590",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkalllinkedtracklinked",
+      "label": ".checkAllLinkedTrackLinked()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L612",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_trackstosavestrings",
+      "label": ".tracksToSaveStrings()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L628",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_gettracklist",
+      "label": ".getTrackList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L640",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_settracklist",
+      "label": ".setTrackList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L644",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_maketracklist",
+      "label": ".makeTrackList()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L649",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_linklocaltext",
+      "label": ".linkLocalText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L661",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_deletetextfromallelements",
+      "label": ".deleteTextFromAllElements()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L665",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_linknewelementtotext",
+      "label": ".linkNewElementToText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L669",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_changedeletetext",
+      "label": ".changeDeleteText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L673",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addplatform",
+      "label": ".addPlatform()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L681",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_addlevelcrossing",
+      "label": ".addLevelCrossing()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L685",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_checkalltracksconnected",
+      "label": ".checkAllTracksConnected()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L693",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_findalllinkedtracks",
+      "label": ".findAllLinkedTracks()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L697",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_findunpairedlinkedtracks",
+      "label": ".findUnpairedLinkedTracks()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L701",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getlinkedtrackpairs",
+      "label": ".getLinkedTrackPairs()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L705",
+      "_origin": "ast"
+    },
+    {
+      "id": "map_map_map_getlinkedtrackreport",
+      "label": ".getLinkedTrackReport()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L709",
       "_origin": "ast"
     }
   ],
@@ -326,12 +1334,32 @@
     },
     {
       "source": "sim_nameelementdialog",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_button_tsx",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "src_index_namedelement",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_button_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -341,7 +1369,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -351,7 +1379,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -361,7 +1389,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -371,7 +1399,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -381,7 +1409,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -391,7 +1419,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -401,7 +1429,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -411,7 +1439,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -421,7 +1449,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -431,7 +1459,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -441,17 +1469,37 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L11",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
       "source": "sim_nameelementdialog",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "target": "store_editor_store",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L12",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "store_editor_store_nameablekind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "store_editor_store",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -461,7 +1509,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L12",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -470,7 +1518,25 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L14",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "sim_nameelementdialog_kind_titles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog",
+      "target": "sim_nameelementdialog_getelementat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -479,7 +1545,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
-      "source_location": "L24",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -544,7 +1610,7 @@
     },
     {
       "source": "sim_simlayout",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "target": "store_editor_store",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -624,7 +1690,7 @@
     },
     {
       "source": "sim_simlayout",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_sim_toolbar_tsx",
+      "target": "sim_toolbar",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -649,6 +1715,94 @@
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/components/sim/SimLayout.tsx",
       "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_components_ui_button_tsx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "ui_button_button",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "store_editor_store",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "store_editor_store_tool",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "sim_toolbar_tools",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar",
+      "target": "sim_toolbar_toolbar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -823,7 +1977,7 @@
     },
     {
       "source": "engine_placementcontroller",
-      "target": "layers_textlayer",
+      "target": "layers_linkhighlightlayer",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -833,7 +1987,7 @@
     },
     {
       "source": "engine_placementcontroller",
-      "target": "layers_textlayer_textlayer",
+      "target": "layers_linkhighlightlayer_linkhighlightlayer",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -843,12 +1997,32 @@
     },
     {
       "source": "engine_placementcontroller",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_tracklayer_ts",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_textlayer_ts",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_textlayer_textlayer",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "layers_tracklayer",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -858,17 +2032,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
       "source": "engine_placementcontroller",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_layers_tracklayer_ts",
+      "target": "layers_tracklayer",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -878,7 +2052,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -888,7 +2062,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -898,17 +2072,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
       "source": "engine_placementcontroller",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_store_editor_store_ts",
+      "target": "store_editor_store",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -918,7 +2092,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -928,7 +2102,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L21",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller",
+      "target": "store_editor_store_nameablekind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -938,7 +2122,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -947,7 +2131,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -956,7 +2140,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L42",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -965,7 +2149,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L64",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -974,7 +2158,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L94",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_publishtrackstatus",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -983,7 +2176,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L116",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -992,7 +2185,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L152",
+      "source_location": "L209",
       "weight": 1.0
     },
     {
@@ -1001,7 +2194,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L163",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -1010,7 +2203,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L171",
+      "source_location": "L228",
       "weight": 1.0
     },
     {
@@ -1019,7 +2212,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L179",
+      "source_location": "L236",
       "weight": 1.0
     },
     {
@@ -1028,7 +2221,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L320",
+      "source_location": "L450",
       "weight": 1.0
     },
     {
@@ -1037,7 +2230,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L372",
+      "source_location": "L502",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "engine_placementcontroller_placementcontroller_nameelementat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L524",
       "weight": 1.0
     },
     {
@@ -1046,7 +2248,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L390",
+      "source_location": "L576",
       "weight": 1.0
     },
     {
@@ -1055,7 +2257,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L413",
+      "source_location": "L580",
       "weight": 1.0
     },
     {
@@ -1064,7 +2266,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L429",
+      "source_location": "L596",
       "weight": 1.0
     },
     {
@@ -1073,7 +2275,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L433",
+      "source_location": "L600",
       "weight": 1.0
     },
     {
@@ -1082,7 +2284,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L446",
+      "source_location": "L613",
       "weight": 1.0
     },
     {
@@ -1091,7 +2293,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L459",
+      "source_location": "L626",
       "weight": 1.0
     },
     {
@@ -1100,7 +2302,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L478",
+      "source_location": "L645",
       "weight": 1.0
     },
     {
@@ -1109,7 +2311,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L493",
+      "source_location": "L661",
       "weight": 1.0
     },
     {
@@ -1118,7 +2320,17 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L541",
+      "source_location": "L709",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_constructor",
+      "target": "engine_placementcontroller_placementcontroller_publishtrackstatus",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -1128,7 +2340,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L148",
+      "source_location": "L205",
       "weight": 1.0
     },
     {
@@ -1138,7 +2350,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L149",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
@@ -1148,7 +2360,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L166",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -1158,7 +2370,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L215",
+      "source_location": "L272",
       "weight": 1.0
     },
     {
@@ -1168,7 +2380,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L228",
+      "source_location": "L285",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointerup",
+      "target": "engine_placementcontroller_placementcontroller_publishtrackstatus",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L288",
       "weight": 1.0
     },
     {
@@ -1178,7 +2400,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L298",
+      "source_location": "L426",
       "weight": 1.0
     },
     {
@@ -1188,7 +2410,27 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L345",
+      "source_location": "L475",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_nameelementat",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L530",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_namenamedlocation",
+      "target": "engine_placementcontroller_placementcontroller_nameelementat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L577",
       "weight": 1.0
     },
     {
@@ -1198,7 +2440,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L419",
+      "source_location": "L586",
       "weight": 1.0
     },
     {
@@ -1208,231 +2450,3480 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L502",
+      "source_location": "L670",
       "weight": 1.0
     },
     {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_colormap",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_source_fills",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_recolorsvg",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_escaperegexp",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_normalizedcache",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L45",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_normalizecsscolor",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L66",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_rgbtohex",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L107",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_buildthemecolormap",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L120",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors",
-      "target": "lib_svgcolors_builddomcolormap",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L135",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors_recolorsvg",
-      "target": "lib_svgcolors_escaperegexp",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L34",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors_normalizecsscolor",
-      "target": "lib_svgcolors_rgbtohex",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L81",
-      "weight": 1.0
-    },
-    {
-      "source": "lib_svgcolors_buildthemecolormap",
-      "target": "lib_svgcolors_normalizecsscolor",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/lib/svgColors.ts",
-      "source_location": "L125",
-      "weight": 1.0
-    },
-    {
-      "source": "layers_textlayer",
+      "source": "hooks_usepixiapp",
       "target": "pixi_js",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L1",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "source": "hooks_usepixiapp",
+      "target": "react",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L2",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "src_index_map",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "layers_textlayer",
-      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "source": "hooks_usepixiapp",
+      "target": "engine_placementcontroller",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L3",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "lib_grid_gridtoworld",
+      "source": "hooks_usepixiapp",
+      "target": "engine_placementcontroller_placementcontroller",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L3",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "lib_svgcolors",
+      "source": "hooks_usepixiapp",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_engine_viewportcontroller_ts",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L4",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "lib_svgcolors_normalizecsscolor",
+      "source": "hooks_usepixiapp",
+      "target": "engine_viewportcontroller_viewportcontroller",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L4",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
+      "source": "hooks_usepixiapp",
       "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_debuglogger_ts",
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L5",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
+      "source": "hooks_usepixiapp",
       "target": "lib_debuglogger_debuglog",
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L5",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "layers_textlayer_textlayer",
+      "source": "hooks_usepixiapp",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "lib_grid_cell_size",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_svgcolors_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "lib_svgcolors_buildthemecolormap",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "lib_svgmap",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "lib_svgmap_svg_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "hooks_usepixiapp_usepixiappreturn",
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "hooks_usepixiapp_themekey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp",
+      "target": "hooks_usepixiapp_usepixiapp",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "node_path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "vitest",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_bridgeunderpasstype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_buffertype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_crossovertype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_curvedtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_directedtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_exittype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_flyovertype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_linkedtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_parapettype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_signaltype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_straighttype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "src_index_switchtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "lib_svgmap",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "lib_svgmap_svg_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "tests_svgmap_test_track_enums",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "tests_svgmap_test_all_track_subtypes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "tests_svgmap_test_element_keys",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_svgmap_test",
+      "target": "tests_svgmap_test_graphics_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/__tests__/svgMap.test.ts",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "src_index_signalaspect",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_numbered",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_svg_map",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_svgurlfor",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_rawcache",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L161",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_loadrawsvg",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_shunt_svg_map",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L193",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_aspect_svg_map",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L207",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_svgfilenameforsignal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L219",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap",
+      "target": "lib_svgmap_loadrawsvgbyfilename",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_svgmap_loadrawsvg",
+      "target": "lib_svgmap_svgurlfor",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/lib/svgMap.ts",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "pixi_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "src_index_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "lib_grid_cell_size",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "lib_grid_gridtoworld",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "layers_linkhighlightlayer_linkhighlightlayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_linkhighlightlayer",
+      "target": "layers_linkhighlightlayer_createlinkhighlightlayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/LinkHighlightLayer.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "pixi_js",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "src_index_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_grid_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "lib_grid_cell_size",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "lib_grid_gridtoworld",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_debuglogger_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "lib_debuglogger_debuglog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_renderer_texturecache_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "renderer_texturecache_texturecache",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_entry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_cellkey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_entrykey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_maketracksprite",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_tracklayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "layers_tracklayer",
+      "target": "layers_tracklayer_createtracklayer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "src_index_signalaspect",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "src_index_signalaspectvalue",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "src_index_trackkind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "zustand",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_app_src_lib_debuglogger_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "lib_debuglogger_debuglog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_tool",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_elementkind",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_nameablekind",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_addkind",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_istrackkind",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_editorstate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "store_editor_store",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "vitest",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_enums_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "railway_enums_curvedtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "railway_enums_exittype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "railway_enums_linkedtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "railway_enums_straighttype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "railway_enums_switchtype",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_map_index_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_index_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity_checkalltracksconnected",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity_findunpairedlinkedtracks",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity_getlinkedtrackpairs",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_map_connectivity_test",
+      "target": "map_map_connectivity_getlinkedtrackreport",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_element_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_concourse",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_element",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_namedelement",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_namedlocation",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_parapet",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_element_text",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_enums_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_bridgeunderpasstype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_buffertype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_crossovertype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_curvedtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_directedtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_exittype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_flyovertype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_linkedtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_parapettype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_platform",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_signaltype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_straighttype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_enums_switchtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_errors_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_elementalreadyexistserror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_elementnotfounderror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_linkedtrackerror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_railwayerror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_tracknotconnectederror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_errors_zerotrackerror",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_map_index_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "map_index_map",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "map_map_connectivity",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "map_map_connectivity_linkedtrackpair",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "map_map_connectivity_linkedtrackreport",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_index_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_createtrackdataoptions",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_signalaspectvalue",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_trackdata",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_trackkind",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_trackkindmeta",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_index_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_createtrackdata",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_getlinksforsubtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_hassecondarypath",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_isvalidsubtype",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_kind_meta",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_kindtolabel",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_signalaspect",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_subtypetocode",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_supportslevelcrossing",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_supportsplatforms",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "track_index_track",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_types_ts",
+      "relation": "imports_from",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_types_fontinfo",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_types_messagecallback",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_types_point",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "railway_types_textselectionprompt",
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_track_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "track_track_track",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_map",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_link_offsets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_checkalltracksconnected",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_linkedtrackpair",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_linkedtrackreport",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_findunpairedlinkedtracks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_getlinkedtrackpairs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity",
+      "target": "map_map_connectivity_getlinkedtrackreport",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity_findunpairedlinkedtracks",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity_getlinkedtrackpairs",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity_getlinkedtrackreport",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity_getlinkedtrackreport",
+      "target": "map_map_connectivity_getlinkedtrackpairs",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_connectivity_getlinkedtrackreport",
+      "target": "map_map_connectivity_findunpairedlinkedtracks",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_element_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_concourse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_element",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_namedelement",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_namedlocation",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_parapet",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_element_text",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_errors_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_errors_elementalreadyexistserror",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_enums_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_enums_platform",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_track_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
       "source_location": "L11",
       "weight": 1.0
     },
     {
-      "source": "layers_textlayer",
-      "target": "layers_textlayer_createtextlayer",
+      "source": "map_map",
+      "target": "track_track_track",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_track_data_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "track_track_data_trackdata",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "track_track_data_trackkind",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_track_data_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "track_track_data_kind_meta",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "track_track_data_supportsplatforms",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_types_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_types_fontinfo",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_types_messagecallback",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "railway_types_textselectionprompt",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_checkalltracksconnected",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_findalllinkedtracks",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_findunpairedlinkedtracks",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_getlinkedtrackpairs",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_getlinkedtrackreport",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_linkedtrackpair",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_connectivity_linkedtrackreport",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_map_map_platform_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_platform_addlevelcrossing",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_platform_addplatform",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_map_map_text_linking_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_text_linking_changedeletetext",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_text_linking_deletetextfromallelements",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_text_linking_linklocaltext",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_text_linking_linknewelementtotext",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_coordkey",
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
-      "source_location": "L23",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_map_debug",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_mapdebug",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map",
+      "target": "map_map_map",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettextselectionprompt",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getonmessage",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getimagesize",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_setimagesize",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettotaltrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_settotaltrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getorcreatekindarray",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettracksofkind",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L146",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_foreachtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkelementexists",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L159",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checktrackconcourseparapetexists",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L163",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_haselementat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L170",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_hastrackat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L174",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_haselementexcludingtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getelementat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getelementexcludingtrackat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L190",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getnamedelementat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L196",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettrackat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettrackhasplatformat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L209",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkcanaddnamedlocation",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L219",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_indexelement",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L242",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_unindexelement",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L246",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L252",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addnamedlocation",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L285",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_createaddnamedlocation",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L299",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addconcourse",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L307",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_createaddconcourse",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L314",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addparapet",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L322",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_createaddparapet",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L329",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addtext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L340",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_createaddtext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L344",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_createaddlinktext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L355",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettextat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L370",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checktextexists",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L381",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_deletetext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L385",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettexttomove",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L395",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_settexttomove",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L401",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_movetext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L413",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_deleteelement",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L425",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getnamedlocationlist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L480",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getnamedlocationat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L484",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checknamedlocationat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L490",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_namedlocationlisttosavestring",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L494",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getconcourselist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L500",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getconcourseat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L504",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkconcourseat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L510",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_concourselisttosavestring",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L514",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getparapetlist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L520",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getparapetat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L524",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkparapetat",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L530",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_parapetlisttosavestring",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L534",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettextlist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L540",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_settextlist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L544",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_textlisttosavestring",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L548",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_connectlinkedtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L556",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_disconnectlinkedtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L564",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_resetconnectlinkedtrack",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L569",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getlinkedtrack1",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L574",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_setlinkedtrack1",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L578",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getlinkedtrack2",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L582",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_setlinkedtrack2",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L586",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_connecttwolinkedtracks",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L590",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkalllinkedtracklinked",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L612",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_trackstosavestrings",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L628",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_gettracklist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L640",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_settracklist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L644",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_maketracklist",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L649",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_linklocaltext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L661",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_deletetextfromallelements",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L665",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_linknewelementtotext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L669",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_changedeletetext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L673",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addplatform",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L681",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_addlevelcrossing",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L685",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_checkalltracksconnected",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L693",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_findalllinkedtracks",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L697",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_findunpairedlinkedtracks",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L701",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getlinkedtrackpairs",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L705",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map",
+      "target": "map_map_map_getlinkedtrackreport",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L709",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkelementexists",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L160",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checktrackconcourseparapetexists",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_haselementat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_hastrackat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_haselementexcludingtrack",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L180",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getelementat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L187",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getelementexcludingtrackat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L191",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getnamedelementat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L197",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_gettrackat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L203",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_gettrackhasplatformat",
+      "target": "map_map_map_gettrackat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L210",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkcanaddnamedlocation",
+      "target": "map_map_map_haselementexcludingtrack",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkcanaddnamedlocation",
+      "target": "map_map_map_gettrackat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L223",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_unindexelement",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addtrack",
+      "target": "map_map_mapdebug",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L253",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addtrack",
+      "target": "map_map_map_checkelementexists",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L255",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addtrack",
+      "target": "map_map_map_gettrackat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L256",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addtrack",
+      "target": "map_map_map_indexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L276",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addtrack",
+      "target": "map_map_map_getorcreatekindarray",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L277",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addnamedlocation",
+      "target": "map_map_map_checkcanaddnamedlocation",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L288",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addnamedlocation",
+      "target": "map_map_map_gettrackat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L290",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addnamedlocation",
+      "target": "map_map_map_indexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L292",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddnamedlocation",
+      "target": "map_map_map_addnamedlocation",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L301",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddnamedlocation",
+      "target": "map_map_map_linknewelementtotext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L302",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addconcourse",
+      "target": "map_map_map_checkelementexists",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L308",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addconcourse",
+      "target": "map_map_map_indexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L310",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddconcourse",
+      "target": "map_map_map_addconcourse",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L316",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddconcourse",
+      "target": "map_map_map_linknewelementtotext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L317",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addparapet",
+      "target": "map_map_map_checkelementexists",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L323",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_addparapet",
+      "target": "map_map_map_indexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L325",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddparapet",
+      "target": "map_map_map_addparapet",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L335",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddtext",
+      "target": "map_map_map_addtext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L351",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddlinktext",
+      "target": "map_map_map_createaddtext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L365",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_createaddlinktext",
+      "target": "map_map_map_linklocaltext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L366",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checktextexists",
+      "target": "map_map_map_gettextat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L382",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_settexttomove",
+      "target": "map_map_map_checktextexists",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L403",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_settexttomove",
+      "target": "map_map_map_gettextat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L404",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L426",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_map_deletetextfromallelements",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L433",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_map_deletetext",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L434",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_map_disconnectlinkedtrack",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L441",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_map_indexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L461",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_deleteelement",
+      "target": "map_map_map_unindexelement",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L474",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getnamedlocationat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L485",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checknamedlocationat",
+      "target": "map_map_map_getnamedlocationat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L491",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getconcourseat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L505",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkconcourseat",
+      "target": "map_map_map_getconcourseat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L511",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getparapetat",
+      "target": "map_map_coordkey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L525",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkparapetat",
+      "target": "map_map_map_getparapetat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L531",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_connectlinkedtrack",
+      "target": "map_map_map_resetconnectlinkedtrack",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L561",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_connecttwolinkedtracks",
+      "target": "map_map_map_gettrackat",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L591",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_connecttwolinkedtracks",
+      "target": "map_map_map_disconnectlinkedtrack",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L600",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_connecttwolinkedtracks",
+      "target": "map_map_map_connectlinkedtrack",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L608",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_checkalllinkedtracklinked",
+      "target": "map_map_map_gettracksofkind",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L613",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_element_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_enums_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_errors_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_map_index_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "map_map_connectivity",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_track_index_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "railway_index",
+      "target": "users_jonathankwok_projects_rail_op_sim_packages_shared_src_railway_types_ts",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/index.ts",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
       "source": "engine_placementcontroller_placementcontrolleroptions",
-      "target": "layers_textlayer_textlayer",
+      "target": "layers_tracklayer_tracklayer",
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
@@ -1441,13 +5932,138 @@
       "weight": 1.0
     },
     {
-      "source": "engine_placementcontroller_placementcontroller",
-      "target": "layers_textlayer_textlayer",
+      "source": "engine_placementcontroller_placementcontrolleroptions",
+      "target": "layers_linkhighlightlayer_linkhighlightlayer",
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/engine/PlacementController.ts",
-      "source_location": "L77",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "layers_tracklayer_tracklayer",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller",
+      "target": "layers_linkhighlightlayer_linkhighlightlayer",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "target": "store_editor_store_elementkind",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L450",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_nameelementat",
+      "target": "store_editor_store_nameablekind",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L524",
+      "weight": 1.0
+    },
+    {
+      "source": "hooks_usepixiapp_usepixiappreturn",
+      "target": "engine_placementcontroller_placementcontroller",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/hooks/usePixiApp.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getlinkedtrackpairs",
+      "target": "map_map_connectivity_linkedtrackpair",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L705",
+      "weight": 1.0
+    },
+    {
+      "source": "map_map_map_getlinkedtrackreport",
+      "target": "map_map_connectivity_linkedtrackreport",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L709",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_nameelementdialog_nameelementdialog",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/app/src/components/sim/NameElementDialog.tsx",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_simlayout_simlayout",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/app/src/components/sim/SimLayout.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "sim_toolbar_toolbar",
+      "target": "store_editor_store_useeditorstore",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/app/src/components/sim/Toolbar.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_onpointerup",
+      "target": "store_editor_store_istrackkind",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L385",
+      "weight": 1.0
+    },
+    {
+      "source": "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "target": "layers_tracklayer_maketracksprite",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/app/src/engine/PlacementController.ts",
+      "source_location": "L702",
       "weight": 1.0
     }
   ],

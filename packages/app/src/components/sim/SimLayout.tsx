@@ -1,5 +1,5 @@
 import { Moon, Sun } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { useTheme } from "#/hooks/useTheme";
 import { useEditorStore } from "#/store/editor-store";
@@ -14,6 +14,7 @@ import { Toolbar } from "./Toolbar";
 export function SimLayout() {
 	const { theme, toggle } = useTheme();
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
+	const trackStatus = useEditorStore((s) => s.trackStatus);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
 
@@ -28,6 +29,22 @@ export function SimLayout() {
 		}
 	}, [pendingNameTarget]);
 
+	// Derive connectivity status from the plain summary the placement controller
+	// publishes to the store. No pixi/controller access here, so this component
+	// stays safe to render on the server.
+	const connectivity = useMemo(() => {
+		if (!trackStatus) {
+			return { label: "Loading…", color: "bg-muted-foreground" };
+		}
+		if (trackStatus.total === 0) {
+			return { label: "No tracks", color: "bg-muted-foreground" };
+		}
+		if (trackStatus.connected) {
+			return { label: "All tracks connected", color: "bg-lagoon" };
+		}
+		return { label: "Tracks disconnected", color: "bg-amber-500" };
+	}, [trackStatus]);
+
 	return (
 		<div className="h-dvh w-full grid grid-rows-[1fr_auto]">
 			<div className="relative overflow-hidden">
@@ -41,8 +58,8 @@ export function SimLayout() {
 			</div>
 			<footer className="h-7 border-t border-border bg-muted/30 flex items-center justify-between px-3 text-[11px] text-muted-foreground select-none">
 				<span className="inline-flex items-center gap-1.5">
-					<span className="size-1.5 rounded-full bg-lagoon" />
-					Ready
+					<span className={`size-1.5 rounded-full ${connectivity.color}`} />
+					{connectivity.label}
 				</span>
 				<Button
 					variant="ghost"

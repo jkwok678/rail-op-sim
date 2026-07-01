@@ -72,6 +72,15 @@ export interface EditorState {
 	/** Whether the linked track highlight overlay is visible. */
 	showLinkHighlights: boolean;
 
+	/**
+	 * Track connectivity summary, recomputed by the (pixi-owning) placement
+	 * controller after every map mutation and pushed here as plain data.
+	 * `null` means the map isn't ready yet. Keeping this as serialisable data —
+	 * rather than reaching into the controller/pixi — keeps the SSR module graph
+	 * free of browser-only code.
+	 */
+	trackStatus: { total: number; connected: boolean } | null;
+
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
 	/** Choose a category (clears any subtype). Pass null to go back to categories. */
@@ -86,6 +95,8 @@ export interface EditorState {
 	setPendingNameTarget: (loc: { gx: number; gy: number; kind: NameableKind } | null) => void;
 	/** Toggle the linked track highlight overlay on/off. */
 	toggleLinkHighlights: () => void;
+	/** Push a freshly-computed track connectivity summary for the UI to read. */
+	setTrackStatus: (status: { total: number; connected: boolean } | null) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -96,6 +107,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	pendingTextLocation: null,
 	pendingNameTarget: null,
 	showLinkHighlights: false,
+	trackStatus: null,
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
@@ -148,4 +160,5 @@ export const useEditorStore = create<EditorState>((set) => ({
 
 	toggleLinkHighlights: () =>
 		set((s) => ({ showLinkHighlights: !s.showLinkHighlights })),
+	setTrackStatus: (status) => set({ trackStatus: status }),
 }));

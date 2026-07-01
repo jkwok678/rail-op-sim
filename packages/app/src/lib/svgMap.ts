@@ -44,15 +44,15 @@ export const SVG_MAP: Record<string, string> = {
 	...numbered("TIGHTCURVE", "tightCurve", 4),
 	...numbered("CURVE", "curve", 8),
 
-	// ── Linked (default to the unpaired "Unset" art; placement always renders Unset) ──
-	LINKLEFT: "linkLeftUnset.svg",
-	LINKRIGHT: "linkRightUnset.svg",
-	LINKDOWN: "linkDownUnset.svg",
-	LINKUP: "linkUpUnset.svg",
-	LINKLEFTUP: "linkLeftUpUnset.svg",
-	LINKRIGHTUP: "linkRightUpUnset.svg",
-	LINKLEFTDOWN: "linkLeftDownUnset.svg",
-	LINKRIGHTDOWN: "linkRightDownUnset.svg",
+	// ── Linked (base = paired "Set" art; placement / unpaired renders Unset) ──
+	LINKLEFT: "linkLeftSet.svg",
+	LINKRIGHT: "linkRightSet.svg",
+	LINKDOWN: "linkDownSet.svg",
+	LINKUP: "linkUpSet.svg",
+	LINKLEFTUP: "linkLeftUpSet.svg",
+	LINKRIGHTUP: "linkRightUpSet.svg",
+	LINKLEFTDOWN: "linkLeftDownSet.svg",
+	LINKRIGHTDOWN: "linkRightDownSet.svg",
 
 	// ── Exit ──
 	EXITLEFT: "exitLeft.svg",

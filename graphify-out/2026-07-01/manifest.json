@@ -40,8 +40,8 @@
     "semantic_hash": "1974ddaee8e07f6d028245452bf37c86"
   },
   "packages/app/src/components/sim/SimLayout.tsx": {
-    "mtime": 1782859123.1309037,
-    "ast_hash": "15fad83865d1d76c3fd3e33b7056ae9a",
+    "mtime": 1782864943.007245,
+    "ast_hash": "abdcdf8d6efef99282008952ca0ec05f",
     "semantic_hash": ""
   },
   "packages/app/src/components/ui/button.tsx": {
@@ -77,7 +77,7 @@
   "packages/app/src/engine/GroundLayer.ts": {
     "mtime": 1782758239.5590775,
     "ast_hash": "eec2ce5f709fbde7c54e3eebb89ab04f",
-    "semantic_hash": ""
+    "semantic_hash": "eec2ce5f709fbde7c54e3eebb89ab04f"
   },
   "packages/app/src/engine/PixiApp.ts": {
     "mtime": 1782594245.1572056,
@@ -87,12 +87,12 @@
   "packages/app/src/engine/ViewportController.ts": {
     "mtime": 1782774135.3812761,
     "ast_hash": "c8fa9bc5bd1e899910589743f2962819",
-    "semantic_hash": ""
+    "semantic_hash": "c8fa9bc5bd1e899910589743f2962819"
   },
   "packages/app/src/hooks/usePixiApp.ts": {
-    "mtime": 1782777623.3349693,
-    "ast_hash": "66fae93ad68285438a10855c31c69334",
-    "semantic_hash": ""
+    "mtime": 1782861437.7273347,
+    "ast_hash": "40d3f961a714dd71ce48d60225d353bc",
+    "semantic_hash": "40d3f961a714dd71ce48d60225d353bc"
   },
   "packages/app/src/hooks/useTheme.ts": {
     "mtime": 1782601168.8286235,
@@ -177,7 +177,7 @@
   "packages/shared/src/railway/__tests__/map-text-linking.test.ts": {
     "mtime": 1782858893.1759148,
     "ast_hash": "15a825862d025e44b8221d53398bc49c",
-    "semantic_hash": ""
+    "semantic_hash": "15a825862d025e44b8221d53398bc49c"
   },
   "packages/shared/src/railway/__tests__/map.test.ts": {
     "mtime": 1782594245.1825285,
@@ -207,7 +207,7 @@
   "packages/shared/src/railway/index.ts": {
     "mtime": 1782776013.5413365,
     "ast_hash": "f3d63fd76314d74702e2059bd6398e42",
-    "semantic_hash": ""
+    "semantic_hash": "f3d63fd76314d74702e2059bd6398e42"
   },
   "packages/shared/src/railway/map/index.ts": {
     "mtime": 1782573453.7477164,
@@ -232,17 +232,17 @@
   "packages/shared/src/railway/map/map.ts": {
     "mtime": 1782857221.669942,
     "ast_hash": "bcc063255cc6677dfcbcee3fabd2e28a",
-    "semantic_hash": ""
+    "semantic_hash": "bcc063255cc6677dfcbcee3fabd2e28a"
   },
   "packages/shared/src/railway/track/index.ts": {
     "mtime": 1782776009.2407246,
     "ast_hash": "404dfac5ab764ede80f618960150d015",
-    "semantic_hash": ""
+    "semantic_hash": "404dfac5ab764ede80f618960150d015"
   },
   "packages/shared/src/railway/track/track-data.ts": {
     "mtime": 1782773982.3813176,
     "ast_hash": "86be501240f5a83fee75abb38bfbd6c2",
-    "semantic_hash": ""
+    "semantic_hash": "86be501240f5a83fee75abb38bfbd6c2"
   },
   "packages/shared/src/railway/track/track.ts": {
     "mtime": 1782594245.163231,
@@ -1192,146 +1192,151 @@
   "packages/app/src/components/sim/AddPalette.tsx": {
     "mtime": 1782818130.7969096,
     "ast_hash": "73974af89b29ddd8e00542ce889d227e",
-    "semantic_hash": ""
+    "semantic_hash": "73974af89b29ddd8e00542ce889d227e"
   },
   "packages/app/src/components/sim/AspectPreview.tsx": {
     "mtime": 1782777016.9198308,
     "ast_hash": "519c0b42ae49e75c7cd7193638fc4256",
-    "semantic_hash": ""
+    "semantic_hash": "519c0b42ae49e75c7cd7193638fc4256"
   },
   "packages/app/src/components/sim/NameElementDialog.tsx": {
-    "mtime": 1782859123.1308978,
-    "ast_hash": "55af568cde5b34dbdd883df841a3a83f",
+    "mtime": 1782865442.8610005,
+    "ast_hash": "786f9d7d5a70681b0e6d1d6912817940",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TextInputDialog.tsx": {
     "mtime": 1782822846.609217,
     "ast_hash": "d653c28c616c934f4a6852920cab5f46",
-    "semantic_hash": ""
+    "semantic_hash": "d653c28c616c934f4a6852920cab5f46"
   },
   "packages/app/src/components/sim/Toolbar.tsx": {
     "mtime": 1782859123.13091,
     "ast_hash": "5001f3ad9d7fd08e7e5eb0bad97ca9a3",
-    "semantic_hash": ""
+    "semantic_hash": "5001f3ad9d7fd08e7e5eb0bad97ca9a3"
   },
   "packages/app/src/components/sim/TrackPreview.tsx": {
     "mtime": 1782777083.2332401,
     "ast_hash": "d7ef281f0923d6a7126f015857679fb7",
-    "semantic_hash": ""
+    "semantic_hash": "d7ef281f0923d6a7126f015857679fb7"
   },
   "packages/app/src/engine/PlacementController.ts": {
-    "mtime": 1782859163.428426,
-    "ast_hash": "1b924459b6531dfae2583618408c23bf",
+    "mtime": 1782864948.9628558,
+    "ast_hash": "80d330b9e831f9067b352cff8d04b3a9",
     "semantic_hash": ""
   },
   "packages/app/src/lib/__tests__/svgMap.test.ts": {
     "mtime": 1782777851.5287297,
     "ast_hash": "19240fd861e7bcdc00e3c3f0ad8c25eb",
-    "semantic_hash": ""
+    "semantic_hash": "19240fd861e7bcdc00e3c3f0ad8c25eb"
   },
   "packages/app/src/lib/debugLogger.ts": {
     "mtime": 1782760166.3424203,
     "ast_hash": "ccfae3116ed425c0eeadec5184a925b9",
-    "semantic_hash": ""
+    "semantic_hash": "ccfae3116ed425c0eeadec5184a925b9"
   },
   "packages/app/src/lib/grid.ts": {
     "mtime": 1782774012.5909636,
     "ast_hash": "558bd23a071396f762e1f75452b2ef71",
-    "semantic_hash": ""
+    "semantic_hash": "558bd23a071396f762e1f75452b2ef71"
   },
   "packages/app/src/lib/svgColors.ts": {
     "mtime": 1782774033.4373062,
     "ast_hash": "d77fdce9b098b289c78ff23aa6c95de1",
-    "semantic_hash": ""
+    "semantic_hash": "d77fdce9b098b289c78ff23aa6c95de1"
   },
   "packages/app/src/lib/svgMap.ts": {
     "mtime": 1782777846.2858105,
     "ast_hash": "29743ba6246ab455326479808c7910e7",
-    "semantic_hash": ""
+    "semantic_hash": "29743ba6246ab455326479808c7910e7"
   },
   "packages/app/src/lib/svgToCanvas.ts": {
     "mtime": 1782774023.427645,
     "ast_hash": "bd85f39d94d9b167ac6aa2a79c591ee2",
-    "semantic_hash": ""
+    "semantic_hash": "bd85f39d94d9b167ac6aa2a79c591ee2"
   },
   "packages/app/src/renderer/layers/ElementLayer.ts": {
-    "mtime": 1782857221.6693604,
-    "ast_hash": "be69ed408adbd99bfcbf0bdf8687190e",
-    "semantic_hash": ""
+    "mtime": 1782861403.1990235,
+    "ast_hash": "87857ba26a0cfd66f63c5f399bf27138",
+    "semantic_hash": "87857ba26a0cfd66f63c5f399bf27138"
   },
   "packages/app/src/renderer/layers/TrackLayer.ts": {
     "mtime": 1782776776.266327,
     "ast_hash": "51dd7c391fd1707a728eb506948a4456",
-    "semantic_hash": ""
+    "semantic_hash": "51dd7c391fd1707a728eb506948a4456"
   },
   "packages/app/src/renderer/textureCache.ts": {
     "mtime": 1782776765.765597,
     "ast_hash": "fab04fdf18a25da0ea286f42828acb2b",
-    "semantic_hash": ""
+    "semantic_hash": "fab04fdf18a25da0ea286f42828acb2b"
   },
   "packages/app/src/store/editor-store.ts": {
     "mtime": 1782859163.4201756,
     "ast_hash": "2f1140fbc230245a7b28e00803d6cb06",
-    "semantic_hash": ""
+    "semantic_hash": "2f1140fbc230245a7b28e00803d6cb06"
   },
   "packages/shared/src/railway/__tests__/track-factory.test.ts": {
     "mtime": 1782776154.0156548,
     "ast_hash": "60224eff143661169a6ed269363d1317",
-    "semantic_hash": ""
+    "semantic_hash": "60224eff143661169a6ed269363d1317"
   },
   "packages/shared/src/railway/track/signal-aspects.ts": {
     "mtime": 1782776007.241384,
     "ast_hash": "4a27615bf5f8cce502a19c92f75e76d4",
-    "semantic_hash": ""
+    "semantic_hash": "4a27615bf5f8cce502a19c92f75e76d4"
   },
   "packages/shared/src/railway/track/track-factory.ts": {
     "mtime": 1782776186.9762278,
     "ast_hash": "7b33b1f325eaac6eb8e4cfc3f7aed7f2",
-    "semantic_hash": ""
+    "semantic_hash": "7b33b1f325eaac6eb8e4cfc3f7aed7f2"
   },
   "NAMEDLOCATION_PLAN.md": {
     "mtime": 1782858542.6607726,
     "ast_hash": "2726cd659b71c11489df51e19f128dab",
-    "semantic_hash": ""
+    "semantic_hash": "2726cd659b71c11489df51e19f128dab"
   },
   "packages/app/public/graphics/aspect2.png": {
     "mtime": 1782776324.3087454,
     "ast_hash": "daf009b6b784d213fc4d5abeb5e3eccb",
-    "semantic_hash": ""
+    "semantic_hash": "daf009b6b784d213fc4d5abeb5e3eccb"
   },
   "packages/app/public/graphics/aspect2.svg": {
     "mtime": 1782776706.9152048,
     "ast_hash": "64a7743f70b04a1644c55c3df5b0d25f",
-    "semantic_hash": ""
+    "semantic_hash": "64a7743f70b04a1644c55c3df5b0d25f"
   },
   "packages/app/public/graphics/aspect3.png": {
     "mtime": 1782776324.324328,
     "ast_hash": "243e04396b5f600b1be2d4746b33a775",
-    "semantic_hash": ""
+    "semantic_hash": "243e04396b5f600b1be2d4746b33a775"
   },
   "packages/app/public/graphics/aspect3.svg": {
     "mtime": 1782776706.9143603,
     "ast_hash": "a4a649ed175c4f850d22bf8bd560fbbb",
-    "semantic_hash": ""
+    "semantic_hash": "a4a649ed175c4f850d22bf8bd560fbbb"
   },
   "packages/app/public/graphics/aspect4.png": {
     "mtime": 1782776324.336973,
     "ast_hash": "49409f133ef564999a6cd4cc2aaadd27",
-    "semantic_hash": ""
+    "semantic_hash": "49409f133ef564999a6cd4cc2aaadd27"
   },
   "packages/app/public/graphics/aspect4.svg": {
     "mtime": 1782776706.9134173,
     "ast_hash": "f95ee07696dcf5b9073c315c5d01dac1",
-    "semantic_hash": ""
+    "semantic_hash": "f95ee07696dcf5b9073c315c5d01dac1"
   },
   "packages/app/public/graphics/aspectShunt.png": {
     "mtime": 1782776324.3432455,
     "ast_hash": "ecb49656be00534cca66c0dd9deb7f24",
-    "semantic_hash": ""
+    "semantic_hash": "ecb49656be00534cca66c0dd9deb7f24"
   },
   "packages/app/public/graphics/aspectShunt.svg": {
     "mtime": 1782776706.916196,
     "ast_hash": "bf38aeeec615ee1c0dfde4cf49c4e2ee",
+    "semantic_hash": "bf38aeeec615ee1c0dfde4cf49c4e2ee"
+  },
+  "packages/app/src/renderer/layers/TextLayer.ts": {
+    "mtime": 1782865437.2420897,
+    "ast_hash": "ad757816f2e9743bd9e1678fba1a37b0",
     "semantic_hash": ""
   },
   "/Users/jonathankwok/projects/rail-op-sim/.cta.json": {
@@ -1380,9 +1385,9 @@
     "semantic_hash": "519c0b42ae49e75c7cd7193638fc4256"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/NameElementDialog.tsx": {
-    "mtime": 1782859123.1308978,
-    "ast_hash": "55af568cde5b34dbdd883df841a3a83f",
-    "semantic_hash": "55af568cde5b34dbdd883df841a3a83f"
+    "mtime": 1782865442.8610005,
+    "ast_hash": "786f9d7d5a70681b0e6d1d6912817940",
+    "semantic_hash": "786f9d7d5a70681b0e6d1d6912817940"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx": {
     "mtime": 1782594771.56368,
@@ -1390,9 +1395,9 @@
     "semantic_hash": "1974ddaee8e07f6d028245452bf37c86"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimLayout.tsx": {
-    "mtime": 1782859123.1309037,
-    "ast_hash": "15fad83865d1d76c3fd3e33b7056ae9a",
-    "semantic_hash": "15fad83865d1d76c3fd3e33b7056ae9a"
+    "mtime": 1782864943.007245,
+    "ast_hash": "abdcdf8d6efef99282008952ca0ec05f",
+    "semantic_hash": "abdcdf8d6efef99282008952ca0ec05f"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/TextInputDialog.tsx": {
     "mtime": 1782822846.609217,
@@ -1450,9 +1455,9 @@
     "semantic_hash": "fcf56f6b6879c7f2a6a34f2b7bb9b9c5"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/PlacementController.ts": {
-    "mtime": 1782861478.1120145,
-    "ast_hash": "d67c20dbcfbc6e1a6ce18190689959f4",
-    "semantic_hash": "d67c20dbcfbc6e1a6ce18190689959f4"
+    "mtime": 1782896774.0290549,
+    "ast_hash": "f2caba2fe6612f5b436b360671f7ad99",
+    "semantic_hash": "f2caba2fe6612f5b436b360671f7ad99"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts": {
     "mtime": 1782774135.3812761,
@@ -1485,9 +1490,9 @@
     "semantic_hash": "558bd23a071396f762e1f75452b2ef71"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/lib/svgColors.ts": {
-    "mtime": 1782774033.4373062,
-    "ast_hash": "d77fdce9b098b289c78ff23aa6c95de1",
-    "semantic_hash": "d77fdce9b098b289c78ff23aa6c95de1"
+    "mtime": 1782896805.9675164,
+    "ast_hash": "b501e148af4959191683dc945e08b31e",
+    "semantic_hash": "b501e148af4959191683dc945e08b31e"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/lib/svgMap.ts": {
     "mtime": 1782777846.2858105,
@@ -1510,9 +1515,9 @@
     "semantic_hash": "87857ba26a0cfd66f63c5f399bf27138"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/renderer/layers/TextLayer.ts": {
-    "mtime": 1782861359.7239554,
-    "ast_hash": "ebc254ad206612ab69280cef81c9fd52",
-    "semantic_hash": "ebc254ad206612ab69280cef81c9fd52"
+    "mtime": 1782865437.2420897,
+    "ast_hash": "ad757816f2e9743bd9e1678fba1a37b0",
+    "semantic_hash": "ad757816f2e9743bd9e1678fba1a37b0"
   },
   "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/renderer/layers/TrackLayer.ts": {
     "mtime": 1782776776.266327,
