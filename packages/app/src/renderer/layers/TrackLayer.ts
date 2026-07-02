@@ -1,5 +1,11 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import type { Map as Map_ } from "@rail-op-sim/shared";
+import {
+	getTrackColorState,
+	TRACK_COLOR_BOTH,
+	TRACK_COLOR_LENGTH,
+	TRACK_COLOR_SPEED,
+} from "@rail-op-sim/shared";
 import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 import { debugLog } from "#/lib/debugLogger";
 import type { TextureCache } from "#/renderer/textureCache";
@@ -8,6 +14,10 @@ interface Entry {
 	sprite: Sprite;
 	/** Composite key tracking both subtype and aspect for change detection. */
 	lookupKey: string;
+	/** Resolved subtype + aspect the sprite was baked from — needed to swap
+	 * between the themed and the white tintable texture variants. */
+	subtype: string;
+	aspect?: number;
 }
 
 function cellKey(gx: number, gy: number): string {
@@ -44,6 +54,8 @@ export interface TrackLayer {
 	removeCell(gx: number, gy: number): void;
 	/** Drop all sprites so the next `sync` rebuilds them (e.g. after a theme change). */
 	clear(): void;
+	/** Apply/remove speed-length colour tints to all track sprites. */
+	syncColors(map: Map_, active: boolean): void;
 	destroy(): void;
 }
 
@@ -57,6 +69,8 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 	container.label = "track-layer";
 
 	const entries = new Map<string, Entry>();
+
+	let colorModeActive = false;
 
 	const removeEntry = (key: string, entry: Entry) => {
 		debugLog("trackLayer", `remove sprite at (${key}) — lookupKey=${entry.lookupKey}`);
@@ -76,7 +90,7 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		const sprite = makeTrackSprite(texture, gx, gy);
 		sprite.label = `track-${key}`;
 		container.addChild(sprite);
-		entries.set(key, { sprite, lookupKey: lk });
+		entries.set(key, { sprite, lookupKey: lk, subtype, aspect });
 	};
 
 	return {
@@ -120,6 +134,10 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			}
 
 			debugLog("trackLayer", `sync complete — ${trackCount} tracks in map, ${entries.size} sprites rendered, ${removed} removed`);
+
+			// Re-apply colour tints if the section colour mode is active
+			// (sync may have rebuilt sprites, losing previous tints).
+			if (colorModeActive) this.syncColors(map, true);
 		},
 
 		upsertCell(subtype, gx, gy, aspect) {
@@ -158,6 +176,41 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 
 		clear() {
 			for (const [key, entry] of entries) removeEntry(key, entry);
+		},
+
+		syncColors(map, active) {
+			colorModeActive = active;
+			for (const [key, entry] of entries) {
+				let state: ReturnType<typeof getTrackColorState> = "default";
+				if (active) {
+					const [gxStr, gyStr] = key.split(",");
+					const track = map.getTrackAt(Number(gxStr), Number(gyStr));
+					if (track) state = getTrackColorState(track);
+				}
+
+				if (state === "default") {
+					// Restore the themed texture.
+					const texture = textures.get(entry.subtype, entry.aspect);
+					if (texture) entry.sprite.texture = texture;
+					continue;
+				}
+
+				// Swap to a variant baked with the fills replaced by the status
+				// colour — theme-independent, so it reads identically in light
+				// and dark mode.
+				const color =
+					state === "speed"
+						? TRACK_COLOR_SPEED
+						: state === "length"
+							? TRACK_COLOR_LENGTH
+							: TRACK_COLOR_BOTH;
+				const texture = textures.getColored(
+					entry.subtype,
+					`#${color.toString(16).padStart(6, "0")}`,
+					entry.aspect,
+				);
+				if (texture) entry.sprite.texture = texture;
+			}
 		},
 
 		destroy() {

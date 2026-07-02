@@ -7,7 +7,7 @@ import { create } from "zustand";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
-export type Tool = "select" | "add" | "delete" | "name" | "link";
+export type Tool = "select" | "add" | "delete" | "name" | "link" | "section";
 
 /** Non-track element types placeable from the Add palette. */
 export type ElementKind =
@@ -27,6 +27,23 @@ export type NameableKind =
 
 /** Union of all placeable categories (tracks + elements). */
 export type AddKind = TrackKind | ElementKind;
+
+/**
+ * Plain-data snapshot of the track under the pointer, pushed by the placement
+ * controller when "show track info" is enabled. Kept serialisable (no pixi/model
+ * references) so it can live in the store and be read by the tooltip.
+ */
+export type HoveredTrackInfo = {
+	kindLabel: string;
+	subtypeCode: string;
+	mainSpeed: number;
+	mainLength: number;
+	gx: number;
+	gy: number;
+	/** Viewport coordinates of the pointer (for fixed-position rendering). */
+	screenX: number;
+	screenY: number;
+};
 
 /** Returns true when `kind` is a track category (not an element). */
 export function isTrackKind(kind: AddKind): kind is TrackKind {
@@ -72,6 +89,15 @@ export interface EditorState {
 	/** Whether the linked track highlight overlay is visible. */
 	showLinkHighlights: boolean;
 
+	/** Whether hovering the canvas shows a floating track-info tooltip. */
+	showTrackInfo: boolean;
+
+	/**
+	 * Plain-data snapshot of the track currently under the pointer, or null when
+	 * the pointer isn't over a track (or the feature is disabled).
+	 */
+	hoveredTrackInfo: HoveredTrackInfo | null;
+
 	/**
 	 * Track connectivity summary, recomputed by the (pixi-owning) placement
 	 * controller after every map mutation and pushed here as plain data.
@@ -95,8 +121,33 @@ export interface EditorState {
 	setPendingNameTarget: (loc: { gx: number; gy: number; kind: NameableKind } | null) => void;
 	/** Toggle the linked track highlight overlay on/off. */
 	toggleLinkHighlights: () => void;
+	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
+	toggleShowTrackInfo: () => void;
+	/** Push (or clear) the track-info snapshot for the tooltip to render. */
+	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
 	setTrackStatus: (status: { total: number; connected: boolean } | null) => void;
+
+	/**
+	 * Section tool — two-click path selection.
+	 * grid coordinates of the first clicked track (start), or null.
+	 */
+	sectionStart: { gx: number; gy: number } | null;
+	/** grid coordinates of the second clicked track (end), or null. */
+	sectionEnd: { gx: number; gy: number } | null;
+	/** Ordered array of grid coords for every track in the computed section path. */
+	sectionTracks: { gx: number; gy: number }[];
+	/** Set the section start track (clears end + tracks). */
+	setSectionStart: (loc: { gx: number; gy: number } | null) => void;
+	/** Set the section end track and the computed path tracks. */
+	setSectionEnd: (
+		loc: { gx: number; gy: number } | null,
+		tracks: { gx: number; gy: number }[],
+	) => void;
+	/** Set the section tracks array (used after recomputing path). */
+	setSectionTracks: (tracks: { gx: number; gy: number }[]) => void;
+	/** Clear all section selection state. */
+	clearSectionSelection: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -107,7 +158,12 @@ export const useEditorStore = create<EditorState>((set) => ({
 	pendingTextLocation: null,
 	pendingNameTarget: null,
 	showLinkHighlights: false,
+	showTrackInfo: false,
+	hoveredTrackInfo: null,
 	trackStatus: null,
+	sectionStart: null,
+	sectionEnd: null,
+	sectionTracks: [],
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
@@ -119,6 +175,9 @@ export const useEditorStore = create<EditorState>((set) => ({
 						selectedKind: null,
 						selectedSubtype: null,
 						pendingNameTarget: null,
+						sectionStart: null,
+						sectionEnd: null,
+						sectionTracks: [],
 					},
 		);
 	},
@@ -160,5 +219,36 @@ export const useEditorStore = create<EditorState>((set) => ({
 
 	toggleLinkHighlights: () =>
 		set((s) => ({ showLinkHighlights: !s.showLinkHighlights })),
+	toggleShowTrackInfo: () =>
+		set((s) => ({
+			showTrackInfo: !s.showTrackInfo,
+			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
+		})),
+	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
+
+	setSectionStart: (loc) => {
+		debugLog(
+			"store",
+			`setSectionStart: ${loc ? `(${loc.gx},${loc.gy})` : "null"}`,
+		);
+		set({ sectionStart: loc, sectionEnd: null, sectionTracks: [] });
+	},
+
+	setSectionEnd: (loc, tracks) => {
+		debugLog(
+			"store",
+			`setSectionEnd: ${loc ? `(${loc.gx},${loc.gy})` : "null"} tracks=${tracks.length}`,
+		);
+		set({ sectionEnd: loc, sectionTracks: tracks });
+	},
+
+	setSectionTracks: (tracks) => {
+		set({ sectionTracks: tracks });
+	},
+
+	clearSectionSelection: () => {
+		debugLog("store", "clearSectionSelection");
+		set({ sectionStart: null, sectionEnd: null, sectionTracks: [] });
+	},
 }));

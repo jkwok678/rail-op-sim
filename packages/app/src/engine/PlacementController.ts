@@ -1,9 +1,12 @@
 import {
 	createTrackData,
 	ElementAlreadyExistsError,
+	findPathBetween,
+	kindToLabel,
 	Map as Map_,
 	type ParapetType,
 	Platform,
+	subtypeToCode,
 } from "@rail-op-sim/shared";
 import {
 	type Application,
@@ -16,6 +19,7 @@ import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
 import type { TextLayer } from "#/renderer/layers/TextLayer";
+import type { TrackColorLayer } from "#/renderer/layers/TrackColorLayer";
 import type { TrackLayer } from "#/renderer/layers/TrackLayer";
 import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
 import type { TextureCache } from "#/renderer/textureCache";
@@ -37,6 +41,7 @@ export interface PlacementControllerOptions {
 	elementLayer: ElementLayer;
 	textLayer: TextLayer;
 	linkHighlightLayer: LinkHighlightLayer;
+	trackColorLayer: TrackColorLayer;
 	textures: TextureCache;
 	viewport: ViewportController;
 }
@@ -79,6 +84,7 @@ export class PlacementController {
 	private readonly elementLayer: ElementLayer;
 	private readonly textLayer: TextLayer;
 	private readonly linkHighlightLayer: LinkHighlightLayer;
+	private readonly trackColorLayer: TrackColorLayer;
 	private readonly textures: TextureCache;
 	private readonly viewport: ViewportController;
 
@@ -102,6 +108,7 @@ export class PlacementController {
 		this.elementLayer = opts.elementLayer;
 		this.textLayer = opts.textLayer;
 		this.linkHighlightLayer = opts.linkHighlightLayer;
+		this.trackColorLayer = opts.trackColorLayer;
 		this.textures = opts.textures;
 		this.viewport = opts.viewport;
 
@@ -182,6 +189,20 @@ export class PlacementController {
 						// Keep highlights visible, but clear selection
 						this.linkHighlightLayer.sync(this.map);
 						this.linkHighlightLayer.syncSelection(this.map);
+					}
+				}
+
+				// Entering section tool — show colour overlay immediately for all tracks
+				if (state.tool === "section" && prevState.tool !== "section") {
+					this.trackColorLayer.sync(this.map);
+				}
+
+				// Leaving section tool — clear section highlight & hide colour overlay
+				if (prevState.tool === "section" && state.tool !== "section") {
+					this.linkHighlightLayer.clearSectionHighlight();
+					this.trackColorLayer.hide();
+					if (!state.showLinkHighlights) {
+						this.linkHighlightLayer.container.visible = false;
 					}
 				}
 			}
@@ -366,6 +387,73 @@ export class PlacementController {
 			return;
 		}
 
+		// Section tool — two-click path selection
+		if (tool === "section") {
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (!cell) {
+				useEditorStore.getState().clearSectionSelection();
+				this.linkHighlightLayer.clearSectionHighlight();
+				this.trackColorLayer.hide();
+				return;
+			}
+
+			const track = this.map.getTrackAt(cell.gx, cell.gy);
+			if (!track) {
+				// Clicked empty space — clear selection
+				useEditorStore.getState().clearSectionSelection();
+				this.linkHighlightLayer.clearSectionHighlight();
+				this.trackColorLayer.hide();
+				debugLog("placement", "section click → empty cell, cleared");
+				return;
+			}
+
+			const { sectionStart } = useEditorStore.getState();
+			if (!sectionStart) {
+				// First click — set start
+				useEditorStore.getState().setSectionStart({ gx: cell.gx, gy: cell.gy });
+				debugLog(
+					"placement",
+					`section click → start at (${cell.gx},${cell.gy})`,
+				);
+			} else {
+				// Second click — find path
+				const startTrack = this.map.getTrackAt(sectionStart.gx, sectionStart.gy);
+				if (!startTrack) {
+					useEditorStore.getState().clearSectionSelection();
+					this.linkHighlightLayer.clearSectionHighlight();
+					this.trackColorLayer.hide();
+					debugLog("placement", "section click → start track gone, cleared");
+					return;
+				}
+
+				const path = findPathBetween(this.map, startTrack, track);
+				if (path) {
+					const coords = path.map((t) => ({
+						gx: t.getLocationX(),
+						gy: t.getLocationY(),
+					}));
+					useEditorStore
+						.getState()
+						.setSectionEnd({ gx: cell.gx, gy: cell.gy }, coords);
+					this.linkHighlightLayer.highlightSection(coords);
+					this.linkHighlightLayer.container.visible = true;
+					this.trackColorLayer.sync(this.map);
+					this.trackColorLayer.container.visible = true;
+					debugLog(
+						"placement",
+						`section click → end at (${cell.gx},${cell.gy}), path length=${coords.length}`,
+					);
+				} else {
+					// No path — clear and let user retry
+					useEditorStore.getState().clearSectionSelection();
+					this.linkHighlightLayer.clearSectionHighlight();
+					this.trackColorLayer.hide();
+					debugLog("placement", "section click → no path found, cleared");
+				}
+			}
+			return;
+		}
+
 		const cell = this.screenToGrid(e.clientX, e.clientY);
 		if (!cell) {
 			debugLog(
@@ -421,6 +509,7 @@ export class PlacementController {
 					aspectArg,
 				);
 				this.linkHighlightLayer.sync(this.map);
+				this.trackColorLayer.sync(this.map);
 			} else {
 				// ── Element placement ──
 				this.handleElementPlacement(
@@ -441,6 +530,7 @@ export class PlacementController {
 				this.elementLayer.sync(this.map);
 				this.textLayer.sync(this.map);
 				this.linkHighlightLayer.sync(this.map);
+				this.trackColorLayer.sync(this.map);
 				this.publishTrackStatus();
 			}
 		}
@@ -577,8 +667,86 @@ export class PlacementController {
 		this.nameElementAt(gx, gy, content, "namedLocation");
 	}
 
+	/**
+	 * Apply speed/length edits from the section panel to every track in the
+	 * selected section.
+	 */
+	applySectionEdit(values: {
+		mainSpeed: number;
+		mainLength: number;
+		secondarySpeed?: number;
+		secondaryLength?: number;
+	}): void {
+		const { sectionTracks } = useEditorStore.getState();
+		for (const coord of sectionTracks) {
+			const track = this.map.getTrackAt(coord.gx, coord.gy);
+			if (!track) continue;
+			track.setTrackMainSpeed(values.mainSpeed);
+			track.setTrackMainLength(values.mainLength);
+			if (values.secondarySpeed !== undefined) {
+				track.setTrackSecondarySpeed(values.secondarySpeed);
+			}
+			if (values.secondaryLength !== undefined) {
+				track.setTrackSecondaryLength(values.secondaryLength);
+			}
+		}
+		this.trackLayer.sync(this.map);
+		this.trackColorLayer.sync(this.map);
+		this.publishTrackStatus();
+		debugLog(
+			"placement",
+			`applySectionEdit — ${sectionTracks.length} tracks updated`,
+		);
+	}
+
+	/** Clear the section highlight overlay (public for SectionEditPanel). */
+	clearSectionHighlight(): void {
+		this.linkHighlightLayer.clearSectionHighlight();
+	}
+
+	/** Restore defaults for all tracks in the selected section. */
+	restoreSection(): void {
+		const { sectionTracks } = useEditorStore.getState();
+		for (const coord of sectionTracks) {
+			const track = this.map.getTrackAt(coord.gx, coord.gy);
+			if (!track) continue;
+			track.restoreDefaults();
+		}
+		this.trackLayer.sync(this.map);
+		this.trackColorLayer.sync(this.map);
+		this.publishTrackStatus();
+		debugLog(
+			"placement",
+			`restoreSection — ${sectionTracks.length} tracks reset to defaults`,
+		);
+	}
+
 	private onPointerMove = (e: PointerEvent): void => {
-		const { tool, selectedSubtype } = useEditorStore.getState();
+		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
+
+		// Track-info hover: independent of the ghost/add logic below, so it works
+		// with any tool (e.g. the select tool while inspecting placed track).
+		if (showTrackInfo) {
+			const hoverCell = this.screenToGrid(e.clientX, e.clientY);
+			const track = hoverCell
+				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
+				: null;
+			useEditorStore.getState().setHoveredTrackInfo(
+				track && hoverCell
+					? {
+							kindLabel: kindToLabel(track.data.kind),
+							subtypeCode: subtypeToCode(track.data.kind, track.data.subtype),
+							mainSpeed: track.getTrackMainSpeed(),
+							mainLength: track.getTrackMainLength(),
+							gx: hoverCell.gx,
+							gy: hoverCell.gy,
+							screenX: e.clientX,
+							screenY: e.clientY,
+						}
+					: null,
+			);
+		}
+
 		if (tool !== "add" || !selectedSubtype || !this.ghostSprite) {
 			this.ghost.visible = false;
 			return;
@@ -595,6 +763,7 @@ export class PlacementController {
 
 	private onPointerLeave = (): void => {
 		this.ghost.visible = false;
+		useEditorStore.getState().setHoveredTrackInfo(null);
 	};
 
 	private onPointerCancel = (): void => {
@@ -602,6 +771,7 @@ export class PlacementController {
 		this.downPos = null;
 		this.downRect = null;
 		this.ghost.visible = false;
+		useEditorStore.getState().setHoveredTrackInfo(null);
 	};
 
 	// ── Helpers ──
@@ -650,6 +820,7 @@ export class PlacementController {
 		else if (tool === "delete") cursor = "pointer";
 		else if (tool === "name") cursor = "text";
 		else if (tool === "link") cursor = "pointer";
+		else if (tool === "section") cursor = "pointer";
 		canvas.style.cursor = cursor;
 		debugLog(
 			"placement",

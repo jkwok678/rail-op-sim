@@ -1,5 +1,5 @@
 import type { Icon } from "@phosphor-icons/react";
-import { Cursor, Eye, EyeSlash, Link, Plus, Tag, Trash } from "@phosphor-icons/react";
+import { Cursor, Eye, EyeSlash, Graph, Link, Plus, Tag, Trash } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { type Tool, useEditorStore } from "#/store/editor-store";
 
@@ -7,6 +7,7 @@ const TOOLS: { tool: Tool; label: string; Icon: Icon }[] = [
 	{ tool: "select", label: "Select", Icon: Cursor },
 	{ tool: "add", label: "Add track", Icon: Plus },
 	{ tool: "link", label: "Link", Icon: Link },
+	{ tool: "section", label: "Section", Icon: Graph },
 	{ tool: "name", label: "Name", Icon: Tag },
 	{ tool: "delete", label: "Delete", Icon: Trash },
 ];

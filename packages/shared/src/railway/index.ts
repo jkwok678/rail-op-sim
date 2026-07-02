@@ -38,6 +38,7 @@ export {
 } from "./errors";
 // Map class
 export { Map_ as Map } from "./map";
+export { findPathBetween } from "./map/map-connectivity";
 export type { LinkedTrackPair, LinkedTrackReport } from "./map/map-connectivity";
 export type {
 	CreateTrackDataOptions,
@@ -49,7 +50,12 @@ export type {
 // Track class
 export {
 	createTrackData,
+	DEFAULT_MAIN_LENGTH,
+	DEFAULT_MAIN_SPEED,
+	DEFAULT_SECONDARY_LENGTH,
+	DEFAULT_SECONDARY_SPEED,
 	getLinksForSubtype,
+	getTrackColorState,
 	hasSecondaryPath,
 	isValidSubtype,
 	KIND_META,
@@ -58,8 +64,16 @@ export {
 	subtypeToCode,
 	supportsLevelCrossing,
 	supportsPlatforms,
+	TRACK_COLOR_ALPHA,
+	TRACK_COLOR_BOTH,
+	TRACK_COLOR_LENGTH,
+	TRACK_COLOR_SPEED,
 	Track,
 } from "./track";
+export type { TrackColorState } from "./track";
+// Units
+export { formatImperialLength, kmhToMph, metresToImperial, round1 } from "./units";
+
 // Types
 export type {
 	FontInfo,

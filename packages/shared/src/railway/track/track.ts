@@ -8,6 +8,12 @@ import {
 	supportsLevelCrossing,
 	supportsPlatforms,
 } from "./track-data";
+import {
+	DEFAULT_MAIN_LENGTH,
+	DEFAULT_MAIN_SPEED,
+	DEFAULT_SECONDARY_LENGTH,
+	DEFAULT_SECONDARY_SPEED,
+} from "./track-color";
 
 // ============================================================================
 // Track — single class replacing 11 subclasses via discriminated union
@@ -27,10 +33,10 @@ export class Track extends NamedElement {
 	/** Type-specific data (reference is readonly; mutable fields via setters). */
 	readonly data: TrackData;
 
-	readonly trackMainSpeed: number = 200;
-	readonly trackMainLength: number = 100;
-	readonly trackSecondarySpeed: number;
-	readonly trackSecondaryLength: number;
+	trackMainSpeed: number = DEFAULT_MAIN_SPEED;
+	trackMainLength: number = DEFAULT_MAIN_LENGTH;
+	trackSecondarySpeed: number;
+	trackSecondaryLength: number;
 	/** Bitmask of active link indices (bit i = 1 → link i is active). */
 	readonly linkMask: number;
 
@@ -46,8 +52,8 @@ export class Track extends NamedElement {
 
 		// Compute secondary path defaults
 		if (hasSecondaryPath(data.kind)) {
-			this.trackSecondarySpeed = 200;
-			this.trackSecondaryLength = 100;
+			this.trackSecondarySpeed = DEFAULT_SECONDARY_SPEED;
+			this.trackSecondaryLength = DEFAULT_SECONDARY_LENGTH;
 		} else {
 			this.trackSecondarySpeed = -1;
 			this.trackSecondaryLength = -1;
@@ -77,6 +83,36 @@ export class Track extends NamedElement {
 
 	getTrackSecondaryLength(): number {
 		return this.trackSecondaryLength;
+	}
+
+	setTrackMainSpeed(v: number): void {
+		this.trackMainSpeed = v;
+	}
+
+	setTrackMainLength(v: number): void {
+		this.trackMainLength = v;
+	}
+
+	setTrackSecondarySpeed(v: number): void {
+		if (hasSecondaryPath(this.data.kind)) {
+			this.trackSecondarySpeed = v;
+		}
+	}
+
+	setTrackSecondaryLength(v: number): void {
+		if (hasSecondaryPath(this.data.kind)) {
+			this.trackSecondaryLength = v;
+		}
+	}
+
+	/** Reset speed/length to defaults (200/100). Secondary only reset when applicable. */
+	restoreDefaults(): void {
+		this.trackMainSpeed = DEFAULT_MAIN_SPEED;
+		this.trackMainLength = DEFAULT_MAIN_LENGTH;
+		if (hasSecondaryPath(this.data.kind)) {
+			this.trackSecondarySpeed = DEFAULT_SECONDARY_SPEED;
+			this.trackSecondaryLength = DEFAULT_SECONDARY_LENGTH;
+		}
 	}
 
 	mainSpeedLengthToString(): string {

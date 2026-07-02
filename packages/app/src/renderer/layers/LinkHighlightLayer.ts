@@ -11,12 +11,18 @@ const SELECTION_ALPHA = 0.5;
 const LINE_COLOR = 0x22c55e; // green-500
 const LINE_ALPHA = 0.7;
 const LINE_WIDTH = 2;
+const SECTION_COLOR = 0xa855f7; // purple-500
+const SECTION_ALPHA = 0.35;
 
 export interface LinkHighlightLayer {
 	container: Container;
 	sync(map: Map_): void;
 	/** Show a highlight on the currently-selected linked track (link tool first click). */
 	syncSelection(map: Map_): void;
+	/** Highlight the tracks at the given grid coordinates as a selected section. */
+	highlightSection(coords: { gx: number; gy: number }[]): void;
+	/** Clear the section highlight overlay. */
+	clearSectionHighlight(): void;
 }
 
 /**
@@ -35,6 +41,9 @@ export function createLinkHighlightLayer(): LinkHighlightLayer {
 
 	const selectionGfx = new Graphics();
 	container.addChild(selectionGfx);
+
+	const sectionGfx = new Graphics();
+	container.addChild(sectionGfx);
 
 	const half = CELL_SIZE / 2;
 
@@ -80,5 +89,18 @@ export function createLinkHighlightLayer(): LinkHighlightLayer {
 		selectionGfx.fill({ color: SELECTION_COLOR, alpha: SELECTION_ALPHA });
 	}
 
-	return { container, sync, syncSelection };
+	function highlightSection(coords: { gx: number; gy: number }[]): void {
+		sectionGfx.clear();
+		for (const c of coords) {
+			const { x, y } = gridToWorld(c.gx, c.gy);
+			sectionGfx.rect(x - half, y - half, CELL_SIZE, CELL_SIZE);
+		}
+		sectionGfx.fill({ color: SECTION_COLOR, alpha: SECTION_ALPHA });
+	}
+
+	function clearSectionHighlight(): void {
+		sectionGfx.clear();
+	}
+
+	return { container, sync, syncSelection, highlightSection, clearSectionHighlight };
 }

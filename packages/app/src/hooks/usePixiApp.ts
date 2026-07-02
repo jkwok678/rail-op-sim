@@ -54,6 +54,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ createElementLayer },
 				{ createTextLayer },
 				{ createLinkHighlightLayer },
+				{ createTrackColorLayer },
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
@@ -65,6 +66,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("#/renderer/layers/ElementLayer"),
 				import("#/renderer/layers/TextLayer"),
 				import("#/renderer/layers/LinkHighlightLayer"),
+				import("#/renderer/layers/TrackColorLayer"),
 				import("#/renderer/textureCache"),
 				import("#/engine/PlacementController"),
 			]);
@@ -104,12 +106,19 @@ export function usePixiApp(): UsePixiAppReturn {
 			});
 			world.addChild(ground.container);
 
-			// Shared texture cache + track layer + element layer
+			// Shared texture cache + track layer (created before colour layer
+			// so the colour layer can delegate tinting to it)
 			textures = createTextureCache(
 				themeKey(),
 				buildThemeColorMap(),
 			);
 			const trackLayer = createTrackLayer(textures);
+
+			// Track colour overlay (empty container; tints are applied to track sprites)
+			const trackColorLayer = createTrackColorLayer(trackLayer);
+
+			// Scene-graph order: ground → colour → tracks
+			world.addChild(trackColorLayer.container);
 			world.addChild(trackLayer.container);
 
 			const elementLayer = createElementLayer(textures);
@@ -142,7 +151,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			redrawGrid();
 
 			// Placement interaction (owns the Map; ghost lives on top of the tracks)
-			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, linkHighlightLayer, textures, viewport });
+			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, linkHighlightLayer, trackColorLayer, textures, viewport });
 			world.addChild(placement.ghost);
 			placement.attach();
 			debugLog("pixi", "placement controller attached");
@@ -153,6 +162,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			textures.preload(allSubtypes).then(() => {
 				if (destroyed) return;
 				debugLog("pixi", "texture preload complete — syncing layers");
+				trackColorLayer.sync(placement.map);
 				trackLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
 				textLayer.sync(placement.map);
@@ -171,6 +181,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				elementLayer.clear();
 				textLayer.clear();
 				trackLayer.sync(placement.map);
+				trackColorLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
 				textLayer.sync(placement.map);
 				placement.refreshGhost();

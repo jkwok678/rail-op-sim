@@ -1,7 +1,7 @@
 import { Texture } from "pixi.js";
 import { SignalAspect } from "@rail-op-sim/shared";
 import { debugLog } from "#/lib/debugLogger";
-import { recolorSvg, type ColorMap } from "#/lib/svgColors";
+import { recolorSvg, SOURCE_FILLS, type ColorMap } from "#/lib/svgColors";
 import { loadRawSvg, loadRawSvgByFilename, SHUNT_SVG_MAP } from "#/lib/svgMap";
 import { svgToCanvas } from "#/lib/svgToCanvas";
 
@@ -10,6 +10,15 @@ import { svgToCanvas } from "#/lib/svgToCanvas";
  * E.g. `"shunt:SIGNALLEFT"` → `shuntLeftRed.svg`.
  */
 const SHUNT_PREFIX = "shunt:";
+
+/**
+ * Colour map that bakes every source fill to a single flat colour. Used for
+ * status-coloured track variants, which replace the fills outright instead of
+ * tinting — a multiplicative tint against the light theme's near-black rail
+ * would swallow the colour.
+ */
+const flatColorMap = (color: string): ColorMap =>
+	Object.fromEntries(Object.values(SOURCE_FILLS).map((fill) => [fill, color]));
 
 /**
  * Bakes recoloured track SVGs into shared PixiJS textures, cached by
@@ -33,6 +42,12 @@ export interface TextureCache {
 	 * shunt variant.
 	 */
 	get(subtype: string, aspect?: number): Texture | null;
+	/**
+	 * Variant of a subtype texture with every fill replaced by the given
+	 * `#rrggbb` colour (theme-independent), or null if its markup hasn't been
+	 * preloaded yet.
+	 */
+	getColored(subtype: string, color: string, aspect?: number): Texture | null;
 	/** Update the active theme colour map and drop baked textures. */
 	setTheme(themeKey: string, colorMap: ColorMap): void;
 	/** Destroy all baked textures. */
@@ -55,11 +70,11 @@ export function createTextureCache(
 	const lookupKey = (subtype: string, aspect?: number): string =>
 		aspect === SignalAspect.SHUNT ? `${SHUNT_PREFIX}${subtype}` : subtype;
 
-	const bake = (key: string): Texture | null => {
+	const bake = (key: string, colorMap = currentColorMap): Texture | null => {
 		const svg = raw.get(key);
 		if (svg === undefined) return null;
 
-		const recolored = recolorSvg(svg, currentColorMap);
+		const recolored = recolorSvg(svg, colorMap);
 		const canvas = svgToCanvas(recolored, 2);
 		const texture = Texture.from(canvas);
 		texture.source.scaleMode = "nearest";
@@ -127,6 +142,23 @@ export function createTextureCache(
 				debugLog("textureCache", `get("${key}") → baked (theme=${currentTheme})`);
 			} else {
 				debugLog("textureCache", `get("${key}") → bake returned null`);
+			}
+			return texture;
+		},
+
+		getColored(subtype, color, aspect) {
+			const key = lookupKey(subtype, aspect);
+			// Flat-colour bakes are theme-independent, so the key omits the theme.
+			const bakedKey = `${color}:${key}`;
+			const existing = baked.get(bakedKey);
+			if (existing) return existing;
+
+			const texture = bake(key, flatColorMap(color));
+			if (texture) {
+				baked.set(bakedKey, texture);
+				debugLog("textureCache", `getColored("${key}", ${color}) → baked`);
+			} else {
+				debugLog("textureCache", `getColored("${key}", ${color}) → miss (raw SVG not preloaded)`);
 			}
 			return texture;
 		},

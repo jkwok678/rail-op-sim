@@ -123,3 +123,73 @@ export function getLinkedTrackReport(map: Map_): LinkedTrackReport {
 		unpairedTracks,
 	};
 }
+
+// ============================================================================
+// Section path-finding
+// ============================================================================
+
+/**
+ * Find the shortest path between two tracks using BFS.
+ * Returns the path as an array of tracks (inclusive of start and end),
+ * or `null` if the tracks are in disconnected components.
+ */
+export function findPathBetween(
+	map: Map_,
+	start: Track,
+	end: Track,
+): Track[] | null {
+	if (start === end) return [start];
+
+	map.makeTrackList();
+	const trackList = map.getTrackList();
+
+	// Reset found flags before traversal
+	for (const t of trackList) t.setFound(false);
+
+	const parent = new Map<Track, Track>();
+	const queue: Track[] = [start];
+	start.setFound(true);
+
+	const step = map.getImageSize();
+	let found = false;
+
+	while (queue.length > 0 && !found) {
+		const current = queue.shift()!;
+		const cx = current.getLocationX();
+		const cy = current.getLocationY();
+
+		for (let link = 0; link <= 8 && !found; link++) {
+			if (link === 4) continue;
+			if (!current.getLinkAt(link)) continue;
+
+			const [dx, dy] = LINK_OFFSETS[link];
+			const nx = cx + dx * step;
+			const ny = cy + dy * step;
+			const neighbor = map.getTrackAt(nx, ny);
+
+			if (neighbor && !neighbor.getFound()) {
+				neighbor.setFound(true);
+				parent.set(neighbor, current);
+				queue.push(neighbor);
+				if (neighbor === end) {
+					found = true;
+				}
+			}
+		}
+	}
+
+	// Always reset found flags after traversal
+	for (const t of trackList) t.setFound(false);
+
+	if (!found) return null;
+
+	// Reconstruct path by walking parent chain from end to start
+	const path: Track[] = [];
+	let node: Track | undefined = end;
+	while (node) {
+		path.push(node);
+		node = parent.get(node);
+	}
+	path.reverse();
+	return path;
+}

@@ -5,8 +5,11 @@ import { useTheme } from "#/hooks/useTheme";
 import { useEditorStore } from "#/store/editor-store";
 import { AddPalette } from "./AddPalette";
 import { NameElementDialog } from "./NameElementDialog";
+import { SectionEditPanel } from "./SectionEditPanel";
+import { SettingsMenu } from "./SettingsMenu";
 import { SimCanvas } from "./SimCanvas";
 import { Toolbar } from "./Toolbar";
+import { TrackInfoTooltip } from "./TrackInfoTooltip";
 
 /**
  * Full-screen simulation layout — the PixiJS canvas fills the entire viewport.
@@ -51,26 +54,31 @@ export function SimLayout() {
 				<SimCanvas />
 				<Toolbar />
 				<AddPalette />
+				<SectionEditPanel />
 				<NameElementDialog
 					open={nameDialogOpen}
 					onOpenChange={setNameDialogOpen}
 				/>
+				<TrackInfoTooltip />
 			</div>
 			<footer className="h-7 border-t border-border bg-muted/30 flex items-center justify-between px-3 text-[11px] text-muted-foreground select-none">
 				<span className="inline-flex items-center gap-1.5">
 					<span className={`size-1.5 rounded-full ${connectivity.color}`} />
 					{connectivity.label}
 				</span>
-				<Button
-					variant="ghost"
-					size="icon-xs"
-					onClick={toggle}
-					aria-label={
-						theme === "light" ? "Switch to dark mode" : "Switch to light mode"
-					}
-				>
-					{theme === "light" ? <Moon /> : <Sun />}
-				</Button>
+				<div className="flex items-center gap-1">
+					<SettingsMenu />
+					<Button
+						variant="ghost"
+						size="icon-xs"
+						onClick={toggle}
+						aria-label={
+							theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+						}
+					>
+						{theme === "light" ? <Moon /> : <Sun />}
+					</Button>
+				</div>
 			</footer>
 		</div>
 	);
