@@ -1,13 +1,17 @@
 import { usePixiApp } from "#/hooks/usePixiApp";
+import { ZoomSlider } from "./ZoomSlider";
 
 /**
  * Thin wrapper that owns the PixiJS canvas lifecycle via usePixiApp.
  * Renders a full-size div that the hook fills with the canvas element.
  */
 export function SimCanvas() {
-	const { containerRef } = usePixiApp();
+	const { containerRef, viewportRef } = usePixiApp();
 
 	return (
-		<div ref={containerRef} className="size-full relative overflow-hidden bg-background" />
+		<div className="size-full relative overflow-hidden bg-background">
+			<div ref={containerRef} className="absolute inset-0" />
+			<ZoomSlider viewportRef={viewportRef} />
+		</div>
 	);
 }

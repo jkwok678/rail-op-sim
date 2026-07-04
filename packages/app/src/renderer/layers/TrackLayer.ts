@@ -34,7 +34,11 @@ function entryKey(subtype: string, aspect?: number): string {
  * Shared by both the track layer and the placement ghost so anchor/sizing
  * conventions stay consistent.
  */
-export function makeTrackSprite(texture: Texture, gx: number, gy: number): Sprite {
+export function makeTrackSprite(
+	texture: Texture,
+	gx: number,
+	gy: number,
+): Sprite {
 	const sprite = new Sprite(texture);
 	sprite.anchor.set(0.5);
 	sprite.width = CELL_SIZE;
@@ -73,16 +77,28 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 	let colorModeActive = false;
 
 	const removeEntry = (key: string, entry: Entry) => {
-		debugLog("trackLayer", `remove sprite at (${key}) — lookupKey=${entry.lookupKey}`);
+		debugLog(
+			"trackLayer",
+			`remove sprite at (${key}) — lookupKey=${entry.lookupKey}`,
+		);
 		container.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		entries.delete(key);
 	};
 
-	const addSprite = (key: string, subtype: string, gx: number, gy: number, aspect?: number) => {
+	const addSprite = (
+		key: string,
+		subtype: string,
+		gx: number,
+		gy: number,
+		aspect?: number,
+	) => {
 		const texture = textures.get(subtype, aspect);
 		if (!texture) {
-			debugLog("trackLayer", `addSprite SKIP at (${key}) — no texture for "${subtype}" (aspect=${aspect ?? "undefined"})`);
+			debugLog(
+				"trackLayer",
+				`addSprite SKIP at (${key}) — no texture for "${subtype}" (aspect=${aspect ?? "undefined"})`,
+			);
 			return;
 		}
 		const lk = entryKey(subtype, aspect);
@@ -125,15 +141,27 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 					if (existing.lookupKey === lookupKey) return; // unchanged
 					removeEntry(key, existing); // subtype or aspect changed — rebuild
 				}
-				addSprite(key, subtype, track.getLocationX(), track.getLocationY(), aspect);
+				addSprite(
+					key,
+					subtype,
+					track.getLocationX(),
+					track.getLocationY(),
+					aspect,
+				);
 			});
 
 			let removed = 0;
 			for (const [key, entry] of entries) {
-				if (!seen.has(key)) { removeEntry(key, entry); removed++; }
+				if (!seen.has(key)) {
+					removeEntry(key, entry);
+					removed++;
+				}
 			}
 
-			debugLog("trackLayer", `sync complete — ${trackCount} tracks in map, ${entries.size} sprites rendered, ${removed} removed`);
+			debugLog(
+				"trackLayer",
+				`sync complete — ${trackCount} tracks in map, ${entries.size} sprites rendered, ${removed} removed`,
+			);
 
 			// Re-apply colour tints if the section colour mode is active
 			// (sync may have rebuilt sprites, losing previous tints).

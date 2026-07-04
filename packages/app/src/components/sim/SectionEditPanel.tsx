@@ -110,41 +110,53 @@ export function SectionEditPanel() {
 		setConvMi(String(round1(totalChains / CHAINS_PER_MILE)));
 	}, []);
 
-	const handleConvM = useCallback((v: string) => {
-		setConvM(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) syncLengthFromM(n);
-	}, [syncLengthFromM]);
+	const handleConvM = useCallback(
+		(v: string) => {
+			setConvM(v);
+			const n = Number(v);
+			if (!Number.isNaN(n) && n >= 0) syncLengthFromM(n);
+		},
+		[syncLengthFromM],
+	);
 
-	const handleConvCh = useCallback((v: string) => {
-		setConvCh(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) {
-			const m = Math.round(n * M_PER_CHAIN);
-			setConvM(String(m));
-			syncLengthFromM(m);
-		}
-	}, [syncLengthFromM]);
+	const handleConvCh = useCallback(
+		(v: string) => {
+			setConvCh(v);
+			const n = Number(v);
+			if (!Number.isNaN(n) && n >= 0) {
+				const m = Math.round(n * M_PER_CHAIN);
+				setConvM(String(m));
+				syncLengthFromM(m);
+			}
+		},
+		[syncLengthFromM],
+	);
 
-	const handleConvYd = useCallback((v: string) => {
-		setConvYd(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) {
-			const m = Math.round(n * M_PER_YARD);
-			setConvM(String(m));
-			syncLengthFromM(m);
-		}
-	}, [syncLengthFromM]);
+	const handleConvYd = useCallback(
+		(v: string) => {
+			setConvYd(v);
+			const n = Number(v);
+			if (!Number.isNaN(n) && n >= 0) {
+				const m = Math.round(n * M_PER_YARD);
+				setConvM(String(m));
+				syncLengthFromM(m);
+			}
+		},
+		[syncLengthFromM],
+	);
 
-	const handleConvMi = useCallback((v: string) => {
-		setConvMi(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) {
-			const m = Math.round(n * CHAINS_PER_MILE * M_PER_CHAIN);
-			setConvM(String(m));
-			syncLengthFromM(m);
-		}
-	}, [syncLengthFromM]);
+	const handleConvMi = useCallback(
+		(v: string) => {
+			setConvMi(v);
+			const n = Number(v);
+			if (!Number.isNaN(n) && n >= 0) {
+				const m = Math.round(n * CHAINS_PER_MILE * M_PER_CHAIN);
+				setConvM(String(m));
+				syncLengthFromM(m);
+			}
+		},
+		[syncLengthFromM],
+	);
 
 	// ── Apply / Defaults / Cancel ────────────────────────────────────────
 
@@ -175,7 +187,14 @@ export function SectionEditPanel() {
 			}
 		}
 		confirmingRef.current = false;
-	}, [mainSpeed, mainLength, secondarySpeed, secondaryLength, hasSecondary, sectionTracks.length]);
+	}, [
+		mainSpeed,
+		mainLength,
+		secondarySpeed,
+		secondaryLength,
+		hasSecondary,
+		sectionTracks.length,
+	]);
 
 	const handleDefaults = useCallback(() => {
 		const ctrl = PlacementController.instance;
@@ -211,8 +230,8 @@ export function SectionEditPanel() {
 					selected — total {totalLength} m
 				</div>
 				<div>
-					Start ({sectionStart!.gx}, {sectionStart!.gy}) → End ({sectionEnd!.gx},{" "}
-					{sectionEnd!.gy})
+					Start ({sectionStart!.gx}, {sectionStart!.gy}) → End ({sectionEnd!.gx}
+					, {sectionEnd!.gy})
 				</div>
 			</div>
 

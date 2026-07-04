@@ -82,8 +82,7 @@ export function createTextureCache(
 	};
 
 	/** True for the 8 {@link SignalType} enum values. */
-	const isSignalSubtype = (s: string): boolean =>
-		s in SHUNT_SVG_MAP;
+	const isSignalSubtype = (s: string): boolean => s in SHUNT_SVG_MAP;
 
 	return {
 		async preload(subtypes) {
@@ -108,7 +107,8 @@ export function createTextureCache(
 						if (key.startsWith(SHUNT_PREFIX)) {
 							const signalSubtype = key.slice(SHUNT_PREFIX.length);
 							const filename = SHUNT_SVG_MAP[signalSubtype];
-							if (!filename) throw new Error(`No shunt SVG mapped for ${signalSubtype}`);
+							if (!filename)
+								throw new Error(`No shunt SVG mapped for ${signalSubtype}`);
 							svg = await loadRawSvgByFilename(filename);
 						} else {
 							svg = await loadRawSvg(key);
@@ -121,7 +121,10 @@ export function createTextureCache(
 					}
 				}),
 			);
-			debugLog("textureCache", `preload complete — ${loaded} loaded, ${failed} failed, ${raw.size} total in cache`);
+			debugLog(
+				"textureCache",
+				`preload complete — ${loaded} loaded, ${failed} failed, ${raw.size} total in cache`,
+			);
 		},
 
 		get(subtype, aspect) {
@@ -132,14 +135,20 @@ export function createTextureCache(
 
 			const rawSvg = raw.get(key);
 			if (rawSvg === undefined) {
-				debugLog("textureCache", `get("${key}") → miss (raw SVG not preloaded)`);
+				debugLog(
+					"textureCache",
+					`get("${key}") → miss (raw SVG not preloaded)`,
+				);
 				return null;
 			}
 
 			const texture = bake(key);
 			if (texture) {
 				baked.set(bakedKey, texture);
-				debugLog("textureCache", `get("${key}") → baked (theme=${currentTheme})`);
+				debugLog(
+					"textureCache",
+					`get("${key}") → baked (theme=${currentTheme})`,
+				);
 			} else {
 				debugLog("textureCache", `get("${key}") → bake returned null`);
 			}
@@ -158,7 +167,10 @@ export function createTextureCache(
 				baked.set(bakedKey, texture);
 				debugLog("textureCache", `getColored("${key}", ${color}) → baked`);
 			} else {
-				debugLog("textureCache", `getColored("${key}", ${color}) → miss (raw SVG not preloaded)`);
+				debugLog(
+					"textureCache",
+					`getColored("${key}", ${color}) → miss (raw SVG not preloaded)`,
+				);
 			}
 			return texture;
 		},

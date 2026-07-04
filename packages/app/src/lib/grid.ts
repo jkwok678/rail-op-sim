@@ -24,7 +24,10 @@ export function gridToWorld(gx: number, gy: number): { x: number; y: number } {
 /**
  * Snap a world-pixel position to the nearest grid cell.
  */
-export function worldToGrid(wx: number, wy: number): { gx: number; gy: number } {
+export function worldToGrid(
+	wx: number,
+	wy: number,
+): { gx: number; gy: number } {
 	return {
 		gx: Math.round(wx / CELL_SIZE),
 		gy: Math.round(-wy / CELL_SIZE),

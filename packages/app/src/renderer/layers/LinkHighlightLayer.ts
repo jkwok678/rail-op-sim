@@ -55,7 +55,10 @@ export function createLinkHighlightLayer(): LinkHighlightLayer {
 		// Paired — green (batch all rects, then fill once)
 		for (const pair of report.pairedPairs) {
 			for (const track of [pair.a, pair.b]) {
-				const { x, y } = gridToWorld(track.getLocationX(), track.getLocationY());
+				const { x, y } = gridToWorld(
+					track.getLocationX(),
+					track.getLocationY(),
+				);
 				gfx.rect(x - half, y - half, CELL_SIZE, CELL_SIZE);
 			}
 		}
@@ -84,7 +87,10 @@ export function createLinkHighlightLayer(): LinkHighlightLayer {
 		const selected = map.getLinkedTrack1();
 		if (!selected) return;
 
-		const { x, y } = gridToWorld(selected.getLocationX(), selected.getLocationY());
+		const { x, y } = gridToWorld(
+			selected.getLocationX(),
+			selected.getLocationY(),
+		);
 		selectionGfx.rect(x - half, y - half, CELL_SIZE, CELL_SIZE);
 		selectionGfx.fill({ color: SELECTION_COLOR, alpha: SELECTION_ALPHA });
 	}
@@ -102,5 +108,11 @@ export function createLinkHighlightLayer(): LinkHighlightLayer {
 		sectionGfx.clear();
 	}
 
-	return { container, sync, syncSelection, highlightSection, clearSectionHighlight };
+	return {
+		container,
+		sync,
+		syncSelection,
+		highlightSection,
+		clearSectionHighlight,
+	};
 }

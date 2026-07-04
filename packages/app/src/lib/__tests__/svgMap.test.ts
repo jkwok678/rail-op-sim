@@ -87,9 +87,9 @@ describe("SVG_MAP completeness", () => {
 	});
 
 	it("points every track mapping at a file that exists on disk", () => {
-		const broken = ALL_TRACK_SUBTYPES
-			.map((s) => SVG_MAP[s])
-			.filter((file) => file && !existsSync(resolve(GRAPHICS_DIR, file)));
+		const broken = ALL_TRACK_SUBTYPES.map((s) => SVG_MAP[s]).filter(
+			(file) => file && !existsSync(resolve(GRAPHICS_DIR, file)),
+		);
 		expect(broken).toEqual([]);
 	});
 
@@ -112,9 +112,9 @@ describe("SVG_MAP completeness", () => {
 	});
 
 	it("points every element mapping at a file that exists on disk", () => {
-		const broken = ELEMENT_KEYS
-			.map((k) => SVG_MAP[k])
-			.filter((file) => file && !existsSync(resolve(GRAPHICS_DIR, file)));
+		const broken = ELEMENT_KEYS.map((k) => SVG_MAP[k]).filter(
+			(file) => file && !existsSync(resolve(GRAPHICS_DIR, file)),
+		);
 		expect(broken).toEqual([]);
 	});
 });

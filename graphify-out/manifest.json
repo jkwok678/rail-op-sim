@@ -35,13 +35,13 @@
     "semantic_hash": "8e51e1e8af472dcd2f255656c66bec15"
   },
   "packages/app/src/components/sim/SimCanvas.tsx": {
-    "mtime": 1782594771.56368,
-    "ast_hash": "1974ddaee8e07f6d028245452bf37c86",
-    "semantic_hash": "1974ddaee8e07f6d028245452bf37c86"
+    "mtime": 1783130975.2508361,
+    "ast_hash": "ba46592e2d4996057ed94c5713b50a8f",
+    "semantic_hash": ""
   },
   "packages/app/src/components/sim/SimLayout.tsx": {
-    "mtime": 1782993115.7037654,
-    "ast_hash": "7d0f3df50f14628deb5260c6e46e2e48",
+    "mtime": 1783129481.8906317,
+    "ast_hash": "bb9e3262f438bef4be85f2b13a302349",
     "semantic_hash": ""
   },
   "packages/app/src/components/ui/button.tsx": {
@@ -85,17 +85,17 @@
     "semantic_hash": "fcf56f6b6879c7f2a6a34f2b7bb9b9c5"
   },
   "packages/app/src/engine/ViewportController.ts": {
-    "mtime": 1782774135.3812761,
-    "ast_hash": "c8fa9bc5bd1e899910589743f2962819",
-    "semantic_hash": "c8fa9bc5bd1e899910589743f2962819"
+    "mtime": 1783151947.881479,
+    "ast_hash": "a934223011744af6423ec3c5e248daaf",
+    "semantic_hash": ""
   },
   "packages/app/src/hooks/usePixiApp.ts": {
-    "mtime": 1783031021.960176,
-    "ast_hash": "35f9897dc7a9ec3a2939542de21d3518",
+    "mtime": 1783131027.1675005,
+    "ast_hash": "2658e4b1c92beb28a0ca1b897c6fc2db",
     "semantic_hash": ""
   },
   "packages/app/src/hooks/useTheme.ts": {
-    "mtime": 1782601168.8286235,
+    "mtime": 1783131564.4693828,
     "ast_hash": "a657fbf590c2dfff1f4d3123178ed07c",
     "semantic_hash": "a657fbf590c2dfff1f4d3123178ed07c"
   },
@@ -165,17 +165,17 @@
     "semantic_hash": "f9445628f58a5720acb5537b73b0302c"
   },
   "packages/shared/src/railway/__tests__/map-connectivity.test.ts": {
-    "mtime": 1782993312.161011,
+    "mtime": 1783126269.1362286,
     "ast_hash": "dbdf3712c7887bba1b281fd5fa4fd05e",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/map-platform.test.ts": {
-    "mtime": 1782594245.168359,
-    "ast_hash": "c2440a7122837a7426de8a5c93045007",
-    "semantic_hash": "c2440a7122837a7426de8a5c93045007"
+    "mtime": 1783126233.4158816,
+    "ast_hash": "830c752c39c4df5d18f341492a36eb30",
+    "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/map-text-linking.test.ts": {
-    "mtime": 1782858893.1759148,
+    "mtime": 1783126269.1365242,
     "ast_hash": "15a825862d025e44b8221d53398bc49c",
     "semantic_hash": "15a825862d025e44b8221d53398bc49c"
   },
@@ -190,7 +190,7 @@
     "semantic_hash": "0ef79254017a257f55bc2120b0a43305"
   },
   "packages/shared/src/railway/element.ts": {
-    "mtime": 1782601021.8736134,
+    "mtime": 1783126269.1375554,
     "ast_hash": "5eac68167a38609313d2d9eb1c8221c4",
     "semantic_hash": "5eac68167a38609313d2d9eb1c8221c4"
   },
@@ -205,7 +205,7 @@
     "semantic_hash": "b4577b432a421d703274d931f0cee337"
   },
   "packages/shared/src/railway/index.ts": {
-    "mtime": 1782998997.7763374,
+    "mtime": 1783126269.1377692,
     "ast_hash": "d5a8eec9d967dd2cb58e8920c477204e",
     "semantic_hash": ""
   },
@@ -220,9 +220,9 @@
     "semantic_hash": ""
   },
   "packages/shared/src/railway/map/map-platform.ts": {
-    "mtime": 1782594245.172262,
-    "ast_hash": "9b8b98c63cf66ac58f980509626f298d",
-    "semantic_hash": "9b8b98c63cf66ac58f980509626f298d"
+    "mtime": 1783126233.4161506,
+    "ast_hash": "409a80540eed9ed7ee651810326a77a9",
+    "semantic_hash": ""
   },
   "packages/shared/src/railway/map/map-text-linking.ts": {
     "mtime": 1782857221.669789,
@@ -230,22 +230,22 @@
     "semantic_hash": "c15736ebf4ea4357a722488b1e8b2437"
   },
   "packages/shared/src/railway/map/map.ts": {
-    "mtime": 1782936967.0549967,
-    "ast_hash": "1438d7a77fb8a0ac1696a0436a658618",
-    "semantic_hash": "1438d7a77fb8a0ac1696a0436a658618"
+    "mtime": 1783126244.3914185,
+    "ast_hash": "587a4704b970673c2f7c0ae8a25de4c7",
+    "semantic_hash": ""
   },
   "packages/shared/src/railway/track/index.ts": {
-    "mtime": 1782998995.2069633,
+    "mtime": 1783126269.1379166,
     "ast_hash": "aec0e4e4769f1a2ea41f036f74b6abc5",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/track/track-data.ts": {
-    "mtime": 1782773982.3813176,
+    "mtime": 1783126269.1382859,
     "ast_hash": "86be501240f5a83fee75abb38bfbd6c2",
     "semantic_hash": "86be501240f5a83fee75abb38bfbd6c2"
   },
   "packages/shared/src/railway/track/track.ts": {
-    "mtime": 1782999007.2645552,
+    "mtime": 1783126269.1386461,
     "ast_hash": "2f87cd0f53aa93458e0ea877b2e76a68",
     "semantic_hash": ""
   },
@@ -283,11 +283,6 @@
     "mtime": 1782566482.3607843,
     "ast_hash": "c6739a07e5d8dcb2305878d51480e6c3",
     "semantic_hash": "c6739a07e5d8dcb2305878d51480e6c3"
-  },
-  "UPDATED_PLAN.md": {
-    "mtime": 1782602922.9533036,
-    "ast_hash": "7026a451b4af1b356266c27082bccf1c",
-    "semantic_hash": "7026a451b4af1b356266c27082bccf1c"
   },
   "packages/app/public/robots.txt": {
     "mtime": 1782555592.4316185,
@@ -1190,9 +1185,9 @@
     "semantic_hash": "917515db74ea8d1aee6a246cfbcc0b45"
   },
   "packages/app/src/components/sim/AddPalette.tsx": {
-    "mtime": 1782818130.7969096,
-    "ast_hash": "73974af89b29ddd8e00542ce889d227e",
-    "semantic_hash": "73974af89b29ddd8e00542ce889d227e"
+    "mtime": 1783126244.3484378,
+    "ast_hash": "957c610bf1ad5da31effbc7e897411f7",
+    "semantic_hash": ""
   },
   "packages/app/src/components/sim/AspectPreview.tsx": {
     "mtime": 1782777016.9198308,
@@ -1200,34 +1195,34 @@
     "semantic_hash": "519c0b42ae49e75c7cd7193638fc4256"
   },
   "packages/app/src/components/sim/NameElementDialog.tsx": {
-    "mtime": 1782923396.3763218,
-    "ast_hash": "2813478b619f9934b1e522fb59cefbbf",
-    "semantic_hash": "2813478b619f9934b1e522fb59cefbbf"
+    "mtime": 1783126244.347414,
+    "ast_hash": "83daefe4a794db85f39561dc4bfcfbb7",
+    "semantic_hash": ""
   },
   "packages/app/src/components/sim/TextInputDialog.tsx": {
-    "mtime": 1782822846.609217,
-    "ast_hash": "d653c28c616c934f4a6852920cab5f46",
-    "semantic_hash": "d653c28c616c934f4a6852920cab5f46"
+    "mtime": 1783126244.3473272,
+    "ast_hash": "c7ceb0b0c7f09436d1146db20116db78",
+    "semantic_hash": ""
   },
   "packages/app/src/components/sim/Toolbar.tsx": {
-    "mtime": 1782992957.8536584,
-    "ast_hash": "9ee5b62e14ead195642c9529e9092f9a",
+    "mtime": 1783126244.3462374,
+    "ast_hash": "55e920713a9bdb4e2f9e515e8870c756",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TrackPreview.tsx": {
-    "mtime": 1782777083.2332401,
+    "mtime": 1783126269.1323764,
     "ast_hash": "d7ef281f0923d6a7126f015857679fb7",
     "semantic_hash": "d7ef281f0923d6a7126f015857679fb7"
   },
   "packages/app/src/engine/PlacementController.ts": {
-    "mtime": 1783012086.8955886,
-    "ast_hash": "065991c7b45d42ff7f1eca86c408c878",
+    "mtime": 1783126244.36541,
+    "ast_hash": "bacae30a37a84127086cd5159ff23e0a",
     "semantic_hash": ""
   },
   "packages/app/src/lib/__tests__/svgMap.test.ts": {
-    "mtime": 1782936967.0529559,
-    "ast_hash": "1d7b18b96c8cc09092637f1a54d05649",
-    "semantic_hash": "1d7b18b96c8cc09092637f1a54d05649"
+    "mtime": 1783152024.3608413,
+    "ast_hash": "a4b21e0f562eb7e87bba24b406572d7a",
+    "semantic_hash": ""
   },
   "packages/app/src/lib/debugLogger.ts": {
     "mtime": 1782760166.3424203,
@@ -1235,9 +1230,9 @@
     "semantic_hash": "ccfae3116ed425c0eeadec5184a925b9"
   },
   "packages/app/src/lib/grid.ts": {
-    "mtime": 1782774012.5909636,
-    "ast_hash": "558bd23a071396f762e1f75452b2ef71",
-    "semantic_hash": "558bd23a071396f762e1f75452b2ef71"
+    "mtime": 1783152024.360612,
+    "ast_hash": "dc5d7fca0cbe6240ed5f2a55d6b60a21",
+    "semantic_hash": ""
   },
   "packages/app/src/lib/svgColors.ts": {
     "mtime": 1782896805.9675164,
@@ -1255,27 +1250,27 @@
     "semantic_hash": "bd85f39d94d9b167ac6aa2a79c591ee2"
   },
   "packages/app/src/renderer/layers/ElementLayer.ts": {
-    "mtime": 1782861403.1990235,
-    "ast_hash": "87857ba26a0cfd66f63c5f399bf27138",
-    "semantic_hash": "87857ba26a0cfd66f63c5f399bf27138"
+    "mtime": 1783152024.3623092,
+    "ast_hash": "d2f1ff087cd6481aa8bbb78a08d5ac9a",
+    "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/TrackLayer.ts": {
-    "mtime": 1783031556.166986,
-    "ast_hash": "96a8d9b223ae335f6792e9682684f7cf",
+    "mtime": 1783152024.362185,
+    "ast_hash": "f7a90effd4b1c70918596d7e343ce63d",
     "semantic_hash": ""
   },
   "packages/app/src/renderer/textureCache.ts": {
-    "mtime": 1783031541.9829495,
-    "ast_hash": "b03fedf7ca651c57946d82e82fa6d15d",
+    "mtime": 1783152024.3608956,
+    "ast_hash": "f043b24c706f349fda125487b3bc3852",
     "semantic_hash": ""
   },
   "packages/app/src/store/editor-store.ts": {
-    "mtime": 1782992947.4923809,
-    "ast_hash": "f2795a1e9bbba279b685f6cd21cd4a38",
+    "mtime": 1783151957.1301465,
+    "ast_hash": "b0e2501009f8291a7d6dd875b12936f3",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/track-factory.test.ts": {
-    "mtime": 1782776154.0156548,
+    "mtime": 1783126269.1369882,
     "ast_hash": "60224eff143661169a6ed269363d1317",
     "semantic_hash": "60224eff143661169a6ed269363d1317"
   },
@@ -1285,14 +1280,9 @@
     "semantic_hash": "4a27615bf5f8cce502a19c92f75e76d4"
   },
   "packages/shared/src/railway/track/track-factory.ts": {
-    "mtime": 1782776186.9762278,
+    "mtime": 1783126269.1384957,
     "ast_hash": "7b33b1f325eaac6eb8e4cfc3f7aed7f2",
     "semantic_hash": "7b33b1f325eaac6eb8e4cfc3f7aed7f2"
-  },
-  "NAMEDLOCATION_PLAN.md": {
-    "mtime": 1782858542.6607726,
-    "ast_hash": "2726cd659b71c11489df51e19f128dab",
-    "semantic_hash": "2726cd659b71c11489df51e19f128dab"
   },
   "packages/app/public/graphics/aspect2.png": {
     "mtime": 1782776324.3087454,
@@ -1335,18 +1325,18 @@
     "semantic_hash": "bf38aeeec615ee1c0dfde4cf49c4e2ee"
   },
   "packages/app/src/renderer/layers/TextLayer.ts": {
-    "mtime": 1782865437.2420897,
-    "ast_hash": "ad757816f2e9743bd9e1678fba1a37b0",
-    "semantic_hash": "ad757816f2e9743bd9e1678fba1a37b0"
+    "mtime": 1783126244.3638995,
+    "ast_hash": "d941bc4f61d3057a3f130483e13f5cac",
+    "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/LinkHighlightLayer.ts": {
-    "mtime": 1782992971.6266077,
-    "ast_hash": "f5d071a22c78ca32ea2cc916bbf6dd5a",
+    "mtime": 1783152024.3613627,
+    "ast_hash": "790e9004d9a9b7bf1a4775c0b8fae12d",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/SettingsMenu.tsx": {
-    "mtime": 1782976611.4422631,
-    "ast_hash": "b765fd10f0fcb78521aaddc04d7145b9",
+    "mtime": 1783128989.7910008,
+    "ast_hash": "6adec7838965cd86406a6bad4ab8df8d",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TrackInfoTooltip.tsx": {
@@ -1354,23 +1344,18 @@
     "ast_hash": "0319d45b9f6930667df4dbec546a9eed",
     "semantic_hash": ""
   },
-  "TRACK_SPEED_LENGTH_PLAN.md": {
-    "mtime": 1782946052.7595394,
-    "ast_hash": "a1b0e324308b3f329e089c9b965091ed",
-    "semantic_hash": ""
-  },
   "packages/app/src/components/sim/SectionEditPanel.tsx": {
-    "mtime": 1783031624.1356833,
-    "ast_hash": "530a9555e59f38fc5983eb9fd9f76359",
+    "mtime": 1783152024.3600087,
+    "ast_hash": "e36530150ef9d0ff6cdf2d5eb292e6cf",
     "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/TrackColorLayer.ts": {
-    "mtime": 1783031017.1418035,
+    "mtime": 1783126269.1348221,
     "ast_hash": "3f4691be9891e498aeb90efa2a6b0d90",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/units.test.ts": {
-    "mtime": 1782993320.7693062,
+    "mtime": 1783126269.1372273,
     "ast_hash": "a33a156f9c6ed7f0b523f0a75dcb1461",
     "semantic_hash": ""
   },
@@ -1382,6 +1367,16 @@
   "packages/shared/src/railway/units.ts": {
     "mtime": 1782993156.3005033,
     "ast_hash": "3d9b547115fd7e6fcbe6acc1f4ecaab2",
+    "semantic_hash": ""
+  },
+  "packages/app/src/components/sim/ZoomSlider.tsx": {
+    "mtime": 1783152024.3596203,
+    "ast_hash": "baac3c25be04e594ae524f831faef9cb",
+    "semantic_hash": ""
+  },
+  "packages/app/src/engine/zoomConstants.ts": {
+    "mtime": 1783151944.7660801,
+    "ast_hash": "a6fbeee4e7aea34d4353b7d5fc37537e",
     "semantic_hash": ""
   }
 }

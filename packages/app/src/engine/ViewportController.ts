@@ -5,10 +5,11 @@ export interface ViewportState {
 	y: number;
 	zoom: number;
 }
-
-const DEFAULT_MIN_ZOOM = 0.5;
-const DEFAULT_MAX_ZOOM = 2;
-const ZOOM_FACTOR = 1.1;
+import {
+	DEFAULT_MIN_ZOOM,
+	DEFAULT_MAX_ZOOM,
+	ZOOM_FACTOR,
+} from "./zoomConstants";
 
 export interface ViewportControllerOptions {
 	world: Container;

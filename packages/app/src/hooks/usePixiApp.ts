@@ -39,7 +39,9 @@ export function usePixiApp(): UsePixiAppReturn {
 		let observer: ResizeObserver | null = null;
 		let themeObserver: MutationObserver | null = null;
 		let unsubGrid: (() => void) | null = null;
-		let textures: ReturnType<typeof import("#/renderer/textureCache").createTextureCache> | null = null;
+		let textures: ReturnType<
+			typeof import("#/renderer/textureCache").createTextureCache
+		> | null = null;
 
 		const container = containerRef.current;
 		if (!container) return;
@@ -111,10 +113,7 @@ export function usePixiApp(): UsePixiAppReturn {
 
 			// Shared texture cache + track layer (created before colour layer
 			// so the colour layer can delegate tinting to it)
-			textures = createTextureCache(
-				themeKey(),
-				buildThemeColorMap(),
-			);
+			textures = createTextureCache(themeKey(), buildThemeColorMap());
 			const trackLayer = createTrackLayer(textures);
 
 			// Track colour overlay (empty container; tints are applied to track sprites)
@@ -134,10 +133,14 @@ export function usePixiApp(): UsePixiAppReturn {
 			world.addChild(linkHighlightLayer.container);
 
 			app.stage.addChild(world);
-			debugLog("pixi", `scene graph assembled — world children: ${world.children.map(c => c.label).join(", ")}`);
+			debugLog(
+				"pixi",
+				`scene graph assembled — world children: ${world.children.map((c) => c.label).join(", ")}`,
+			);
 
 			const redrawGrid = () => {
 				ground.redraw(world.scale.x, app.screen.width, app.screen.height);
+				useEditorStore.getState().setZoom(world.scale.x);
 			};
 
 			const canvas = app.canvas;
@@ -150,18 +153,34 @@ export function usePixiApp(): UsePixiAppReturn {
 			viewport.attach();
 			// A tile-scale starting view (≈ origin centred, cells ~cell-size on screen).
 			viewport.fitToView(320, 40);
-			debugLog("pixi", `viewport attached — fitToView(320,40), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`);
+			debugLog(
+				"pixi",
+				`viewport attached — fitToView(320,40), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`,
+			);
 			redrawGrid();
 
 			// Placement interaction (owns the Map; ghost lives on top of the tracks)
-			const placement = new PC({ app, world, trackLayer, elementLayer, textLayer, linkHighlightLayer, trackColorLayer, textures, viewport });
+			const placement = new PC({
+				app,
+				world,
+				trackLayer,
+				elementLayer,
+				textLayer,
+				linkHighlightLayer,
+				trackColorLayer,
+				textures,
+				viewport,
+			});
 			world.addChild(placement.ghost);
 			placement.attach();
 			debugLog("pixi", "placement controller attached");
 
 			// Preload all track art, then backfill anything placed meanwhile.
 			const allSubtypes = Object.keys(SVG_MAP);
-			debugLog("pixi", `starting texture preload — ${allSubtypes.length} subtypes`);
+			debugLog(
+				"pixi",
+				`starting texture preload — ${allSubtypes.length} subtypes`,
+			);
 			textures.preload(allSubtypes).then(() => {
 				if (destroyed) return;
 				debugLog("pixi", "texture preload complete — syncing layers");

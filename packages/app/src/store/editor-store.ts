@@ -4,6 +4,7 @@ import {
 	type TrackKind,
 } from "@rail-op-sim/shared";
 import { create } from "zustand";
+import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
@@ -146,6 +147,11 @@ export interface EditorState {
 		status: { total: number; connected: boolean } | null,
 	) => void;
 
+	/** Current zoom level. */
+	zoom: number;
+	/** Set zoom level. */
+	setZoom: (z: number) => void;
+
 	/**
 	 * Section tool — two-click path selection.
 	 * grid coordinates of the first clicked track (start), or null.
@@ -180,6 +186,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showGrid: true,
 	hoveredTrackInfo: null,
 	trackStatus: null,
+	zoom: DEFAULT_ZOOM,
 	sectionStart: null,
 	sectionEnd: null,
 	sectionTracks: [],
@@ -253,6 +260,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
+	setZoom: (z) => set({ zoom: z }),
 
 	setSectionStart: (loc) => {
 		debugLog(

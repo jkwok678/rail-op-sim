@@ -132,17 +132,28 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 
 	/** Remove a sprite entry and its display object. */
 	const removeSpriteEntry = (key: string, entry: SpriteEntry) => {
-		debugLog("trackLayer", `elementLayer removeSprite at (${key}) — lookupKey=${entry.lookupKey}`);
+		debugLog(
+			"trackLayer",
+			`elementLayer removeSprite at (${key}) — lookupKey=${entry.lookupKey}`,
+		);
 		container.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		spriteEntries.delete(key);
 	};
 
 	/** Add or update a sprite at a cell, keyed by composite key. */
-	const upsertSprite = (compositeKey: string, lookupKey: string, gx: number, gy: number) => {
+	const upsertSprite = (
+		compositeKey: string,
+		lookupKey: string,
+		gx: number,
+		gy: number,
+	) => {
 		const texture = textures.get(lookupKey);
 		if (!texture) {
-			debugLog("trackLayer", `elementLayer upsertSprite SKIP at (${compositeKey}) — no texture for "${lookupKey}"`);
+			debugLog(
+				"trackLayer",
+				`elementLayer upsertSprite SKIP at (${compositeKey}) — no texture for "${lookupKey}"`,
+			);
 			return;
 		}
 		const existing = spriteEntries.get(compositeKey);
@@ -154,7 +165,10 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		sprite.label = `element-${compositeKey}`;
 		container.addChild(sprite);
 		spriteEntries.set(compositeKey, { sprite, lookupKey });
-		debugLog("trackLayer", `elementLayer upsertSprite at (${compositeKey}) — lookupKey=${lookupKey}`);
+		debugLog(
+			"trackLayer",
+			`elementLayer upsertSprite at (${compositeKey}) — lookupKey=${lookupKey}`,
+		);
 	};
 
 	return {
@@ -235,9 +249,11 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				// ── Level Crossings ──
 				if (track.data.kind === "straight" && track.hasLevelCrossing()) {
 					const lcKey =
-						subtype === "STRAIGHTH" ? "LEVELCROSSING_H"
-						: subtype === "STRAIGHTV" ? "LEVELCROSSING_V"
-						: "LEVELCROSSING";
+						subtype === "STRAIGHTH"
+							? "LEVELCROSSING_H"
+							: subtype === "STRAIGHTV"
+								? "LEVELCROSSING_V"
+								: "LEVELCROSSING";
 					const key = cellKey(gx, gy) + ":lc";
 					seenSpriteKeys.add(key);
 					upsertSprite(key, lcKey, gx, gy);
@@ -253,7 +269,10 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				}
 			}
 
-			debugLog("trackLayer", `elementLayer sync complete — ${spriteEntries.size} sprites, ${removed} removed`);
+			debugLog(
+				"trackLayer",
+				`elementLayer sync complete — ${spriteEntries.size} sprites, ${removed} removed`,
+			);
 		},
 
 		upsertElement(lookupKey, gx, gy) {
