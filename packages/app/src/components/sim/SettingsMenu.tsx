@@ -4,12 +4,14 @@ import { Button } from "#/components/ui/button";
 import { useEditorStore } from "#/store/editor-store";
 
 /**
- * Small settings popover anchored to a gear button in the footer. Currently
- * holds a single toggle ("Show track info"); more settings can be added as rows.
+ * Small settings popover anchored to a gear button in the footer. Holds
+ * toggles ("Show track info", "Show grid"); more settings can be added as rows.
  */
 export function SettingsMenu() {
 	const showTrackInfo = useEditorStore((s) => s.showTrackInfo);
 	const toggleShowTrackInfo = useEditorStore((s) => s.toggleShowTrackInfo);
+	const showGrid = useEditorStore((s) => s.showGrid);
+	const toggleShowGrid = useEditorStore((s) => s.toggleShowGrid);
 
 	return (
 		<PopoverPrimitive.Root>
@@ -35,6 +37,18 @@ export function SettingsMenu() {
 						<span>Show track info</span>
 						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
 							{showTrackInfo ? <Check weight="bold" /> : null}
+						</span>
+					</button>
+					<button
+						type="button"
+						role="menuitemcheckbox"
+						aria-checked={showGrid}
+						onClick={toggleShowGrid}
+						className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-muted hover:text-foreground"
+					>
+						<span>Show grid</span>
+						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
+							{showGrid ? <Check weight="bold" /> : null}
 						</span>
 					</button>
 				</PopoverPrimitive.Content>

@@ -6,6 +6,7 @@ import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE } from "#/lib/grid";
 import { buildThemeColorMap } from "#/lib/svgColors";
 import { SVG_MAP } from "#/lib/svgMap";
+import { useEditorStore } from "#/store/editor-store";
 
 export interface UsePixiAppReturn {
 	/** Attach to a `<div>` in JSX. The PixiJS canvas mounts inside it. */
@@ -37,6 +38,7 @@ export function usePixiApp(): UsePixiAppReturn {
 		let destroyed = false;
 		let observer: ResizeObserver | null = null;
 		let themeObserver: MutationObserver | null = null;
+		let unsubGrid: (() => void) | null = null;
 		let textures: ReturnType<typeof import("#/renderer/textureCache").createTextureCache> | null = null;
 
 		const container = containerRef.current;
@@ -104,6 +106,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				fixedSpacing: CELL_SIZE,
 				showAxes: false,
 			});
+			ground.container.visible = useEditorStore.getState().showGrid;
 			world.addChild(ground.container);
 
 			// Shared texture cache + track layer (created before colour layer
@@ -192,6 +195,12 @@ export function usePixiApp(): UsePixiAppReturn {
 				attributeFilter: ["class"],
 			});
 
+			unsubGrid = useEditorStore.subscribe((state, prev) => {
+				if (state.showGrid !== prev.showGrid) {
+					ground.container.visible = state.showGrid;
+				}
+			});
+
 			observer = new ResizeObserver((entries) => {
 				const entry = entries[0];
 				if (!entry) return;
@@ -216,6 +225,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			destroyed = true;
 			if (observer) observer.disconnect();
 			if (themeObserver) themeObserver.disconnect();
+			if (unsubGrid) unsubGrid();
 			placementRef.current?.detach();
 			viewportRef.current?.detach();
 			textures?.destroy();

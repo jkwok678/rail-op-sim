@@ -101,6 +101,9 @@ export interface EditorState {
 	/** Whether hovering the canvas shows a floating track-info tooltip. */
 	showTrackInfo: boolean;
 
+	/** Whether the graph-paper grid behind the tracks is visible. */
+	showGrid: boolean;
+
 	/**
 	 * Plain-data snapshot of the track currently under the pointer, or null when
 	 * the pointer isn't over a track (or the feature is disabled).
@@ -134,6 +137,8 @@ export interface EditorState {
 	toggleLinkHighlights: () => void;
 	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
 	toggleShowTrackInfo: () => void;
+	/** Toggle the ground grid on/off. */
+	toggleShowGrid: () => void;
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
@@ -172,6 +177,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	pendingNameTarget: null,
 	showLinkHighlights: false,
 	showTrackInfo: false,
+	showGrid: true,
 	hoveredTrackInfo: null,
 	trackStatus: null,
 	sectionStart: null,
@@ -244,6 +250,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 			showTrackInfo: !s.showTrackInfo,
 			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
 		})),
+	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
 
