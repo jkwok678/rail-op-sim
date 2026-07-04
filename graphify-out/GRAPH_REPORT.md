@@ -1,16 +1,16 @@
 # Graph Report - rail-op-sim  (2026-07-04)
 
 ## Corpus Check
-- 88 files · ~82,261 words
+- 88 files · ~82,281 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1188 nodes · 1981 edges · 206 communities (53 shown, 153 thin omitted)
+- 1188 nodes · 1985 edges · 206 communities (53 shown, 153 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aac60734`
+- Built from commit: `3193efb0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -243,8 +243,8 @@
   UPDATED_PLAN.md → PLAN.md
 - `ZoomSliderProps` --references--> `ViewportController`  [EXTRACTED]
   packages/app/src/components/sim/ZoomSlider.tsx → packages/app/src/engine/ViewportController.ts
-- `TooltipContent()` --calls--> `cn()`  [EXTRACTED]
-  packages/app/src/components/ui/tooltip.tsx → packages/app/src/lib/utils.ts
+- `makeElementSprite()` --calls--> `gridToWorld()`  [EXTRACTED]
+  packages/app/src/renderer/layers/ElementLayer.ts → packages/app/src/lib/grid.ts
 
 ## Import Cycles
 - None detected.
@@ -281,7 +281,7 @@ Nodes (28): graphics, switch1.svg, switch10.svg, switch11.svg, switch12.svg, swi
 
 ### Community 9 - "Codes Links Components"
 Cohesion: 0.08
-Nodes (54): checkAllTracksConnected(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport(), LINK_OFFSETS, LinkedTrackPair (+46 more)
+Nodes (58): checkAllTracksConnected(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport(), LINK_OFFSETS, LinkedTrackPair (+50 more)
 
 ### Community 10 - "Enabled Ignore Components"
 Cohesion: 0.09
@@ -305,7 +305,7 @@ Nodes (6): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, Ra
 
 ### Community 17 - "Dialog Element Components"
 Cohesion: 0.05
-Nodes (59): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx, /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx, ViewportControllerOptions, ViewportState, usePixiApp(), useTheme(), cn(), formatImperialLength() (+51 more)
+Nodes (58): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx, /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx, ViewportControllerOptions, ViewportState, usePixiApp(), useTheme(), cn(), AddPalette() (+50 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.10
@@ -340,8 +340,8 @@ Cohesion: 0.13
 Nodes (15): concept:railway-graphics, concept:signal-graphics, concept:track-graphics, file:packages/app/public/graphics/signalDown.svg, file:packages/app/public/graphics/signalLeft.svg, file:packages/app/public/graphics/signalLeftDown.svg, file:packages/app/public/graphics/signalLeftUp.svg, file:packages/app/public/graphics/signalRight.svg (+7 more)
 
 ### Community 26 - "Route File Components"
-Cohesion: 0.13
-Nodes (15): Route, Route, getRouter(), Register, FileRoutesByFullPath, FileRoutesById, FileRoutesByPath, FileRoutesByTo (+7 more)
+Cohesion: 0.16
+Nodes (14): Route, Route, getRouter(), Register, FileRoutesByFullPath, FileRoutesById, FileRoutesByPath, FileRoutesByTo (+6 more)
 
 ### Community 27 - "Lib Unused Components"
 Cohesion: 0.13
@@ -475,8 +475,8 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.073) - this node is a cross-community bridge._
 - **Why does `Track` connect `Get Track Components` to `Error Constructor Components`, `Community 33`, `Community 34`, `Community 3`, `String Location Components`, `Get List Components`, `Codes Links Components`, `Community 30`?**
   _High betweenness centrality (0.032) - this node is a cross-community bridge._
-- **Why does `cn()` connect `Dialog Element Components` to `Route File Components`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **Why does `Text` connect `Font Set Components` to `Layer Element Components`, `String Location Components`, `Track Subtype Components`, `Get List Components`, `Codes Links Components`, `Linked Connect Components`, `Use Theme Components`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **What connects `$schema`, `enabled`, `clientKind` to the rest of the system?**
   _293 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Layer Element Components` be split into smaller, more focused modules?**

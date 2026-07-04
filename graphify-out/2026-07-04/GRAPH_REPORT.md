@@ -1,11 +1,11 @@
 # Graph Report - rail-op-sim  (2026-07-04)
 
 ## Corpus Check
-- 87 files · ~82,134 words
+- 88 files · ~82,261 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1187 nodes · 1978 edges · 203 communities (53 shown, 150 thin omitted)
+- 1188 nodes · 1981 edges · 206 communities (53 shown, 153 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
@@ -59,16 +59,19 @@
 - [[_COMMUNITY_Block Element Components|Block Element Components]]
 - [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Linked Connect Components|Linked Connect Components]]
 - [[_COMMUNITY_Color Name Components|Color Name Components]]
 - [[_COMMUNITY_Error Track Components|Error Track Components]]
 - [[_COMMUNITY_Ground Layer Components|Ground Layer Components]]
 - [[_COMMUNITY_Pixi Rendering Components|Pixi Rendering Components]]
+- [[_COMMUNITY_Community 50|Community 50]]
 - [[_COMMUNITY_Callback Types Components|Callback Types Components]]
 - [[_COMMUNITY_Png Svg Components|Png Svg Components]]
 - [[_COMMUNITY_Package Json Components|Package Json Components]]
 - [[_COMMUNITY_Tooltip Content Components|Tooltip Content Components]]
 - [[_COMMUNITY_Input App Components|Input App Components]]
+- [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Pixi App Components|Pixi App Components]]
 - [[_COMMUNITY_Tsconfig Json Components|Tsconfig Json Components]]
 - [[_COMMUNITY_Community 62|Community 62]]
@@ -238,31 +241,31 @@
   UPDATED_PLAN.md → PLAN.md
 - `Railway Builder Scope Update` --conceptually_related_to--> `Rail Ops Sim`  [INFERRED]
   UPDATED_PLAN.md → PLAN.md
+- `ZoomSliderProps` --references--> `ViewportController`  [EXTRACTED]
+  packages/app/src/components/sim/ZoomSlider.tsx → packages/app/src/engine/ViewportController.ts
 - `TooltipContent()` --calls--> `cn()`  [EXTRACTED]
   packages/app/src/components/ui/tooltip.tsx → packages/app/src/lib/utils.ts
-- `M1 PixiJS on Screen Completed` --references--> `PixiJS v8 Rendering Engine`  [EXTRACTED]
-  UPDATED_PLAN.md → PLAN.md
 
 ## Import Cycles
 - None detected.
 
-## Communities (203 total, 150 thin omitted)
+## Communities (206 total, 153 thin omitted)
 
 ### Community 0 - "Layer Element Components"
-Cohesion: 0.13
-Nodes (6): PlacementController, platformSubtypeToSide(), debugLog(), worldToGrid(), ElementKind, isTrackKind()
+Cohesion: 0.15
+Nodes (3): PlacementController, debugLog(), NameableKind
 
 ### Community 1 - "Svg Track Components"
-Cohesion: 0.16
-Nodes (24): Track (unified track class), Link grid layout (0-8 indices), KIND_META, track.test.ts, track-data.ts, track.ts, track/track-data.ts, KIND_META (per-kind flags) (+16 more)
+Cohesion: 0.06
+Nodes (47): Track (unified track class), Link grid layout (0-8 indices), Link state SVGs (set/unset variants), KIND_META, switchTight1.svg, switchTight2.svg, switchTight3.svg, switchTight4.svg (+39 more)
 
 ### Community 2 - "String Location Components"
-Cohesion: 0.08
-Nodes (8): Concourse, Element, NamedElement, Parapet, ParapetType, TestElement, testFont, TestNamedElement
+Cohesion: 0.15
+Nodes (3): Concourse, NamedElement, TestNamedElement
 
 ### Community 4 - "Svg Map Components"
-Cohesion: 0.12
-Nodes (17): buildDomColorMap(), buildThemeColorMap(), ColorMap, escapeRegExp(), normalizeCssColor(), normalizedCache, recolorSvg(), rgbToHex() (+9 more)
+Cohesion: 0.09
+Nodes (23): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts, buildDomColorMap(), buildThemeColorMap(), ColorMap, escapeRegExp(), normalizeCssColor(), normalizedCache, recolorSvg() (+15 more)
 
 ### Community 6 - "Milestone Train Components"
 Cohesion: 0.06
@@ -277,8 +280,8 @@ Cohesion: 0.13
 Nodes (28): graphics, switch1.svg, switch10.svg, switch11.svg, switch12.svg, switch13.svg, switch14.svg, switch15.svg (+20 more)
 
 ### Community 9 - "Codes Links Components"
-Cohesion: 0.05
-Nodes (86): checkAllTracksConnected(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport(), LINK_OFFSETS, LinkedTrackPair (+78 more)
+Cohesion: 0.08
+Nodes (54): checkAllTracksConnected(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport(), LINK_OFFSETS, LinkedTrackPair (+46 more)
 
 ### Community 10 - "Enabled Ignore Components"
 Cohesion: 0.09
@@ -296,25 +299,21 @@ Nodes (22): dependencies, class-variance-authority, clsx, @fontsource-variable/j
 Cohesion: 0.67
 Nodes (4): Adjacency Spread Algorithm (linkLocalText), Phase 0 Coordinate-Unit Fix (setImageSize(1)), Name Tool, NamedLocation
 
-### Community 14 - "Get Track Components"
-Cohesion: 0.06
-Nodes (4): hasSecondaryPath(), supportsLevelCrossing(), supportsPlatforms(), Track
-
 ### Community 15 - "Plan Rendering Components"
 Cohesion: 0.26
 Nodes (6): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError, TrackNotConnectedError, ZeroTrackError
 
 ### Community 17 - "Dialog Element Components"
-Cohesion: 0.06
-Nodes (52): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx, /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx, usePixiApp(), useTheme(), cn(), AddPalette(), ALL_LABELS, ASPECT_OPTIONS (+44 more)
+Cohesion: 0.05
+Nodes (59): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx, /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx, ViewportControllerOptions, ViewportState, usePixiApp(), useTheme(), cn(), formatImperialLength() (+51 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.10
 Nodes (20): dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg (+12 more)
 
 ### Community 19 - "Use Theme Components"
-Cohesion: 0.13
-Nodes (16): PlacementControllerOptions, ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, LinkHighlightLayer, TextLayer (+8 more)
+Cohesion: 0.17
+Nodes (13): PlacementControllerOptions, platformSubtypeToSide(), ElementLayer, LinkHighlightLayer, TextLayer, TrackColorLayer, Entry, makeTrackSprite() (+5 more)
 
 ### Community 20 - "React Plugin Components"
 Cohesion: 0.12
@@ -325,8 +324,8 @@ Cohesion: 0.20
 Nodes (10): 1. Rendering Engine — **PixiJS v8** ✅ Decided, 2. Meta-Framework — **TanStack Start** (already scaffolded), 3. State Management (UI) — **Zustand**, 4. Worker Communication — **Raw postMessage**, 5. Schema Validation — **Valibot**, 6. IndexedDB Wrapper — **Dexie.js**, 7. Table Component — **@tanstack/react-table**, 8. CSS & UI Components — **Tailwind v4 + shadcn/ui** (already configured) (+2 more)
 
 ### Community 22 - "Text Map Components"
-Cohesion: 0.22
-Nodes (9): Link state SVGs (set/unset variants), Link down set SVG, Link left-down set SVG, Link left set SVG, Link left unset SVG, Link right set SVG, Link right unset SVG, Link up set SVG (+1 more)
+Cohesion: 0.07
+Nodes (26): BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES, CROSSOVER_LINKS, CURVED_CODES (+18 more)
 
 ### Community 23 - "Dev Dependencies Components"
 Cohesion: 0.12
@@ -349,28 +348,24 @@ Cohesion: 0.13
 Nodes (14): compilerOptions, allowImportingTsExtensions, lib, module, moduleResolution, noEmit, noFallthroughCasesInSwitch, noUncheckedSideEffectImports (+6 more)
 
 ### Community 28 - "Map Platform Components"
-Cohesion: 0.10
-Nodes (27): Map_ (railway map data structure), map-connectivity.test.ts — tests for checkAllTracksConnected, map-platform.test.ts — tests for addPlatform and addLevelCrossing, map-text-linking.test.ts — tests for linkLocalText, deleteTextFromAllElements, changeDeleteText, map.test.ts — comprehensive tests for Map_ class, map/map-connectivity.ts, map/map-platform.ts, map/map-text-linking.ts (+19 more)
+Cohesion: 0.16
+Nodes (14): Map_ (railway map data structure), map-platform.test.ts — tests for addPlatform and addLevelCrossing, map.test.ts — comprehensive tests for Map_ class, map/map-platform.ts, addLevelCrossing(map, x, y) — adds level crossing to straight tracks only, addPlatform(map, side, x, y) — sets platform flags on track data by kind/subtype, Map_.addLevelCrossing(x, y) — delegates to map-platform module, Map_.addNamedLocation(nl) — adds a NamedLocation (+6 more)
 
 ### Community 29 - "Type Variants Components"
 Cohesion: 0.14
 Nodes (14): BridgeUnderpassType (4 variants), BufferType (8 variants), CrossoverType (6 variants), CurvedType (12 variants), DirectedType (8 variants), ExitType (8 variants), FlyoverType (12 variants), LinkedType (8 variants) (+6 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.22
-Nodes (9): switchTight1.svg, switchTight2.svg, switchTight3.svg, switchTight4.svg, switchTight5.svg, switchTight6.svg, switchTight7.svg, switchTight8.svg (+1 more)
+Cohesion: 0.16
+Nodes (12): EditorState, SignalAspect, SignalAspectValue, getTrackColorState(), TrackColorState, getLinksForSubtype(), hasSecondaryPath(), supportsLevelCrossing() (+4 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.80
-Nodes (4): formatImperialLength(), kmhToMph(), metresToImperial(), round1()
+Cohesion: 0.20
+Nodes (5): makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, Subsystem
 
 ### Community 35 - "Dev Package Components"
 Cohesion: 0.15
 Nodes (12): devDependencies, typescript, vitest, main, name, private, scripts, build (+4 more)
-
-### Community 36 - "Track Subtype Components"
-Cohesion: 0.40
-Nodes (5): tightCurve1.svg, tightCurve2.svg, tightCurve3.svg, tightCurve4.svg, CURVED_LINKS
 
 ### Community 37 - "Scripts Build Components"
 Cohesion: 0.22
@@ -389,8 +384,8 @@ Cohesion: 0.40
 Nodes (5): Key Architectural Decisions, Multiplayer Readiness (Built In From Day 1), What changes for multiplayer (later, not now), What "multiplayer-ready" means here, What we do now to enable this
 
 ### Community 41 - "Block Element Components"
-Cohesion: 0.22
-Nodes (14): Concourse (red block), Element (abstract base), NamedElement (abstract), NamedLocation (blue block), Parapet (decorative structure), Text (editable canvas text), shared/src/index.ts, file:packages/shared/src/railway/__tests__/element.test.ts (+6 more)
+Cohesion: 0.39
+Nodes (9): Concourse (red block), Element (abstract base), NamedElement (abstract), NamedLocation (blue block), Parapet (decorative structure), Text (editable canvas text), file:packages/shared/src/railway/__tests__/element.test.ts, file:packages/shared/src/railway/element.ts (+1 more)
 
 ### Community 42 - "Community 42"
 Cohesion: 0.25
@@ -400,9 +395,9 @@ Nodes (8): entity:packages/shared/src/railway/__tests__/element.test.ts/class/Te
 Cohesion: 0.67
 Nodes (3): Adapter Implementations, How the engine boots (host-agnostic), Transport Protocol (Engine ↔ Host)
 
-### Community 45 - "Linked Connect Components"
-Cohesion: 0.15
-Nodes (9): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts, ViewportControllerOptions, ViewportState, UsePixiAppReturn, ASPECT_SVG_MAP, loadRawSvg(), rawCache, SVG_MAP (+1 more)
+### Community 44 - "Community 44"
+Cohesion: 0.28
+Nodes (9): map-text-linking.test.ts — tests for linkLocalText, deleteTextFromAllElements, changeDeleteText, map/map-text-linking.ts, map/map.ts, changeDeleteText(map, readableBit, ok, text) — updates or deletes text based on user input, deleteTextFromAllElements(map, text) — removes text reference from tracks, namedLocations, concourses, linkLocalText(map, x, y, text) — links text to tracks with platforms, concourses, named locations, bridge/underpass, propagating to neighbors, linkNewElementToText(map, x, y) — collects neighbour texts, prompts if multiple, links or cleans up, Map_.deleteTextFromAllElements(t) — delegates to map-text-linking module (+1 more)
 
 ### Community 46 - "Color Name Components"
 Cohesion: 0.25
@@ -419,6 +414,10 @@ Nodes (3): DEFAULTS, GroundLayer, GroundLayerOptions
 ### Community 49 - "Pixi Rendering Components"
 Cohesion: 0.29
 Nodes (7): Multiplayer-Ready Architecture, PixiJS v8 Rendering Engine, React-UI Rendering Separation, Pure TypeScript Simulation Engine, Transport Adapter Pattern, Four Editor Milestones E1-E4, M1 PixiJS on Screen Completed
+
+### Community 50 - "Community 50"
+Cohesion: 0.40
+Nodes (5): shared/src/index.ts, railway/index.ts (barrel), railway/map/index.ts (barrel), railway/track/index.ts (barrel), @rail-op-sim/shared package
 
 ### Community 51 - "Callback Types Components"
 Cohesion: 0.53
@@ -439,6 +438,10 @@ Nodes (5): tooltip.tsx, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 ### Community 55 - "Input App Components"
 Cohesion: 0.50
 Nodes (4): ui/input.tsx, routes/index.tsx (app), Input component, @rail-op-sim/app package
+
+### Community 56 - "Community 56"
+Cohesion: 0.50
+Nodes (4): map-connectivity.test.ts — tests for checkAllTracksConnected, map/map-connectivity.ts, checkAllTracksConnected(map) — validates all tracks are properly connected via link offsets, Map_.checkAllTracksConnected() — delegates to map-connectivity module
 
 ### Community 61 - "Tsconfig Json Components"
 Cohesion: 0.67
@@ -463,22 +466,22 @@ Nodes (3): parapet7.svg, parapet8.svg, parapet9.svg
 ## Knowledge Gaps
 - **292 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+287 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **150 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **153 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Get List Components` to `Community 33`, `String Location Components`, `Community 3`, `Codes Links Components`, `Get Track Components`, `Use Theme Components`, `Font Set Components`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
-- **Why does `Track` connect `Get Track Components` to `Error Constructor Components`, `Community 33`, `String Location Components`, `Community 3`, `Get List Components`, `Codes Links Components`, `Use Theme Components`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `Text` connect `Font Set Components` to `Layer Element Components`, `String Location Components`, `Get List Components`, `Codes Links Components`, `Use Theme Components`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `Map_` connect `Get List Components` to `Community 33`, `Community 34`, `Community 3`, `String Location Components`, `Track Subtype Components`, `Codes Links Components`, `Linked Connect Components`, `Get Track Components`, `Use Theme Components`, `Community 30`, `Font Set Components`?**
+  _High betweenness centrality (0.073) - this node is a cross-community bridge._
+- **Why does `Track` connect `Get Track Components` to `Error Constructor Components`, `Community 33`, `Community 34`, `Community 3`, `String Location Components`, `Get List Components`, `Codes Links Components`, `Community 30`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Dialog Element Components` to `Route File Components`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **What connects `$schema`, `enabled`, `clientKind` to the rest of the system?**
   _293 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Layer Element Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.13306451612903225 - nodes in this community are weakly interconnected._
-- **Should `String Location Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.07926829268292683 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14942528735632185 - nodes in this community are weakly interconnected._
+- **Should `Svg Track Components` be split into smaller, more focused modules?**
+  _Cohesion score 0.06382978723404255 - nodes in this community are weakly interconnected._
 - **Should `Svg Map Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09009009009009009 - nodes in this community are weakly interconnected._

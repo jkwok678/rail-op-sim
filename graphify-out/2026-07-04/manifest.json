@@ -85,9 +85,9 @@
     "semantic_hash": "fcf56f6b6879c7f2a6a34f2b7bb9b9c5"
   },
   "packages/app/src/engine/ViewportController.ts": {
-    "mtime": 1782774135.3812761,
-    "ast_hash": "c8fa9bc5bd1e899910589743f2962819",
-    "semantic_hash": "c8fa9bc5bd1e899910589743f2962819"
+    "mtime": 1783151947.881479,
+    "ast_hash": "a934223011744af6423ec3c5e248daaf",
+    "semantic_hash": ""
   },
   "packages/app/src/hooks/usePixiApp.ts": {
     "mtime": 1783131027.1675005,
@@ -95,7 +95,7 @@
     "semantic_hash": ""
   },
   "packages/app/src/hooks/useTheme.ts": {
-    "mtime": 1782601168.8286235,
+    "mtime": 1783131564.4693828,
     "ast_hash": "a657fbf590c2dfff1f4d3123178ed07c",
     "semantic_hash": "a657fbf590c2dfff1f4d3123178ed07c"
   },
@@ -1220,9 +1220,9 @@
     "semantic_hash": ""
   },
   "packages/app/src/lib/__tests__/svgMap.test.ts": {
-    "mtime": 1783126269.133312,
-    "ast_hash": "1d7b18b96c8cc09092637f1a54d05649",
-    "semantic_hash": "1d7b18b96c8cc09092637f1a54d05649"
+    "mtime": 1783152024.3608413,
+    "ast_hash": "a4b21e0f562eb7e87bba24b406572d7a",
+    "semantic_hash": ""
   },
   "packages/app/src/lib/debugLogger.ts": {
     "mtime": 1782760166.3424203,
@@ -1230,9 +1230,9 @@
     "semantic_hash": "ccfae3116ed425c0eeadec5184a925b9"
   },
   "packages/app/src/lib/grid.ts": {
-    "mtime": 1783126269.1337333,
-    "ast_hash": "558bd23a071396f762e1f75452b2ef71",
-    "semantic_hash": "558bd23a071396f762e1f75452b2ef71"
+    "mtime": 1783152024.360612,
+    "ast_hash": "dc5d7fca0cbe6240ed5f2a55d6b60a21",
+    "semantic_hash": ""
   },
   "packages/app/src/lib/svgColors.ts": {
     "mtime": 1782896805.9675164,
@@ -1250,23 +1250,23 @@
     "semantic_hash": "bd85f39d94d9b167ac6aa2a79c591ee2"
   },
   "packages/app/src/renderer/layers/ElementLayer.ts": {
-    "mtime": 1783126269.1341372,
-    "ast_hash": "87857ba26a0cfd66f63c5f399bf27138",
-    "semantic_hash": "87857ba26a0cfd66f63c5f399bf27138"
+    "mtime": 1783152024.3623092,
+    "ast_hash": "d2f1ff087cd6481aa8bbb78a08d5ac9a",
+    "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/TrackLayer.ts": {
-    "mtime": 1783126269.1351151,
-    "ast_hash": "96a8d9b223ae335f6792e9682684f7cf",
+    "mtime": 1783152024.362185,
+    "ast_hash": "f7a90effd4b1c70918596d7e343ce63d",
     "semantic_hash": ""
   },
   "packages/app/src/renderer/textureCache.ts": {
-    "mtime": 1783126269.1359882,
-    "ast_hash": "b03fedf7ca651c57946d82e82fa6d15d",
+    "mtime": 1783152024.3608956,
+    "ast_hash": "f043b24c706f349fda125487b3bc3852",
     "semantic_hash": ""
   },
   "packages/app/src/store/editor-store.ts": {
-    "mtime": 1783130948.1024544,
-    "ast_hash": "bf43b49bf4f6fcc7d5667e5848105754",
+    "mtime": 1783151957.1301465,
+    "ast_hash": "b0e2501009f8291a7d6dd875b12936f3",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/track-factory.test.ts": {
@@ -1330,8 +1330,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/LinkHighlightLayer.ts": {
-    "mtime": 1783126269.1345181,
-    "ast_hash": "f5d071a22c78ca32ea2cc916bbf6dd5a",
+    "mtime": 1783152024.3613627,
+    "ast_hash": "790e9004d9a9b7bf1a4775c0b8fae12d",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/SettingsMenu.tsx": {
@@ -1345,8 +1345,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/SectionEditPanel.tsx": {
-    "mtime": 1783126269.1315658,
-    "ast_hash": "530a9555e59f38fc5983eb9fd9f76359",
+    "mtime": 1783152024.3600087,
+    "ast_hash": "e36530150ef9d0ff6cdf2d5eb292e6cf",
     "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/TrackColorLayer.ts": {
@@ -1370,8 +1370,13 @@
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/ZoomSlider.tsx": {
-    "mtime": 1783131000.58465,
-    "ast_hash": "2cfc2c5241ed62e1c9074a256f042b39",
+    "mtime": 1783152024.3596203,
+    "ast_hash": "baac3c25be04e594ae524f831faef9cb",
+    "semantic_hash": ""
+  },
+  "packages/app/src/engine/zoomConstants.ts": {
+    "mtime": 1783151944.7660801,
+    "ast_hash": "a6fbeee4e7aea34d4353b7d5fc37537e",
     "semantic_hash": ""
   }
 }

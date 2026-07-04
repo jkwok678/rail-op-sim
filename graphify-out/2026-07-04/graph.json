@@ -1637,17 +1637,17 @@
       "label": "ZoomSliderProps",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
-      "source_location": "L7",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "sim_zoomslider_zoomsliderprops",
-      "community": 16,
+      "community": 17,
       "norm_label": "zoomsliderprops"
     },
     {
       "label": "ZoomSlider()",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
-      "source_location": "L11",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "sim_zoomslider_zoomslider",
       "community": 17,
@@ -2120,7 +2120,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "engine_placementcontroller_platformsubtypetoside",
-      "community": 0,
+      "community": 19,
       "norm_label": "platformsubtypetoside()"
     },
     {
@@ -2330,7 +2330,7 @@
       "source_location": "L815",
       "_origin": "ast",
       "id": "engine_placementcontroller_placementcontroller_onpointermove",
-      "community": 32,
+      "community": 0,
       "norm_label": ".onpointermove()"
     },
     {
@@ -2410,7 +2410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "engine_viewportcontroller",
-      "community": 45,
+      "community": 17,
       "norm_label": "viewportcontroller.ts"
     },
     {
@@ -2420,24 +2420,24 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportstate",
-      "community": 45,
+      "community": 17,
       "norm_label": "viewportstate"
     },
     {
       "label": "ViewportControllerOptions",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontrolleroptions",
-      "community": 45,
+      "community": 17,
       "norm_label": "viewportcontrolleroptions"
     },
     {
       "label": "ViewportController",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller",
       "community": 16,
@@ -2447,7 +2447,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_constructor",
       "community": 16,
@@ -2457,7 +2457,7 @@
       "label": ".state()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L66",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_state",
       "community": 16,
@@ -2467,7 +2467,7 @@
       "label": ".isPanning()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L75",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_ispanning",
       "community": 16,
@@ -2477,7 +2477,7 @@
       "label": ".attach()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L80",
+      "source_location": "L81",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_attach",
       "community": 16,
@@ -2487,7 +2487,7 @@
       "label": ".detach()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L92",
+      "source_location": "L93",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_detach",
       "community": 16,
@@ -2497,7 +2497,7 @@
       "label": ".fitToView()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L104",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_fittoview",
       "community": 16,
@@ -2507,7 +2507,7 @@
       "label": ".zoomTo()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L126",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_zoomto",
       "community": 16,
@@ -2517,7 +2517,7 @@
       "label": ".panTo()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L135",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_panto",
       "community": 16,
@@ -2527,7 +2527,7 @@
       "label": ".notify()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L140",
+      "source_location": "L141",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_notify",
       "community": 16,
@@ -2537,7 +2537,7 @@
       "label": ".handlePointerDown()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L146",
+      "source_location": "L147",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointerdown",
       "community": 16,
@@ -2547,7 +2547,7 @@
       "label": ".handlePointerMove()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L158",
+      "source_location": "L159",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointermove",
       "community": 16,
@@ -2557,7 +2557,7 @@
       "label": ".handlePointerUp()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L171",
+      "source_location": "L172",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointerup",
       "community": 16,
@@ -2567,7 +2567,7 @@
       "label": ".handleWheel()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L181",
+      "source_location": "L182",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlewheel",
       "community": 16,
@@ -2577,7 +2577,7 @@
       "label": ".applyZoom()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L193",
+      "source_location": "L194",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_applyzoom",
       "community": 16,
@@ -2587,7 +2587,7 @@
       "label": ".handleKeyDown()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L209",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlekeydown",
       "community": 16,
@@ -2597,7 +2597,7 @@
       "label": ".handleKeyUp()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L217",
+      "source_location": "L218",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlekeyup",
       "community": 16,
@@ -2607,11 +2607,21 @@
       "label": ".updateCursor()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L224",
+      "source_location": "L225",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_updatecursor",
       "community": 16,
       "norm_label": ".updatecursor()"
+    },
+    {
+      "label": "zoomConstants.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/engine/zoomConstants.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "engine_zoomconstants",
+      "community": 17,
+      "norm_label": "zoomconstants.ts"
     },
     {
       "label": "usePixiApp.ts",
@@ -2620,7 +2630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_usepixiapp",
-      "community": 45,
+      "community": 4,
       "norm_label": "usepixiapp.ts"
     },
     {
@@ -2630,7 +2640,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "hooks_usepixiapp_usepixiappreturn",
-      "community": 45,
+      "community": 16,
       "norm_label": "usepixiappreturn"
     },
     {
@@ -2640,7 +2650,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "hooks_usepixiapp_themekey",
-      "community": 45,
+      "community": 4,
       "norm_label": "themekey()"
     },
     {
@@ -2750,7 +2760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_debuglogger",
-      "community": 19,
+      "community": 34,
       "norm_label": "debuglogger.ts"
     },
     {
@@ -2760,7 +2770,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "lib_debuglogger_subsystem",
-      "community": 19,
+      "community": 34,
       "norm_label": "subsystem"
     },
     {
@@ -2800,7 +2810,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "lib_grid_worldtogrid",
-      "community": 0,
+      "community": 19,
       "norm_label": "worldtogrid()"
     },
     {
@@ -2910,7 +2920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_svgmap",
-      "community": 45,
+      "community": 4,
       "norm_label": "svgmap.ts"
     },
     {
@@ -2920,7 +2930,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "lib_svgmap_numbered",
-      "community": 45,
+      "community": 4,
       "norm_label": "numbered()"
     },
     {
@@ -2930,7 +2940,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "lib_svgmap_svg_map",
-      "community": 45,
+      "community": 4,
       "norm_label": "svg_map"
     },
     {
@@ -2940,7 +2950,7 @@
       "source_location": "L151",
       "_origin": "ast",
       "id": "lib_svgmap_svgurlfor",
-      "community": 45,
+      "community": 4,
       "norm_label": "svgurlfor()"
     },
     {
@@ -2950,7 +2960,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "lib_svgmap_rawcache",
-      "community": 45,
+      "community": 4,
       "norm_label": "rawcache"
     },
     {
@@ -2960,7 +2970,7 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "lib_svgmap_loadrawsvg",
-      "community": 45,
+      "community": 4,
       "norm_label": "loadrawsvg()"
     },
     {
@@ -2980,7 +2990,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "lib_svgmap_aspect_svg_map",
-      "community": 45,
+      "community": 4,
       "norm_label": "aspect_svg_map"
     },
     {
@@ -2990,7 +3000,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "lib_svgmap_svgfilenameforsignal",
-      "community": 45,
+      "community": 4,
       "norm_label": "svgfilenameforsignal()"
     },
     {
@@ -3060,7 +3070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "layers_elementlayer",
-      "community": 19,
+      "community": 34,
       "norm_label": "elementlayer.ts"
     },
     {
@@ -3070,7 +3080,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "layers_elementlayer_platformsidemapping",
-      "community": 19,
+      "community": 34,
       "norm_label": "platformsidemapping"
     },
     {
@@ -3080,7 +3090,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "layers_elementlayer_platform_side_map",
-      "community": 19,
+      "community": 34,
       "norm_label": "platform_side_map"
     },
     {
@@ -3090,7 +3100,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "layers_elementlayer_platformsvgkey",
-      "community": 19,
+      "community": 34,
       "norm_label": "platformsvgkey()"
     },
     {
@@ -3100,7 +3110,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "layers_elementlayer_cellkey",
-      "community": 19,
+      "community": 34,
       "norm_label": "cellkey()"
     },
     {
@@ -3110,7 +3120,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "layers_elementlayer_makeelementsprite",
-      "community": 19,
+      "community": 34,
       "norm_label": "makeelementsprite()"
     },
     {
@@ -3120,7 +3130,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "layers_elementlayer_spriteentry",
-      "community": 19,
+      "community": 34,
       "norm_label": "spriteentry"
     },
     {
@@ -3140,7 +3150,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "layers_elementlayer_createelementlayer",
-      "community": 19,
+      "community": 34,
       "norm_label": "createelementlayer()"
     },
     {
@@ -3287,7 +3297,7 @@
       "label": "TrackLayer",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
-      "source_location": "L47",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "layers_tracklayer_tracklayer",
       "community": 19,
@@ -3297,7 +3307,7 @@
       "label": "createTrackLayer()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
-      "source_location": "L67",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "layers_tracklayer_createtracklayer",
       "community": 19,
@@ -3547,7 +3557,7 @@
       "label": "Tool",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "store_editor_store_tool",
       "community": 17,
@@ -3557,17 +3567,17 @@
       "label": "ElementKind",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "store_editor_store_elementkind",
-      "community": 0,
+      "community": 17,
       "norm_label": "elementkind"
     },
     {
       "label": "PendingText",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "store_editor_store_pendingtext",
       "community": 17,
@@ -3577,17 +3587,17 @@
       "label": "NameableKind",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "store_editor_store_nameablekind",
-      "community": 17,
+      "community": 0,
       "norm_label": "nameablekind"
     },
     {
       "label": "AddKind",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "store_editor_store_addkind",
       "community": 17,
@@ -3597,7 +3607,7 @@
       "label": "HoveredTrackInfo",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "store_editor_store_hoveredtrackinfo",
       "community": 17,
@@ -3607,27 +3617,27 @@
       "label": "isTrackKind()",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "store_editor_store_istrackkind",
-      "community": 0,
+      "community": 19,
       "norm_label": "istrackkind()"
     },
     {
       "label": "EditorState",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L75",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "store_editor_store_editorstate",
-      "community": 9,
+      "community": 30,
       "norm_label": "editorstate"
     },
     {
       "label": "useEditorStore",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L176",
+      "source_location": "L177",
       "_origin": "ast",
       "id": "store_editor_store_useeditorstore",
       "community": 17,
@@ -3890,7 +3900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_element_test",
-      "community": 2,
+      "community": 9,
       "norm_label": "element.test.ts"
     },
     {
@@ -3900,7 +3910,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "tests_element_test_testelement",
-      "community": 2,
+      "community": 36,
       "norm_label": "testelement"
     },
     {
@@ -3910,7 +3920,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "tests_element_test_testelement_tostring",
-      "community": 2,
+      "community": 36,
       "norm_label": ".tostring()"
     },
     {
@@ -3920,7 +3930,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "tests_element_test_testelement_tosavestring",
-      "community": 2,
+      "community": 36,
       "norm_label": ".tosavestring()"
     },
     {
@@ -3930,7 +3940,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "tests_element_test_testfont",
-      "community": 2,
+      "community": 9,
       "norm_label": "testfont"
     },
     {
@@ -4120,7 +4130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_units_test",
-      "community": 34,
+      "community": 17,
       "norm_label": "units.test.ts"
     },
     {
@@ -4140,7 +4150,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "railway_element_element",
-      "community": 2,
+      "community": 36,
       "norm_label": "element"
     },
     {
@@ -4150,7 +4160,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "railway_element_element_constructor",
-      "community": 2,
+      "community": 36,
       "norm_label": ".constructor()"
     },
     {
@@ -4160,7 +4170,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "railway_element_element_getlocationx",
-      "community": 2,
+      "community": 36,
       "norm_label": ".getlocationx()"
     },
     {
@@ -4170,7 +4180,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "railway_element_element_setlocationx",
-      "community": 2,
+      "community": 36,
       "norm_label": ".setlocationx()"
     },
     {
@@ -4180,7 +4190,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "railway_element_element_getlocationy",
-      "community": 2,
+      "community": 36,
       "norm_label": ".getlocationy()"
     },
     {
@@ -4190,7 +4200,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "railway_element_element_setlocationy",
-      "community": 2,
+      "community": 36,
       "norm_label": ".setlocationy()"
     },
     {
@@ -4330,7 +4340,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "railway_element_text_tostring",
-      "community": 2,
+      "community": 31,
       "norm_label": ".tostring()"
     },
     {
@@ -4340,7 +4350,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "railway_element_text_tosavestring",
-      "community": 2,
+      "community": 31,
       "norm_label": ".tosavestring()"
     },
     {
@@ -4490,7 +4500,7 @@
       "source_location": "L267",
       "_origin": "ast",
       "id": "railway_element_parapet",
-      "community": 2,
+      "community": 9,
       "norm_label": "parapet"
     },
     {
@@ -4500,7 +4510,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "railway_element_parapet_constructor",
-      "community": 2,
+      "community": 9,
       "norm_label": ".constructor()"
     },
     {
@@ -4510,7 +4520,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "railway_element_parapet_getparapettype",
-      "community": 2,
+      "community": 9,
       "norm_label": ".getparapettype()"
     },
     {
@@ -4520,7 +4530,7 @@
       "source_location": "L283",
       "_origin": "ast",
       "id": "railway_element_parapet_setparapettype",
-      "community": 2,
+      "community": 9,
       "norm_label": ".setparapettype()"
     },
     {
@@ -4570,7 +4580,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "railway_enums_parapettype",
-      "community": 2,
+      "community": 9,
       "norm_label": "parapettype"
     },
     {
@@ -5100,7 +5110,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "map_map_coordkey",
-      "community": 5,
+      "community": 45,
       "norm_label": "coordkey()"
     },
     {
@@ -5210,7 +5220,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "map_map_map_getorcreatekindarray",
-      "community": 3,
+      "community": 5,
       "norm_label": ".getorcreatekindarray()"
     },
     {
@@ -5250,7 +5260,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "map_map_map_checktrackconcourseparapetexists",
-      "community": 5,
+      "community": 45,
       "norm_label": ".checktrackconcourseparapetexists()"
     },
     {
@@ -5260,7 +5270,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "map_map_map_haselementat",
-      "community": 5,
+      "community": 45,
       "norm_label": ".haselementat()"
     },
     {
@@ -5270,7 +5280,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "map_map_map_hastrackat",
-      "community": 5,
+      "community": 45,
       "norm_label": ".hastrackat()"
     },
     {
@@ -5280,7 +5290,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "map_map_map_haselementexcludingtrack",
-      "community": 5,
+      "community": 3,
       "norm_label": ".haselementexcludingtrack()"
     },
     {
@@ -5290,7 +5300,7 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "map_map_map_getelementat",
-      "community": 5,
+      "community": 45,
       "norm_label": ".getelementat()"
     },
     {
@@ -5300,7 +5310,7 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "map_map_map_getelementexcludingtrackat",
-      "community": 2,
+      "community": 36,
       "norm_label": ".getelementexcludingtrackat()"
     },
     {
@@ -5320,7 +5330,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "map_map_map_gettrackat",
-      "community": 5,
+      "community": 3,
       "norm_label": ".gettrackat()"
     },
     {
@@ -5330,7 +5340,7 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "map_map_map_gettrackhasplatformat",
-      "community": 14,
+      "community": 30,
       "norm_label": ".gettrackhasplatformat()"
     },
     {
@@ -5340,7 +5350,7 @@
       "source_location": "L221",
       "_origin": "ast",
       "id": "map_map_map_checkcanaddnamedlocation",
-      "community": 5,
+      "community": 3,
       "norm_label": ".checkcanaddnamedlocation()"
     },
     {
@@ -5360,7 +5370,7 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "map_map_map_unindexelement",
-      "community": 5,
+      "community": 45,
       "norm_label": ".unindexelement()"
     },
     {
@@ -5380,7 +5390,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "map_map_map_addnamedlocation",
-      "community": 5,
+      "community": 3,
       "norm_label": ".addnamedlocation()"
     },
     {
@@ -5390,7 +5400,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "map_map_map_createaddnamedlocation",
-      "community": 5,
+      "community": 3,
       "norm_label": ".createaddnamedlocation()"
     },
     {
@@ -5410,7 +5420,7 @@
       "source_location": "L320",
       "_origin": "ast",
       "id": "map_map_map_createaddconcourse",
-      "community": 5,
+      "community": 3,
       "norm_label": ".createaddconcourse()"
     },
     {
@@ -5490,7 +5500,7 @@
       "source_location": "L391",
       "_origin": "ast",
       "id": "map_map_map_deletetext",
-      "community": 5,
+      "community": 45,
       "norm_label": ".deletetext()"
     },
     {
@@ -5530,7 +5540,7 @@
       "source_location": "L431",
       "_origin": "ast",
       "id": "map_map_map_deleteelement",
-      "community": 5,
+      "community": 45,
       "norm_label": ".deleteelement()"
     },
     {
@@ -5620,7 +5630,7 @@
       "source_location": "L526",
       "_origin": "ast",
       "id": "map_map_map_getparapetlist",
-      "community": 2,
+      "community": 9,
       "norm_label": ".getparapetlist()"
     },
     {
@@ -5780,7 +5790,7 @@
       "source_location": "L634",
       "_origin": "ast",
       "id": "map_map_map_trackstosavestrings",
-      "community": 9,
+      "community": 5,
       "norm_label": ".trackstosavestrings()"
     },
     {
@@ -5790,7 +5800,7 @@
       "source_location": "L646",
       "_origin": "ast",
       "id": "map_map_map_gettracklist",
-      "community": 14,
+      "community": 5,
       "norm_label": ".gettracklist()"
     },
     {
@@ -5830,7 +5840,7 @@
       "source_location": "L671",
       "_origin": "ast",
       "id": "map_map_map_deletetextfromallelements",
-      "community": 5,
+      "community": 45,
       "norm_label": ".deletetextfromallelements()"
     },
     {
@@ -5840,7 +5850,7 @@
       "source_location": "L675",
       "_origin": "ast",
       "id": "map_map_map_linknewelementtotext",
-      "community": 5,
+      "community": 3,
       "norm_label": ".linknewelementtotext()"
     },
     {
@@ -5860,7 +5870,7 @@
       "source_location": "L687",
       "_origin": "ast",
       "id": "map_map_map_addplatform",
-      "community": 5,
+      "community": 9,
       "norm_label": ".addplatform()"
     },
     {
@@ -5930,7 +5940,7 @@
       "source_location": "L719",
       "_origin": "ast",
       "id": "map_map_map_getlinkedtrackpairs",
-      "community": 5,
+      "community": 9,
       "norm_label": ".getlinkedtrackpairs()"
     },
     {
@@ -5940,7 +5950,7 @@
       "source_location": "L723",
       "_origin": "ast",
       "id": "map_map_map_getlinkedtrackreport",
-      "community": 5,
+      "community": 9,
       "norm_label": ".getlinkedtrackreport()"
     },
     {
@@ -5950,7 +5960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "track_index",
-      "community": 9,
+      "community": 30,
       "norm_label": "index.ts"
     },
     {
@@ -5960,7 +5970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "track_signal_aspects",
-      "community": 9,
+      "community": 30,
       "norm_label": "signal-aspects.ts"
     },
     {
@@ -5970,7 +5980,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "track_signal_aspects_signalaspect",
-      "community": 9,
+      "community": 30,
       "norm_label": "signalaspect"
     },
     {
@@ -5980,7 +5990,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "track_signal_aspects_signalaspectvalue",
-      "community": 9,
+      "community": 30,
       "norm_label": "signalaspectvalue"
     },
     {
@@ -5990,7 +6000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "track_track_color",
-      "community": 9,
+      "community": 30,
       "norm_label": "track-color.ts"
     },
     {
@@ -6000,7 +6010,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "track_track_color_trackcolorstate",
-      "community": 9,
+      "community": 30,
       "norm_label": "trackcolorstate"
     },
     {
@@ -6010,7 +6020,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "track_track_color_gettrackcolorstate",
-      "community": 19,
+      "community": 30,
       "norm_label": "gettrackcolorstate()"
     },
     {
@@ -6020,7 +6030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "track_track_data",
-      "community": 9,
+      "community": 22,
       "norm_label": "track-data.ts"
     },
     {
@@ -6030,7 +6040,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "track_track_data_trackdata",
-      "community": 9,
+      "community": 30,
       "norm_label": "trackdata"
     },
     {
@@ -6040,7 +6050,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "track_track_data_trackkind",
-      "community": 9,
+      "community": 5,
       "norm_label": "trackkind"
     },
     {
@@ -6050,7 +6060,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "track_track_data_trackkindmeta",
-      "community": 9,
+      "community": 30,
       "norm_label": "trackkindmeta"
     },
     {
@@ -6070,7 +6080,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "track_track_data_subtypekey",
-      "community": 9,
+      "community": 22,
       "norm_label": "subtypekey"
     },
     {
@@ -6080,7 +6090,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "track_track_data_straight_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "straight_links"
     },
     {
@@ -6090,7 +6100,7 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "track_track_data_directed_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "directed_links"
     },
     {
@@ -6100,7 +6110,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "track_track_data_curved_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "curved_links"
     },
     {
@@ -6110,7 +6120,7 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "track_track_data_linked_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "linked_links"
     },
     {
@@ -6120,7 +6130,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "track_track_data_exit_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "exit_links"
     },
     {
@@ -6130,7 +6140,7 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "track_track_data_buffer_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "buffer_links"
     },
     {
@@ -6140,7 +6150,7 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "track_track_data_signal_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "signal_links"
     },
     {
@@ -6150,7 +6160,7 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "track_track_data_bridge_underpass_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "bridge_underpass_links"
     },
     {
@@ -6160,7 +6170,7 @@
       "source_location": "L271",
       "_origin": "ast",
       "id": "track_track_data_switch_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "switch_links"
     },
     {
@@ -6170,7 +6180,7 @@
       "source_location": "L306",
       "_origin": "ast",
       "id": "track_track_data_crossover_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "crossover_links"
     },
     {
@@ -6180,7 +6190,7 @@
       "source_location": "L315",
       "_origin": "ast",
       "id": "track_track_data_flyover_links",
-      "community": 9,
+      "community": 22,
       "norm_label": "flyover_links"
     },
     {
@@ -6190,7 +6200,7 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "track_track_data_link_tables",
-      "community": 9,
+      "community": 22,
       "norm_label": "link_tables"
     },
     {
@@ -6200,7 +6210,7 @@
       "source_location": "L346",
       "_origin": "ast",
       "id": "track_track_data_getlinksforsubtype",
-      "community": 9,
+      "community": 30,
       "norm_label": "getlinksforsubtype()"
     },
     {
@@ -6220,7 +6230,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "track_track_data_hassecondarypath",
-      "community": 14,
+      "community": 30,
       "norm_label": "hassecondarypath()"
     },
     {
@@ -6230,7 +6240,7 @@
       "source_location": "L367",
       "_origin": "ast",
       "id": "track_track_data_supportsplatforms",
-      "community": 14,
+      "community": 30,
       "norm_label": "supportsplatforms()"
     },
     {
@@ -6240,7 +6250,7 @@
       "source_location": "L372",
       "_origin": "ast",
       "id": "track_track_data_supportslevelcrossing",
-      "community": 14,
+      "community": 30,
       "norm_label": "supportslevelcrossing()"
     },
     {
@@ -6250,7 +6260,7 @@
       "source_location": "L380",
       "_origin": "ast",
       "id": "track_track_data_straight_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "straight_codes"
     },
     {
@@ -6260,7 +6270,7 @@
       "source_location": "L387",
       "_origin": "ast",
       "id": "track_track_data_directed_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "directed_codes"
     },
     {
@@ -6270,7 +6280,7 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "track_track_data_curved_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "curved_codes"
     },
     {
@@ -6280,7 +6290,7 @@
       "source_location": "L413",
       "_origin": "ast",
       "id": "track_track_data_linked_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "linked_codes"
     },
     {
@@ -6290,7 +6300,7 @@
       "source_location": "L424",
       "_origin": "ast",
       "id": "track_track_data_exit_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "exit_codes"
     },
     {
@@ -6300,7 +6310,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "track_track_data_buffer_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "buffer_codes"
     },
     {
@@ -6310,7 +6320,7 @@
       "source_location": "L446",
       "_origin": "ast",
       "id": "track_track_data_signal_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "signal_codes"
     },
     {
@@ -6320,7 +6330,7 @@
       "source_location": "L457",
       "_origin": "ast",
       "id": "track_track_data_bridge_underpass_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "bridge_underpass_codes"
     },
     {
@@ -6330,7 +6340,7 @@
       "source_location": "L464",
       "_origin": "ast",
       "id": "track_track_data_switch_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "switch_codes"
     },
     {
@@ -6340,7 +6350,7 @@
       "source_location": "L499",
       "_origin": "ast",
       "id": "track_track_data_crossover_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "crossover_codes"
     },
     {
@@ -6350,7 +6360,7 @@
       "source_location": "L508",
       "_origin": "ast",
       "id": "track_track_data_flyover_codes",
-      "community": 9,
+      "community": 22,
       "norm_label": "flyover_codes"
     },
     {
@@ -6360,7 +6370,7 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "track_track_data_code_tables",
-      "community": 9,
+      "community": 22,
       "norm_label": "code_tables"
     },
     {
@@ -6380,7 +6390,7 @@
       "source_location": "L546",
       "_origin": "ast",
       "id": "track_track_data_kind_labels",
-      "community": 9,
+      "community": 22,
       "norm_label": "kind_labels"
     },
     {
@@ -6410,7 +6420,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "track_track_factory_createtrackdataoptions",
-      "community": 9,
+      "community": 30,
       "norm_label": "createtrackdataoptions"
     },
     {
@@ -6430,7 +6440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "track_track",
-      "community": 9,
+      "community": 30,
       "norm_label": "track.ts"
     },
     {
@@ -6450,7 +6460,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "track_track_track_constructor",
-      "community": 9,
+      "community": 30,
       "norm_label": ".constructor()"
     },
     {
@@ -6460,7 +6470,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "track_track_track_gettrackmainspeed",
-      "community": 14,
+      "community": 32,
       "norm_label": ".gettrackmainspeed()"
     },
     {
@@ -6470,7 +6480,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "track_track_track_gettrackmainlength",
-      "community": 14,
+      "community": 32,
       "norm_label": ".gettrackmainlength()"
     },
     {
@@ -6480,7 +6490,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "track_track_track_gettracksecondaryspeed",
-      "community": 14,
+      "community": 32,
       "norm_label": ".gettracksecondaryspeed()"
     },
     {
@@ -6490,7 +6500,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "track_track_track_gettracksecondarylength",
-      "community": 14,
+      "community": 32,
       "norm_label": ".gettracksecondarylength()"
     },
     {
@@ -6520,7 +6530,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "track_track_track_settracksecondaryspeed",
-      "community": 14,
+      "community": 30,
       "norm_label": ".settracksecondaryspeed()"
     },
     {
@@ -6530,7 +6540,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "track_track_track_settracksecondarylength",
-      "community": 14,
+      "community": 30,
       "norm_label": ".settracksecondarylength()"
     },
     {
@@ -6540,7 +6550,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "track_track_track_restoredefaults",
-      "community": 14,
+      "community": 30,
       "norm_label": ".restoredefaults()"
     },
     {
@@ -6550,7 +6560,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "track_track_track_mainspeedlengthtostring",
-      "community": 14,
+      "community": 32,
       "norm_label": ".mainspeedlengthtostring()"
     },
     {
@@ -6760,7 +6770,7 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "track_track_track_islinked",
-      "community": 14,
+      "community": 32,
       "norm_label": ".islinked()"
     },
     {
@@ -6800,7 +6810,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "track_track_track_subtypecode",
-      "community": 14,
+      "community": 32,
       "norm_label": ".subtypecode()"
     },
     {
@@ -6820,7 +6830,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "track_track_track_otherlinkedtracktostring",
-      "community": 14,
+      "community": 32,
       "norm_label": ".otherlinkedtracktostring()"
     },
     {
@@ -6830,7 +6840,7 @@
       "source_location": "L274",
       "_origin": "ast",
       "id": "track_track_track_otherlinkedtracktosavestring",
-      "community": 14,
+      "community": 32,
       "norm_label": ".otherlinkedtracktosavestring()"
     },
     {
@@ -6840,7 +6850,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "track_track_track_escapecsv",
-      "community": 14,
+      "community": 32,
       "norm_label": ".escapecsv()"
     },
     {
@@ -6850,7 +6860,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "track_track_track_serializefieldgroups",
-      "community": 14,
+      "community": 32,
       "norm_label": ".serializefieldgroups()"
     },
     {
@@ -6860,7 +6870,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "track_track_track_tostring",
-      "community": 14,
+      "community": 32,
       "norm_label": ".tostring()"
     },
     {
@@ -6870,7 +6880,7 @@
       "source_location": "L368",
       "_origin": "ast",
       "id": "track_track_track_tosavestring",
-      "community": 14,
+      "community": 32,
       "norm_label": ".tosavestring()"
     },
     {
@@ -6930,7 +6940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "railway_units",
-      "community": 34,
+      "community": 17,
       "norm_label": "units.ts"
     },
     {
@@ -6940,7 +6950,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "railway_units_round1",
-      "community": 34,
+      "community": 17,
       "norm_label": "round1()"
     },
     {
@@ -6950,7 +6960,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "railway_units_kmhtomph",
-      "community": 34,
+      "community": 17,
       "norm_label": "kmhtomph()"
     },
     {
@@ -6960,7 +6970,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "railway_units_metrestoimperial",
-      "community": 34,
+      "community": 17,
       "norm_label": "metrestoimperial()"
     },
     {
@@ -6970,7 +6980,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "railway_units_formatimperiallength",
-      "community": 34,
+      "community": 17,
       "norm_label": "formatimperiallength()"
     },
     {
@@ -8336,7 +8346,7 @@
       "kind": "source",
       "summary": "Handles pan (middle-mouse/Space+LMB), zoom (scroll wheel centered on cursor), and fit-to-view for the PixiJS simulation canvas",
       "file_type": "concept",
-      "community": 45,
+      "community": 4,
       "norm_label": "",
       "id": "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts"
     },
@@ -9706,7 +9716,7 @@
         "path": "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/index.ts"
       },
       "file_type": "concept",
-      "community": 41,
+      "community": 50,
       "norm_label": "shared/src/index.ts",
       "id": "file:packages/shared/src/index.ts"
     },
@@ -9717,7 +9727,7 @@
         "path": "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/index.ts"
       },
       "file_type": "concept",
-      "community": 41,
+      "community": 50,
       "norm_label": "railway/index.ts (barrel)",
       "id": "file:packages/shared/src/railway/index.ts"
     },
@@ -9728,7 +9738,7 @@
         "path": "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/index.ts"
       },
       "file_type": "concept",
-      "community": 41,
+      "community": 50,
       "norm_label": "railway/map/index.ts (barrel)",
       "id": "file:packages/shared/src/railway/map/index.ts"
     },
@@ -9739,7 +9749,7 @@
         "path": "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/track/index.ts"
       },
       "file_type": "concept",
-      "community": 41,
+      "community": 50,
       "norm_label": "railway/track/index.ts (barrel)",
       "id": "file:packages/shared/src/railway/track/index.ts"
     },
@@ -9805,7 +9815,7 @@
         "path": "/Users/jonathankwok/projects/rail-op-sim/packages/shared/src/railway/map/map.ts"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "map/map.ts",
       "id": "file:packages/shared/src/railway/map/map.ts"
     },
@@ -9817,7 +9827,7 @@
         "derived": true
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 56,
       "norm_label": "map/map-connectivity.ts",
       "id": "file:packages/shared/src/railway/map/map-connectivity.ts"
     },
@@ -9841,7 +9851,7 @@
         "derived": true
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "map/map-text-linking.ts",
       "id": "file:packages/shared/src/railway/map/map-text-linking.ts"
     },
@@ -10464,7 +10474,7 @@
         "path": "packages/app/public/graphics/linkDownSet.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link down set svg",
       "id": "svg:linkDownSet"
     },
@@ -10475,7 +10485,7 @@
         "path": "packages/app/public/graphics/linkLeftSet.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link left set svg",
       "id": "svg:linkLeftSet"
     },
@@ -10486,7 +10496,7 @@
         "path": "packages/app/public/graphics/linkLeftUnset.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link left unset svg",
       "id": "svg:linkLeftUnset"
     },
@@ -10497,7 +10507,7 @@
         "path": "packages/app/public/graphics/linkLeftDownSet.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link left-down set svg",
       "id": "svg:linkLeftDownSet"
     },
@@ -10508,7 +10518,7 @@
         "path": "packages/app/public/graphics/linkRightSet.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link right set svg",
       "id": "svg:linkRightSet"
     },
@@ -10519,7 +10529,7 @@
         "path": "packages/app/public/graphics/linkRightUnset.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link right unset svg",
       "id": "svg:linkRightUnset"
     },
@@ -10530,7 +10540,7 @@
         "path": "packages/app/public/graphics/linkUpSet.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link up set svg",
       "id": "svg:linkUpSet"
     },
@@ -10541,7 +10551,7 @@
         "path": "packages/app/public/graphics/linkUpUnset.svg"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link up unset svg",
       "id": "svg:linkUpUnset"
     },
@@ -10563,7 +10573,7 @@
         "description": "8 directional link SVGs each with Set and Unset variants: Up, Down, Left, Right, LeftUp, LeftDown, RightUp, RightDown"
       },
       "file_type": "concept",
-      "community": 22,
+      "community": 1,
       "norm_label": "link state svgs (set/unset variants)",
       "id": "concept:link-state-svgs"
     },
@@ -10574,7 +10584,7 @@
         "role": "shared library - railway model/data types"
       },
       "file_type": "concept",
-      "community": 41,
+      "community": 50,
       "norm_label": "@rail-op-sim/shared package",
       "id": "module:shared"
     },
@@ -10670,7 +10680,7 @@
         "returns": "boolean"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 56,
       "norm_label": "map_.checkalltracksconnected() \u2014 delegates to map-connectivity module",
       "id": "symbol:Map_.checkAllTracksConnected"
     },
@@ -10706,7 +10716,7 @@
         "parent": "Map_"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "map_.linklocaltext(x, y, text) \u2014 delegates to map-text-linking module",
       "id": "symbol:Map_.linkLocalText"
     },
@@ -10718,7 +10728,7 @@
         "parent": "Map_"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "map_.deletetextfromallelements(t) \u2014 delegates to map-text-linking module",
       "id": "symbol:Map_.deleteTextFromAllElements"
     },
@@ -10769,7 +10779,7 @@
         "gridMultiplier": "uses map.getImageSize() as grid offset multiplier"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 56,
       "norm_label": "checkalltracksconnected(map) \u2014 validates all tracks are properly connected via link offsets",
       "id": "function:checkAllTracksConnected"
     },
@@ -10778,7 +10788,7 @@
       "typeLabel": "TypeScript Test",
       "label": "map-connectivity.test.ts \u2014 tests for checkAllTracksConnected",
       "file_type": "concept",
-      "community": 28,
+      "community": 56,
       "norm_label": "map-connectivity.test.ts \u2014 tests for checkalltracksconnected",
       "id": "file:packages/shared/src/railway/__tests__/map-connectivity.test.ts"
     },
@@ -10838,7 +10848,7 @@
         "propagation": "if linked to track/concourse, propagates to neighbors; if namedLocation, searches neighbor named locations"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "linklocaltext(map, x, y, text) \u2014 links text to tracks with platforms, concourses, named locations, bridge/underpass, propagating to neighbors",
       "id": "function:linkLocalText"
     },
@@ -10850,7 +10860,7 @@
         "file": "packages/shared/src/railway/map/map-text-linking.ts"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "deletetextfromallelements(map, text) \u2014 removes text reference from tracks, namedlocations, concourses",
       "id": "function:deleteTextFromAllElements"
     },
@@ -10862,7 +10872,7 @@
         "file": "packages/shared/src/railway/map/map-text-linking.ts"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "linknewelementtotext(map, x, y) \u2014 collects neighbour texts, prompts if multiple, links or cleans up",
       "id": "function:linkNewElementToText"
     },
@@ -10874,7 +10884,7 @@
         "file": "packages/shared/src/railway/map/map-text-linking.ts"
       },
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "changedeletetext(map, readablebit, ok, text) \u2014 updates or deletes text based on user input",
       "id": "function:changeDeleteText"
     },
@@ -10883,7 +10893,7 @@
       "typeLabel": "TypeScript Test",
       "label": "map-text-linking.test.ts \u2014 tests for linkLocalText, deleteTextFromAllElements, changeDeleteText",
       "file_type": "concept",
-      "community": 28,
+      "community": 44,
       "norm_label": "map-text-linking.test.ts \u2014 tests for linklocaltext, deletetextfromallelements, changedeletetext",
       "id": "file:packages/shared/src/railway/__tests__/map-text-linking.test.ts"
     },
@@ -12649,7 +12659,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight1.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight1.svg",
       "id": "entity:/packages/app/public/graphics/switchTight1.svg"
     },
@@ -12662,7 +12672,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight2.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight2.svg",
       "id": "entity:/packages/app/public/graphics/switchTight2.svg"
     },
@@ -12675,7 +12685,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight3.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight3.svg",
       "id": "entity:/packages/app/public/graphics/switchTight3.svg"
     },
@@ -12688,7 +12698,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight4.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight4.svg",
       "id": "entity:/packages/app/public/graphics/switchTight4.svg"
     },
@@ -12701,7 +12711,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight5.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight5.svg",
       "id": "entity:/packages/app/public/graphics/switchTight5.svg"
     },
@@ -12714,7 +12724,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight6.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight6.svg",
       "id": "entity:/packages/app/public/graphics/switchTight6.svg"
     },
@@ -12727,7 +12737,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight7.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight7.svg",
       "id": "entity:/packages/app/public/graphics/switchTight7.svg"
     },
@@ -12740,7 +12750,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchTight8.svg"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switchtight8.svg",
       "id": "entity:/packages/app/public/graphics/switchTight8.svg"
     },
@@ -12753,7 +12763,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/tightCurve1.svg"
       },
       "file_type": "concept",
-      "community": 36,
+      "community": 1,
       "norm_label": "tightcurve1.svg",
       "id": "entity:/packages/app/public/graphics/tightCurve1.svg"
     },
@@ -12766,7 +12776,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/tightCurve2.svg"
       },
       "file_type": "concept",
-      "community": 36,
+      "community": 1,
       "norm_label": "tightcurve2.svg",
       "id": "entity:/packages/app/public/graphics/tightCurve2.svg"
     },
@@ -12779,7 +12789,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/tightCurve3.svg"
       },
       "file_type": "concept",
-      "community": 36,
+      "community": 1,
       "norm_label": "tightcurve3.svg",
       "id": "entity:/packages/app/public/graphics/tightCurve3.svg"
     },
@@ -12792,7 +12802,7 @@
         "filePath": "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/tightCurve4.svg"
       },
       "file_type": "concept",
-      "community": 36,
+      "community": 1,
       "norm_label": "tightcurve4.svg",
       "id": "entity:/packages/app/public/graphics/tightCurve4.svg"
     },
@@ -12996,7 +13006,7 @@
         "module": "packages/shared/src/railway/track/track-data.ts"
       },
       "file_type": "concept",
-      "community": 36,
+      "community": 1,
       "norm_label": "curved_links",
       "id": "struct:CURVED_LINKS"
     },
@@ -13008,7 +13018,7 @@
         "module": "packages/shared/src/railway/track/track-data.ts"
       },
       "file_type": "concept",
-      "community": 30,
+      "community": 1,
       "norm_label": "switch_links",
       "id": "struct:SWITCH_LINKS"
     },
@@ -15525,9 +15535,9 @@
       "source_file": "packages/app/src/components/sim/SimCanvas.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_simcanvas",
-      "target": "sim_zoomslider",
-      "confidence_score": 1.0
+      "target": "sim_zoomslider"
     },
     {
       "relation": "imports",
@@ -15536,9 +15546,9 @@
       "source_file": "packages/app/src/components/sim/SimCanvas.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_simcanvas",
-      "target": "sim_zoomslider_zoomslider",
-      "confidence_score": 1.0
+      "target": "sim_zoomslider_zoomslider"
     },
     {
       "relation": "imports_from",
@@ -15645,9 +15655,9 @@
       "source_file": "packages/app/src/components/sim/SimLayout.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_simlayout",
-      "target": "sim_textinputdialog",
-      "confidence_score": 1.0
+      "target": "sim_textinputdialog"
     },
     {
       "relation": "imports",
@@ -15656,9 +15666,9 @@
       "source_file": "packages/app/src/components/sim/SimLayout.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_simlayout",
-      "target": "sim_textinputdialog_textinputdialog",
-      "confidence_score": 1.0
+      "target": "sim_textinputdialog_textinputdialog"
     },
     {
       "relation": "imports_from",
@@ -16253,9 +16263,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "engine_viewportcontroller",
-      "confidence_score": 1.0
+      "target": "engine_viewportcontroller"
     },
     {
       "relation": "imports",
@@ -16264,8 +16274,19 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "engine_viewportcontroller_viewportcontroller",
+      "target": "engine_viewportcontroller_viewportcontroller"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "sim_zoomslider",
+      "target": "engine_zoomconstants",
       "confidence_score": 1.0
     },
     {
@@ -16274,9 +16295,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "sim_zoomslider_zoomslider",
-      "confidence_score": 1.0
+      "target": "sim_zoomslider_zoomslider"
     },
     {
       "relation": "contains",
@@ -16284,9 +16305,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "sim_zoomslider_zoomsliderprops",
-      "confidence_score": 1.0
+      "target": "sim_zoomslider_zoomsliderprops"
     },
     {
       "relation": "imports_from",
@@ -16295,9 +16316,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "store_editor_store",
-      "confidence_score": 1.0
+      "target": "store_editor_store"
     },
     {
       "relation": "imports",
@@ -16306,9 +16327,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "store_editor_store_useeditorstore",
-      "confidence_score": 1.0
+      "target": "store_editor_store_useeditorstore"
     },
     {
       "relation": "imports_from",
@@ -16317,9 +16338,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "ui_button",
-      "confidence_score": 1.0
+      "target": "ui_button"
     },
     {
       "relation": "imports",
@@ -16328,9 +16349,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider",
-      "target": "ui_button_button",
-      "confidence_score": 1.0
+      "target": "ui_button_button"
     },
     {
       "relation": "references",
@@ -16339,9 +16360,9 @@
       "source_file": "packages/app/src/components/sim/ZoomSlider.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_zoomslider_zoomsliderprops",
-      "target": "engine_viewportcontroller_viewportcontroller",
-      "confidence_score": 1.0
+      "target": "engine_viewportcontroller_viewportcontroller"
     },
     {
       "relation": "calls",
@@ -17367,9 +17388,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller",
-      "target": "railway_element_text",
-      "confidence_score": 1.0
+      "target": "railway_element_text"
     },
     {
       "relation": "imports",
@@ -17690,9 +17711,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L681",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller",
-      "target": "engine_placementcontroller_placementcontroller_deletetextobject",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_deletetextobject"
     },
     {
       "relation": "method",
@@ -17710,9 +17731,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L660",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller",
-      "target": "engine_placementcontroller_placementcontroller_gettextbylocation",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_gettextbylocation"
     },
     {
       "relation": "method",
@@ -17730,9 +17751,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L539",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller",
-      "target": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_handlerightclick"
     },
     {
       "relation": "method",
@@ -17880,9 +17901,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L691",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller",
-      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange"
     },
     {
       "relation": "method",
@@ -17890,9 +17911,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L671",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller",
-      "target": "engine_placementcontroller_placementcontroller_updatetextat",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_updatetextat"
     },
     {
       "relation": "references",
@@ -18022,9 +18043,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L588",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "target": "engine_placementcontroller_placementcontroller_publishtrackstatus",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_publishtrackstatus"
     },
     {
       "relation": "calls",
@@ -18132,9 +18153,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L299",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_onpointerup",
-      "target": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_handlerightclick"
     },
     {
       "relation": "calls",
@@ -18220,9 +18241,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L546",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "target": "engine_placementcontroller_placementcontroller_deletetextobject",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_deletetextobject"
     },
     {
       "relation": "calls",
@@ -18231,9 +18252,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L551",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "target": "engine_placementcontroller_placementcontroller_screentogrid",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_screentogrid"
     },
     {
       "relation": "calls",
@@ -18242,9 +18263,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L543",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_handlerightclick",
-      "target": "engine_placementcontroller_placementcontroller_screentoworld",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_screentoworld"
     },
     {
       "relation": "calls",
@@ -18297,9 +18318,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L660",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_gettextbylocation",
-      "target": "railway_element_text",
-      "confidence_score": 1.0
+      "target": "railway_element_text"
     },
     {
       "relation": "calls",
@@ -18308,9 +18329,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L672",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_updatetextat",
-      "target": "engine_placementcontroller_placementcontroller_gettextbylocation",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_gettextbylocation"
     },
     {
       "relation": "calls",
@@ -18319,9 +18340,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L676",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_updatetextat",
-      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange"
     },
     {
       "relation": "calls",
@@ -18341,9 +18362,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L683",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_deletetextobject",
-      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange",
-      "confidence_score": 1.0
+      "target": "engine_placementcontroller_placementcontroller_syncaftertextchange"
     },
     {
       "relation": "calls",
@@ -18363,9 +18384,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L681",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_deletetextobject",
-      "target": "railway_element_text",
-      "confidence_score": 1.0
+      "target": "railway_element_text"
     },
     {
       "relation": "calls",
@@ -18583,6 +18604,17 @@
       "confidence_score": 1.0,
       "source": "engine_viewportcontroller",
       "target": "engine_viewportcontroller_viewportstate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/engine/ViewportController.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "engine_viewportcontroller",
+      "target": "engine_zoomconstants",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -18901,6 +18933,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "store_editor_store",
+      "target": "engine_zoomconstants",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L4",
       "weight": 1.0,
@@ -19022,9 +19065,9 @@
       "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usepixiapp",
-      "target": "store_editor_store",
-      "confidence_score": 1.0
+      "target": "store_editor_store"
     },
     {
       "relation": "imports",
@@ -19033,9 +19076,9 @@
       "source_file": "packages/app/src/hooks/usePixiApp.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usepixiapp",
-      "target": "store_editor_store_useeditorstore",
-      "confidence_score": 1.0
+      "target": "store_editor_store_useeditorstore"
     },
     {
       "relation": "contains",
@@ -20177,9 +20220,9 @@
       "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "layers_textlayer",
-      "target": "railway_element_text",
-      "confidence_score": 1.0
+      "target": "railway_element_text"
     },
     {
       "relation": "imports_from",
@@ -20782,9 +20825,9 @@
       "source_file": "packages/app/src/store/editor-store.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "store_editor_store",
-      "target": "store_editor_store_pendingtext",
-      "confidence_score": 1.0
+      "target": "store_editor_store_pendingtext"
     },
     {
       "relation": "contains",
@@ -21732,9 +21775,9 @@
       "source_file": "packages/shared/src/railway/__tests__/map-platform.test.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_map_platform_test",
-      "target": "map_map_platform_removelevelcrossing",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removelevelcrossing"
     },
     {
       "relation": "imports",
@@ -21743,9 +21786,9 @@
       "source_file": "packages/shared/src/railway/__tests__/map-platform.test.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_map_platform_test",
-      "target": "map_map_platform_removeplatform",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removeplatform"
     },
     {
       "relation": "imports_from",
@@ -21765,9 +21808,9 @@
       "source_file": "packages/shared/src/railway/__tests__/map-platform.test.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_map_platform_test",
-      "target": "railway_enums_bridgeunderpasstype",
-      "confidence_score": 1.0
+      "target": "railway_enums_bridgeunderpasstype"
     },
     {
       "relation": "imports",
@@ -21841,9 +21884,9 @@
       "source_file": "packages/shared/src/railway/__tests__/map-platform.test.ts",
       "source_location": "L336",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_map_platform_test",
-      "target": "tests_map_platform_test_addstraighth",
-      "confidence_score": 1.0
+      "target": "tests_map_platform_test_addstraighth"
     },
     {
       "relation": "contains",
@@ -21851,9 +21894,9 @@
       "source_file": "packages/shared/src/railway/__tests__/map-platform.test.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_map_platform_test",
-      "target": "tests_map_platform_test_font",
-      "confidence_score": 1.0
+      "target": "tests_map_platform_test_font"
     },
     {
       "relation": "imports_from",
@@ -25649,9 +25692,9 @@
       "source_file": "packages/shared/src/railway/map/map-platform.ts",
       "source_location": "L217",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map_platform",
-      "target": "map_map_platform_removelevelcrossing",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removelevelcrossing"
     },
     {
       "relation": "contains",
@@ -25659,9 +25702,9 @@
       "source_file": "packages/shared/src/railway/map/map-platform.ts",
       "source_location": "L203",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map_platform",
-      "target": "map_map_platform_removeplatform",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removeplatform"
     },
     {
       "relation": "imports_from",
@@ -25725,9 +25768,9 @@
       "source_file": "packages/shared/src/railway/map/map.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map",
-      "target": "map_map_platform_removeplatform",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removeplatform"
     },
     {
       "relation": "imports",
@@ -25736,9 +25779,9 @@
       "source_file": "packages/shared/src/railway/map/map.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map",
-      "target": "map_map_platform_removelevelcrossing",
-      "confidence_score": 1.0
+      "target": "map_map_platform_removelevelcrossing"
     },
     {
       "relation": "imports_from",
@@ -26964,9 +27007,9 @@
       "source_file": "packages/shared/src/railway/map/map.ts",
       "source_location": "L699",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map_map",
-      "target": "map_map_map_removelevelcrossing",
-      "confidence_score": 1.0
+      "target": "map_map_map_removelevelcrossing"
     },
     {
       "relation": "method",
@@ -26974,9 +27017,9 @@
       "source_file": "packages/shared/src/railway/map/map.ts",
       "source_location": "L695",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "map_map_map",
-      "target": "map_map_map_removeplatform",
-      "confidence_score": 1.0
+      "target": "map_map_map_removeplatform"
     },
     {
       "relation": "method",
