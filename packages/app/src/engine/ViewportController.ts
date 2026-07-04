@@ -1,13 +1,15 @@
-import type { Application, Container } from "pixi.js";
+import type { Application, Container, Ticker } from "pixi.js";
 
 export interface ViewportState {
 	x: number;
 	y: number;
 	zoom: number;
 }
+
+import { PAN_KEY_SPEED } from "./panConstants";
 import {
-	DEFAULT_MIN_ZOOM,
 	DEFAULT_MAX_ZOOM,
+	DEFAULT_MIN_ZOOM,
 	ZOOM_FACTOR,
 } from "./zoomConstants";
 
@@ -37,6 +39,9 @@ export class ViewportController {
 	private lastX = 0;
 	private lastY = 0;
 
+	/** Arrow keys currently held down, for continuous keyboard panning. */
+	private heldKeys = new Set<string>();
+
 	private onPointerDown: (e: PointerEvent) => void;
 	private onPointerMove: (e: PointerEvent) => void;
 	private onPointerUp: (e: PointerEvent) => void;
@@ -45,6 +50,7 @@ export class ViewportController {
 	private onWheel: (e: WheelEvent) => void;
 	private onKeyDown: (e: KeyboardEvent) => void;
 	private onKeyUp: (e: KeyboardEvent) => void;
+	private onTick: (ticker: Ticker) => void;
 
 	constructor(opts: ViewportControllerOptions) {
 		this.world = opts.world;
@@ -62,6 +68,7 @@ export class ViewportController {
 		this.onWheel = this.handleWheel.bind(this);
 		this.onKeyDown = this.handleKeyDown.bind(this);
 		this.onKeyUp = this.handleKeyUp.bind(this);
+		this.onTick = this.handleTick.bind(this);
 	}
 
 	get state(): ViewportState {
@@ -87,6 +94,7 @@ export class ViewportController {
 		this.canvas.addEventListener("wheel", this.onWheel, { passive: false });
 		window.addEventListener("keydown", this.onKeyDown);
 		window.addEventListener("keyup", this.onKeyUp);
+		this.app.ticker.add(this.onTick);
 	}
 
 	/** Remove all DOM event listeners. Call before destroying the app. */
@@ -99,6 +107,8 @@ export class ViewportController {
 		this.canvas.removeEventListener("wheel", this.onWheel);
 		window.removeEventListener("keydown", this.onKeyDown);
 		window.removeEventListener("keyup", this.onKeyUp);
+		this.app.ticker.remove(this.onTick);
+		this.heldKeys.clear();
 	}
 
 	/** Reset transform so the grid extent fits the screen. */
@@ -136,6 +146,13 @@ export class ViewportController {
 	/** Set pan position in screen coordinates. */
 	panTo(x: number, y: number): void {
 		this.world.position.set(x, y);
+		this.notify();
+	}
+
+	/** Nudge the view by a screen-pixel delta. */
+	panBy(dx: number, dy: number): void {
+		this.world.position.x += dx;
+		this.world.position.y += dy;
 		this.notify();
 	}
 
@@ -209,10 +226,19 @@ export class ViewportController {
 	// --- Keyboard ---
 
 	private handleKeyDown(e: KeyboardEvent): void {
+		// Ignore keyboard panning while the user is typing in a form field.
+		if (this.isTypingTarget(e.target)) return;
+
 		if (e.code === "Space" && !e.repeat) {
 			e.preventDefault();
 			this.spaceHeld = true;
 			this.updateCursor();
+			return;
+		}
+
+		if (this.isArrowKey(e.code)) {
+			e.preventDefault();
+			this.heldKeys.add(e.code);
 		}
 	}
 
@@ -220,6 +246,44 @@ export class ViewportController {
 		if (e.code === "Space") {
 			this.spaceHeld = false;
 			this.updateCursor();
+		}
+
+		this.heldKeys.delete(e.code);
+	}
+
+	private isArrowKey(code: string): boolean {
+		return (
+			code === "ArrowLeft" ||
+			code === "ArrowRight" ||
+			code === "ArrowUp" ||
+			code === "ArrowDown"
+		);
+	}
+
+	private isTypingTarget(target: EventTarget | null): boolean {
+		const el = target as HTMLElement | null;
+		if (!el) return false;
+		const tag = el.tagName;
+		return tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable;
+	}
+
+	// --- Ticker: continuous keyboard panning ---
+
+	private handleTick(ticker: Ticker): void {
+		if (this.heldKeys.size === 0) return;
+
+		const step = PAN_KEY_SPEED * ticker.deltaTime;
+		let dx = 0;
+		let dy = 0;
+
+		// An arrow reveals content in its direction, so the world shifts opposite.
+		if (this.heldKeys.has("ArrowLeft")) dx += step;
+		if (this.heldKeys.has("ArrowRight")) dx -= step;
+		if (this.heldKeys.has("ArrowUp")) dy += step;
+		if (this.heldKeys.has("ArrowDown")) dy -= step;
+
+		if (dx !== 0 || dy !== 0) {
+			this.panBy(dx, dy);
 		}
 	}
 

@@ -1,4 +1,5 @@
 import { usePixiApp } from "#/hooks/usePixiApp";
+import { PanControls } from "./PanControls";
 import { ZoomSlider } from "./ZoomSlider";
 
 /**
@@ -11,6 +12,7 @@ export function SimCanvas() {
 	return (
 		<div className="size-full relative overflow-hidden bg-background">
 			<div ref={containerRef} className="absolute inset-0" />
+			<PanControls viewportRef={viewportRef} />
 			<ZoomSlider viewportRef={viewportRef} />
 		</div>
 	);
