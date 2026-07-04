@@ -1,5 +1,5 @@
 import type { Map as Map_, Text as MapText } from "@rail-op-sim/shared";
-import { Container, Text as PixiText, TextStyle } from "pixi.js";
+import { Container, Graphics, Text as PixiText, TextStyle } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
 import { gridToWorld } from "#/lib/grid";
 import { normalizeCssColor } from "#/lib/svgColors";
@@ -35,6 +35,27 @@ export function createTextLayer(): TextLayer {
 	// hitTest can map a rendered box back to its model. Kept in sync (pushed
 	// together, cleared together).
 	const textModels: MapText[] = [];
+	// Parallel to textEntries: underline/strikethrough decoration for each text,
+	// or null when it has neither. Pixi TextStyle can't draw these, so we render
+	// them as manual Graphics lines. Removed/destroyed alongside textEntries.
+	const decorations: (Graphics | null)[] = [];
+
+	/** Remove and destroy every rendered text and its decoration. */
+	function removeAll() {
+		for (const text of textEntries) {
+			container.removeChild(text);
+			text.destroy();
+		}
+		for (const deco of decorations) {
+			if (deco) {
+				container.removeChild(deco);
+				deco.destroy();
+			}
+		}
+		textEntries.length = 0;
+		textModels.length = 0;
+		decorations.length = 0;
+	}
 
 	return {
 		container,
@@ -44,21 +65,20 @@ export function createTextLayer(): TextLayer {
 			// normalise the design token to a concrete `#rrggbb` first.
 			const textColor = normalizeCssColor("var(--foreground)");
 
-			// Remove old text objects
-			for (const text of textEntries) {
-				container.removeChild(text);
-				text.destroy();
-			}
-			textEntries.length = 0;
-			textModels.length = 0;
+			// Remove old text objects and their decorations
+			removeAll();
 
 			const textList = map.getTextList();
 			for (let i = 0; i < textList.length; i++) {
 				const t = textList[i];
+				const font = t.getFont();
+				const fill = font.color ? normalizeCssColor(font.color) : textColor;
 				const style = new TextStyle({
-					fontFamily: t.getFont().family,
-					fontSize: t.getFont().pointSize * 2, // scale up from point size to pixel size
-					fill: textColor,
+					fontFamily: font.family,
+					fontSize: font.pointSize * 2, // scale up from point size to pixel size
+					fontWeight: font.bold ? "bold" : "normal",
+					fontStyle: font.italic ? "italic" : "normal",
+					fill,
 				});
 				const pixiText = new PixiText({ text: t.getReadableText(), style });
 				const { x, y } = gridToWorld(t.getLocationX(), t.getLocationY());
@@ -68,6 +88,32 @@ export function createTextLayer(): TextLayer {
 				container.addChild(pixiText);
 				textEntries.push(pixiText);
 				textModels.push(t);
+
+				// Underline / strikethrough: Pixi TextStyle has no native support,
+				// so draw manual lines across the rendered box. anchor (0, 0.5)
+				// centres the text vertically on position.y and grows right.
+				if (font.underline || font.strikethrough) {
+					const deco = new Graphics();
+					const thickness = Math.max(1, font.pointSize / 8);
+					if (font.strikethrough) {
+						deco
+							.moveTo(x, y)
+							.lineTo(x + pixiText.width, y)
+							.stroke({ color: fill, width: thickness });
+					}
+					if (font.underline) {
+						const uy = y + pixiText.height / 2 - thickness;
+						deco
+							.moveTo(x, uy)
+							.lineTo(x + pixiText.width, uy)
+							.stroke({ color: fill, width: thickness });
+					}
+					deco.label = `text-deco-${i}`;
+					container.addChild(deco);
+					decorations.push(deco);
+				} else {
+					decorations.push(null);
+				}
 			}
 
 			debugLog(
@@ -98,12 +144,7 @@ export function createTextLayer(): TextLayer {
 		},
 
 		clear() {
-			for (const text of textEntries) {
-				container.removeChild(text);
-				text.destroy();
-			}
-			textEntries.length = 0;
-			textModels.length = 0;
+			removeAll();
 		},
 
 		destroy() {

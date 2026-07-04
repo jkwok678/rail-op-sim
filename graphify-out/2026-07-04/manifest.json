@@ -1205,8 +1205,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/Toolbar.tsx": {
-    "mtime": 1783126244.3462374,
-    "ast_hash": "55e920713a9bdb4e2f9e515e8870c756",
+    "mtime": 1783152877.255802,
+    "ast_hash": "35746e5d79b4ecbfe21955d1e2bb0ca4",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TrackPreview.tsx": {

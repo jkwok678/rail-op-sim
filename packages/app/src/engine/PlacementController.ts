@@ -1,6 +1,7 @@
 import {
 	createTrackData,
 	ElementAlreadyExistsError,
+	type FontInfo,
 	findPathBetween,
 	kindToLabel,
 	Map as Map_,
@@ -642,13 +643,10 @@ export class PlacementController {
 	 * Place a text element at the given world coordinates.
 	 * Converts to fractional grid coords so gridToWorld() round-trips correctly.
 	 */
-	placeText(wx: number, wy: number, content: string): void {
+	placeText(wx: number, wy: number, content: string, font: FontInfo): void {
 		const gx = wx / CELL_SIZE;
 		const gy = -wy / CELL_SIZE;
-		this.map.createAddText(gx, gy, content, {
-			family: "JetBrains Mono",
-			pointSize: 12,
-		});
+		this.map.createAddText(gx, gy, content, font);
 		this.textLayer.sync(this.map);
 		debugLog(
 			"placement",
@@ -668,11 +666,14 @@ export class PlacementController {
 	 * Rename (or delete, when content is empty) the Text at the given grid
 	 * coordinates, then re-sync the affected layers.
 	 */
-	updateTextAt(tx: number, ty: number, content: string): void {
+	updateTextAt(tx: number, ty: number, content: string, font?: FontInfo): void {
 		const text = this.getTextByLocation(tx, ty);
 		if (!text) return;
 		const trimmed = content.trim();
 		this.map.changeDeleteText(trimmed, trimmed !== "", text);
+		// changeDeleteText deletes the text when trimmed is empty; only restyle
+		// when it survived (non-empty content) and a new font was supplied.
+		if (trimmed !== "" && font) text.setFont(font);
 		this.syncAfterTextChange();
 		debugLog("placement", `updateTextAt (${tx},${ty}) → "${trimmed}"`);
 	}

@@ -5,6 +5,12 @@
 export interface FontInfo {
 	family: string;
 	pointSize: number;
+	bold?: boolean;
+	italic?: boolean;
+	underline?: boolean;
+	strikethrough?: boolean;
+	/** CSS hex color for the text fill; falls back to --foreground when absent. */
+	color?: string;
 }
 
 /** 2D coordinate. */
