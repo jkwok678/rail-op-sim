@@ -194,3 +194,29 @@ export function addLevelCrossing(
 		t.addLevelCrossing();
 	}
 }
+
+/**
+ * Remove both platforms from a track at the given coordinates. Returns true if a
+ * platform was present and cleared. Also unlinks any shared text (except on
+ * bridge/underpass tracks, whose naming isn't platform-gated).
+ */
+export function removePlatform(map: Map_, x: number, y: number): boolean {
+	const t = map.getTrackAt(x, y);
+	if (!t || !t.hasPlatform()) return false;
+	t.setPlatform1(false);
+	t.setPlatform2(false);
+	// Track text-linking is platform-gated, except bridge/underpass naming.
+	if (t.getNamed() && t.data.kind !== "bridgeUnderpass") t.setText(null);
+	return true;
+}
+
+/**
+ * Remove a level crossing from a track at the given coordinates. Returns true if
+ * a level crossing was present and removed.
+ */
+export function removeLevelCrossing(map: Map_, x: number, y: number): boolean {
+	const t = map.getTrackAt(x, y);
+	if (!t || !t.hasLevelCrossing()) return false;
+	t.removeLevelCrossing();
+	return true;
+}

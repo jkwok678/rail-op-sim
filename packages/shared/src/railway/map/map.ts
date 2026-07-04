@@ -6,8 +6,8 @@ import {
 	Parapet,
 	Text,
 } from "../element";
-import { ElementAlreadyExistsError } from "../errors";
 import type { Platform } from "../enums";
+import { ElementAlreadyExistsError } from "../errors";
 import { Track } from "../track/track";
 import type { TrackData, TrackKind } from "../track/track-data";
 import { KIND_META, supportsPlatforms } from "../track/track-data";
@@ -24,6 +24,8 @@ import {
 import {
 	addLevelCrossing as addLevelCrossingFn,
 	addPlatform as addPlatformFn,
+	removeLevelCrossing as removeLevelCrossingFn,
+	removePlatform as removePlatformFn,
 } from "./map-platform";
 import {
 	changeDeleteText,
@@ -250,7 +252,9 @@ export class Map_ {
 	// ── Add Track ───────────────────────────────────────────────────────
 
 	addTrack(data: TrackData, x: number, y: number): Track {
-		mapDebug(`addTrack — kind=${data.kind} subtype=${data.subtype} at (${x},${y})`);
+		mapDebug(
+			`addTrack — kind=${data.kind} subtype=${data.subtype} at (${x},${y})`,
+		);
 		// Guard against any existing element (not just tracks) at this coordinate
 		if (this.checkElementExists(x, y)) {
 			const existing = this.getTrackAt(x, y);
@@ -260,7 +264,9 @@ export class Map_ {
 					existing.data.kind === data.kind &&
 					existing.data.subtype === data.subtype
 				) {
-					mapDebug(`addTrack — idempotent return (same kind/subtype already at (${x},${y}))`);
+					mapDebug(
+						`addTrack — idempotent return (same kind/subtype already at (${x},${y}))`,
+					);
 					return existing;
 				}
 				mapDebug(`addTrack — ELEMENT_EXISTS at (${x},${y})`);
@@ -684,6 +690,14 @@ export class Map_ {
 
 	addLevelCrossing(x: number, y: number): void {
 		addLevelCrossingFn(this, x, y);
+	}
+
+	removePlatform(x: number, y: number): boolean {
+		return removePlatformFn(this, x, y);
+	}
+
+	removeLevelCrossing(x: number, y: number): boolean {
+		return removeLevelCrossingFn(this, x, y);
 	}
 
 	// ====================================================================

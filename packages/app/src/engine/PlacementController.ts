@@ -7,6 +7,7 @@ import {
 	type ParapetType,
 	Platform,
 	subtypeToCode,
+	type Text,
 } from "@rail-op-sim/shared";
 import {
 	type Application,
@@ -157,6 +158,11 @@ export class PlacementController {
 		canvas.addEventListener("pointermove", this.onPointerMove, { signal });
 		canvas.addEventListener("pointerleave", this.onPointerLeave, { signal });
 		canvas.addEventListener("pointercancel", this.onPointerCancel, { signal });
+		// Right-click is a delete gesture (see handleRightClick) — suppress the
+		// native context menu so the release lands as our own event.
+		canvas.addEventListener("contextmenu", (e) => e.preventDefault(), {
+			signal,
+		});
 
 		this.unsubStore = useEditorStore.subscribe((state, prevState) => {
 			const toolChanged = state.tool !== prevState.tool;
@@ -247,7 +253,7 @@ export class PlacementController {
 	// ── Pointer handling (arrow fields keep `this` bound as listeners) ──
 
 	private onPointerDown = (e: PointerEvent): void => {
-		if (e.button !== 0) return;
+		if (e.button !== 0 && e.button !== 2) return;
 		debugLog("placement", `pointerdown at (${e.clientX}, ${e.clientY})`);
 		this.downPos = { x: e.clientX, y: e.clientY };
 		this.downRect = this.app.canvas.getBoundingClientRect();
@@ -255,7 +261,7 @@ export class PlacementController {
 	};
 
 	private onPointerUp = (e: PointerEvent): void => {
-		if (e.button !== 0) return;
+		if (e.button !== 0 && e.button !== 2) return;
 
 		const down = this.downPos;
 		this.downPos = null;
@@ -288,16 +294,87 @@ export class PlacementController {
 			return;
 		}
 
-		// Text uses free pixel placement — no grid snapping.
-		if (tool === "add" && selectedKind === "text" && selectedSubtype) {
+		// Right-click is the delete gesture (Add + Text tools).
+		if (e.button === 2) {
+			this.handleRightClick(e);
+			return;
+		}
+
+		// Text tool — edit an existing text, name an element, or place new text.
+		if (tool === "text") {
 			const wp = this.screenToWorld(e.clientX, e.clientY);
-			if (wp) {
-				useEditorStore.getState().setPendingTextLocation({ x: wp.x, y: wp.y });
+			if (!wp) return;
+
+			// 1) Clicked an existing text → edit it.
+			const hit = this.textLayer.hitTest(wp.x, wp.y);
+			if (hit) {
+				useEditorStore.getState().setPendingText({
+					mode: "edit",
+					tx: hit.getLocationX(),
+					ty: hit.getLocationY(),
+				});
 				debugLog(
 					"placement",
-					`text click → world(${wp.x.toFixed(1)},${wp.y.toFixed(1)}) — opening dialog`,
+					`text click → edit text at grid(${hit.getLocationX()},${hit.getLocationY()})`,
 				);
+				return;
 			}
+
+			// 2) Clicked a nameable element → open the naming dialog.
+			//    Priority: NamedLocation > Concourse > bridgeUnderpass > platform track.
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (cell) {
+				const nl = this.map.getNamedLocationAt(cell.gx, cell.gy);
+				if (nl) {
+					useEditorStore.getState().setPendingNameTarget({
+						gx: cell.gx,
+						gy: cell.gy,
+						kind: "namedLocation",
+					});
+					return;
+				}
+
+				const concourse = this.map.getConcourseAt(cell.gx, cell.gy);
+				if (concourse) {
+					useEditorStore.getState().setPendingNameTarget({
+						gx: cell.gx,
+						gy: cell.gy,
+						kind: "concourse",
+					});
+					return;
+				}
+
+				const track = this.map.getTrackAt(cell.gx, cell.gy);
+				if (track) {
+					if (track.data.kind === "bridgeUnderpass") {
+						useEditorStore.getState().setPendingNameTarget({
+							gx: cell.gx,
+							gy: cell.gy,
+							kind: "bridgeUnderpass",
+						});
+						return;
+					}
+					if (track.hasPlatform()) {
+						useEditorStore.getState().setPendingNameTarget({
+							gx: cell.gx,
+							gy: cell.gy,
+							kind: "platform",
+						});
+						return;
+					}
+				}
+			}
+
+			// 3) Empty / non-nameable cell → place a new standalone text.
+			useEditorStore.getState().setPendingText({
+				mode: "place",
+				x: wp.x,
+				y: wp.y,
+			});
+			debugLog(
+				"placement",
+				`text click → place at world(${wp.x.toFixed(1)},${wp.y.toFixed(1)})`,
+			);
 			return;
 		}
 
@@ -312,78 +389,6 @@ export class PlacementController {
 			this.linkHighlightLayer.sync(this.map);
 			this.linkHighlightLayer.syncSelection(this.map);
 			debugLog("placement", `link click → grid(${cell.gx},${cell.gy})`);
-			return;
-		}
-
-		// Name tool — click an element to open the naming dialog.
-		if (tool === "name") {
-			const cell = this.screenToGrid(e.clientX, e.clientY);
-			if (!cell) return;
-
-			// Priority order: NamedLocation > Concourse > bridgeUnderpass > platform track
-			const nl = this.map.getNamedLocationAt(cell.gx, cell.gy);
-			if (nl) {
-				useEditorStore
-					.getState()
-					.setPendingNameTarget({
-						gx: cell.gx,
-						gy: cell.gy,
-						kind: "namedLocation",
-					});
-				debugLog(
-					"placement",
-					`name click → NamedLocation at (${cell.gx},${cell.gy}) — opening dialog`,
-				);
-				return;
-			}
-
-			const concourse = this.map.getConcourseAt(cell.gx, cell.gy);
-			if (concourse) {
-				useEditorStore
-					.getState()
-					.setPendingNameTarget({
-						gx: cell.gx,
-						gy: cell.gy,
-						kind: "concourse",
-					});
-				debugLog(
-					"placement",
-					`name click → Concourse at (${cell.gx},${cell.gy}) — opening dialog`,
-				);
-				return;
-			}
-
-			const track = this.map.getTrackAt(cell.gx, cell.gy);
-			if (track) {
-				if (track.data.kind === "bridgeUnderpass") {
-					useEditorStore
-						.getState()
-						.setPendingNameTarget({
-							gx: cell.gx,
-							gy: cell.gy,
-							kind: "bridgeUnderpass",
-						});
-					debugLog(
-						"placement",
-						`name click → bridgeUnderpass at (${cell.gx},${cell.gy}) — opening dialog`,
-					);
-					return;
-				}
-				if (track.hasPlatform()) {
-					useEditorStore
-						.getState()
-						.setPendingNameTarget({
-							gx: cell.gx,
-							gy: cell.gy,
-							kind: "platform",
-						});
-					debugLog(
-						"placement",
-						`name click → platform track at (${cell.gx},${cell.gy}) — opening dialog`,
-					);
-					return;
-				}
-			}
 			return;
 		}
 
@@ -417,7 +422,10 @@ export class PlacementController {
 				);
 			} else {
 				// Second click — find path
-				const startTrack = this.map.getTrackAt(sectionStart.gx, sectionStart.gy);
+				const startTrack = this.map.getTrackAt(
+					sectionStart.gx,
+					sectionStart.gy,
+				);
 				if (!startTrack) {
 					useEditorStore.getState().clearSectionSelection();
 					this.linkHighlightLayer.clearSectionHighlight();
@@ -519,11 +527,57 @@ export class PlacementController {
 					cell.gy,
 				);
 			}
-		} else if (tool === "delete") {
+		}
+	};
+
+	/**
+	 * Right-click delete gesture.
+	 * - Text tool: delete the text under the pointer (unlinking it everywhere).
+	 * - Add tool: cascade — level crossing first, then platform, then the whole
+	 *   element.
+	 */
+	private handleRightClick(e: PointerEvent): void {
+		const { tool } = useEditorStore.getState();
+
+		if (tool === "text") {
+			const wp = this.screenToWorld(e.clientX, e.clientY);
+			if (!wp) return;
+			const hit = this.textLayer.hitTest(wp.x, wp.y);
+			if (hit) this.deleteTextObject(hit);
+			return;
+		}
+
+		if (tool === "add") {
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (!cell) return;
+
+			// 1) Level crossing first.
+			if (this.map.removeLevelCrossing(cell.gx, cell.gy)) {
+				this.elementLayer.sync(this.map);
+				debugLog(
+					"placement",
+					`right-click → removeLevelCrossing at (${cell.gx},${cell.gy})`,
+				);
+				return;
+			}
+
+			// 2) Platform next (may unlink shared text on non-bridge tracks).
+			if (this.map.removePlatform(cell.gx, cell.gy)) {
+				this.elementLayer.sync(this.map);
+				this.textLayer.sync(this.map);
+				debugLog(
+					"placement",
+					`right-click → removePlatform at (${cell.gx},${cell.gy})`,
+				);
+				return;
+			}
+
+			// 3) Otherwise delete the whole element (track / NamedLocation /
+			//    Concourse / Parapet) plus any text cascade.
 			const deleted = this.map.deleteElement(cell.gx, cell.gy);
 			debugLog(
 				"placement",
-				`deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
+				`right-click → deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
 			);
 			if (deleted) {
 				this.trackLayer.removeCell(cell.gx, cell.gy);
@@ -534,7 +588,7 @@ export class PlacementController {
 				this.publishTrackStatus();
 			}
 		}
-	};
+	}
 
 	/** Place a non-track element on the map and sync the element layer. */
 	private handleElementPlacement(
@@ -560,7 +614,6 @@ export class PlacementController {
 						`createAddParapet type=${subtype} at (${gx},${gy})`,
 					);
 					break;
-				// Text is handled via early return in onPointerUp (free pixel placement).
 				case "platform": {
 					const side = platformSubtypeToSide(subtype);
 					if (side !== null) {
@@ -601,6 +654,44 @@ export class PlacementController {
 			"placement",
 			`placeText "${content}" at world(${wx.toFixed(1)},${wy.toFixed(1)}) grid(${gx.toFixed(2)},${gy.toFixed(2)})`,
 		);
+	}
+
+	/** Find the Text at exact grid coordinates (used to prefill/apply text edits). */
+	getTextByLocation(tx: number, ty: number): Text | null {
+		for (const t of this.map.getTextList()) {
+			if (t.getLocationX() === tx && t.getLocationY() === ty) return t;
+		}
+		return null;
+	}
+
+	/**
+	 * Rename (or delete, when content is empty) the Text at the given grid
+	 * coordinates, then re-sync the affected layers.
+	 */
+	updateTextAt(tx: number, ty: number, content: string): void {
+		const text = this.getTextByLocation(tx, ty);
+		if (!text) return;
+		const trimmed = content.trim();
+		this.map.changeDeleteText(trimmed, trimmed !== "", text);
+		this.syncAfterTextChange();
+		debugLog("placement", `updateTextAt (${tx},${ty}) → "${trimmed}"`);
+	}
+
+	/** Delete a Text and unlink it from every element that shared it. */
+	deleteTextObject(text: Text): void {
+		this.map.changeDeleteText("", false, text);
+		this.syncAfterTextChange();
+		debugLog("placement", "deleteTextObject");
+	}
+
+	/**
+	 * Re-sync layers touched by a text rename/delete. The track layer is included
+	 * because bridge/underpass base sprites swap between Set/Unset on name change.
+	 */
+	private syncAfterTextChange(): void {
+		this.textLayer.sync(this.map);
+		this.elementLayer.sync(this.map);
+		this.trackLayer.sync(this.map);
 	}
 
 	/**
@@ -817,8 +908,7 @@ export class PlacementController {
 		const canvas = this.app.canvas;
 		let cursor = "";
 		if (tool === "add" && selectedSubtype) cursor = "crosshair";
-		else if (tool === "delete") cursor = "pointer";
-		else if (tool === "name") cursor = "text";
+		else if (tool === "text") cursor = "text";
 		else if (tool === "link") cursor = "pointer";
 		else if (tool === "section") cursor = "pointer";
 		canvas.style.cursor = cursor;
@@ -833,7 +923,7 @@ export class PlacementController {
 		const { tool, selectedSubtype, selectedKind, selectedAspect } =
 			useEditorStore.getState();
 
-		if (tool !== "add" || !selectedSubtype || selectedKind === "text") {
+		if (tool !== "add" || !selectedSubtype) {
 			debugLog(
 				"placement",
 				`refreshGhost — hiding (tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"})`,

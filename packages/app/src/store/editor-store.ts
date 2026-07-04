@@ -7,18 +7,27 @@ import { create } from "zustand";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
-export type Tool = "select" | "add" | "delete" | "name" | "link" | "section";
+export type Tool = "select" | "add" | "text" | "link" | "section";
 
 /** Non-track element types placeable from the Add palette. */
 export type ElementKind =
 	| "namedLocation"
 	| "concourse"
 	| "parapet"
-	| "text"
 	| "platform"
 	| "levelCrossing";
 
-/** Element types that can be named with the "name" tool. */
+/**
+ * Pending action for the Text tool. Kept serialisable (no pixi/model refs) so it
+ * can live in the store, per store convention.
+ * - `place`: world-pixel coords for a new standalone text.
+ * - `edit`: grid coords of an existing Text to edit/delete.
+ */
+export type PendingText =
+	| { mode: "place"; x: number; y: number }
+	| { mode: "edit"; tx: number; ty: number };
+
+/** Element types that can be named via the Text tool. */
 export type NameableKind =
 	| "namedLocation"
 	| "concourse"
@@ -74,15 +83,15 @@ export interface EditorState {
 	selectedAspect: SignalAspectValue;
 
 	/**
-	 * World coordinates where the user clicked to place text.
-	 * When non-null, the text input dialog opens to collect content.
+	 * Pending Text-tool action. When non-null, the TextInputDialog opens to
+	 * place a new text (`place`) or edit/delete an existing one (`edit`).
 	 */
-	pendingTextLocation: { x: number; y: number } | null;
+	pendingText: PendingText | null;
 
 	/**
 	 * Grid coordinates and element kind of the element the user clicked with the
-	 * "name" tool. When non-null, the NameElementDialog opens to set/change/delete
-	 * its label.
+	 * Text tool on a nameable element. When non-null, the NameElementDialog opens
+	 * to set/change/delete its label.
 	 */
 	pendingNameTarget: { gx: number; gy: number; kind: NameableKind } | null;
 
@@ -115,10 +124,12 @@ export interface EditorState {
 	selectSubtype: (subtype: string | null) => void;
 	/** Set the signal aspect type. */
 	setAspect: (aspect: SignalAspectValue) => void;
-	/** Store the world-coordinate location where text should be placed, triggering the dialog. */
-	setPendingTextLocation: (loc: { x: number; y: number } | null) => void;
-	/** Store the grid-coordinate target for the "name" tool, triggering the dialog. */
-	setPendingNameTarget: (loc: { gx: number; gy: number; kind: NameableKind } | null) => void;
+	/** Store the pending Text-tool action, triggering the TextInputDialog. */
+	setPendingText: (pending: PendingText | null) => void;
+	/** Store the grid-coordinate target for a nameable element, triggering the dialog. */
+	setPendingNameTarget: (
+		loc: { gx: number; gy: number; kind: NameableKind } | null,
+	) => void;
 	/** Toggle the linked track highlight overlay on/off. */
 	toggleLinkHighlights: () => void;
 	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
@@ -126,7 +137,9 @@ export interface EditorState {
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
-	setTrackStatus: (status: { total: number; connected: boolean } | null) => void;
+	setTrackStatus: (
+		status: { total: number; connected: boolean } | null,
+	) => void;
 
 	/**
 	 * Section tool — two-click path selection.
@@ -155,7 +168,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	selectedKind: null,
 	selectedSubtype: null,
 	selectedAspect: SignalAspect.FOUR_ASPECT,
-	pendingTextLocation: null,
+	pendingText: null,
 	pendingNameTarget: null,
 	showLinkHighlights: false,
 	showTrackInfo: false,
@@ -169,12 +182,13 @@ export const useEditorStore = create<EditorState>((set) => ({
 		debugLog("store", `setTool: ${tool}`);
 		set(
 			tool === "add"
-				? { tool, pendingNameTarget: null }
+				? { tool, pendingNameTarget: null, pendingText: null }
 				: {
 						tool,
 						selectedKind: null,
 						selectedSubtype: null,
 						pendingNameTarget: null,
+						pendingText: null,
 						sectionStart: null,
 						sectionEnd: null,
 						sectionTracks: [],
@@ -201,12 +215,18 @@ export const useEditorStore = create<EditorState>((set) => ({
 		set({ selectedAspect: aspect });
 	},
 
-	setPendingTextLocation: (loc) => {
+	setPendingText: (pending) => {
 		debugLog(
 			"store",
-			`setPendingTextLocation: ${loc ? `(${loc.x.toFixed(1)},${loc.y.toFixed(1)})` : "null"}`,
+			`setPendingText: ${
+				pending
+					? pending.mode === "place"
+						? `place(${pending.x.toFixed(1)},${pending.y.toFixed(1)})`
+						: `edit(${pending.tx},${pending.ty})`
+					: "null"
+			}`,
 		);
-		set({ pendingTextLocation: loc });
+		set({ pendingText: pending });
 	},
 
 	setPendingNameTarget: (loc) => {

@@ -1,5 +1,4 @@
 import { ArrowLeft, X } from "@phosphor-icons/react";
-import { useState } from "react";
 import {
 	BridgeUnderpassType,
 	BufferType,
@@ -17,12 +16,11 @@ import {
 	SwitchType,
 	type TrackKind,
 } from "@rail-op-sim/shared";
-import { ASPECT_SVG_MAP } from "#/lib/svgMap";
 import { Button } from "#/components/ui/button";
 import { Separator } from "#/components/ui/separator";
+import { ASPECT_SVG_MAP } from "#/lib/svgMap";
 import { type ElementKind, useEditorStore } from "#/store/editor-store";
 import { AspectPreview } from "./AspectPreview";
-import { TextInputDialog } from "./TextInputDialog";
 import { TrackPreview } from "./TrackPreview";
 
 /** Track categories in display order (most common first). */
@@ -45,11 +43,14 @@ const CATEGORY_LABELS: Record<TrackKind, string> = Object.fromEntries(
 ) as Record<TrackKind, string>;
 
 /** Element types shown in the Elements section. */
-const ELEMENT_TYPES: { kind: ElementKind; label: string; hasSubtypes: boolean }[] = [
+const ELEMENT_TYPES: {
+	kind: ElementKind;
+	label: string;
+	hasSubtypes: boolean;
+}[] = [
 	{ kind: "namedLocation", label: "Named Location", hasSubtypes: false },
 	{ kind: "concourse", label: "Concourse", hasSubtypes: false },
 	{ kind: "parapet", label: "Parapet", hasSubtypes: true },
-	{ kind: "text", label: "Text", hasSubtypes: false },
 	{ kind: "platform", label: "Platform", hasSubtypes: true },
 	{ kind: "levelCrossing", label: "Level Crossing", hasSubtypes: false },
 ];
@@ -59,7 +60,10 @@ const ELEMENT_LABELS: Record<ElementKind, string> = Object.fromEntries(
 ) as Record<ElementKind, string>;
 
 /** Label lookup for all categories (tracks + elements). */
-const ALL_LABELS: Record<string, string> = { ...CATEGORY_LABELS, ...ELEMENT_LABELS };
+const ALL_LABELS: Record<string, string> = {
+	...CATEGORY_LABELS,
+	...ELEMENT_LABELS,
+};
 
 /** Subtype enum values for each kind (both tracks and elements with subtypes). */
 const SUBTYPE_VALUES: Record<string, string[]> = {
@@ -77,12 +81,16 @@ const SUBTYPE_VALUES: Record<string, string[]> = {
 	flyover: Object.values(FlyoverType),
 	// ── Elements ──
 	parapet: Object.values(ParapetType),
-	platform: ["PLATFORM_LEFT_SET", "PLATFORM_RIGHT_SET", "PLATFORM_UP_SET", "PLATFORM_DOWN_SET"],
+	platform: [
+		"PLATFORM_LEFT_SET",
+		"PLATFORM_RIGHT_SET",
+		"PLATFORM_UP_SET",
+		"PLATFORM_DOWN_SET",
+	],
 	// Single-entry sentinel subtypes for elements without variants
 	namedLocation: ["NAMEDLOCATION_SET"],
 	concourse: ["CONCOURSE_SET"],
 	levelCrossing: ["LEVELCROSSING"],
-	text: ["TEXT_ENTRY"],
 };
 
 /**
@@ -93,17 +101,36 @@ const SENTINEL_SUBTYPE: Record<ElementKind, string> = {
 	namedLocation: "NAMEDLOCATION_SET",
 	concourse: "CONCOURSE_SET",
 	parapet: "", // not used — user picks from subtype grid
-	text: "TEXT_ENTRY",
 	platform: "", // not used — user picks from subtype grid
 	levelCrossing: "LEVELCROSSING",
 };
 
 /** Aspect type options shown below the signal subtype grid. */
-const ASPECT_OPTIONS: { value: SignalAspectValue; label: string; filename: string }[] = [
-	{ value: SignalAspect.FOUR_ASPECT, label: "4-aspect", filename: ASPECT_SVG_MAP[SignalAspect.FOUR_ASPECT] },
-	{ value: SignalAspect.THREE_ASPECT, label: "3-aspect", filename: ASPECT_SVG_MAP[SignalAspect.THREE_ASPECT] },
-	{ value: SignalAspect.TWO_ASPECT, label: "2-aspect", filename: ASPECT_SVG_MAP[SignalAspect.TWO_ASPECT] },
-	{ value: SignalAspect.SHUNT, label: "Shunt", filename: ASPECT_SVG_MAP[SignalAspect.SHUNT] },
+const ASPECT_OPTIONS: {
+	value: SignalAspectValue;
+	label: string;
+	filename: string;
+}[] = [
+	{
+		value: SignalAspect.FOUR_ASPECT,
+		label: "4-aspect",
+		filename: ASPECT_SVG_MAP[SignalAspect.FOUR_ASPECT],
+	},
+	{
+		value: SignalAspect.THREE_ASPECT,
+		label: "3-aspect",
+		filename: ASPECT_SVG_MAP[SignalAspect.THREE_ASPECT],
+	},
+	{
+		value: SignalAspect.TWO_ASPECT,
+		label: "2-aspect",
+		filename: ASPECT_SVG_MAP[SignalAspect.TWO_ASPECT],
+	},
+	{
+		value: SignalAspect.SHUNT,
+		label: "Shunt",
+		filename: ASPECT_SVG_MAP[SignalAspect.SHUNT],
+	},
 ];
 
 /**
@@ -120,31 +147,15 @@ export function AddPalette() {
 	const selectKind = useEditorStore((s) => s.selectKind);
 	const selectSubtype = useEditorStore((s) => s.selectSubtype);
 	const setAspect = useEditorStore((s) => s.setAspect);
-	const pendingTextLocation = useEditorStore((s) => s.pendingTextLocation);
 	const setTool = useEditorStore((s) => s.setTool);
-
-	const [textDialogOpen, setTextDialogOpen] = useState(false);
-
-	// When the user clicks the canvas with the text tool, the store gets a
-	// pendingTextLocation — open the dialog to collect the text content.
-	if (pendingTextLocation && !textDialogOpen) {
-		setTextDialogOpen(true);
-	}
 
 	if (tool !== "add") return null;
 
 	// Pass aspect to directional previews so shunt signals show shunt art.
-	const previewAspect =
-		selectedKind === "signal" ? selectedAspect : undefined;
+	const previewAspect = selectedKind === "signal" ? selectedAspect : undefined;
 
 	/** Handle clicking an element type button in the Elements section. */
 	const handleElementClick = (kind: ElementKind, hasSubtypes: boolean) => {
-		if (kind === "text") {
-			// Enter placement mode — the dialog opens after the canvas click.
-			selectKind(kind);
-			selectSubtype(SENTINEL_SUBTYPE[kind]);
-			return;
-		}
 		if (hasSubtypes) {
 			// parapet, platform — drill into subtype grid
 			selectKind(kind);
@@ -156,7 +167,8 @@ export function AddPalette() {
 	};
 
 	/** Whether the current selectedKind has a subtype grid to show. */
-	const hasSubtypeGrid = selectedKind != null && SUBTYPE_VALUES[selectedKind] != null;
+	const hasSubtypeGrid =
+		selectedKind != null && SUBTYPE_VALUES[selectedKind] != null;
 	const subtypeValues = selectedKind ? SUBTYPE_VALUES[selectedKind] : [];
 	const isSingleSubtype = subtypeValues.length === 1;
 
@@ -166,122 +178,118 @@ export function AddPalette() {
 		: "Add";
 
 	return (
-		<>
-			<div className="absolute left-[4.5rem] top-4 z-10 max-h-[75vh] min-w-[220px] overflow-y-auto rounded-xl border bg-background/95 p-3 shadow-sm backdrop-blur-sm">
-				<div className="mb-2 flex items-center justify-between gap-2">
-					{selectedKind ? (
-						<Button
-							variant="ghost"
-							size="icon-sm"
-							aria-label="Back to categories"
-							onClick={() => selectKind(null)}
-						>
-							<ArrowLeft size={16} />
-						</Button>
-					) : (
-						<div className="size-7" />
-					)}
-					<span className="text-sm font-medium">{headerTitle}</span>
+		<div className="absolute left-[4.5rem] top-4 z-10 max-h-[75vh] min-w-[220px] overflow-y-auto rounded-xl border bg-background/95 p-3 shadow-sm backdrop-blur-sm">
+			<div className="mb-2 flex items-center justify-between gap-2">
+				{selectedKind ? (
 					<Button
 						variant="ghost"
 						size="icon-sm"
-						aria-label="Close palette"
-						onClick={() => setTool("select")}
+						aria-label="Back to categories"
+						onClick={() => selectKind(null)}
 					>
-						<X size={16} />
+						<ArrowLeft size={16} />
 					</Button>
-				</div>
+				) : (
+					<div className="size-7" />
+				)}
+				<span className="text-sm font-medium">{headerTitle}</span>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					aria-label="Close palette"
+					onClick={() => setTool("select")}
+				>
+					<X size={16} />
+				</Button>
+			</div>
 
-				{hasSubtypeGrid ? (
-					<>
-						{isSingleSubtype ? (
-							<div className="py-2 text-center text-xs text-muted-foreground">
-								Click on canvas to place.
+			{hasSubtypeGrid ? (
+				<>
+					{isSingleSubtype ? (
+						<div className="py-2 text-center text-xs text-muted-foreground">
+							Click on canvas to place.
+						</div>
+					) : (
+						<div className="grid grid-cols-3 gap-1">
+							{subtypeValues.map((subtype) => (
+								<Button
+									key={subtype}
+									variant={selectedSubtype === subtype ? "secondary" : "ghost"}
+									size="icon-lg"
+									aria-label={subtype}
+									aria-pressed={selectedSubtype === subtype}
+									onClick={() => selectSubtype(subtype)}
+								>
+									<TrackPreview subtype={subtype} aspect={previewAspect} />
+								</Button>
+							))}
+						</div>
+					)}
+
+					{selectedKind === "signal" && (
+						<>
+							<Separator className="my-2" />
+							<div className="mb-1.5 text-xs font-medium text-muted-foreground">
+								Signal type
 							</div>
-						) : (
-							<div className="grid grid-cols-3 gap-1">
-								{subtypeValues.map((subtype) => (
+							<div className="flex flex-wrap gap-1">
+								{ASPECT_OPTIONS.map(({ value, label, filename }) => (
 									<Button
-										key={subtype}
-										variant={selectedSubtype === subtype ? "secondary" : "ghost"}
+										key={value}
+										variant={selectedAspect === value ? "secondary" : "ghost"}
 										size="icon-lg"
-										aria-label={subtype}
-										aria-pressed={selectedSubtype === subtype}
-										onClick={() => selectSubtype(subtype)}
+										aria-label={label}
+										aria-pressed={selectedAspect === value}
+										onClick={() => setAspect(value)}
 									>
-										<TrackPreview subtype={subtype} aspect={previewAspect} />
+										<AspectPreview filename={filename} />
 									</Button>
 								))}
 							</div>
-						)}
+						</>
+					)}
+				</>
+			) : (
+				<>
+					{/* ── Tracks section ── */}
+					<div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+						Tracks
+					</div>
+					<div className="grid grid-cols-2 gap-1">
+						{CATEGORIES.map(({ kind, label }) => (
+							<Button
+								key={kind}
+								variant="ghost"
+								size="sm"
+								className="justify-start"
+								onClick={() => selectKind(kind)}
+							>
+								{label}
+							</Button>
+						))}
+					</div>
 
-						{selectedKind === "signal" && (
-							<>
-								<Separator className="my-2" />
-								<div className="mb-1.5 text-xs font-medium text-muted-foreground">
-									Signal type
-								</div>
-								<div className="flex flex-wrap gap-1">
-									{ASPECT_OPTIONS.map(({ value, label, filename }) => (
-										<Button
-											key={value}
-											variant={selectedAspect === value ? "secondary" : "ghost"}
-											size="icon-lg"
-											aria-label={label}
-											aria-pressed={selectedAspect === value}
-											onClick={() => setAspect(value)}
-										>
-											<AspectPreview filename={filename} />
-										</Button>
-									))}
-								</div>
-							</>
-						)}
-					</>
-				) : (
-					<>
-						{/* ── Tracks section ── */}
-						<div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-							Tracks
-						</div>
-						<div className="grid grid-cols-2 gap-1">
-							{CATEGORIES.map(({ kind, label }) => (
-								<Button
-									key={kind}
-									variant="ghost"
-									size="sm"
-									className="justify-start"
-									onClick={() => selectKind(kind)}
-								>
-									{label}
-								</Button>
-							))}
-						</div>
+					<Separator className="my-2" />
 
-						<Separator className="my-2" />
-
-						{/* ── Elements section ── */}
-						<div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-							Elements
-						</div>
-						<div className="grid grid-cols-2 gap-1">
-							{ELEMENT_TYPES.map(({ kind, label, hasSubtypes }) => (
-								<Button
-									key={kind}
-									variant="ghost"
-									size="sm"
-									className="justify-start"
-									onClick={() => handleElementClick(kind, hasSubtypes)}
-								>
-									{label}
-								</Button>
-							))}
-						</div>
-					</>
-				)}
-			</div>
-
-			<TextInputDialog open={textDialogOpen} onOpenChange={setTextDialogOpen} />
-		</>
+					{/* ── Elements section ── */}
+					<div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+						Elements
+					</div>
+					<div className="grid grid-cols-2 gap-1">
+						{ELEMENT_TYPES.map(({ kind, label, hasSubtypes }) => (
+							<Button
+								key={kind}
+								variant="ghost"
+								size="sm"
+								className="justify-start"
+								onClick={() => handleElementClick(kind, hasSubtypes)}
+							>
+								{label}
+							</Button>
+						))}
+					</div>
+				</>
+			)}
+		</div>
 	);
 }

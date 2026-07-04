@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import type { NamedElement } from "@rail-op-sim/shared";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "#/components/ui/button";
 import {
 	Dialog,
@@ -49,7 +49,7 @@ function getElementAt(
 
 /**
  * Modal dialog shown after the user clicks a nameable element (NamedLocation,
- * Concourse, platform track, or bridge/underpass) with the "name" tool active.
+ * Concourse, platform track, or bridge/underpass) with the Text tool active.
  * Allows setting, changing, or deleting the label on the element and its
  * cardinally-adjacent group.
  */

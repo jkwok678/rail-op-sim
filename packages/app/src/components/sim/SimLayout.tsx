@@ -8,6 +8,7 @@ import { NameElementDialog } from "./NameElementDialog";
 import { SectionEditPanel } from "./SectionEditPanel";
 import { SettingsMenu } from "./SettingsMenu";
 import { SimCanvas } from "./SimCanvas";
+import { TextInputDialog } from "./TextInputDialog";
 import { Toolbar } from "./Toolbar";
 import { TrackInfoTooltip } from "./TrackInfoTooltip";
 
@@ -17,9 +18,11 @@ import { TrackInfoTooltip } from "./TrackInfoTooltip";
 export function SimLayout() {
 	const { theme, toggle } = useTheme();
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
+	const pendingText = useEditorStore((s) => s.pendingText);
 	const trackStatus = useEditorStore((s) => s.trackStatus);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
+	const [textDialogOpen, setTextDialogOpen] = useState(false);
 
 	// Derive dialog visibility from the store so there is a single source of
 	// truth.  When `pendingNameTarget` is set the dialog opens; when it is
@@ -31,6 +34,15 @@ export function SimLayout() {
 			setNameDialogOpen(false);
 		}
 	}, [pendingNameTarget]);
+
+	// Same pattern for the Text tool's dialog.
+	useEffect(() => {
+		if (pendingText) {
+			setTextDialogOpen(true);
+		} else {
+			setTextDialogOpen(false);
+		}
+	}, [pendingText]);
 
 	// Derive connectivity status from the plain summary the placement controller
 	// publishes to the store. No pixi/controller access here, so this component
@@ -58,6 +70,10 @@ export function SimLayout() {
 				<NameElementDialog
 					open={nameDialogOpen}
 					onOpenChange={setNameDialogOpen}
+				/>
+				<TextInputDialog
+					open={textDialogOpen}
+					onOpenChange={setTextDialogOpen}
 				/>
 				<TrackInfoTooltip />
 			</div>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	BridgeUnderpassType,
 	BufferType,
 	CurvedType,
 	DirectedType,
@@ -8,7 +9,14 @@ import {
 	SwitchType,
 } from "../enums";
 import { Map_ } from "../map";
-import { addLevelCrossing, addPlatform } from "../map/map-platform";
+import {
+	addLevelCrossing,
+	addPlatform,
+	removeLevelCrossing,
+	removePlatform,
+} from "../map/map-platform";
+
+const FONT = { family: "JetBrains Mono", pointSize: 12 };
 
 // ============================================================================
 // addPlatform
@@ -318,5 +326,112 @@ describe("addLevelCrossing", () => {
 	it("empty coordinate does not raise an error", () => {
 		const map = new Map_();
 		expect(() => addLevelCrossing(map, 999, 999)).not.toThrow();
+	});
+});
+
+// ============================================================================
+// removePlatform
+// ============================================================================
+
+function addStraightH(map: Map_, x: number, y: number): void {
+	map.addTrack(
+		{
+			kind: "straight",
+			subtype: StraightType.STRAIGHTH,
+			platform1: false,
+			platform2: false,
+			levelCrossing: false,
+		},
+		x,
+		y,
+	);
+}
+
+describe("removePlatform", () => {
+	it("clears both platforms and returns true", () => {
+		const map = new Map_();
+		addStraightH(map, 0, 0);
+		const track = map.getTrackAt(0, 0)!;
+		track.setPlatform1(true);
+		track.setPlatform2(true);
+		expect(removePlatform(map, 0, 0)).toBe(true);
+		expect(track.getPlatform1()).toBe(false);
+		expect(track.getPlatform2()).toBe(false);
+	});
+
+	it("returns false when the track has no platform", () => {
+		const map = new Map_();
+		addStraightH(map, 0, 0);
+		expect(removePlatform(map, 0, 0)).toBe(false);
+	});
+
+	it("returns false at an empty coordinate", () => {
+		const map = new Map_();
+		expect(removePlatform(map, 999, 999)).toBe(false);
+	});
+
+	it("unlinks shared text but keeps the Text and adjacent sharer named", () => {
+		const map = new Map_();
+		map.setImageSize(1); // match integer-grid storage for neighbor propagation
+		addStraightH(map, 0, 0);
+		addStraightH(map, 1, 0);
+		map.getTrackAt(0, 0)!.setPlatform1(true);
+		map.getTrackAt(1, 0)!.setPlatform1(true);
+		// Names (0,0) and flood-fills to the adjacent platform track (1,0).
+		map.createAddLinkText(0, 0, "Platform A", true, FONT);
+		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
+		expect(map.getTrackAt(1, 0)!.getNamed()).toBe(true);
+
+		expect(removePlatform(map, 0, 0)).toBe(true);
+		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(false);
+		// The Text survives (still referenced by the adjacent sharer).
+		expect(map.getTextList().length).toBe(1);
+		expect(map.getTrackAt(1, 0)!.getNamed()).toBe(true);
+	});
+
+	it("keeps text on a named bridge/underpass after removePlatform", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "bridgeUnderpass",
+				subtype: BridgeUnderpassType.BRIDGE2,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		addPlatform(map, Platform.LEFT, 0, 0);
+		map.createAddLinkText(0, 0, "Bridge", true, FONT);
+		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
+
+		expect(removePlatform(map, 0, 0)).toBe(true);
+		// Bridge naming isn't platform-gated, so the text stays linked.
+		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
+	});
+});
+
+// ============================================================================
+// removeLevelCrossing
+// ============================================================================
+
+describe("removeLevelCrossing", () => {
+	it("removes an existing level crossing and returns true", () => {
+		const map = new Map_();
+		addStraightH(map, 0, 0);
+		map.getTrackAt(0, 0)!.addLevelCrossing();
+		expect(removeLevelCrossing(map, 0, 0)).toBe(true);
+		expect(map.getTrackAt(0, 0)!.hasLevelCrossing()).toBe(false);
+	});
+
+	it("returns false when there is no level crossing", () => {
+		const map = new Map_();
+		addStraightH(map, 0, 0);
+		expect(removeLevelCrossing(map, 0, 0)).toBe(false);
+	});
+
+	it("returns false at an empty coordinate", () => {
+		const map = new Map_();
+		expect(removeLevelCrossing(map, 999, 999)).toBe(false);
 	});
 });

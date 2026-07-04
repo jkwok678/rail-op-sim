@@ -1,15 +1,22 @@
 import type { Icon } from "@phosphor-icons/react";
-import { Cursor, Eye, EyeSlash, Graph, Link, Plus, Tag, Trash } from "@phosphor-icons/react";
+import {
+	Cursor,
+	Eye,
+	EyeSlash,
+	Graph,
+	Link,
+	Plus,
+	TextT,
+} from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { type Tool, useEditorStore } from "#/store/editor-store";
 
 const TOOLS: { tool: Tool; label: string; Icon: Icon }[] = [
 	{ tool: "select", label: "Select", Icon: Cursor },
 	{ tool: "add", label: "Add track", Icon: Plus },
+	{ tool: "text", label: "Add Text", Icon: TextT },
 	{ tool: "link", label: "Link", Icon: Link },
 	{ tool: "section", label: "Section", Icon: Graph },
-	{ tool: "name", label: "Name", Icon: Tag },
-	{ tool: "delete", label: "Delete", Icon: Trash },
 ];
 
 /** Floating left toolbar for choosing the active editing tool. */
@@ -38,9 +45,13 @@ export function Toolbar() {
 			<Button
 				variant={showLinkHighlights ? "secondary" : "ghost"}
 				size="icon"
-				aria-label={showLinkHighlights ? "Hide link highlights" : "Show link highlights"}
+				aria-label={
+					showLinkHighlights ? "Hide link highlights" : "Show link highlights"
+				}
 				aria-pressed={showLinkHighlights}
-				title={showLinkHighlights ? "Hide link highlights" : "Show link highlights"}
+				title={
+					showLinkHighlights ? "Hide link highlights" : "Show link highlights"
+				}
 				onClick={toggleLinkHighlights}
 			>
 				{showLinkHighlights ? <Eye size={18} /> : <EyeSlash size={18} />}
