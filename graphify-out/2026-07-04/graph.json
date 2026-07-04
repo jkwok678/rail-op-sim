@@ -2517,7 +2517,7 @@
       "label": ".zoomTo()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L127",
+      "source_location": "L128",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_zoomto",
       "community": 16,
@@ -2527,7 +2527,7 @@
       "label": ".panTo()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L136",
+      "source_location": "L137",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_panto",
       "community": 16,
@@ -2537,7 +2537,7 @@
       "label": ".notify()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L141",
+      "source_location": "L142",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_notify",
       "community": 16,
@@ -2547,7 +2547,7 @@
       "label": ".handlePointerDown()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L147",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointerdown",
       "community": 16,
@@ -2557,7 +2557,7 @@
       "label": ".handlePointerMove()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L159",
+      "source_location": "L160",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointermove",
       "community": 16,
@@ -2567,7 +2567,7 @@
       "label": ".handlePointerUp()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L172",
+      "source_location": "L173",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlepointerup",
       "community": 16,
@@ -2577,7 +2577,7 @@
       "label": ".handleWheel()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L182",
+      "source_location": "L183",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlewheel",
       "community": 16,
@@ -2587,7 +2587,7 @@
       "label": ".applyZoom()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L194",
+      "source_location": "L195",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_applyzoom",
       "community": 16,
@@ -2597,7 +2597,7 @@
       "label": ".handleKeyDown()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L210",
+      "source_location": "L211",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlekeydown",
       "community": 16,
@@ -2607,7 +2607,7 @@
       "label": ".handleKeyUp()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L218",
+      "source_location": "L219",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_handlekeyup",
       "community": 16,
@@ -2617,7 +2617,7 @@
       "label": ".updateCursor()",
       "file_type": "code",
       "source_file": "packages/app/src/engine/ViewportController.ts",
-      "source_location": "L225",
+      "source_location": "L226",
       "_origin": "ast",
       "id": "engine_viewportcontroller_viewportcontroller_updatecursor",
       "community": 16,
@@ -15841,9 +15841,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "lib_svgcolors",
-      "confidence_score": 1.0
+      "target": "lib_svgcolors"
     },
     {
       "relation": "imports",
@@ -15852,9 +15852,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "lib_svgcolors_normalizecsscolor",
-      "confidence_score": 1.0
+      "target": "lib_svgcolors_normalizecsscolor"
     },
     {
       "relation": "imports",
@@ -15863,9 +15863,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "railway_types_fontinfo",
-      "confidence_score": 1.0
+      "target": "railway_types_fontinfo"
     },
     {
       "relation": "contains",
@@ -15873,9 +15873,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "sim_textinputdialog_font_families",
-      "confidence_score": 1.0
+      "target": "sim_textinputdialog_font_families"
     },
     {
       "relation": "contains",
@@ -15904,9 +15904,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "src_index",
-      "confidence_score": 1.0
+      "target": "src_index"
     },
     {
       "relation": "imports_from",
@@ -16047,9 +16047,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select",
-      "confidence_score": 1.0
+      "target": "ui_select"
     },
     {
       "relation": "imports",
@@ -16058,9 +16058,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select_select",
-      "confidence_score": 1.0
+      "target": "ui_select_select"
     },
     {
       "relation": "imports",
@@ -16069,9 +16069,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select_selectcontent",
-      "confidence_score": 1.0
+      "target": "ui_select_selectcontent"
     },
     {
       "relation": "imports",
@@ -16080,9 +16080,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select_selectitem",
-      "confidence_score": 1.0
+      "target": "ui_select_selectitem"
     },
     {
       "relation": "imports",
@@ -16091,9 +16091,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select_selecttrigger",
-      "confidence_score": 1.0
+      "target": "ui_select_selecttrigger"
     },
     {
       "relation": "imports",
@@ -16102,9 +16102,9 @@
       "source_file": "packages/app/src/components/sim/TextInputDialog.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sim_textinputdialog",
-      "target": "ui_select_selectvalue",
-      "confidence_score": 1.0
+      "target": "ui_select_selectvalue"
     },
     {
       "relation": "calls",
@@ -17606,9 +17606,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller",
-      "target": "railway_types_fontinfo",
-      "confidence_score": 1.0
+      "target": "railway_types_fontinfo"
     },
     {
       "relation": "imports_from",
@@ -18503,9 +18503,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L646",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_placetext",
-      "target": "railway_types_fontinfo",
-      "confidence_score": 1.0
+      "target": "railway_types_fontinfo"
     },
     {
       "relation": "references",
@@ -18558,9 +18558,9 @@
       "source_file": "packages/app/src/engine/PlacementController.ts",
       "source_location": "L669",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "engine_placementcontroller_placementcontroller_updatetextat",
-      "target": "railway_types_fontinfo",
-      "confidence_score": 1.0
+      "target": "railway_types_fontinfo"
     },
     {
       "relation": "calls",
@@ -33426,5 +33426,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4f8ea2e39e43311d647768269b12de0d26c6043d"
+  "built_at_commit": "6015e30e077bcc2e88257832c9939a4eb0ce028a"
 }

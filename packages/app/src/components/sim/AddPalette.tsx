@@ -148,6 +148,7 @@ export function AddPalette() {
 	const selectSubtype = useEditorStore((s) => s.selectSubtype);
 	const setAspect = useEditorStore((s) => s.setAspect);
 	const setTool = useEditorStore((s) => s.setTool);
+	const toolbarPos = useEditorStore((s) => s.toolbarPos);
 
 	if (tool !== "add") return null;
 
@@ -178,7 +179,10 @@ export function AddPalette() {
 		: "Add";
 
 	return (
-		<div className="absolute left-[4.5rem] top-4 z-10 max-h-[75vh] min-w-[220px] overflow-y-auto rounded-xl border bg-background/95 p-3 shadow-sm backdrop-blur-sm">
+		<div
+			className="absolute z-10 max-h-[75vh] min-w-[220px] overflow-y-auto rounded-xl border bg-background/95 p-3 shadow-sm backdrop-blur-sm"
+			style={{ left: toolbarPos.x + 56, top: toolbarPos.y }}
+		>
 			<div className="mb-2 flex items-center justify-between gap-2">
 				{selectedKind ? (
 					<Button

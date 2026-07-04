@@ -1185,8 +1185,8 @@
     "semantic_hash": "917515db74ea8d1aee6a246cfbcc0b45"
   },
   "packages/app/src/components/sim/AddPalette.tsx": {
-    "mtime": 1783126244.3484378,
-    "ast_hash": "957c610bf1ad5da31effbc7e897411f7",
+    "mtime": 1783168858.2334926,
+    "ast_hash": "ed005e4193e0497233d789b8ac248793",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/AspectPreview.tsx": {
@@ -1205,8 +1205,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/Toolbar.tsx": {
-    "mtime": 1783152877.255802,
-    "ast_hash": "35746e5d79b4ecbfe21955d1e2bb0ca4",
+    "mtime": 1783168833.0121648,
+    "ast_hash": "7aa99e2f9b3fb746cc8dddf0b47adb7b",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TrackPreview.tsx": {
@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/store/editor-store.ts": {
-    "mtime": 1783151957.1301465,
-    "ast_hash": "b0e2501009f8291a7d6dd875b12936f3",
+    "mtime": 1783168592.7809043,
+    "ast_hash": "e26d7e6033e157719347a603b078c379",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/__tests__/track-factory.test.ts": {

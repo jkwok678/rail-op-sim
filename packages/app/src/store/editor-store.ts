@@ -153,6 +153,15 @@ export interface EditorState {
 	setZoom: (z: number) => void;
 
 	/**
+	 * Screen position (px, top-left corner) of the floating toolbar. Panels that
+	 * anchor to the toolbar (e.g. the Add palette) read this so they follow it as
+	 * the user drags it around the viewport.
+	 */
+	toolbarPos: { x: number; y: number };
+	/** Move the floating toolbar to a new screen position. */
+	setToolbarPos: (pos: { x: number; y: number }) => void;
+
+	/**
 	 * Section tool — two-click path selection.
 	 * grid coordinates of the first clicked track (start), or null.
 	 */
@@ -187,6 +196,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	hoveredTrackInfo: null,
 	trackStatus: null,
 	zoom: DEFAULT_ZOOM,
+	toolbarPos: { x: 16, y: 16 },
 	sectionStart: null,
 	sectionEnd: null,
 	sectionTracks: [],
@@ -261,6 +271,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
 	setZoom: (z) => set({ zoom: z }),
+	setToolbarPos: (pos) => set({ toolbarPos: pos }),
 
 	setSectionStart: (loc) => {
 		debugLog(

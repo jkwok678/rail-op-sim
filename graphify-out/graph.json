@@ -1557,7 +1557,7 @@
       "label": "TOOLS",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/Toolbar.tsx",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "sim_toolbar_tools",
       "community": 17,
@@ -1567,7 +1567,7 @@
       "label": "Toolbar()",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/Toolbar.tsx",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "sim_toolbar_toolbar",
       "community": 17,
@@ -3647,7 +3647,7 @@
       "label": "useEditorStore",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L177",
+      "source_location": "L186",
       "_origin": "ast",
       "id": "store_editor_store_useeditorstore",
       "community": 17,
@@ -33426,5 +33426,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6015e30e077bcc2e88257832c9939a4eb0ce028a"
+  "built_at_commit": "08e8a289706334f56e373fecd65c89b7d5643410"
 }
