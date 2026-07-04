@@ -85,8 +85,8 @@
     "semantic_hash": "fcf56f6b6879c7f2a6a34f2b7bb9b9c5"
   },
   "packages/app/src/engine/ViewportController.ts": {
-    "mtime": 1783151947.881479,
-    "ast_hash": "a934223011744af6423ec3c5e248daaf",
+    "mtime": 1783168194.3233304,
+    "ast_hash": "da813f57336c7be4256e2a7ade09236c",
     "semantic_hash": ""
   },
   "packages/app/src/hooks/usePixiApp.ts": {

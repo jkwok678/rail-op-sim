@@ -250,9 +250,9 @@
     "semantic_hash": ""
   },
   "packages/shared/src/railway/types.ts": {
-    "mtime": 1782594245.1561,
-    "ast_hash": "f9b0000a1073421401fd049afd1eca20",
-    "semantic_hash": "f9b0000a1073421401fd049afd1eca20"
+    "mtime": 1783153633.2323716,
+    "ast_hash": "9ecf2220a42755e701161c229eda64af",
+    "semantic_hash": ""
   },
   "packages/shared/tsconfig.json": {
     "mtime": 1782555999.37945,
@@ -1200,8 +1200,8 @@
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/TextInputDialog.tsx": {
-    "mtime": 1783126244.3473272,
-    "ast_hash": "c7ceb0b0c7f09436d1146db20116db78",
+    "mtime": 1783153741.9375274,
+    "ast_hash": "3cdb3b4478b2e4e9a82e2cf9a4dc5364",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/Toolbar.tsx": {
@@ -1215,8 +1215,8 @@
     "semantic_hash": "d7ef281f0923d6a7126f015857679fb7"
   },
   "packages/app/src/engine/PlacementController.ts": {
-    "mtime": 1783126244.36541,
-    "ast_hash": "bacae30a37a84127086cd5159ff23e0a",
+    "mtime": 1783153767.6965504,
+    "ast_hash": "56d2300b3f0f7b31a699488df7c2f2f7",
     "semantic_hash": ""
   },
   "packages/app/src/lib/__tests__/svgMap.test.ts": {
@@ -1325,8 +1325,8 @@
     "semantic_hash": "bf38aeeec615ee1c0dfde4cf49c4e2ee"
   },
   "packages/app/src/renderer/layers/TextLayer.ts": {
-    "mtime": 1783126244.3638995,
-    "ast_hash": "d941bc4f61d3057a3f130483e13f5cac",
+    "mtime": 1783153682.6434526,
+    "ast_hash": "76f1a83251a95be83d15d71a039a37c1",
     "semantic_hash": ""
   },
   "packages/app/src/renderer/layers/LinkHighlightLayer.ts": {

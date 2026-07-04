@@ -115,9 +115,10 @@ export class ViewportController {
 		const clampedZoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 
 		this.world.scale.set(clampedZoom);
+		// Center the world origin (0,0) on the screen.
 		this.world.position.set(
-			padding + extent * clampedZoom,
-			padding + extent * clampedZoom,
+			this.app.screen.width / 2,
+			this.app.screen.height / 2,
 		);
 
 		this.notify();

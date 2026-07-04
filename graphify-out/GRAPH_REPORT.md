@@ -1,7 +1,7 @@
 # Graph Report - rail-op-sim  (2026-07-04)
 
 ## Corpus Check
-- 88 files · ~82,895 words
+- 88 files · ~82,900 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4f8ea2e3`
+- Built from commit: `6015e30e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
