@@ -5,6 +5,7 @@ import { useTheme } from "#/hooks/useTheme";
 import { useEditorStore } from "#/store/editor-store";
 import { AddPalette } from "./AddPalette";
 import { NameElementDialog } from "./NameElementDialog";
+import { SaveLoadControls } from "./SaveLoadControls";
 import { SectionEditPanel } from "./SectionEditPanel";
 import { SettingsMenu } from "./SettingsMenu";
 import { SimCanvas } from "./SimCanvas";
@@ -83,6 +84,7 @@ export function SimLayout() {
 					{connectivity.label}
 				</span>
 				<div className="flex items-center gap-1">
+					<SaveLoadControls />
 					<SettingsMenu />
 					<Button
 						variant="ghost"

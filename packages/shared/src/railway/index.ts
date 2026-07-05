@@ -38,11 +38,27 @@ export {
 } from "./errors";
 // Map class
 export { Map_ as Map } from "./map";
+export type {
+	LinkedTrackPair,
+	LinkedTrackReport,
+} from "./map/map-connectivity";
 export { findPathBetween } from "./map/map-connectivity";
-export type { LinkedTrackPair, LinkedTrackReport } from "./map/map-connectivity";
+export type {
+	SerializedMap,
+	SerializedNamedElement,
+	SerializedParapet,
+	SerializedText,
+	SerializedTrack,
+} from "./map/map-serialization";
+export {
+	deserializeMap,
+	SERIALIZED_MAP_VERSION,
+	serializeMap,
+} from "./map/map-serialization";
 export type {
 	CreateTrackDataOptions,
 	SignalAspectValue,
+	TrackColorState,
 	TrackData,
 	TrackKind,
 	TrackKindMeta,
@@ -70,10 +86,6 @@ export {
 	TRACK_COLOR_SPEED,
 	Track,
 } from "./track";
-export type { TrackColorState } from "./track";
-// Units
-export { formatImperialLength, kmhToMph, metresToImperial, round1 } from "./units";
-
 // Types
 export type {
 	FontInfo,
@@ -81,3 +93,10 @@ export type {
 	Point,
 	TextSelectionPrompt,
 } from "./types";
+// Units
+export {
+	formatImperialLength,
+	kmhToMph,
+	metresToImperial,
+	round1,
+} from "./units";

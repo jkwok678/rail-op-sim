@@ -11,7 +11,8 @@ type Subsystem =
 	| "textureCache"
 	| "pixi"
 	| "grid"
-	| "map";
+	| "map"
+	| "saveload";
 
 export function debugLog(
 	subsystem: Subsystem,

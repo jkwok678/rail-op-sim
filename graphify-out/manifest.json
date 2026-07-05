@@ -35,13 +35,13 @@
     "semantic_hash": "8e51e1e8af472dcd2f255656c66bec15"
   },
   "packages/app/src/components/sim/SimCanvas.tsx": {
-    "mtime": 1783130975.2508361,
-    "ast_hash": "ba46592e2d4996057ed94c5713b50a8f",
+    "mtime": 1783169634.7563636,
+    "ast_hash": "a640afd2f36550b325b45f52202dd5f0",
     "semantic_hash": ""
   },
   "packages/app/src/components/sim/SimLayout.tsx": {
-    "mtime": 1783129481.8906317,
-    "ast_hash": "bb9e3262f438bef4be85f2b13a302349",
+    "mtime": 1783208173.7006993,
+    "ast_hash": "daa0c8d38ca82619ccbc09f4ec36da08",
     "semantic_hash": ""
   },
   "packages/app/src/components/ui/button.tsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": "fcf56f6b6879c7f2a6a34f2b7bb9b9c5"
   },
   "packages/app/src/engine/ViewportController.ts": {
-    "mtime": 1783168194.3233304,
-    "ast_hash": "da813f57336c7be4256e2a7ade09236c",
+    "mtime": 1783169655.1288133,
+    "ast_hash": "1dc977018947e4bbf66762c0fc020124",
     "semantic_hash": ""
   },
   "packages/app/src/hooks/usePixiApp.ts": {
@@ -205,14 +205,14 @@
     "semantic_hash": "b4577b432a421d703274d931f0cee337"
   },
   "packages/shared/src/railway/index.ts": {
-    "mtime": 1783126269.1377692,
-    "ast_hash": "d5a8eec9d967dd2cb58e8920c477204e",
+    "mtime": 1783208316.6704187,
+    "ast_hash": "7705535212b39895aa882b46ab06900d",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/map/index.ts": {
-    "mtime": 1782573453.7477164,
-    "ast_hash": "d061dfb39c79c59be43f20542b1ec695",
-    "semantic_hash": "d061dfb39c79c59be43f20542b1ec695"
+    "mtime": 1783208316.6700552,
+    "ast_hash": "74afa758813a6a3d508b6054226f795d",
+    "semantic_hash": ""
   },
   "packages/shared/src/railway/map/map-connectivity.ts": {
     "mtime": 1782992891.1430466,
@@ -230,8 +230,8 @@
     "semantic_hash": "c15736ebf4ea4357a722488b1e8b2437"
   },
   "packages/shared/src/railway/map/map.ts": {
-    "mtime": 1783126244.3914185,
-    "ast_hash": "587a4704b970673c2f7c0ae8a25de4c7",
+    "mtime": 1783207985.109202,
+    "ast_hash": "706b9fbb4bca2e59508240a9be8f6e7d",
     "semantic_hash": ""
   },
   "packages/shared/src/railway/track/index.ts": {
@@ -1215,8 +1215,8 @@
     "semantic_hash": "d7ef281f0923d6a7126f015857679fb7"
   },
   "packages/app/src/engine/PlacementController.ts": {
-    "mtime": 1783153767.6965504,
-    "ast_hash": "56d2300b3f0f7b31a699488df7c2f2f7",
+    "mtime": 1783239295.1327066,
+    "ast_hash": "366551b081a15f3925d2d6348a1f6212",
     "semantic_hash": ""
   },
   "packages/app/src/lib/__tests__/svgMap.test.ts": {
@@ -1225,9 +1225,9 @@
     "semantic_hash": ""
   },
   "packages/app/src/lib/debugLogger.ts": {
-    "mtime": 1782760166.3424203,
-    "ast_hash": "ccfae3116ed425c0eeadec5184a925b9",
-    "semantic_hash": "ccfae3116ed425c0eeadec5184a925b9"
+    "mtime": 1783208165.2631116,
+    "ast_hash": "b1c0289702368a9ccb6a7c8e83c9fd1d",
+    "semantic_hash": ""
   },
   "packages/app/src/lib/grid.ts": {
     "mtime": 1783152024.360612,
@@ -1377,6 +1377,36 @@
   "packages/app/src/engine/zoomConstants.ts": {
     "mtime": 1783151944.7660801,
     "ast_hash": "a6fbeee4e7aea34d4353b7d5fc37537e",
+    "semantic_hash": ""
+  },
+  "packages/app/src/components/sim/PanControls.tsx": {
+    "mtime": 1783169619.2285266,
+    "ast_hash": "7b5ce43268047f74e51b071bf87e4108",
+    "semantic_hash": ""
+  },
+  "packages/app/src/components/sim/SaveLoadControls.tsx": {
+    "mtime": 1783208156.4313872,
+    "ast_hash": "9b38b76fedca80d11df3eb1069e1a81c",
+    "semantic_hash": ""
+  },
+  "packages/app/src/engine/panConstants.ts": {
+    "mtime": 1783169857.0309799,
+    "ast_hash": "c58692317d2cefaeb69fe9a4d66bf880",
+    "semantic_hash": ""
+  },
+  "packages/app/src/lib/mapFile.ts": {
+    "mtime": 1783208316.671354,
+    "ast_hash": "cea3c33f7661c2466b4b1b872ed0390e",
+    "semantic_hash": ""
+  },
+  "packages/shared/src/railway/__tests__/map-serialization.test.ts": {
+    "mtime": 1783210317.3709507,
+    "ast_hash": "02103b7ba6a16c882abca836dcd5a56e",
+    "semantic_hash": ""
+  },
+  "packages/shared/src/railway/map/map-serialization.ts": {
+    "mtime": 1783208316.6727667,
+    "ast_hash": "5f8399737743cb2d1d563a3c5c3a9114",
     "semantic_hash": ""
   }
 }

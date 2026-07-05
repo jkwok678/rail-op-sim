@@ -1,5 +1,6 @@
 import {
 	createTrackData,
+	deserializeMap,
 	ElementAlreadyExistsError,
 	type FontInfo,
 	findPathBetween,
@@ -7,6 +8,8 @@ import {
 	Map as Map_,
 	type ParapetType,
 	Platform,
+	type SerializedMap,
+	serializeMap,
 	subtypeToCode,
 	type Text,
 } from "@rail-op-sim/shared";
@@ -810,6 +813,52 @@ export class PlacementController {
 		debugLog(
 			"placement",
 			`restoreSection — ${sectionTracks.length} tracks reset to defaults`,
+		);
+	}
+
+	// ── Save / load ─────────────────────────────────────────────────────
+
+	/** Snapshot the current map as a plain-JSON structure for file download. */
+	serialize(): SerializedMap {
+		return serializeMap(this.map);
+	}
+
+	/**
+	 * Replace the current map with a loaded snapshot and rebuild every render
+	 * layer. Mirrors the initial sync in usePixiApp (clearing the track layer
+	 * first so stale cells from the previous map are removed).
+	 */
+	loadFromData(data: SerializedMap): void {
+		// Validate by building into a throwaway map first: assertSerializedMap only
+		// checks the top-level shape, so a structurally-valid file with malformed
+		// element entries would otherwise throw *after* clearAll and destroy the
+		// user's unsaved work. If this deserialize succeeds, the same data is safe
+		// to apply to the live map below.
+		deserializeMap(data, new Map_());
+
+		this.map.clearAll();
+		deserializeMap(data, this.map);
+
+		// Rebuild sprites from scratch so stale cells from the previous map go away.
+		this.trackLayer.clear();
+		this.elementLayer.clear();
+		this.textLayer.clear();
+		this.trackLayer.sync(this.map);
+		// Reset the section colour overlay: no section is selected after a load, so
+		// restore plain themed textures (otherwise tracks with non-default speed/
+		// length would appear tinted).
+		this.trackColorLayer.hide();
+		this.elementLayer.sync(this.map);
+		this.textLayer.sync(this.map);
+		this.linkHighlightLayer.clearSectionHighlight();
+		this.linkHighlightLayer.sync(this.map);
+
+		// Any prior section selection now points at removed tracks — clear it.
+		useEditorStore.getState().clearSectionSelection();
+		this.publishTrackStatus();
+		debugLog(
+			"placement",
+			`loadFromData — ${this.map.getTotalTrack()} tracks restored`,
 		);
 	}
 

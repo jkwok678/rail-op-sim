@@ -132,6 +132,25 @@ export class Map_ {
 		this.totalTrack = n;
 	}
 
+	/**
+	 * Remove every user-placed element and reset all counters and transient
+	 * state machines to their empty defaults. Used before loading a saved map
+	 * into this instance so the caller can repopulate a clean slate.
+	 */
+	clearAll(): void {
+		this.elementsByCoord.clear();
+		this.tracksByKind.clear();
+		this.namedLocationList = [];
+		this.concourseList = [];
+		this.parapetList = [];
+		this.textList = [];
+		this.trackList = [];
+		this.totalTrack = 0;
+		this.linkedTrack1 = null;
+		this.linkedTrack2 = null;
+		this.textToMove = null;
+	}
+
 	// ── Kind-based track access ─────────────────────────────────────────
 
 	/** O(1) — ensures a kind array exists and returns it. */
