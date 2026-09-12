@@ -43,6 +43,7 @@ export type {
 	DanglingLink,
 	LinkedTrackPair,
 	LinkedTrackReport,
+	PathOptions,
 } from "./map/map-connectivity";
 export {
 	findPathBetween,
@@ -75,9 +76,11 @@ export {
 	DEFAULT_MAIN_SPEED,
 	DEFAULT_SECONDARY_LENGTH,
 	DEFAULT_SECONDARY_SPEED,
+	getDirectedFlow,
 	getLinksForSubtype,
 	getTrackColorState,
 	hasSecondaryPath,
+	isTraversableLinkPair,
 	isValidSubtype,
 	KIND_META,
 	kindToLabel,

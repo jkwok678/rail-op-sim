@@ -351,11 +351,8 @@ export function getLinksForSubtype(
 }
 
 /** Whether a subtype string is a recognised value for the given track kind. */
-export function isValidSubtype(
-	kind: TrackKind,
-	subtype: SubtypeKey,
-): boolean {
-	return Object.prototype.hasOwnProperty.call(LINK_TABLES[kind] ?? {}, subtype);
+export function isValidSubtype(kind: TrackKind, subtype: SubtypeKey): boolean {
+	return Object.hasOwn(LINK_TABLES[kind] ?? {}, subtype);
 }
 
 /** Whether a track kind has a secondary path (separate speed/length). */
@@ -371,6 +368,76 @@ export function supportsPlatforms(kind: TrackKind): boolean {
 /** Whether a track kind supports level crossings. */
 export function supportsLevelCrossing(kind: TrackKind): boolean {
 	return KIND_META[kind].supportsLevelCrossing;
+}
+
+// ============================================================================
+// Path traversability (which link pairs a train can actually run between)
+// ============================================================================
+
+/**
+ * One-way sense of each `directed` subtype as an entry→exit link pair. The
+ * arrow direction is not expressible in the link mask (DIRECTEDLEFT and
+ * DIRECTEDRIGHT both occupy links [3, 5]), so it lives here.
+ */
+const DIRECTED_FLOW: Record<SubtypeKey, { entry: number; exit: number }> = {
+	DIRECTEDLEFT: { entry: 5, exit: 3 },
+	DIRECTEDRIGHT: { entry: 3, exit: 5 },
+	DIRECTEDUP: { entry: 7, exit: 1 },
+	DIRECTEDDOWN: { entry: 1, exit: 7 },
+	DIRECTEDLEFTUP: { entry: 8, exit: 0 },
+	DIRECTEDRIGHTDOWN: { entry: 0, exit: 8 },
+	DIRECTEDRIGHTUP: { entry: 6, exit: 2 },
+	DIRECTEDLEFTDOWN: { entry: 2, exit: 6 },
+};
+
+/** The permitted entry→exit pair of a one-way `directed` subtype, if known. */
+export function getDirectedFlow(
+	subtype: SubtypeKey,
+): { entry: number; exit: number } | null {
+	return DIRECTED_FLOW[subtype] ?? null;
+}
+
+/**
+ * Every unordered link pair that forms a single continuous piece of track —
+ * i.e. the link sets of all straight and curved subtypes. A multi-link track
+ * (switch) can only route between links that some two-link geometry connects,
+ * which rejects e.g. 2↔5 on SWITCH1 ([2, 3, 5]).
+ */
+const GEOMETRIC_PAIRS: ReadonlySet<number> = new Set(
+	[...Object.values(STRAIGHT_LINKS), ...Object.values(CURVED_LINKS)].flatMap(
+		([a, b]) => [a * 9 + b, b * 9 + a],
+	),
+);
+
+/**
+ * Whether a train can physically run from link `entry` to link `exit` within a
+ * single cell of this subtype. Both links are assumed to be active
+ * ({@link getLinksForSubtype}); this is the extra constraint the link mask
+ * cannot express:
+ *  - no U-turns (`entry === exit`);
+ *  - crossovers/flyovers carry two independent paths that cross without
+ *    connecting, so only the opposite link (`8 - entry`) is reachable;
+ *  - switches route only along a real two-link geometry (see
+ *    {@link GEOMETRIC_PAIRS}) — note this cannot separate the two tight-switch
+ *    variants that share a link set, so it stays permissive there;
+ *  - `directed` track is one-way, enforced only when `respectOneWay` is set
+ *    (path-finding for section selection ignores it, preferred directions do not).
+ */
+export function isTraversableLinkPair(
+	kind: TrackKind,
+	subtype: SubtypeKey,
+	entry: number,
+	exit: number,
+	respectOneWay = false,
+): boolean {
+	if (entry === exit) return false;
+	if (kind === "crossover" || kind === "flyover") return exit === 8 - entry;
+	if (kind === "switch") return GEOMETRIC_PAIRS.has(entry * 9 + exit);
+	if (kind === "directed" && respectOneWay) {
+		const flow = DIRECTED_FLOW[subtype];
+		return flow === undefined || (entry === flow.entry && exit === flow.exit);
+	}
+	return true;
 }
 
 // ============================================================================

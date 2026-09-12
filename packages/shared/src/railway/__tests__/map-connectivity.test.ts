@@ -513,8 +513,15 @@ describe("findPathBetween", () => {
 	it("returns single-element path when start === end", () => {
 		const map = new Map_();
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
 		);
 		const start = map.getTrackAt(0, 0)!;
 		const path = findPathBetween(map, start, start);
@@ -524,12 +531,26 @@ describe("findPathBetween", () => {
 	it("finds path between two directly connected horizontal tracks", () => {
 		const map = new Map_();
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
 		);
 		const start = map.getTrackAt(0, 0)!;
 		const end = map.getTrackAt(16, 0)!;
@@ -544,20 +565,48 @@ describe("findPathBetween", () => {
 		const map = new Map_();
 		// Horizontal chain: -16,0 → 0,0 → 16,0 → 32,0
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			-16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			-16,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			32, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			32,
+			0,
 		);
 		const start = map.getTrackAt(-16, 0)!;
 		const end = map.getTrackAt(32, 0)!;
@@ -569,12 +618,26 @@ describe("findPathBetween", () => {
 	it("returns null when tracks are in disconnected components", () => {
 		const map = new Map_();
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 32,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			32,
 		);
 		const start = map.getTrackAt(0, 0)!;
 		const end = map.getTrackAt(0, 32)!;
@@ -587,16 +650,36 @@ describe("findPathBetween", () => {
 		// SWITCHTIGHT1 at (0,0): links[1]=top, [3]=left, [5]=right
 		// Path: left entry → switch → right exit
 		map.addTrack(
-			{ kind: "switch", subtype: SwitchType.SWITCHTIGHT1, platform1: false, platform2: false },
-			0, 0,
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			-16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			-16,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
 		);
 		const start = map.getTrackAt(-16, 0)!;
 		const end = map.getTrackAt(16, 0)!;
@@ -608,12 +691,26 @@ describe("findPathBetween", () => {
 	it("cleans up found flags after traversal", () => {
 		const map = new Map_();
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			0, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
 		);
 		map.addTrack(
-			{ kind: "straight", subtype: StraightType.STRAIGHTH, platform1: false, platform2: false, levelCrossing: false },
-			16, 0,
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
 		);
 		const start = map.getTrackAt(0, 0)!;
 		const end = map.getTrackAt(16, 0)!;

@@ -1,4 +1,5 @@
 import type { Track } from "../track/track";
+import { getDirectedFlow, isTraversableLinkPair } from "../track/track-data";
 import type { Map_ } from "./map";
 
 // ============================================================================
@@ -167,15 +168,47 @@ export function getLinkedTrackReport(map: Map_): LinkedTrackReport {
 // Section path-finding
 // ============================================================================
 
+/** Options for {@link findPathBetween}. */
+export interface PathOptions {
+	/**
+	 * Refuse to route against the arrow of a one-way `directed` track. Off by
+	 * default (section selection is direction-agnostic); on for preferred
+	 * directions, which record an actual travel direction.
+	 */
+	respectOneWay?: boolean;
+}
+
+/** A BFS node: a track reached through a given entry link (null for `start`). */
+interface PathNode {
+	track: Track;
+	/** Link index the track was entered by, or `null` for the start track. */
+	entry: number | null;
+	prev: PathNode | null;
+}
+
 /**
  * Find the shortest path between two tracks using BFS.
  * Returns the path as an array of tracks (inclusive of start and end),
  * or `null` if the tracks are in disconnected components.
+ *
+ * The search is link-aware: a track is expanded per entry link, and only exits
+ * that {@link isTraversableLinkPair} allows for that entry are followed. So a
+ * route cannot U-turn, nor hop between the two independent paths of a
+ * crossover/flyover, nor take an impossible turn across a switch. A step is
+ * also only taken when the neighbour links back: occupancy alone is not a
+ * connection (an H straight sits beside a V straight without joining it), and
+ * {@link checkAllTracksConnected} only checks that neighbouring cells are
+ * occupied, so the check has to happen here.
+ *
+ * With `respectOneWay`, a `directed` track is entered only by its arrow's entry
+ * edge and left only by its exit edge — including when it is the start track
+ * (seeded with the arrow's entry) or the goal.
  */
 export function findPathBetween(
 	map: Map_,
 	start: Track,
 	end: Track,
+	opts: PathOptions = {},
 ): Track[] | null {
 	if (start === end) return [start];
 
@@ -185,34 +218,79 @@ export function findPathBetween(
 	// Reset found flags before traversal
 	for (const t of trackList) t.setFound(false);
 
-	const parent = new Map<Track, Track>();
-	const queue: Track[] = [start];
-	start.setFound(true);
+	/** Entry links already expanded per track (`-1` = the start track). */
+	const visited = new Map<Track, Set<number>>();
+	const markVisited = (track: Track, entry: number | null): boolean => {
+		let entries = visited.get(track);
+		if (entries === undefined) {
+			entries = new Set();
+			visited.set(track, entries);
+		}
+		const key = entry ?? -1;
+		if (entries.has(key)) return false;
+		entries.add(key);
+		track.setFound(true);
+		return true;
+	};
+
+	/**
+	 * Whether `track` may be entered by `entry`: the link must be active, and a
+	 * one-way track accepts only its arrow's entry edge.
+	 */
+	const canEnter = (track: Track, entry: number): boolean => {
+		if (!track.getLinkAt(entry)) return false;
+		if (!opts.respectOneWay || track.data.kind !== "directed") return true;
+		const flow = getDirectedFlow(track.data.subtype);
+		return flow === null || entry === flow.entry;
+	};
+
+	// A one-way start track can only be left by its arrow, so seed the search
+	// with the arrow's entry edge instead of leaving it unconstrained.
+	const startEntry =
+		opts.respectOneWay && start.data.kind === "directed"
+			? (getDirectedFlow(start.data.subtype)?.entry ?? null)
+			: null;
 
 	const step = map.getImageSize();
-	let found = false;
+	const queue: PathNode[] = [{ track: start, entry: startEntry, prev: null }];
+	markVisited(start, startEntry);
+	let goal: PathNode | null = null;
 
-	while (queue.length > 0 && !found) {
+	while (queue.length > 0 && goal === null) {
 		const current = queue.shift()!;
-		const cx = current.getLocationX();
-		const cy = current.getLocationY();
+		const cx = current.track.getLocationX();
+		const cy = current.track.getLocationY();
 
-		for (let link = 0; link <= 8 && !found; link++) {
+		for (let link = 0; link <= 8 && goal === null; link++) {
 			if (link === 4) continue;
-			if (!current.getLinkAt(link)) continue;
+			if (!current.track.getLinkAt(link)) continue;
+			if (
+				current.entry !== null &&
+				!isTraversableLinkPair(
+					current.track.data.kind,
+					current.track.data.subtype,
+					current.entry,
+					link,
+					opts.respectOneWay,
+				)
+			) {
+				continue;
+			}
 
 			const [dx, dy] = LINK_OFFSETS[link];
-			const nx = cx + dx * step;
-			const ny = cy + dy * step;
-			const neighbor = map.getTrackAt(nx, ny);
+			const neighbor = map.getTrackAt(cx + dx * step, cy + dy * step);
+			if (!neighbor) continue;
 
-			if (neighbor && !neighbor.getFound()) {
-				neighbor.setFound(true);
-				parent.set(neighbor, current);
-				queue.push(neighbor);
-				if (neighbor === end) {
-					found = true;
-				}
+			// The neighbour is entered by its opposite link.
+			const entry = 8 - link;
+			if (!canEnter(neighbor, entry)) continue;
+			if (!markVisited(neighbor, entry)) continue;
+
+			const node: PathNode = { track: neighbor, entry, prev: current };
+			if (neighbor === end) {
+				goal = node;
+			} else {
+				queue.push(node);
 			}
 		}
 	}
@@ -220,14 +298,12 @@ export function findPathBetween(
 	// Always reset found flags after traversal
 	for (const t of trackList) t.setFound(false);
 
-	if (!found) return null;
+	if (goal === null) return null;
 
-	// Reconstruct path by walking parent chain from end to start
+	// Reconstruct path by walking the parent chain from end to start
 	const path: Track[] = [];
-	let node: Track | undefined = end;
-	while (node) {
-		path.push(node);
-		node = parent.get(node);
+	for (let node: PathNode | null = goal; node !== null; node = node.prev) {
+		path.push(node.track);
 	}
 	path.reverse();
 	return path;
