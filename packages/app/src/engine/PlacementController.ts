@@ -101,6 +101,12 @@ export class PlacementController {
 	private downPos: { x: number; y: number } | null = null;
 	private downWasPanning = false;
 
+	/** Cell key of the last section-tool route preview (same BFS guard). */
+	private sectionHoverKey: string | null = null;
+
+	/** Cell key of the last link-tool pairing preview. */
+	private linkHoverKey: string | null = null;
+
 	/** Cached `getBoundingClientRect` from the last pointerdown (avoids forced layout per pointermove). */
 	private downRect: DOMRect | null = null;
 
@@ -206,6 +212,7 @@ export class PlacementController {
 					// Leaving link tool — reset selection state machine
 					this.map.setLinkedTrack1(null);
 					this.map.setLinkedTrack2(null);
+					this.clearLinkPreview();
 					if (!state.showLinkHighlights) {
 						this.linkHighlightLayer.container.visible = false;
 					} else {
@@ -222,6 +229,7 @@ export class PlacementController {
 
 				// Leaving section tool — clear section highlight & hide colour overlay
 				if (prevState.tool === "section" && state.tool !== "section") {
+					this.sectionHoverKey = null;
 					this.linkHighlightLayer.clearSectionHighlight();
 					this.trackColorLayer.hide();
 					if (!state.showLinkHighlights) {
@@ -405,6 +413,9 @@ export class PlacementController {
 			// Always keep highlight data fresh; visibility controls display
 			this.linkHighlightLayer.sync(this.map);
 			this.linkHighlightLayer.syncSelection(this.map);
+			// The click either took the first pick or completed the pairing, so
+			// whatever was being previewed no longer describes the next click.
+			this.clearLinkPreview();
 			debugLog("placement", `link click → grid(${cell.gx},${cell.gy})`);
 			return;
 		}
@@ -414,6 +425,7 @@ export class PlacementController {
 			const cell = this.screenToGrid(e.clientX, e.clientY);
 			if (!cell) {
 				useEditorStore.getState().clearSectionSelection();
+				this.clearSectionPreview();
 				this.linkHighlightLayer.clearSectionHighlight();
 				this.trackColorLayer.hide();
 				return;
@@ -423,6 +435,7 @@ export class PlacementController {
 			if (!track) {
 				// Clicked empty space — clear selection
 				useEditorStore.getState().clearSectionSelection();
+				this.clearSectionPreview();
 				this.linkHighlightLayer.clearSectionHighlight();
 				this.trackColorLayer.hide();
 				debugLog("placement", "section click → empty cell, cleared");
@@ -433,6 +446,10 @@ export class PlacementController {
 			if (!sectionStart) {
 				// First click — set start
 				useEditorStore.getState().setSectionStart({ gx: cell.gx, gy: cell.gy });
+				this.sectionHoverKey = null;
+				// Outline the pending start so the first click has feedback too.
+				this.linkHighlightLayer.highlightSection(this.map, [], cell, null);
+				this.linkHighlightLayer.container.visible = true;
 				debugLog(
 					"placement",
 					`section click → start at (${cell.gx},${cell.gy})`,
@@ -445,6 +462,7 @@ export class PlacementController {
 				);
 				if (!startTrack) {
 					useEditorStore.getState().clearSectionSelection();
+					this.clearSectionPreview();
 					this.linkHighlightLayer.clearSectionHighlight();
 					this.trackColorLayer.hide();
 					debugLog("placement", "section click → start track gone, cleared");
@@ -460,10 +478,16 @@ export class PlacementController {
 					useEditorStore
 						.getState()
 						.setSectionEnd({ gx: cell.gx, gy: cell.gy }, coords);
-					this.linkHighlightLayer.highlightSection(coords);
+					this.linkHighlightLayer.highlightSection(
+						this.map,
+						coords,
+						sectionStart,
+						{ gx: cell.gx, gy: cell.gy },
+					);
 					this.linkHighlightLayer.container.visible = true;
 					this.trackColorLayer.sync(this.map);
 					this.trackColorLayer.container.visible = true;
+					this.sectionHoverKey = null;
 					debugLog(
 						"placement",
 						`section click → end at (${cell.gx},${cell.gy}), path length=${coords.length}`,
@@ -471,6 +495,7 @@ export class PlacementController {
 				} else {
 					// No path — clear and let user retry
 					useEditorStore.getState().clearSectionSelection();
+					this.clearSectionPreview();
 					this.linkHighlightLayer.clearSectionHighlight();
 					this.trackColorLayer.hide();
 					debugLog("placement", "section click → no path found, cleared");
@@ -800,6 +825,9 @@ export class PlacementController {
 		}
 		this.trackLayer.sync(this.map);
 		this.trackColorLayer.sync(this.map);
+		// Drop the purple route tint (keeping the endpoint outlines) so the
+		// speed/length colours just applied are visible rather than covered.
+		this.linkHighlightLayer.setSectionRouteVisible(false);
 		this.publishTrackStatus();
 		debugLog(
 			"placement",
@@ -822,6 +850,7 @@ export class PlacementController {
 		}
 		this.trackLayer.sync(this.map);
 		this.trackColorLayer.sync(this.map);
+		this.linkHighlightLayer.setSectionRouteVisible(false);
 		this.publishTrackStatus();
 		debugLog(
 			"placement",
@@ -865,6 +894,8 @@ export class PlacementController {
 		this.textLayer.sync(this.map);
 		this.linkHighlightLayer.clearSectionHighlight();
 		this.linkHighlightLayer.sync(this.map);
+		this.sectionHoverKey = null;
+		this.linkHoverKey = null;
 
 		// Any prior section selection now points at removed tracks — clear it.
 		useEditorStore.getState().clearSectionSelection();
@@ -875,8 +906,91 @@ export class PlacementController {
 		);
 	}
 
+	/** Drop any section-tool route preview (hovered outline + blue route). */
+	private clearSectionPreview(): void {
+		if (this.sectionHoverKey === null) return;
+		this.sectionHoverKey = null;
+		this.linkHighlightLayer.setSectionPreview(null, null);
+	}
+
+	/**
+	 * Preview the run the section tool would select: the hovered cell is
+	 * outlined and, when a path exists, the route to it is stroked.
+	 */
+	private updateSectionPreview(e: PointerEvent): void {
+		const { sectionStart } = useEditorStore.getState();
+		if (!sectionStart) {
+			this.clearSectionPreview();
+			return;
+		}
+
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		const end = cell ? this.map.getTrackAt(cell.gx, cell.gy) : null;
+		// Hovering the start itself would re-pick the same cell, so show no route.
+		if (
+			!cell ||
+			!end ||
+			(cell.gx === sectionStart.gx && cell.gy === sectionStart.gy)
+		) {
+			this.clearSectionPreview();
+			return;
+		}
+
+		const key = `${cell.gx},${cell.gy}`;
+		if (key === this.sectionHoverKey) return;
+		this.sectionHoverKey = key;
+
+		const start = this.map.getTrackAt(sectionStart.gx, sectionStart.gy);
+		const path = start ? findPathBetween(this.map, start, end) : null;
+		this.linkHighlightLayer.setSectionPreview(
+			path
+				? path.map((t) => ({ gx: t.getLocationX(), gy: t.getLocationY() }))
+				: null,
+			cell,
+		);
+	}
+
+	/** Drop any link-tool pairing preview (hovered outline + dashed connector). */
+	private clearLinkPreview(): void {
+		if (this.linkHoverKey === null) return;
+		this.linkHoverKey = null;
+		this.linkHighlightLayer.setLinkPreview(this.map, null);
+	}
+
+	/**
+	 * Preview the pairing the link tool would make: once a portal is picked,
+	 * the hovered cell is outlined amber when it can pair with it and red when
+	 * it cannot, with a dashed connector showing the link that would be made.
+	 */
+	private updateLinkPreview(e: PointerEvent): void {
+		if (!this.map.getLinkedTrack1()) {
+			this.clearLinkPreview();
+			return;
+		}
+
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		if (!cell) {
+			this.clearLinkPreview();
+			return;
+		}
+
+		const key = `${cell.gx},${cell.gy}`;
+		if (key === this.linkHoverKey) return;
+		this.linkHoverKey = key;
+		this.linkHighlightLayer.setLinkPreview(this.map, cell);
+	}
+
 	private onPointerMove = (e: PointerEvent): void => {
 		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
+
+		// Each two-click gesture previews what its second click would do. Only
+		// the active tool's preview runs; the other is cleared, so a tool
+		// switch mid-gesture cannot leave a stale route on screen.
+		if (tool === "section") this.updateSectionPreview(e);
+		else this.clearSectionPreview();
+
+		if (tool === "link") this.updateLinkPreview(e);
+		else this.clearLinkPreview();
 
 		// Track-info hover: independent of the ghost/add logic below, so it works
 		// with any tool (e.g. the select tool while inspecting placed track).
@@ -917,6 +1031,8 @@ export class PlacementController {
 
 	private onPointerLeave = (): void => {
 		this.ghost.visible = false;
+		this.clearSectionPreview();
+		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
 	};
 
@@ -925,6 +1041,8 @@ export class PlacementController {
 		this.downPos = null;
 		this.downRect = null;
 		this.ghost.visible = false;
+		this.clearSectionPreview();
+		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
 	};
 

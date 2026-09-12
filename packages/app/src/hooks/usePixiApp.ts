@@ -129,7 +129,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			const textLayer = createTextLayer();
 			world.addChild(textLayer.container);
 
-			const linkHighlightLayer = createLinkHighlightLayer();
+			const linkHighlightLayer = createLinkHighlightLayer(textures);
 			world.addChild(linkHighlightLayer.container);
 
 			app.stage.addChild(world);
