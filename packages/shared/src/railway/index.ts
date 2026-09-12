@@ -63,9 +63,11 @@ export {
 } from "./map/map-serialization";
 export type {
 	CreateTrackDataOptions,
+	PreferredDirection,
 	SignalAspectValue,
 	TrackColorState,
 	TrackData,
+	TrackDirectionality,
 	TrackKind,
 	TrackKindMeta,
 } from "./track";

@@ -2,6 +2,7 @@
 
 export type { SignalAspectValue } from "./signal-aspects";
 export { SignalAspect } from "./signal-aspects";
+export type { PreferredDirection, TrackDirectionality } from "./track";
 export { Track } from "./track";
 export type { TrackColorState } from "./track-color";
 export {

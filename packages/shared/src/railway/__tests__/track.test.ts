@@ -1674,3 +1674,143 @@ describe("Track data.kind checks", () => {
 		).toBe("flyover");
 	});
 });
+
+// ============================================================================
+// Preferred directions (entry→exit link pairs)
+// ============================================================================
+
+describe("Track preferred directions", () => {
+	const makeStraightH = () =>
+		new Track(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+
+	it("defaults to an empty list", () => {
+		const t = makeStraightH();
+		expect(t.getPreferredDirections()).toEqual([]);
+		expect(t.hasPreferredDirection()).toBe(false);
+	});
+
+	it("accepts a pair whose links are both active", () => {
+		const t = makeStraightH(); // STRAIGHTH has active links 3 and 5
+		expect(t.addPreferredDirection(3, 5)).toBe(true);
+		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+		expect(t.hasPreferredDirection()).toBe(true);
+	});
+
+	it("rejects a pair with an inactive link", () => {
+		const t = makeStraightH();
+		expect(t.addPreferredDirection(1, 5)).toBe(false); // link 1 inactive
+		expect(t.getPreferredDirections()).toEqual([]);
+	});
+
+	it("dedupes identical pairs", () => {
+		const t = makeStraightH();
+		expect(t.addPreferredDirection(3, 5)).toBe(true);
+		expect(t.addPreferredDirection(3, 5)).toBe(false);
+		expect(t.getPreferredDirections()).toHaveLength(1);
+	});
+
+	it("stores mirrored pairs as distinct (bidirectional)", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+		expect(t.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+			{ entry: 5, exit: 3 },
+		]);
+	});
+
+	it("getDirectionality() is 'none' with no directions set", () => {
+		const t = makeStraightH();
+		expect(t.getDirectionality()).toBe("none");
+		expect(t.isBidirectional()).toBe(false);
+	});
+
+	it("getDirectionality() is 'one-way' for an unmirrored pair", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		expect(t.getDirectionality()).toBe("one-way");
+		expect(t.isBidirectional()).toBe(false);
+	});
+
+	it("getDirectionality() is 'bidirectional' once every pair is mirrored", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+		expect(t.getDirectionality()).toBe("bidirectional");
+		expect(t.isBidirectional()).toBe(true);
+	});
+
+	it("getDirectionality() is 'mixed' when a crossover has one path each way", () => {
+		// CROSSOVER1 has links 1,3,5,7 as two independent paths: 3↔5 and 1↔7.
+		const t = new Track(
+			{ kind: "crossover", subtype: CrossoverType.CROSSOVER1 },
+			0,
+			0,
+		);
+		expect(t.addPreferredDirection(3, 5)).toBe(true);
+		expect(t.addPreferredDirection(5, 3)).toBe(true);
+		expect(t.addPreferredDirection(1, 7)).toBe(true);
+
+		expect(t.getDirectionality()).toBe("mixed");
+		expect(t.isBidirectional()).toBe(false);
+	});
+
+	it("isDirectionMirrored() answers per route, not per cell", () => {
+		const t = new Track(
+			{ kind: "crossover", subtype: CrossoverType.CROSSOVER1 },
+			0,
+			0,
+		);
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+		t.addPreferredDirection(1, 7);
+
+		expect(t.isDirectionMirrored({ entry: 3, exit: 5 })).toBe(true);
+		expect(t.isDirectionMirrored({ entry: 5, exit: 3 })).toBe(true);
+		expect(t.isDirectionMirrored({ entry: 1, exit: 7 })).toBe(false);
+	});
+
+	it("removePreferredDirection drops only the exact pair", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+
+		expect(t.removePreferredDirection(3, 5)).toBe(true);
+		// The mirrored pair survives — undoing one direction of a two-way route
+		// leaves the other running.
+		expect(t.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
+		expect(t.hasPreferredDirection()).toBe(true);
+	});
+
+	it("removePreferredDirection returns false for a pair that is not set", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		expect(t.removePreferredDirection(5, 3)).toBe(false);
+		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+	});
+
+	it("clearPreferredDirections empties the list", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		t.clearPreferredDirections();
+		expect(t.getPreferredDirections()).toEqual([]);
+		expect(t.hasPreferredDirection()).toBe(false);
+	});
+
+	it("restoreDefaults() does NOT clear preferred directions", () => {
+		const t = makeStraightH();
+		t.addPreferredDirection(3, 5);
+		t.restoreDefaults();
+		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+	});
+});
