@@ -59,6 +59,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ createTextLayer },
 				{ createLinkHighlightLayer },
 				{ createTrackColorLayer },
+				{ createDirectionLayer },
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
@@ -71,6 +72,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("#/renderer/layers/TextLayer"),
 				import("#/renderer/layers/LinkHighlightLayer"),
 				import("#/renderer/layers/TrackColorLayer"),
+				import("#/renderer/layers/DirectionLayer"),
 				import("#/renderer/textureCache"),
 				import("#/engine/PlacementController"),
 			]);
@@ -132,6 +134,11 @@ export function usePixiApp(): UsePixiAppReturn {
 			const linkHighlightLayer = createLinkHighlightLayer(textures);
 			world.addChild(linkHighlightLayer.container);
 
+			// Preferred-direction overlay (per-route legs + arrow markers), added
+			// after the link highlights and below the ghost.
+			const directionLayer = createDirectionLayer();
+			world.addChild(directionLayer.container);
+
 			app.stage.addChild(world);
 			debugLog(
 				"pixi",
@@ -168,6 +175,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				textLayer,
 				linkHighlightLayer,
 				trackColorLayer,
+				directionLayer,
 				textures,
 				viewport,
 			});
@@ -188,6 +196,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				trackLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
 				textLayer.sync(placement.map);
+				directionLayer.sync(placement.map);
 				placement.refreshGhost();
 				debugLog("pixi", "init complete — ready for interaction");
 			});
@@ -206,6 +215,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				trackColorLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
 				textLayer.sync(placement.map);
+				directionLayer.sync(placement.map);
 				placement.refreshGhost();
 				redrawGrid();
 			});

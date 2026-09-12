@@ -1,4 +1,5 @@
 import {
+	clearPreferredDirectionsAlongPath,
 	createTrackData,
 	deserializeMap,
 	ElementAlreadyExistsError,
@@ -11,6 +12,7 @@ import {
 	Platform,
 	type SerializedMap,
 	serializeMap,
+	setPreferredDirectionsAlongPath,
 	subtypeToCode,
 	type Text,
 } from "@rail-op-sim/shared";
@@ -22,6 +24,7 @@ import {
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
+import type { DirectionLayer } from "#/renderer/layers/DirectionLayer";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
 import type { TextLayer } from "#/renderer/layers/TextLayer";
@@ -48,6 +51,7 @@ export interface PlacementControllerOptions {
 	textLayer: TextLayer;
 	linkHighlightLayer: LinkHighlightLayer;
 	trackColorLayer: TrackColorLayer;
+	directionLayer: DirectionLayer;
 	textures: TextureCache;
 	viewport: ViewportController;
 }
@@ -91,6 +95,7 @@ export class PlacementController {
 	private readonly textLayer: TextLayer;
 	private readonly linkHighlightLayer: LinkHighlightLayer;
 	private readonly trackColorLayer: TrackColorLayer;
+	private readonly directionLayer: DirectionLayer;
 	private readonly textures: TextureCache;
 	private readonly viewport: ViewportController;
 
@@ -100,6 +105,9 @@ export class PlacementController {
 
 	private downPos: { x: number; y: number } | null = null;
 	private downWasPanning = false;
+
+	/** Cell key of the last direction-tool route preview (avoids re-running BFS per pointermove). */
+	private directionHoverKey: string | null = null;
 
 	/** Cell key of the last section-tool route preview (same BFS guard). */
 	private sectionHoverKey: string | null = null;
@@ -121,6 +129,7 @@ export class PlacementController {
 		this.textLayer = opts.textLayer;
 		this.linkHighlightLayer = opts.linkHighlightLayer;
 		this.trackColorLayer = opts.trackColorLayer;
+		this.directionLayer = opts.directionLayer;
 		this.textures = opts.textures;
 		this.viewport = opts.viewport;
 
@@ -162,6 +171,12 @@ export class PlacementController {
 				? { gx: offender.getLocationX(), gy: offender.getLocationY() }
 				: null,
 		});
+
+		// The direction tool requires a complete railway; if the map just became
+		// incomplete (e.g. a track deleted, or a load), drop back to the select tool.
+		if (!connected && useEditorStore.getState().tool === "direction") {
+			useEditorStore.getState().setTool("select");
+		}
 	}
 
 	/** Attach pointer listeners and subscribe to tool/selection changes. */
@@ -191,6 +206,8 @@ export class PlacementController {
 			const toolChanged = state.tool !== prevState.tool;
 			const highlightsChanged =
 				state.showLinkHighlights !== prevState.showLinkHighlights;
+			const directionsChanged =
+				state.showDirections !== prevState.showDirections;
 
 			// Toggle: show/hide paired+unpaired highlights
 			if (highlightsChanged) {
@@ -200,6 +217,38 @@ export class PlacementController {
 				} else if (state.tool !== "link") {
 					this.linkHighlightLayer.container.visible = false;
 				}
+			}
+
+			// Toggle: show/hide preferred-direction arrows (kept visible while the
+			// direction tool is active regardless of the toggle).
+			if (directionsChanged) {
+				if (state.showDirections) {
+					this.directionLayer.sync(this.map);
+					this.directionLayer.container.visible = true;
+				} else if (state.tool !== "direction") {
+					this.directionLayer.container.visible = false;
+				}
+			}
+
+			// The pending direction start can also be cleared without a tool change —
+			// re-clicking the active direction tool resets it in the store — so mirror
+			// the store rather than relying on the click handler alone.
+			if (state.directionStart !== prevState.directionStart && !toolChanged) {
+				this.directionLayer.setSelection(
+					state.directionStart,
+					state.directionMode === "erase",
+				);
+				this.directionHoverKey = null;
+			}
+
+			// Flipping set/erase recolours the gesture even when the pending start
+			// is already null (so the branch above does not fire).
+			if (state.directionMode !== prevState.directionMode) {
+				this.directionLayer.setSelection(
+					state.directionStart,
+					state.directionMode === "erase",
+				);
+				this.directionHoverKey = null;
 			}
 
 			// Tool change: manage selection highlight for link tool
@@ -234,6 +283,22 @@ export class PlacementController {
 					this.trackColorLayer.hide();
 					if (!state.showLinkHighlights) {
 						this.linkHighlightLayer.container.visible = false;
+					}
+				}
+
+				// Entering direction tool — show the arrow overlay for all tracks.
+				if (state.tool === "direction" && prevState.tool !== "direction") {
+					this.directionLayer.sync(this.map);
+					this.directionLayer.container.visible = true;
+				}
+
+				// Leaving direction tool — clear the pending start highlight, and
+				// hide the overlay unless the user pinned it visible.
+				if (prevState.tool === "direction" && state.tool !== "direction") {
+					this.directionLayer.setSelection(null);
+					this.directionHoverKey = null;
+					if (!state.showDirections) {
+						this.directionLayer.container.visible = false;
 					}
 				}
 			}
@@ -504,6 +569,112 @@ export class PlacementController {
 			return;
 		}
 
+		// Direction tool — two-click preferred-direction assignment, or removal
+		// of the same legs when the tool is in erase mode.
+		if (tool === "direction") {
+			const erasing = useEditorStore.getState().directionMode === "erase";
+			// Gated on a complete railway; the toolbar disables the tool otherwise,
+			// but guard here too in case the map changed mid-gesture.
+			if (!useEditorStore.getState().trackStatus?.connected) {
+				debugLog("placement", "direction click ignored — railway incomplete");
+				return;
+			}
+
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			const track = cell ? this.map.getTrackAt(cell.gx, cell.gy) : null;
+			if (!cell || !track) {
+				useEditorStore.getState().setDirectionStart(null);
+				this.directionLayer.setSelection(null, erasing);
+				this.directionHoverKey = null;
+				debugLog("placement", "direction click → empty cell, cleared");
+				return;
+			}
+
+			const { directionStart } = useEditorStore.getState();
+			if (!directionStart) {
+				// First click — set start.
+				useEditorStore.getState().setDirectionStart(cell);
+				this.directionLayer.setSelection(cell, erasing);
+				this.directionHoverKey = null;
+				debugLog(
+					"placement",
+					`direction ${erasing ? "erase" : "set"} click → start at (${cell.gx},${cell.gy})`,
+				);
+				return;
+			}
+
+			if (directionStart.gx === cell.gx && directionStart.gy === cell.gy) {
+				// Clicked the start again — cancel.
+				useEditorStore.getState().setDirectionStart(null);
+				this.directionLayer.setSelection(null, erasing);
+				this.directionHoverKey = null;
+				debugLog("placement", "direction click → cancelled start");
+				return;
+			}
+
+			const startTrack = this.map.getTrackAt(
+				directionStart.gx,
+				directionStart.gy,
+			);
+			if (!startTrack) {
+				useEditorStore.getState().setDirectionStart(null);
+				this.directionLayer.setSelection(null, erasing);
+				this.directionHoverKey = null;
+				debugLog("placement", "direction click → start track gone, cleared");
+			} else if (erasing) {
+				const result = clearPreferredDirectionsAlongPath(
+					this.map,
+					startTrack,
+					track,
+				);
+				if (result === null) {
+					debugLog("placement", "direction erase click → no path found");
+				} else if (result.removed === 0) {
+					// Path exists but carried no directions either way round, so there
+					// was nothing along it to undo.
+					debugLog(
+						"placement",
+						`direction erase click → nothing to remove (path length=${result.path.length})`,
+					);
+				} else {
+					this.directionLayer.sync(this.map);
+					debugLog(
+						"placement",
+						`direction erase click → removed ${result.removed} along path length=${result.path.length}`,
+					);
+				}
+				useEditorStore.getState().setDirectionStart(null);
+				this.directionLayer.setSelection(null, erasing);
+				this.directionHoverKey = null;
+			} else {
+				const result = setPreferredDirectionsAlongPath(
+					this.map,
+					startTrack,
+					track,
+				);
+				if (result === null) {
+					debugLog("placement", "direction click → no path found");
+				} else if (result.applied === 0) {
+					// Path exists but nothing changed — every pair was already set, or
+					// none could be determined (e.g. both endpoints facing switches).
+					debugLog(
+						"placement",
+						`direction click → no directions applied (path length=${result.path.length})`,
+					);
+				} else {
+					this.directionLayer.sync(this.map);
+					debugLog(
+						"placement",
+						`direction click → assigned ${result.applied} along path length=${result.path.length}`,
+					);
+				}
+				useEditorStore.getState().setDirectionStart(null);
+				this.directionLayer.setSelection(null, erasing);
+				this.directionHoverKey = null;
+			}
+			return;
+		}
+
 		const cell = this.screenToGrid(e.clientX, e.clientY);
 		if (!cell) {
 			debugLog(
@@ -581,6 +752,22 @@ export class PlacementController {
 	private handleRightClick(e: PointerEvent): void {
 		const { tool } = useEditorStore.getState();
 
+		// Direction tool: right-click clears all preferred directions on a track.
+		if (tool === "direction") {
+			const cell = this.screenToGrid(e.clientX, e.clientY);
+			if (!cell) return;
+			const track = this.map.getTrackAt(cell.gx, cell.gy);
+			if (track?.hasPreferredDirection()) {
+				track.clearPreferredDirections();
+				this.directionLayer.sync(this.map);
+				debugLog(
+					"placement",
+					`right-click → clearPreferredDirections at (${cell.gx},${cell.gy})`,
+				);
+			}
+			return;
+		}
+
 		if (tool === "text") {
 			const wp = this.screenToWorld(e.clientX, e.clientY);
 			if (!wp) return;
@@ -627,6 +814,7 @@ export class PlacementController {
 				this.textLayer.sync(this.map);
 				this.linkHighlightLayer.sync(this.map);
 				this.trackColorLayer.sync(this.map);
+				this.directionLayer.sync(this.map);
 				this.publishTrackStatus();
 			}
 		}
@@ -894,8 +1082,13 @@ export class PlacementController {
 		this.textLayer.sync(this.map);
 		this.linkHighlightLayer.clearSectionHighlight();
 		this.linkHighlightLayer.sync(this.map);
+		// Rebuild direction arrows from the loaded map and clear any pending start.
+		this.directionLayer.sync(this.map);
+		this.directionLayer.setSelection(null);
+		this.directionHoverKey = null;
 		this.sectionHoverKey = null;
 		this.linkHoverKey = null;
+		useEditorStore.getState().setDirectionStart(null);
 
 		// Any prior section selection now points at removed tracks — clear it.
 		useEditorStore.getState().clearSectionSelection();
@@ -904,6 +1097,48 @@ export class PlacementController {
 			"placement",
 			`loadFromData — ${this.map.getTotalTrack()} tracks restored`,
 		);
+	}
+
+	/** Drop any direction-tool route preview (endpoint outline + blue legs). */
+	private clearDirectionPreview(): void {
+		if (this.directionHoverKey === null) return;
+		this.directionHoverKey = null;
+		this.directionLayer.setRoutePreview(this.map, null, null);
+	}
+
+	/**
+	 * Preview the route the direction tool would assign: the hovered cell is
+	 * outlined and, when a path exists, each leg the gesture would assign is
+	 * stroked.
+	 */
+	private updateDirectionPreview(e: PointerEvent): void {
+		const { directionStart } = useEditorStore.getState();
+		if (!directionStart) {
+			this.clearDirectionPreview();
+			return;
+		}
+
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		const end = cell ? this.map.getTrackAt(cell.gx, cell.gy) : null;
+		// Hovering the start itself would cancel on click, so show no route.
+		if (
+			!cell ||
+			!end ||
+			(cell.gx === directionStart.gx && cell.gy === directionStart.gy)
+		) {
+			this.clearDirectionPreview();
+			return;
+		}
+
+		const key = `${cell.gx},${cell.gy}`;
+		if (key === this.directionHoverKey) return;
+		this.directionHoverKey = key;
+
+		const start = this.map.getTrackAt(directionStart.gx, directionStart.gy);
+		const path = start
+			? findPathBetween(this.map, start, end, { respectOneWay: true })
+			: null;
+		this.directionLayer.setRoutePreview(this.map, path, cell);
 	}
 
 	/** Drop any section-tool route preview (hovered outline + blue route). */
@@ -915,7 +1150,9 @@ export class PlacementController {
 
 	/**
 	 * Preview the run the section tool would select: the hovered cell is
-	 * outlined and, when a path exists, the route to it is stroked.
+	 * outlined and, when a path exists, the route to it is stroked. Mirrors
+	 * {@link updateDirectionPreview} so the speed/length gesture shows the same
+	 * thing before its second click as the direction gesture does.
 	 */
 	private updateSectionPreview(e: PointerEvent): void {
 		const { sectionStart } = useEditorStore.getState();
@@ -984,8 +1221,11 @@ export class PlacementController {
 		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
 
 		// Each two-click gesture previews what its second click would do. Only
-		// the active tool's preview runs; the other is cleared, so a tool
+		// the active tool's preview runs; the other two are cleared, so a tool
 		// switch mid-gesture cannot leave a stale route on screen.
+		if (tool === "direction") this.updateDirectionPreview(e);
+		else this.clearDirectionPreview();
+
 		if (tool === "section") this.updateSectionPreview(e);
 		else this.clearSectionPreview();
 
@@ -1031,6 +1271,7 @@ export class PlacementController {
 
 	private onPointerLeave = (): void => {
 		this.ghost.visible = false;
+		this.clearDirectionPreview();
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
@@ -1041,6 +1282,7 @@ export class PlacementController {
 		this.downPos = null;
 		this.downRect = null;
 		this.ghost.visible = false;
+		this.clearDirectionPreview();
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
@@ -1092,6 +1334,7 @@ export class PlacementController {
 		else if (tool === "text") cursor = "text";
 		else if (tool === "link") cursor = "pointer";
 		else if (tool === "section") cursor = "pointer";
+		else if (tool === "direction") cursor = "pointer";
 		canvas.style.cursor = cursor;
 		debugLog(
 			"placement",

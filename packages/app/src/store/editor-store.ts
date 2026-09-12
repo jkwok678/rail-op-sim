@@ -8,7 +8,14 @@ import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
 import { debugLog } from "#/lib/debugLogger";
 
 /** The active editing tool. */
-export type Tool = "select" | "add" | "text" | "link" | "section";
+export type Tool = "select" | "add" | "text" | "link" | "section" | "direction";
+
+/**
+ * What the direction tool's two-click gesture does along the route it finds:
+ * `set` assigns preferred directions, `erase` removes the ones the same
+ * gesture would have assigned — the way back from a mis-drawn route.
+ */
+export type DirectionMode = "set" | "erase";
 
 /** Non-track element types placeable from the Add palette. */
 export type ElementKind =
@@ -116,6 +123,9 @@ export interface EditorState {
 	/** Whether the linked track highlight overlay is visible. */
 	showLinkHighlights: boolean;
 
+	/** Whether the preferred-direction arrow overlay is visible. */
+	showDirections: boolean;
+
 	/** Whether hovering the canvas shows a floating track-info tooltip. */
 	showTrackInfo: boolean;
 
@@ -153,6 +163,8 @@ export interface EditorState {
 	) => void;
 	/** Toggle the linked track highlight overlay on/off. */
 	toggleLinkHighlights: () => void;
+	/** Toggle the preferred-direction arrow overlay on/off. */
+	toggleShowDirections: () => void;
 	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
 	toggleShowTrackInfo: () => void;
 	/** Toggle the ground grid on/off. */
@@ -196,6 +208,19 @@ export interface EditorState {
 	setSectionTracks: (tracks: { gx: number; gy: number }[]) => void;
 	/** Clear all section selection state. */
 	clearSectionSelection: () => void;
+
+	/**
+	 * Direction tool — two-click path assignment. Grid coordinates of the first
+	 * clicked track (start), or null when no start is pending.
+	 */
+	directionStart: { gx: number; gy: number } | null;
+	/** Set (or clear) the pending direction start track. */
+	setDirectionStart: (loc: { gx: number; gy: number } | null) => void;
+
+	/** Whether the direction tool assigns or erases along the route it finds. */
+	directionMode: DirectionMode;
+	/** Switch the direction tool between assigning and erasing. */
+	setDirectionMode: (mode: DirectionMode) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -206,6 +231,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	pendingText: null,
 	pendingNameTarget: null,
 	showLinkHighlights: false,
+	showDirections: false,
 	showTrackInfo: false,
 	showGrid: true,
 	hoveredTrackInfo: null,
@@ -215,6 +241,8 @@ export const useEditorStore = create<EditorState>((set) => ({
 	sectionStart: null,
 	sectionEnd: null,
 	sectionTracks: [],
+	directionStart: null,
+	directionMode: "set",
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
@@ -277,6 +305,8 @@ export const useEditorStore = create<EditorState>((set) => ({
 
 	toggleLinkHighlights: () =>
 		set((s) => ({ showLinkHighlights: !s.showLinkHighlights })),
+	toggleShowDirections: () =>
+		set((s) => ({ showDirections: !s.showDirections })),
 	toggleShowTrackInfo: () =>
 		set((s) => ({
 			showTrackInfo: !s.showTrackInfo,
@@ -311,5 +341,20 @@ export const useEditorStore = create<EditorState>((set) => ({
 	clearSectionSelection: () => {
 		debugLog("store", "clearSectionSelection");
 		set({ sectionStart: null, sectionEnd: null, sectionTracks: [] });
+	},
+
+	setDirectionStart: (loc) => {
+		debugLog(
+			"store",
+			`setDirectionStart: ${loc ? `(${loc.gx},${loc.gy})` : "null"}`,
+		);
+		set({ directionStart: loc });
+	},
+
+	setDirectionMode: (mode) => {
+		debugLog("store", `setDirectionMode: ${mode}`);
+		// A pending start belongs to the gesture being abandoned — switching what
+		// the second click would do mid-gesture would surprise.
+		set({ directionMode: mode, directionStart: null });
 	},
 }));

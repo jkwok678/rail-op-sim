@@ -8,6 +8,7 @@ type Subsystem =
 	| "store"
 	| "placement"
 	| "trackLayer"
+	| "directionLayer"
 	| "textureCache"
 	| "pixi"
 	| "grid"
