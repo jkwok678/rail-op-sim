@@ -1,487 +1,509 @@
-# Graph Report - rail-op-sim  (2026-07-05)
+# Graph Report - rail-op-sim  (2026-09-12)
 
 ## Corpus Check
-- 94 files · ~85,733 words
+- 97 files · ~98,095 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1219 nodes · 2108 edges · 208 communities (55 shown, 153 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.9)
+- 1414 nodes · 2652 edges · 219 communities (109 shown, 110 thin omitted)
+- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 402 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c92a87b4`
+- Built from commit: `6fe0a7a0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Layer Element Components|Layer Element Components]]
-- [[_COMMUNITY_Svg Track Components|Svg Track Components]]
-- [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Svg Map Components|Svg Map Components]]
-- [[_COMMUNITY_Get List Components|Get List Components]]
-- [[_COMMUNITY_Milestone Train Components|Milestone Train Components]]
-- [[_COMMUNITY_What Engine Components|What Engine Components]]
-- [[_COMMUNITY_Svg Switch Components|Svg Switch Components]]
-- [[_COMMUNITY_Codes Links Components|Codes Links Components]]
-- [[_COMMUNITY_Enabled Ignore Components|Enabled Ignore Components]]
-- [[_COMMUNITY_Menu Color Components|Menu Color Components]]
-- [[_COMMUNITY_React Tanstack Components|React Tanstack Components]]
-- [[_COMMUNITY_Phase Fix Components|Phase Fix Components]]
-- [[_COMMUNITY_Get Track Components|Get Track Components]]
-- [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Handle Viewport Components|Handle Viewport Components]]
-- [[_COMMUNITY_Dialog Element Components|Dialog Element Components]]
-- [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Use Theme Components|Use Theme Components]]
-- [[_COMMUNITY_React Plugin Components|React Plugin Components]]
-- [[_COMMUNITY_Community 21|Community 21]]
-- [[_COMMUNITY_Text Map Components|Text Map Components]]
-- [[_COMMUNITY_Dev Dependencies Components|Dev Dependencies Components]]
-- [[_COMMUNITY_Adding Readme Components|Adding Readme Components]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Route File Components|Route File Components]]
-- [[_COMMUNITY_Lib Unused Components|Lib Unused Components]]
-- [[_COMMUNITY_Map Platform Components|Map Platform Components]]
-- [[_COMMUNITY_Type Variants Components|Type Variants Components]]
-- [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Font Set Components|Font Set Components]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Dev Package Components|Dev Package Components]]
-- [[_COMMUNITY_Track Subtype Components|Track Subtype Components]]
-- [[_COMMUNITY_Scripts Build Components|Scripts Build Components]]
-- [[_COMMUNITY_Tsconfig Json Components|Tsconfig Json Components]]
-- [[_COMMUNITY_Data Model Components|Data Model Components]]
-- [[_COMMUNITY_Text Map Components|Text Map Components]]
-- [[_COMMUNITY_Block Element Components|Block Element Components]]
-- [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Color Name Components|Color Name Components]]
-- [[_COMMUNITY_Error Track Components|Error Track Components]]
-- [[_COMMUNITY_Ground Layer Components|Ground Layer Components]]
-- [[_COMMUNITY_Pixi Rendering Components|Pixi Rendering Components]]
-- [[_COMMUNITY_Community 50|Community 50]]
-- [[_COMMUNITY_Callback Types Components|Callback Types Components]]
-- [[_COMMUNITY_Png Svg Components|Png Svg Components]]
-- [[_COMMUNITY_Package Json Components|Package Json Components]]
-- [[_COMMUNITY_Tooltip Content Components|Tooltip Content Components]]
-- [[_COMMUNITY_Input App Components|Input App Components]]
-- [[_COMMUNITY_Community 56|Community 56]]
-- [[_COMMUNITY_Community 57|Community 57]]
-- [[_COMMUNITY_Community 58|Community 58]]
-- [[_COMMUNITY_Pixi App Components|Pixi App Components]]
-- [[_COMMUNITY_Tsconfig Json Components|Tsconfig Json Components]]
-- [[_COMMUNITY_Community 62|Community 62]]
-- [[_COMMUNITY_Package Json Components|Package Json Components]]
-- [[_COMMUNITY_Svg Parapet25 Components|Svg Parapet25 Components]]
-- [[_COMMUNITY_Svg Parapet7 Components|Svg Parapet7 Components]]
-- [[_COMMUNITY_Tsconfig Json Components|Tsconfig Json Components]]
-- [[_COMMUNITY_Config Vite Components|Config Vite Components]]
-- [[_COMMUNITY_Claude Graphify Components|Claude Graphify Components]]
-- [[_COMMUNITY_Svg Parapet1 Components|Svg Parapet1 Components]]
-- [[_COMMUNITY_Svg Parapet10 Components|Svg Parapet10 Components]]
-- [[_COMMUNITY_Svg Parapet12 Components|Svg Parapet12 Components]]
-- [[_COMMUNITY_Svg Parapet14 Components|Svg Parapet14 Components]]
-- [[_COMMUNITY_Svg Parapet17 Components|Svg Parapet17 Components]]
-- [[_COMMUNITY_Svg Parapet2 Components|Svg Parapet2 Components]]
-- [[_COMMUNITY_Svg Parapet21 Components|Svg Parapet21 Components]]
-- [[_COMMUNITY_Svg Parapet22 Components|Svg Parapet22 Components]]
-- [[_COMMUNITY_Svg Parapet3 Components|Svg Parapet3 Components]]
-- [[_COMMUNITY_Community 79|Community 79]]
-- [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
-- [[_COMMUNITY_Community 82|Community 82]]
-- [[_COMMUNITY_Community 83|Community 83]]
-- [[_COMMUNITY_Community 84|Community 84]]
-- [[_COMMUNITY_Community 85|Community 85]]
-- [[_COMMUNITY_Community 86|Community 86]]
-- [[_COMMUNITY_Community 87|Community 87]]
-- [[_COMMUNITY_Community 88|Community 88]]
-- [[_COMMUNITY_Community 89|Community 89]]
-- [[_COMMUNITY_Community 90|Community 90]]
-- [[_COMMUNITY_Community 91|Community 91]]
-- [[_COMMUNITY_Community 92|Community 92]]
-- [[_COMMUNITY_Community 93|Community 93]]
-- [[_COMMUNITY_Community 94|Community 94]]
-- [[_COMMUNITY_Community 95|Community 95]]
-- [[_COMMUNITY_Community 96|Community 96]]
-- [[_COMMUNITY_Community 97|Community 97]]
-- [[_COMMUNITY_Community 98|Community 98]]
-- [[_COMMUNITY_Community 99|Community 99]]
-- [[_COMMUNITY_Community 100|Community 100]]
-- [[_COMMUNITY_Community 101|Community 101]]
-- [[_COMMUNITY_Community 102|Community 102]]
-- [[_COMMUNITY_Community 103|Community 103]]
-- [[_COMMUNITY_Community 104|Community 104]]
-- [[_COMMUNITY_Community 105|Community 105]]
-- [[_COMMUNITY_Community 106|Community 106]]
-- [[_COMMUNITY_Community 107|Community 107]]
-- [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 109|Community 109]]
-- [[_COMMUNITY_Community 110|Community 110]]
-- [[_COMMUNITY_Community 111|Community 111]]
-- [[_COMMUNITY_Community 112|Community 112]]
-- [[_COMMUNITY_Community 113|Community 113]]
-- [[_COMMUNITY_Community 114|Community 114]]
-- [[_COMMUNITY_Community 115|Community 115]]
-- [[_COMMUNITY_Community 116|Community 116]]
-- [[_COMMUNITY_Community 117|Community 117]]
-- [[_COMMUNITY_Community 118|Community 118]]
-- [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 120|Community 120]]
-- [[_COMMUNITY_Community 121|Community 121]]
-- [[_COMMUNITY_Community 122|Community 122]]
-- [[_COMMUNITY_Community 123|Community 123]]
-- [[_COMMUNITY_Community 124|Community 124]]
-- [[_COMMUNITY_Community 125|Community 125]]
-- [[_COMMUNITY_Community 126|Community 126]]
-- [[_COMMUNITY_Community 127|Community 127]]
-- [[_COMMUNITY_Community 128|Community 128]]
-- [[_COMMUNITY_Community 129|Community 129]]
-- [[_COMMUNITY_Community 130|Community 130]]
-- [[_COMMUNITY_Community 131|Community 131]]
-- [[_COMMUNITY_Underpass Set1 Components|Underpass Set1 Components]]
-- [[_COMMUNITY_Underpass Set2 Components|Underpass Set2 Components]]
-- [[_COMMUNITY_Underpass Unset1 Components|Underpass Unset1 Components]]
-- [[_COMMUNITY_Underpass Unset2 Components|Underpass Unset2 Components]]
-- [[_COMMUNITY_Tsr Config Components|Tsr Config Components]]
-- [[_COMMUNITY_Community 137|Community 137]]
-- [[_COMMUNITY_Community 138|Community 138]]
-- [[_COMMUNITY_Community 139|Community 139]]
-- [[_COMMUNITY_Community 140|Community 140]]
-- [[_COMMUNITY_Community 141|Community 141]]
-- [[_COMMUNITY_Community 142|Community 142]]
-- [[_COMMUNITY_Community 143|Community 143]]
-- [[_COMMUNITY_Community 144|Community 144]]
-- [[_COMMUNITY_Community 145|Community 145]]
-- [[_COMMUNITY_Community 146|Community 146]]
-- [[_COMMUNITY_Community 147|Community 147]]
-- [[_COMMUNITY_Community 148|Community 148]]
-- [[_COMMUNITY_Community 149|Community 149]]
-- [[_COMMUNITY_Community 150|Community 150]]
-- [[_COMMUNITY_Community 151|Community 151]]
-- [[_COMMUNITY_Community 152|Community 152]]
-- [[_COMMUNITY_Community 153|Community 153]]
-- [[_COMMUNITY_Community 154|Community 154]]
-- [[_COMMUNITY_Community 155|Community 155]]
-- [[_COMMUNITY_Community 156|Community 156]]
-- [[_COMMUNITY_Community 157|Community 157]]
-- [[_COMMUNITY_Community 158|Community 158]]
-- [[_COMMUNITY_Community 159|Community 159]]
-- [[_COMMUNITY_Community 160|Community 160]]
-- [[_COMMUNITY_Community 161|Community 161]]
-- [[_COMMUNITY_Community 162|Community 162]]
-- [[_COMMUNITY_Community 163|Community 163]]
-- [[_COMMUNITY_Community 164|Community 164]]
-- [[_COMMUNITY_Community 165|Community 165]]
-- [[_COMMUNITY_Community 166|Community 166]]
-- [[_COMMUNITY_Community 167|Community 167]]
-- [[_COMMUNITY_Community 168|Community 168]]
-- [[_COMMUNITY_Community 169|Community 169]]
-- [[_COMMUNITY_Community 170|Community 170]]
-- [[_COMMUNITY_Community 171|Community 171]]
-- [[_COMMUNITY_Community 172|Community 172]]
-- [[_COMMUNITY_Community 173|Community 173]]
-- [[_COMMUNITY_Community 174|Community 174]]
-- [[_COMMUNITY_Community 175|Community 175]]
-- [[_COMMUNITY_Community 176|Community 176]]
-- [[_COMMUNITY_Community 177|Community 177]]
-- [[_COMMUNITY_Community 178|Community 178]]
-- [[_COMMUNITY_Community 179|Community 179]]
-- [[_COMMUNITY_Named Location Components|Named Location Components]]
-- [[_COMMUNITY_Named Location Components|Named Location Components]]
-- [[_COMMUNITY_Parapet19 Svg Components|Parapet19 Svg Components]]
-- [[_COMMUNITY_Parapet20 Svg Components|Parapet20 Svg Components]]
-- [[_COMMUNITY_Parapet28 Svg Components|Parapet28 Svg Components]]
-- [[_COMMUNITY_Parapet4 Svg Components|Parapet4 Svg Components]]
-- [[_COMMUNITY_Manifest Json Components|Manifest Json Components]]
-- [[_COMMUNITY_Community 187|Community 187]]
-- [[_COMMUNITY_Community 188|Community 188]]
-- [[_COMMUNITY_Community 189|Community 189]]
-- [[_COMMUNITY_Community 190|Community 190]]
-- [[_COMMUNITY_Community 191|Community 191]]
-- [[_COMMUNITY_Community 192|Community 192]]
-- [[_COMMUNITY_Community 193|Community 193]]
-- [[_COMMUNITY_Community 194|Community 194]]
-- [[_COMMUNITY_Community 195|Community 195]]
-- [[_COMMUNITY_Community 196|Community 196]]
-- [[_COMMUNITY_Community 197|Community 197]]
-- [[_COMMUNITY_Community 198|Community 198]]
-- [[_COMMUNITY_Community 199|Community 199]]
-- [[_COMMUNITY_Aspect Railway Components|Aspect Railway Components]]
-- [[_COMMUNITY_Aspect Railway Components|Aspect Railway Components]]
-- [[_COMMUNITY_Yellow Aspect Components|Yellow Aspect Components]]
-- [[_COMMUNITY_Shunting Signal Components|Shunting Signal Components]]
-- [[_COMMUNITY_Community 204|Community 204]]
-- [[_COMMUNITY_Pnpm Monorepo Components|Pnpm Monorepo Components]]
-- [[_COMMUNITY_Level Crossing Components|Level Crossing Components]]
-- [[_COMMUNITY_Map Constructor Components|Map Constructor Components]]
-- [[_COMMUNITY_Community 208|Community 208]]
-- [[_COMMUNITY_Community 209|Community 209]]
+- TextInputDialog.tsx
+- track-data.ts
+- Track
+- devDependencies
+- ViewportController.ts
+- dependencies
+- Implementation Milestones
+- Rail Ops Sim — Architecture & Implementation Plan
+- graphics
+- ViewportController
+- includes
+- AddPalette.tsx
+- Map_
+- textureCache.ts
+- PlacementController
+- railway/index.ts
+- track-data.ts
+- SimCanvas.tsx
+- dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics
+- PlacementController.ts
+- Text
+- Technology Evaluation
+- components.json
+- scripts
+- Building For Production
+- concept:signal-graphics
+- routeTree.gen.ts
+- compilerOptions
+- Map_ (railway map data structure)
+- railway/enums.ts
+- LinkHighlightLayer
+- map.ts
+- ElementLayer.ts
+- NamedElement
+- ZoomSlider.tsx
+- gestureOverlay.ts
+- .getTrackAt
+- Element
+- shared/package.json
+- Knowledge Graph Project Rules
+- Multiplayer Readiness (Built In From Day 1)
+- rail-op-sim/packages/shared/src/railway/element.ts
+- Element
+- Transport Protocol (Engine ↔ Host)
+- packages/shared/src/railway/errors.ts
+- app/tsconfig.json
+- SimLayout.tsx
+- railway/errors.ts
+- Link state SVGs (set/unset variants)
+- React-UI Rendering Separation
+- SWITCH_LINKS
+- railway/types.ts
+- png-to-svg.mjs
+- editor-store.ts
+- tooltip.tsx
+- ui/input.tsx
+- manifest.json
+- Toolbar.tsx
+- GroundLayer.ts
+- map-serialization.ts
+- deserializeMap
+- root tsconfig.json
+- file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts
+- package.json — root monorepo config
+- parapet26.svg
+- parapet7.svg
+- CURVED_LINKS
+- shared/tsconfig.json
+- createTrackColorLayer
+- CLAUDE.md
+- parapet1.svg
+- parapet10.svg
+- parapet12.svg
+- parapet14.svg
+- parapet17.svg
+- parapet2.svg
+- parapet21.svg
+- parapet22.svg
+- parapet3.svg
+- .cta.json
+- biome.json
+- components.json
+- bridgeSet1.svg
+- bridgeSet2.svg
+- bridgeUnset1.svg
+- bridgeUnset2.svg
+- bufferDown.svg
+- bufferLeft.svg
+- bufferLeftDown.svg
+- bufferLeftUp.svg
+- bufferRight.svg
+- bufferRightDown.svg
+- bufferRightUp.svg
+- bufferUp.svg
+- concourseSet.svg
+- concourseUnset.svg
+- SimLayout.tsx
+- GroundLayer.ts
+- PixiApp.ts
+- __root.tsx
+- BridgeUnderpassType
+- BufferType
+- Button
+- CrossoverType
+- CurvedType
+- DirectedType
+- ElementAlreadyExistsError
+- ElementNotFoundError
+- ExitType
+- FlyoverType
+- GroundLayer
+- GroundLayerOptions
+- LinkedTrackError
+- LinkedType
+- ParapetType
+- Platform
+- RailwayError
+- RootDocument
+- Route
+- SignalType
+- SimCanvas
+- SimLayout
+- StraightType
+- SwitchType
+- TooltipProvider
+- TrackNotConnectedError
+- ViewportController
+- ViewportState
+- ZeroTrackError
+- buttonVariants
+- createGroundLayer
+- createPixiApp
+- underpassSet1.svg
+- underpassSet2.svg
+- underpassUnset1.svg
+- underpassUnset2.svg
+- tsr.config.json
+- Button
+- DialogPrimitive
+- XIcon
+- cn
+- FontInfo
+- ParapetType
+- rail-op-sim/packages/shared/src/railway/__tests__/enums.test.ts
+- rail-op-sim/packages/shared/src/railway/enums.ts
+- rail-op-sim/packages/shared/src/railway/__tests__/errors.test.ts
+- rail-op-sim/packages/shared/src/railway/errors.ts
+- file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/select.tsx
+- file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/separator.tsx
+- file:/Users/jonathankwok/projects/rail-op-sim/scripts/png-to-svg.mjs
+- namedLocationSet.svg — solid blue 16x16 icon (#0066ff)
+- namedLocationUnset.svg — patterned blue 16x16 icon (#0066ff dot pattern)
+- parapet19.svg
+- parapet20.svg
+- parapet28.svg
+- parapet4.svg
+- manifest.json
+- rail-op-sim/packages/app/src/components/ui/dialog.tsx
+- 2-Aspect Railway Signal (Green-Red)
+- 3-Aspect Railway Signal (Green-Yellow-Red)
+- 4-Aspect Railway Signal (Yellow-Green-Yellow-Red)
+- Shunting Signal (Red)
+- niceSpacing
+- pnpm Monorepo Workspace Configuration
+- Level crossing icon SVG
+- Map_ constructor(options?)
+- usePixiApp
+- useTheme
+- vite.config.ts
+- button.tsx
+- 34 Milestone Implementation Plan
+- button.tsx
+- round1
+- TextLayer
+- serializeMap
+- NamedLocation
 
 ## God Nodes (most connected - your core abstractions)
-1. `Map_` - 106 edges
-2. `Track` - 73 edges
-3. `PlacementController` - 43 edges
-4. `Text` - 40 edges
+1. `Map_` - 119 edges
+2. `Track` - 90 edges
+3. `PlacementController` - 50 edges
+4. `Text` - 41 edges
 5. `Implementation Milestones` - 35 edges
-6. `ViewportController` - 31 edges
-7. `debugLog()` - 25 edges
+6. `debugLog()` - 33 edges
+7. `ViewportController` - 31 edges
 8. `cn()` - 25 edges
-9. `useEditorStore` - 21 edges
+9. `useEditorStore` - 23 edges
 10. `FontInfo` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Knowledge Graph Project Rules` --references--> `Rail Ops Sim`  [INFERRED]
   CLAUDE.md → PLAN.md
-- `Grid-Based Tile Data Model` --conceptually_related_to--> `Rail Ops Sim`  [INFERRED]
-  UPDATED_PLAN.md → PLAN.md
-- `Railway Builder Scope Update` --conceptually_related_to--> `Rail Ops Sim`  [INFERRED]
-  UPDATED_PLAN.md → PLAN.md
 - `PanControlsProps` --references--> `ViewportController`  [EXTRACTED]
   packages/app/src/components/sim/PanControls.tsx → packages/app/src/engine/ViewportController.ts
-- `ZoomSliderProps` --references--> `ViewportController`  [EXTRACTED]
-  packages/app/src/components/sim/ZoomSlider.tsx → packages/app/src/engine/ViewportController.ts
+- `EditorState` --references--> `SignalAspectValue`  [EXTRACTED]
+  packages/app/src/store/editor-store.ts → packages/shared/src/railway/track/signal-aspects.ts
+- `NameElementDialog()` --calls--> `useEditorStore`  [EXTRACTED]
+  packages/app/src/components/sim/NameElementDialog.tsx → packages/app/src/store/editor-store.ts
+- `SaveLoadControls()` --calls--> `debugLog()`  [EXTRACTED]
+  packages/app/src/components/sim/SaveLoadControls.tsx → packages/app/src/lib/debugLogger.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (208 total, 153 thin omitted)
+## Communities (219 total, 110 thin omitted)
 
-### Community 0 - "Layer Element Components"
-Cohesion: 0.15
-Nodes (4): PlacementController, platformSubtypeToSide(), debugLog(), NameableKind
+### Community 0 - "TextInputDialog.tsx"
+Cohesion: 0.12
+Nodes (26): getElementAt(), KIND_TITLES, NameElementDialog(), NameElementDialogProps, FONT_FAMILIES, TextInputDialogProps, Dialog(), DialogContent() (+18 more)
 
-### Community 1 - "Svg Track Components"
+### Community 1 - "track-data.ts"
+Cohesion: 0.16
+Nodes (24): Track (unified track class), Link grid layout (0-8 indices), KIND_META, track.test.ts, track-data.ts, track.ts, track/track-data.ts, KIND_META (per-kind flags) (+16 more)
+
+### Community 2 - "Track"
 Cohesion: 0.06
-Nodes (47): Track (unified track class), Link grid layout (0-8 indices), Link state SVGs (set/unset variants), KIND_META, switchTight1.svg, switchTight2.svg, switchTight3.svg, switchTight4.svg (+39 more)
+Nodes (7): ConnectivityReport, DanglingLink, PathNode, PreferredDirectionRemovalResult, PreferredDirectionResult, getTrackColorState(), Track
 
-### Community 3 - "Community 3"
-Cohesion: 0.23
-Nodes (9): getTrackColorState(), TrackColorState, getLinksForSubtype(), hasSecondaryPath(), supportsLevelCrossing(), supportsPlatforms(), TrackData, TrackKindMeta (+1 more)
+### Community 3 - "devDependencies"
+Cohesion: 0.04
+Nodes (46): babel-plugin-react-compiler, jsdom, devDependencies, babel-plugin-react-compiler, @biomejs/biome, jsdom, @rolldown/plugin-babel, @tailwindcss/typography (+38 more)
 
-### Community 4 - "Svg Map Components"
-Cohesion: 0.10
-Nodes (21): buildDomColorMap(), buildThemeColorMap(), ColorMap, escapeRegExp(), normalizeCssColor(), normalizedCache, recolorSvg(), rgbToHex() (+13 more)
+### Community 5 - "dependencies"
+Cohesion: 0.05
+Nodes (43): class-variance-authority, clsx, @fontsource-variable/jetbrains-mono, dependencies, class-variance-authority, clsx, @fontsource-variable/jetbrains-mono, @phosphor-icons/react (+35 more)
 
-### Community 6 - "Milestone Train Components"
+### Community 6 - "Implementation Milestones"
 Cohesion: 0.06
 Nodes (35): Implementation Milestones, Milestone 10: Train Placement & Rendering, Milestone 11: Train Control, Milestone 12: Block Occupancy, Milestone 13: Signal Placement & Data Model, Milestone 14: Signal Rendering, Milestone 15: Signal Aspect Propagation, Milestone 16: Train Responds to Signals (+27 more)
 
-### Community 7 - "What Engine Components"
+### Community 7 - "Rail Ops Sim — Architecture & Implementation Plan"
 Cohesion: 0.17
 Nodes (11): Architecture Overview, Context, Data Model (Core Types), Key Dependencies to Add, Layer Z-Order, Multiplayer Mode (future — engine code unchanged), Project Structure, Rail Ops Sim — Architecture & Implementation Plan (+3 more)
 
-### Community 8 - "Svg Switch Components"
+### Community 8 - "graphics"
 Cohesion: 0.13
 Nodes (28): graphics, switch1.svg, switch10.svg, switch11.svg, switch12.svg, switch13.svg, switch14.svg, switch15.svg (+20 more)
 
-### Community 9 - "Codes Links Components"
-Cohesion: 0.06
-Nodes (76): checkAllTracksConnected(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport(), LINK_OFFSETS, LinkedTrackPair (+68 more)
+### Community 9 - "ViewportController"
+Cohesion: 0.13
+Nodes (3): ZoomSliderProps, ViewportController, UsePixiAppReturn
 
-### Community 10 - "Enabled Ignore Components"
-Cohesion: 0.09
-Nodes (22): source, assist, actions, files, ignoreUnknown, includes, formatter, enabled (+14 more)
+### Community 10 - "includes"
+Cohesion: 0.07
+Nodes (29): source, assist, actions, files, ignoreUnknown, includes, formatter, enabled (+21 more)
 
-### Community 11 - "Menu Color Components"
-Cohesion: 0.09
-Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
-
-### Community 12 - "React Tanstack Components"
-Cohesion: 0.09
-Nodes (22): dependencies, class-variance-authority, clsx, @fontsource-variable/jetbrains-mono, @phosphor-icons/react, pixi.js, radix-ui, @rail-op-sim/shared (+14 more)
-
-### Community 13 - "Phase Fix Components"
-Cohesion: 0.67
-Nodes (4): Adjacency Spread Algorithm (linkLocalText), Phase 0 Coordinate-Unit Fix (setImageSize(1)), Name Tool, NamedLocation
-
-### Community 15 - "Community 15"
+### Community 11 - "AddPalette.tsx"
 Cohesion: 0.15
-Nodes (8): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts, UsePixiAppReturn, Subsystem, downloadMap(), InvalidMapFileError, pickAndReadMapFile(), SVG_MAP, SaveLoadControls()
+Nodes (33): ALL_LABELS, ASPECT_OPTIONS, CATEGORIES, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE, SUBTYPE_VALUES (+25 more)
 
-### Community 17 - "Dialog Element Components"
-Cohesion: 0.05
-Nodes (58): /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx, /Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx, ViewportControllerOptions, ViewportState, usePixiApp(), useTheme(), cn(), AddPalette() (+50 more)
+### Community 13 - "textureCache.ts"
+Cohesion: 0.11
+Nodes (25): AspectPreview(), DOM_COLOR_MAP, sanitizeSvg(), DOM_COLOR_MAP, sanitizeSvg(), TrackPreview(), buildDomColorMap(), buildThemeColorMap() (+17 more)
 
-### Community 18 - "Community 18"
+### Community 14 - "PlacementController"
+Cohesion: 0.11
+Nodes (9): PlacementController, platformSubtypeToSide(), debugLog(), createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync() (+1 more)
+
+### Community 15 - "railway/index.ts"
+Cohesion: 0.15
+Nodes (25): COLOR_LEGEND, SignalAspectValue, DEFAULT_MAIN_LENGTH, DEFAULT_MAIN_SPEED, DEFAULT_SECONDARY_LENGTH, DEFAULT_SECONDARY_SPEED, TRACK_COLOR_ALPHA, TRACK_COLOR_BOTH (+17 more)
+
+### Community 16 - "track-data.ts"
+Cohesion: 0.07
+Nodes (28): BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES, CROSSOVER_LINKS, CURVED_CODES (+20 more)
+
+### Community 18 - "dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics"
 Cohesion: 0.10
 Nodes (20): dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg (+12 more)
 
-### Community 19 - "Use Theme Components"
-Cohesion: 0.14
-Nodes (15): PlacementControllerOptions, ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, LinkHighlightLayer, TextLayer (+7 more)
+### Community 19 - "PlacementController.ts"
+Cohesion: 0.23
+Nodes (10): DEFAULT_OPTIONS, themeKey(), usePixiApp(), Subsystem, CELL_SIZE, worldToGrid(), createTrackLayer(), Entry (+2 more)
 
-### Community 20 - "React Plugin Components"
-Cohesion: 0.12
-Nodes (17): devDependencies, babel-plugin-react-compiler, @biomejs/biome, jsdom, @rolldown/plugin-babel, @tailwindcss/typography, @tanstack/devtools-vite, @tanstack/router-cli (+9 more)
-
-### Community 21 - "Community 21"
+### Community 21 - "Technology Evaluation"
 Cohesion: 0.20
 Nodes (10): 1. Rendering Engine — **PixiJS v8** ✅ Decided, 2. Meta-Framework — **TanStack Start** (already scaffolded), 3. State Management (UI) — **Zustand**, 4. Worker Communication — **Raw postMessage**, 5. Schema Validation — **Valibot**, 6. IndexedDB Wrapper — **Dexie.js**, 7. Table Component — **@tanstack/react-table**, 8. CSS & UI Components — **Tailwind v4 + shadcn/ui** (already configured) (+2 more)
 
-### Community 22 - "Text Map Components"
-Cohesion: 0.07
-Nodes (26): BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES, CROSSOVER_LINKS, CURVED_CODES (+18 more)
+### Community 22 - "components.json"
+Cohesion: 0.09
+Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 23 - "Dev Dependencies Components"
-Cohesion: 0.12
-Nodes (16): devDependencies, @biomejs/biome, fallow, pngjs, typescript, name, pnpm, onlyBuiltDependencies (+8 more)
+### Community 23 - "scripts"
+Cohesion: 0.09
+Nodes (22): fallow, devDependencies, @biomejs/biome, fallow, pngjs, typescript, @biomejs/biome, typescript (+14 more)
 
-### Community 24 - "Adding Readme Components"
+### Community 24 - "Building For Production"
 Cohesion: 0.12
 Nodes (16): Adding A Route, Adding Links, API Routes, Building For Production, Data Fetching, Demo files, Getting Started, Learn More (+8 more)
 
-### Community 25 - "Community 25"
+### Community 25 - "concept:signal-graphics"
 Cohesion: 0.13
 Nodes (15): concept:railway-graphics, concept:signal-graphics, concept:track-graphics, file:packages/app/public/graphics/signalDown.svg, file:packages/app/public/graphics/signalLeft.svg, file:packages/app/public/graphics/signalLeftDown.svg, file:packages/app/public/graphics/signalLeftUp.svg, file:packages/app/public/graphics/signalRight.svg (+7 more)
 
-### Community 26 - "Route File Components"
-Cohesion: 0.16
-Nodes (14): Route, Route, getRouter(), Register, FileRoutesByFullPath, FileRoutesById, FileRoutesByPath, FileRoutesByTo (+6 more)
-
-### Community 27 - "Lib Unused Components"
+### Community 26 - "routeTree.gen.ts"
 Cohesion: 0.13
-Nodes (14): compilerOptions, allowImportingTsExtensions, lib, module, moduleResolution, noEmit, noFallthroughCasesInSwitch, noUncheckedSideEffectImports (+6 more)
+Nodes (17): TooltipProvider(), getRouter(), Register, @tanstack/react-router, Route, Route, FileRoutesByFullPath, FileRoutesById (+9 more)
 
-### Community 28 - "Map Platform Components"
-Cohesion: 0.16
-Nodes (14): Map_ (railway map data structure), map-platform.test.ts — tests for addPlatform and addLevelCrossing, map.test.ts — comprehensive tests for Map_ class, map/map-platform.ts, addLevelCrossing(map, x, y) — adds level crossing to straight tracks only, addPlatform(map, side, x, y) — sets platform flags on track data by kind/subtype, Map_.addLevelCrossing(x, y) — delegates to map-platform module, Map_.addNamedLocation(nl) — adds a NamedLocation (+6 more)
+### Community 27 - "compilerOptions"
+Cohesion: 0.11
+Nodes (17): DOM, DOM.Iterable, ES2022, compilerOptions, allowImportingTsExtensions, lib, module, moduleResolution (+9 more)
 
-### Community 29 - "Type Variants Components"
+### Community 28 - "Map_ (railway map data structure)"
+Cohesion: 0.10
+Nodes (27): Map_ (railway map data structure), map-connectivity.test.ts — tests for checkAllTracksConnected, map-platform.test.ts — tests for addPlatform and addLevelCrossing, map-text-linking.test.ts — tests for linkLocalText, deleteTextFromAllElements, changeDeleteText, map.test.ts — comprehensive tests for Map_ class, map/map-connectivity.ts, map/map-platform.ts, map/map-text-linking.ts (+19 more)
+
+### Community 29 - "railway/enums.ts"
 Cohesion: 0.14
 Nodes (14): BridgeUnderpassType (4 variants), BufferType (8 variants), CrossoverType (6 variants), CurvedType (12 variants), DirectedType (8 variants), ExitType (8 variants), FlyoverType (12 variants), LinkedType (8 variants) (+6 more)
 
-### Community 30 - "Community 30"
-Cohesion: 0.26
-Nodes (6): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError, TrackNotConnectedError, ZeroTrackError
+### Community 30 - "LinkHighlightLayer"
+Cohesion: 0.09
+Nodes (6): PlacementControllerOptions, Coord, DirectionLayer, LinkHighlightLayer, TrackColorLayer, TrackLayer
 
-### Community 32 - "Community 32"
+### Community 31 - "map.ts"
+Cohesion: 0.12
+Nodes (22): checkAllTracksConnected(), clearPreferredDirectionsAlongPath(), endpointOtherLink(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getConnectivityReport(), getLinkedTrackPairs() (+14 more)
+
+### Community 32 - "ElementLayer.ts"
+Cohesion: 0.13
+Nodes (7): createElementLayer(), ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, TextureCache
+
+### Community 33 - "NamedElement"
 Cohesion: 0.17
 Nodes (3): Concourse, NamedElement, TestNamedElement
 
-### Community 35 - "Dev Package Components"
-Cohesion: 0.15
-Nodes (12): devDependencies, typescript, vitest, main, name, private, scripts, build (+4 more)
+### Community 34 - "ZoomSlider.tsx"
+Cohesion: 0.19
+Nodes (13): PanControls(), PanControlsProps, SimCanvas(), ZoomSlider(), PAN_BUTTON_STEP, PAN_KEY_SPEED, ViewportControllerOptions, ViewportState (+5 more)
 
-### Community 37 - "Scripts Build Components"
-Cohesion: 0.22
-Nodes (9): scripts, build, check, dev, format, generate-routes, lint, preview (+1 more)
+### Community 35 - "gestureOverlay.ts"
+Cohesion: 0.09
+Nodes (30): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), EndpointOutlines, GESTURE_END_COLOR, GESTURE_INVALID_COLOR (+22 more)
 
-### Community 38 - "Tsconfig Json Components"
-Cohesion: 0.22
-Nodes (8): compilerOptions, jsx, paths, types, extends, include, #/*, @rail-op-sim/shared
+### Community 36 - ".getTrackAt"
+Cohesion: 0.26
+Nodes (10): addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform(), collectNeighbourTexts(), linkLocalText(), linkNewElementToText(), NEIGHBOR_OFFSETS (+2 more)
 
-### Community 39 - "Data Model Components"
-Cohesion: 0.22
-Nodes (9): Knowledge Graph Project Rules, 34 Milestone Implementation Plan, Rail Ops Sim, Grid-Based Tile Data Model, Map_ Central Data Structure, Railway Builder Scope Update, Shared Data Model Completed, Shared Railway Data Package (+1 more)
+### Community 38 - "shared/package.json"
+Cohesion: 0.13
+Nodes (14): devDependencies, typescript, vitest, typescript, vitest, main, name, private (+6 more)
 
-### Community 40 - "Text Map Components"
+### Community 40 - "Multiplayer Readiness (Built In From Day 1)"
 Cohesion: 0.40
 Nodes (5): Key Architectural Decisions, Multiplayer Readiness (Built In From Day 1), What changes for multiplayer (later, not now), What "multiplayer-ready" means here, What we do now to enable this
 
-### Community 41 - "Block Element Components"
-Cohesion: 0.39
-Nodes (9): Concourse (red block), Element (abstract base), NamedElement (abstract), NamedLocation (blue block), Parapet (decorative structure), Text (editable canvas text), file:packages/shared/src/railway/__tests__/element.test.ts, file:packages/shared/src/railway/element.ts (+1 more)
+### Community 41 - "rail-op-sim/packages/shared/src/railway/element.ts"
+Cohesion: 0.22
+Nodes (14): Concourse (red block), Element (abstract base), NamedElement (abstract), NamedLocation (blue block), Parapet (decorative structure), Text (editable canvas text), shared/src/index.ts, rail-op-sim/packages/shared/src/railway/__tests__/element.test.ts (+6 more)
 
-### Community 42 - "Community 42"
+### Community 42 - "Element"
 Cohesion: 0.25
-Nodes (8): entity:packages/shared/src/railway/__tests__/element.test.ts/class/TestElement, entity:packages/shared/src/railway/__tests__/element.test.ts/class/TestNamedElement, entity:packages/shared/src/railway/element.ts/class/Concourse, entity:packages/shared/src/railway/element.ts/class/Element, entity:packages/shared/src/railway/element.ts/class/NamedElement, entity:packages/shared/src/railway/element.ts/class/NamedLocation, entity:packages/shared/src/railway/element.ts/class/Parapet, entity:packages/shared/src/railway/element.ts/class/Text
+Nodes (8): TestElement, TestNamedElement, Concourse, Element, NamedElement, NamedLocation, Parapet, Text
 
-### Community 43 - "Community 43"
+### Community 43 - "Transport Protocol (Engine ↔ Host)"
 Cohesion: 0.67
 Nodes (3): Adapter Implementations, How the engine boots (host-agnostic), Transport Protocol (Engine ↔ Host)
 
-### Community 44 - "Community 44"
-Cohesion: 0.28
-Nodes (9): map-text-linking.test.ts — tests for linkLocalText, deleteTextFromAllElements, changeDeleteText, map/map-text-linking.ts, map/map.ts, changeDeleteText(map, readableBit, ok, text) — updates or deletes text based on user input, deleteTextFromAllElements(map, text) — removes text reference from tracks, namedLocations, concourses, linkLocalText(map, x, y, text) — links text to tracks with platforms, concourses, named locations, bridge/underpass, propagating to neighbors, linkNewElementToText(map, x, y) — collects neighbour texts, prompts if multiple, links or cleans up, Map_.deleteTextFromAllElements(t) — delegates to map-text-linking module (+1 more)
+### Community 44 - "packages/shared/src/railway/errors.ts"
+Cohesion: 0.26
+Nodes (6): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError, TrackNotConnectedError, ZeroTrackError
 
-### Community 46 - "Color Name Components"
+### Community 45 - "app/tsconfig.json"
+Cohesion: 0.15
+Nodes (12): compilerOptions, jsx, paths, types, extends, include, ../../tsconfig.json, @rail-op-sim/shared (+4 more)
+
+### Community 46 - "SimLayout.tsx"
 Cohesion: 0.25
-Nodes (7): background_color, display, icons, name, short_name, start_url, theme_color
+Nodes (10): AddPalette(), SettingsMenu(), SimLayout(), TextInputDialog(), Toolbar(), TrackInfoTooltip(), applyTheme(), getInitial() (+2 more)
 
-### Community 47 - "Error Track Components"
+### Community 47 - "railway/errors.ts"
 Cohesion: 0.52
 Nodes (7): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError (base error), TrackNotConnectedError, ZeroTrackError, railway/errors.ts
 
-### Community 48 - "Ground Layer Components"
-Cohesion: 0.29
-Nodes (3): DEFAULTS, GroundLayer, GroundLayerOptions
+### Community 48 - "Link state SVGs (set/unset variants)"
+Cohesion: 0.22
+Nodes (9): Link state SVGs (set/unset variants), Link down set SVG, Link left-down set SVG, Link left set SVG, Link left unset SVG, Link right set SVG, Link right unset SVG, Link up set SVG (+1 more)
 
-### Community 49 - "Pixi Rendering Components"
-Cohesion: 0.29
-Nodes (7): Multiplayer-Ready Architecture, PixiJS v8 Rendering Engine, React-UI Rendering Separation, Pure TypeScript Simulation Engine, Transport Adapter Pattern, Four Editor Milestones E1-E4, M1 PixiJS on Screen Completed
-
-### Community 50 - "Community 50"
+### Community 49 - "React-UI Rendering Separation"
 Cohesion: 0.40
-Nodes (5): shared/src/index.ts, railway/index.ts (barrel), railway/map/index.ts (barrel), railway/track/index.ts (barrel), @rail-op-sim/shared package
+Nodes (5): Multiplayer-Ready Architecture, PixiJS v8 Rendering Engine, React-UI Rendering Separation, Pure TypeScript Simulation Engine, Transport Adapter Pattern
 
-### Community 51 - "Callback Types Components"
+### Community 50 - "SWITCH_LINKS"
+Cohesion: 0.22
+Nodes (9): switchTight1.svg, switchTight2.svg, switchTight3.svg, switchTight4.svg, switchTight5.svg, switchTight6.svg, switchTight7.svg, switchTight8.svg (+1 more)
+
+### Community 51 - "railway/types.ts"
 Cohesion: 0.53
 Nodes (6): types.ts, railway/types.ts, FontInfo interface, MessageCallback callback, Point interface, TextSelectionPrompt callback
 
-### Community 52 - "Png Svg Components"
-Cohesion: 0.40
-Nodes (3): encodeRow(), pngFiles, rgbToHex()
+### Community 52 - "png-to-svg.mjs"
+Cohesion: 0.53
+Nodes (5): encodeRow(), mergeRuns(), pngFiles, pngToSvg(), rgbToHex()
 
-### Community 53 - "Package Json Components"
-Cohesion: 0.40
-Nodes (4): imports, name, private, type
+### Community 53 - "editor-store.ts"
+Cohesion: 0.17
+Nodes (9): DEFAULT_ZOOM, AddKind, DirectionMode, EditorState, ElementKind, HoveredTrackInfo, isTrackKind(), PendingText (+1 more)
 
-### Community 54 - "Tooltip Content Components"
+### Community 54 - "tooltip.tsx"
 Cohesion: 0.40
 Nodes (5): tooltip.tsx, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 
-### Community 55 - "Input App Components"
+### Community 55 - "ui/input.tsx"
 Cohesion: 0.50
 Nodes (4): ui/input.tsx, routes/index.tsx (app), Input component, @rail-op-sim/app package
 
-### Community 56 - "Community 56"
-Cohesion: 0.50
-Nodes (4): map-connectivity.test.ts — tests for checkAllTracksConnected, map/map-connectivity.ts, checkAllTracksConnected(map) — validates all tracks are properly connected via link offsets, Map_.checkAllTracksConnected() — delegates to map-connectivity module
+### Community 56 - "manifest.json"
+Cohesion: 0.25
+Nodes (7): background_color, display, icons, name, short_name, start_url, theme_color
 
-### Community 61 - "Tsconfig Json Components"
+### Community 57 - "Toolbar.tsx"
+Cohesion: 0.43
+Nodes (5): TOOLS, Tooltip(), TooltipContent(), TooltipTrigger(), Tool
+
+### Community 58 - "GroundLayer.ts"
+Cohesion: 0.32
+Nodes (7): createGroundLayer(), redraw(), DEFAULTS, GroundLayer, GroundLayerOptions, niceSpacing(), resolve()
+
+### Community 59 - "map-serialization.ts"
+Cohesion: 0.20
+Nodes (10): Parapet, ParapetType, SERIALIZED_MAP_VERSION, SerializedMap, SerializedNamedElement, SerializedParapet, SerializedText, SerializedTrack (+2 more)
+
+### Community 60 - "deserializeMap"
+Cohesion: 0.21
+Nodes (4): mapDebug(), deserializeMap(), addStraightH(), buildSampleMap()
+
+### Community 61 - "root tsconfig.json"
 Cohesion: 0.67
 Nodes (3): app/tsconfig.json, shared/tsconfig.json, root tsconfig.json
 
-### Community 62 - "Community 62"
+### Community 62 - "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts"
 Cohesion: 0.67
 Nodes (3): file:/Users/jonathankwok/projects/rail-op-sim/.vscode/settings.json, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/router.tsx
 
-### Community 63 - "Package Json Components"
+### Community 63 - "package.json — root monorepo config"
 Cohesion: 1.00
 Nodes (3): package.json — root monorepo config, app/package.json — Rail Ops Sim app package, shared/package.json — shared library package
 
-### Community 64 - "Svg Parapet25 Components"
+### Community 64 - "parapet26.svg"
 Cohesion: 0.67
 Nodes (3): parapet25.svg, parapet26.svg, parapet27.svg
 
-### Community 65 - "Svg Parapet7 Components"
+### Community 65 - "parapet7.svg"
 Cohesion: 0.67
 Nodes (3): parapet7.svg, parapet8.svg, parapet9.svg
 
+### Community 66 - "CURVED_LINKS"
+Cohesion: 0.40
+Nodes (5): tightCurve1.svg, tightCurve2.svg, tightCurve3.svg, tightCurve4.svg, CURVED_LINKS
+
+### Community 67 - "shared/tsconfig.json"
+Cohesion: 0.40
+Nodes (4): extends, include, src/**/*, ../../tsconfig.json
+
+### Community 214 - "button.tsx"
+Cohesion: 0.31
+Nodes (7): SaveLoadControls(), Button(), buttonVariants, assertSerializedMap(), downloadMap(), InvalidMapFileError, pickAndReadMapFile()
+
+### Community 215 - "round1"
+Cohesion: 0.67
+Nodes (5): SectionEditPanel(), formatImperialLength(), kmhToMph(), metresToImperial(), round1()
+
+### Community 216 - "TextLayer"
+Cohesion: 0.29
+Nodes (3): createTextLayer(), removeAll(), TextLayer
+
+### Community 217 - "serializeMap"
+Cohesion: 0.22
+Nodes (3): serializeMap(), changeDeleteText(), deleteTextFromAllElements()
+
 ## Knowledge Gaps
-- **294 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+289 more)
+- **322 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+317 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **153 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Get List Components` to `Community 32`, `Svg Map Components`, `Track Subtype Components`, `Codes Links Components`, `Community 45`, `Get Track Components`, `Use Theme Components`, `Community 57`, `Community 58`, `Font Set Components`?**
-  _High betweenness centrality (0.061) - this node is a cross-community bridge._
-- **Why does `Track` connect `Get Track Components` to `Community 32`, `Community 33`, `Community 34`, `Community 3`, `Get List Components`, `Codes Links Components`, `Use Theme Components`, `Community 57`, `Community 58`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **Why does `Text` connect `Font Set Components` to `Layer Element Components`, `String Location Components`, `Svg Map Components`, `Get List Components`, `Track Subtype Components`, `Codes Links Components`, `Community 45`, `Use Theme Components`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `Map_` connect `Map_` to `ElementLayer.ts`, `NamedElement`, `Track`, `gestureOverlay.ts`, `.getTrackAt`, `Element`, `AddPalette.tsx`, `NamedLocation`, `railway/index.ts`, `PlacementController.ts`, `Text`, `TextLayer`, `serializeMap`, `map-serialization.ts`, `deserializeMap`, `LinkHighlightLayer`, `map.ts`?**
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+- **Why does `Track` connect `Track` to `ElementLayer.ts`, `NamedElement`, `.getTrackAt`, `AddPalette.tsx`, `Map_`, `NamedLocation`, `railway/index.ts`, `PlacementController.ts`, `serializeMap`, `map-serialization.ts`, `deserializeMap`, `LinkHighlightLayer`, `map.ts`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **Why does `ViewportController` connect `ViewportController` to `ZoomSlider.tsx`, `PlacementController.ts`, `PlacementController`, `LinkHighlightLayer`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `$schema`, `enabled`, `clientKind` to the rest of the system?**
-  _295 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Layer Element Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.14623655913978495 - nodes in this community are weakly interconnected._
-- **Should `Svg Track Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.06382978723404255 - nodes in this community are weakly interconnected._
-- **Should `Svg Map Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _322 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `TextInputDialog.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.12063492063492064 - nodes in this community are weakly interconnected._
+- **Should `Track` be split into smaller, more focused modules?**
+  _Cohesion score 0.05701754385964912 - nodes in this community are weakly interconnected._
+- **Should `devDependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
