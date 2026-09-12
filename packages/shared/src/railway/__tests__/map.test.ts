@@ -542,6 +542,77 @@ describe("LinkedTrack state machine", () => {
 		expect(map.getLinkedTrack2()).toBeNull();
 	});
 
+	it("connectTwoLinkedTracks: re-pairing clears both sides of each old link", () => {
+		const map = new Map_();
+		// Two established pairs: A↔X and B↔Y.
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0); // A
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0); // X
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 16); // B
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 16); // Y
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+		map.connectTwoLinkedTracks(0, 16);
+		map.connectTwoLinkedTracks(16, 16);
+
+		const a = map.getTrackAt(0, 0)!;
+		const x = map.getTrackAt(16, 0)!;
+		const b = map.getTrackAt(0, 16)!;
+		const y = map.getTrackAt(16, 16)!;
+		expect(a.getOtherLinkedTrack()).toBe(x);
+		expect(b.getOtherLinkedTrack()).toBe(y);
+
+		// Now pair A with B, across the two existing pairs.
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(0, 16);
+
+		// The new link exists both ways...
+		expect(a.getOtherLinkedTrack()).toBe(b);
+		expect(b.getOtherLinkedTrack()).toBe(a);
+		// ...and neither orphan is left pointing at its old partner, which would
+		// otherwise leave a one-way link that reads as paired from one end only.
+		expect(x.isLinked()).toBe(false);
+		expect(y.isLinked()).toBe(false);
+		expect(x.getOtherLinkedTrack()).toBeNull();
+		expect(y.getOtherLinkedTrack()).toBeNull();
+	});
+
+	it("connectTwoLinkedTracks: re-pairing the same two portals is a no-op", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+
+		// Disconnecting the clicked track also clears its partner, so the second
+		// disconnect must not fire on an already-cleared linkedTrack1.
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+
+		const a = map.getTrackAt(0, 0)!;
+		const b = map.getTrackAt(16, 0)!;
+		expect(a.getOtherLinkedTrack()).toBe(b);
+		expect(b.getOtherLinkedTrack()).toBe(a);
+	});
+
+	it("connectTwoLinkedTracks: pairing a used portal with a free one orphans only the old partner", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 0); // A
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0); // X
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 0, 16); // B (free)
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(16, 0);
+
+		map.connectTwoLinkedTracks(0, 0);
+		map.connectTwoLinkedTracks(0, 16);
+
+		const a = map.getTrackAt(0, 0)!;
+		const x = map.getTrackAt(16, 0)!;
+		const b = map.getTrackAt(0, 16)!;
+		expect(a.getOtherLinkedTrack()).toBe(b);
+		expect(b.getOtherLinkedTrack()).toBe(a);
+		expect(x.isLinked()).toBe(false);
+	});
+
 	it("checkAllLinkedTrackLinked: empty list returns true", () => {
 		const map = new Map_();
 		expect(map.checkAllLinkedTrackLinked()).toBe(true);
