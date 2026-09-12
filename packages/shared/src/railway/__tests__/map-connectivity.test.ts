@@ -12,6 +12,7 @@ import {
 	findAllLinkedTracks,
 	findPathBetween,
 	findUnpairedLinkedTracks,
+	getConnectivityReport,
 	getLinkedTrackPairs,
 	getLinkedTrackReport,
 } from "../map/map-connectivity";
@@ -273,6 +274,79 @@ describe("checkAllTracksConnected", () => {
 		checkAllTracksConnected(map);
 		// onMessage should not be called because trackList is not empty
 		expect(onMessage).not.toHaveBeenCalled();
+	});
+});
+
+// ============================================================================
+// getConnectivityReport
+// ============================================================================
+
+describe("getConnectivityReport", () => {
+	/** A horizontal straight at (x, 0). */
+	const straightAt = (map: Map_, x: number): void => {
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			0,
+		);
+	};
+
+	it("empty map is not connected and reports no faults", () => {
+		const report = getConnectivityReport(new Map_());
+		expect(report).toMatchObject({
+			total: 0,
+			connected: false,
+			dangling: [],
+			unpairedLinked: [],
+		});
+	});
+
+	it("a complete railway reports connected with nothing dangling", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightAt(map, 0);
+		straightAt(map, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+
+		const report = getConnectivityReport(map);
+		expect(report.connected).toBe(true);
+		expect(report.total).toBe(4);
+		expect(report.dangling).toEqual([]);
+	});
+
+	it("names every track with an open end, not just the first", () => {
+		const map = new Map_();
+		straightAt(map, 0);
+		straightAt(map, 16);
+
+		const report = getConnectivityReport(map);
+		expect(report.connected).toBe(false);
+		// (0,0) dangles left, (16,0) dangles right — no early exit.
+		expect(report.dangling).toHaveLength(2);
+		expect(report.dangling.map((d) => d.track.getLocationX())).toEqual([0, 16]);
+		// Each records which link indices are open: 3 = left, 5 = right.
+		expect(report.dangling[0].links).toEqual([3]);
+		expect(report.dangling[1].links).toEqual([5]);
+	});
+
+	it("reports an unpaired portal separately from open ends", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightAt(map, 0);
+		straightAt(map, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 96, 96);
+
+		const report = getConnectivityReport(map);
+		expect(report.connected).toBe(false);
+		expect(report.unpairedLinked).toHaveLength(1);
+		expect(report.unpairedLinked[0].getLocationX()).toBe(96);
 	});
 });
 

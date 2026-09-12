@@ -39,10 +39,15 @@ export {
 // Map class
 export { Map_ as Map } from "./map";
 export type {
+	ConnectivityReport,
+	DanglingLink,
 	LinkedTrackPair,
 	LinkedTrackReport,
 } from "./map/map-connectivity";
-export { findPathBetween } from "./map/map-connectivity";
+export {
+	findPathBetween,
+	getConnectivityReport,
+} from "./map/map-connectivity";
 export type {
 	SerializedMap,
 	SerializedNamedElement,

@@ -21,43 +21,82 @@ const LINK_OFFSETS: readonly [number, number][] = [
 	[1, -1], // 8: bottom-right
 ];
 
+/** A track with at least one active link pointing at an empty cell. */
+export interface DanglingLink {
+	track: Track;
+	/** Link indices (0-8) whose neighbouring cell is empty. */
+	links: number[];
+}
+
+/** A full account of why a map is (or is not) a complete railway. */
+export interface ConnectivityReport {
+	/** Total tracks on the map. */
+	total: number;
+	/** True when nothing is dangling and every linked track is paired. */
+	connected: boolean;
+	/** Tracks with an active link running into an empty cell, in map order. */
+	dangling: DanglingLink[];
+	/** Linked tracks (portals) with no partner. */
+	unpairedLinked: Track[];
+}
+
 /**
- * Check that all tracks on the map are properly connected.
+ * Describe the connectivity of the whole map: every dangling link and every
+ * unpaired portal, not just whether a problem exists.
+ *
+ * Unlike {@link checkAllTracksConnected} this does not short-circuit, so the
+ * counts are complete and the UI can point the user at the first offender.
  */
-export function checkAllTracksConnected(map: Map_): boolean {
+export function getConnectivityReport(map: Map_): ConnectivityReport {
 	map.makeTrackList();
 	const trackList: Track[] = map.getTrackList();
-	let allConnected = map.checkAllLinkedTrackLinked();
+	const grid = map.getImageSize();
 
-	if (trackList.length === 0) {
+	const dangling: DanglingLink[] = [];
+	for (const track of trackList) {
+		const cx = track.getLocationX();
+		const cy = track.getLocationY();
+		const links: number[] = [];
+
+		for (let link = 0; link <= 8; link++) {
+			if (link === 4) continue; // unused slot
+			if (!track.getLinkAt(link)) continue;
+			const [dx, dy] = LINK_OFFSETS[link];
+			if (map.getTrackAt(cx + dx * grid, cy + dy * grid) === null) {
+				links.push(link);
+			}
+		}
+		if (links.length > 0) dangling.push({ track, links });
+	}
+
+	const unpairedLinked = findUnpairedLinkedTracks(map);
+
+	return {
+		total: trackList.length,
+		connected:
+			trackList.length > 0 &&
+			dangling.length === 0 &&
+			unpairedLinked.length === 0,
+		dangling,
+		unpairedLinked,
+	};
+}
+
+/**
+ * Check that all tracks on the map are properly connected.
+ *
+ * A thin wrapper over {@link getConnectivityReport} — use that instead when the
+ * caller wants to tell the user *what* is wrong.
+ */
+export function checkAllTracksConnected(map: Map_): boolean {
+	const report = getConnectivityReport(map);
+
+	if (report.total === 0) {
 		map.getOnMessage()?.("error", "There are zero tracks stored.");
 		return false;
 	}
 
-	if (!allConnected) {
-		return false;
-	}
-
-	const grid = map.getImageSize();
-
-	for (const currentTrack of trackList) {
-		const cx = currentTrack.getLocationX();
-		const cy = currentTrack.getLocationY();
-
-		for (let link = 0; link <= 8; link++) {
-			if (link === 4) continue; // unused slot
-			if (!currentTrack.getLinkAt(link)) continue;
-			if (!allConnected) break; // early exit once disconnected
-
-			const [dx, dy] = LINK_OFFSETS[link];
-			if (map.getTrackAt(cx + dx * grid, cy + dy * grid) === null) {
-				allConnected = false;
-			}
-		}
-		if (!allConnected) break; // short-circuit outer loop
-	}
-
-	return allConnected;
+	return report.connected;
 }
 
 // ============================================================================
