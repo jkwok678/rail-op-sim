@@ -34,6 +34,8 @@ export interface SerializedTrack {
 	secondaryLength: number;
 	/** Grid coords of the paired track (only for wired "linked" tracks). */
 	linkedTo?: [number, number];
+	/** Preferred travel directions (entry→exit link pairs); omitted when empty. */
+	preferredDirections?: { entry: number; exit: number }[];
 	/** Index into {@link SerializedMap.texts} of this track's label, if named. */
 	textIndex?: number;
 }
@@ -97,6 +99,13 @@ export function serializeMap(map: Map_): SerializedMap {
 		};
 		const other = t.getOtherLinkedTrack();
 		if (other) entry.linkedTo = [other.getLocationX(), other.getLocationY()];
+		const prefDirs = t.getPreferredDirections();
+		if (prefDirs.length > 0) {
+			entry.preferredDirections = prefDirs.map((p) => ({
+				entry: p.entry,
+				exit: p.exit,
+			}));
+		}
 		const label = t.getText();
 		if (label) entry.textIndex = indexOfText.get(label);
 		tracks.push(entry);
@@ -162,6 +171,12 @@ export function deserializeMap(data: SerializedMap, target: Map_): void {
 		track.setTrackMainLength(s.mainLength);
 		track.setTrackSecondarySpeed(s.secondarySpeed);
 		track.setTrackSecondaryLength(s.secondaryLength);
+		// Restore through the adder so link-mask and traversability validation
+		// still apply — a pair an older build wrote through an impossible turn
+		// (or against a one-way track) is dropped rather than reloaded.
+		for (const p of s.preferredDirections ?? []) {
+			track.addPreferredDirection(p.entry, p.exit);
+		}
 		attachLabel(track, s.textIndex);
 		if (s.linkedTo) linkPairs.push([[s.x, s.y], s.linkedTo]);
 	}

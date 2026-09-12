@@ -192,3 +192,58 @@ describe("map serialization round-trip", () => {
 		expect(map.getTextList()).toEqual([]);
 	});
 });
+
+// ============================================================================
+// Preferred directions round-trip
+// ============================================================================
+
+describe("preferred directions serialization", () => {
+	const addStraightH = (map: Map_, x: number) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			0,
+		);
+
+	it("round-trips preferred-direction pairs", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+		const t = addStraightH(map, 0);
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+
+		const restored = new Map_();
+		deserializeMap(serializeMap(map), restored);
+		expect(restored.getTrackAt(0, 0)?.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+			{ entry: 5, exit: 3 },
+		]);
+	});
+
+	it("omits the field when a track has no preferred directions", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+		addStraightH(map, 0);
+		const s = serializeMap(map);
+		expect(s.tracks[0].preferredDirections).toBeUndefined();
+	});
+
+	it("deserializes an old snapshot without the field to an empty list", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+		addStraightH(map, 0);
+		const s = serializeMap(map);
+		// Simulate a legacy save with no preferredDirections key.
+		delete s.tracks[0].preferredDirections;
+
+		const restored = new Map_();
+		deserializeMap(s, restored);
+		expect(restored.getTrackAt(0, 0)?.getPreferredDirections()).toEqual([]);
+	});
+});
