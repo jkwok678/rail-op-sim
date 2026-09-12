@@ -1,4 +1,6 @@
 import {
+	DEFAULT_MAIN_LENGTH,
+	DEFAULT_MAIN_SPEED,
 	formatImperialLength,
 	hasSecondaryPath,
 	round1,
@@ -11,6 +13,35 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { PlacementController } from "#/engine/PlacementController";
 import { useEditorStore } from "#/store/editor-store";
+
+/** A PixiJS 0xRRGGBB colour as a CSS hex string. */
+const cssHex = (color: number): string =>
+	`#${color.toString(16).padStart(6, "0")}`;
+
+/**
+ * What each track colour on the map means. Mirrors `getTrackColorState` in the
+ * shared package — a track is tinted only where it deviates from the defaults,
+ * so an untinted track is the fourth (colourless) case.
+ */
+const COLOR_LEGEND: { color: string | null; label: string; meaning: string }[] =
+	[
+		{
+			color: cssHex(TRACK_COLOR_SPEED),
+			label: "Red",
+			meaning: `speed differs from ${DEFAULT_MAIN_SPEED} km/h`,
+		},
+		{
+			color: cssHex(TRACK_COLOR_LENGTH),
+			label: "Yellow",
+			meaning: `length differs from ${DEFAULT_MAIN_LENGTH} m`,
+		},
+		{
+			color: cssHex(TRACK_COLOR_BOTH),
+			label: "Blue",
+			meaning: "both speed and length differ",
+		},
+		{ color: null, label: "Untinted", meaning: "still at the defaults" },
+	];
 
 const MPH_PER_KMH = 1 / 1.609344;
 const M_PER_CHAIN = 20.1168;
@@ -184,6 +215,11 @@ export function SectionEditPanel() {
 					}
 				}
 				ctrl.applySectionEdit(values);
+				// The edit is done: close the panel and drop the selection (route
+				// tint + endpoint outlines). The speed/length colours stay on, so
+				// the result of the edit is what is left on screen.
+				ctrl.clearSectionHighlight();
+				clearSectionSelection();
 			}
 		}
 		confirmingRef.current = false;
@@ -194,6 +230,7 @@ export function SectionEditPanel() {
 		secondaryLength,
 		hasSecondary,
 		sectionTracks.length,
+		clearSectionSelection,
 	]);
 
 	const handleDefaults = useCallback(() => {
@@ -383,35 +420,23 @@ export function SectionEditPanel() {
 
 			{/* ── Colour Legend ──────────────────────────────────────────── */}
 			<div className="border-t border-border my-2" />
-			<div className="mb-1.5 font-medium">Track Status</div>
-			<div className="flex gap-3 text-[10px] text-muted-foreground mb-0.5">
-				<span className="flex items-center gap-1">
-					<span
-						className="inline-block size-2.5 rounded-sm shrink-0"
-						style={{
-							backgroundColor: `#${TRACK_COLOR_SPEED.toString(16).padStart(6, "0")}`,
-						}}
-					/>
-					Speed
-				</span>
-				<span className="flex items-center gap-1">
-					<span
-						className="inline-block size-2.5 rounded-sm shrink-0"
-						style={{
-							backgroundColor: `#${TRACK_COLOR_LENGTH.toString(16).padStart(6, "0")}`,
-						}}
-					/>
-					Length
-				</span>
-				<span className="flex items-center gap-1">
-					<span
-						className="inline-block size-2.5 rounded-sm shrink-0"
-						style={{
-							backgroundColor: `#${TRACK_COLOR_BOTH.toString(16).padStart(6, "0")}`,
-						}}
-					/>
-					Both
-				</span>
+			<div className="mb-1 font-medium">Track Status</div>
+			<div className="text-[10px] text-muted-foreground mb-1.5">
+				While a section is selected, track on the map is coloured by how it
+				differs from the defaults ({DEFAULT_MAIN_SPEED} km/h,{" "}
+				{DEFAULT_MAIN_LENGTH} m per track):
+			</div>
+			<div className="space-y-1 text-[10px] text-muted-foreground">
+				{COLOR_LEGEND.map(({ color, label, meaning }) => (
+					<div key={label} className="flex items-center gap-1.5">
+						<span
+							className="inline-block size-2.5 rounded-sm shrink-0 border border-border"
+							style={color ? { backgroundColor: color } : undefined}
+						/>
+						<span className="text-foreground">{label}</span>
+						<span>— {meaning}</span>
+					</div>
+				))}
 			</div>
 
 			{/* Actions */}
