@@ -1,4 +1,4 @@
-import type { Track } from "../track/track";
+import type { PreferredDirection, Track } from "../track/track";
 import { getDirectedFlow, isTraversableLinkPair } from "../track/track-data";
 import type { Map_ } from "./map";
 
@@ -10,7 +10,7 @@ import type { Map_ } from "./map";
  * Relative neighbour offsets for each link index (0-8).
  * Link 4 is unused (represented as [0, 0]).
  */
-const LINK_OFFSETS: readonly [number, number][] = [
+export const LINK_OFFSETS: readonly [number, number][] = [
 	[-1, 1], // 0: top-left
 	[0, 1], // 1: top
 	[1, 1], // 2: top-right
@@ -307,4 +307,213 @@ export function findPathBetween(
 	}
 	path.reverse();
 	return path;
+}
+
+// ============================================================================
+// Preferred-direction assignment
+// ============================================================================
+
+/**
+ * Reverse of {@link LINK_OFFSETS}: map a neighbour offset back to its link
+ * index. Returns `null` for the unused centre `[0, 0]` or any offset outside
+ * the 3×3 neighbourhood.
+ *
+ * Formula: `link = (1 - dy) * 3 + (dx + 1)` (e.g. `[-1,1]→0`, `[1,0]→5`,
+ * `[0,-1]→7`), rejecting `[0,0]` (→4, unused) and any non-integer offset (which
+ * would otherwise yield a fractional index that silently truncates downstream).
+ */
+export function linkIndexForOffset(dx: number, dy: number): number | null {
+	if (!Number.isInteger(dx) || !Number.isInteger(dy)) return null;
+	if (dx < -1 || dx > 1 || dy < -1 || dy > 1) return null;
+	if (dx === 0 && dy === 0) return null;
+	return (1 - dy) * 3 + (dx + 1);
+}
+
+/**
+ * Resolve the "other" link at a path endpoint — the entry when we know the exit,
+ * or vice-versa — mirroring railway-dot-exe's handling of a PrefDir's first/last
+ * element (which always receives a direction, derived from the element's opposite
+ * connection slot):
+ *  - straights & curves (2 links): the track's other active link;
+ *  - buffers & exits (1 link): the dead-end edge opposite the single link
+ *    (`8 - known`), so the route records travel into the terminus;
+ *  - switches & crossovers (3+ links): the straight-through edge (`8 - known`)
+ *    when that edge is itself a link, otherwise `null` — a facing point, where
+ *    the diverging exit is ambiguous and ROS leaves the exit unset.
+ */
+function endpointOtherLink(track: Track, known: number): number | null {
+	const active: number[] = [];
+	for (let link = 0; link <= 8; link++) {
+		if (link === 4) continue;
+		if (track.getLinkAt(link)) active.push(link);
+	}
+	if (active.length === 2) return active.find((l) => l !== known) ?? null;
+	if (active.length === 1) return 8 - known;
+	const opposite = 8 - known;
+	return active.includes(opposite) ? opposite : null;
+}
+
+/** Outcome of {@link setPreferredDirectionsAlongPath}. */
+export interface PreferredDirectionResult {
+	/** The path the directions were assigned along, start→end inclusive. */
+	path: Track[];
+	/** Pairs newly added (already-present pairs are deduped and not counted). */
+	applied: number;
+	/** Path tracks that received no new pair (undeterminable, rejected, or duplicate). */
+	unassigned: number;
+}
+
+/**
+ * Assign preferred travel directions to every track along the shortest path
+ * from `start` to `end` (found via {@link findPathBetween}), additively.
+ *
+ * For each interior track the entry→exit pair points from the previous track
+ * toward the next. Endpoints (the first/last clicked track) also receive a
+ * direction, borrowing their missing link via {@link endpointOtherLink}: the
+ * other active link for straights/curves, the dead-end edge for buffers/exits,
+ * and the straight-through edge for switches — leaving only a facing switch
+ * endpoint (ambiguous diverging exit) unset.
+ *
+ * Returns the path plus what was actually written (tracks mutated in place), or
+ * `null` when the tracks are disconnected (in which case nothing is mutated).
+ * `applied === 0` means the gesture changed nothing — every pair was already
+ * present, or none could be determined (e.g. both endpoints facing switches) —
+ * which callers should surface rather than reporting success.
+ *
+ * Note: {@link findPathBetween} does not teleport across linked-track portals,
+ * so a path stops at a portal boundary — assign each side separately.
+ */
+export function setPreferredDirectionsAlongPath(
+	map: Map_,
+	start: Track,
+	end: Track,
+): PreferredDirectionResult | null {
+	const path = findPathBetween(map, start, end, { respectOneWay: true });
+	if (path === null) return null;
+
+	const legs = resolvePathDirections(map, path);
+	let applied = 0;
+	let unassigned = 0;
+
+	for (let i = 0; i < path.length; i++) {
+		const leg = legs[i];
+		if (leg && path[i].addPreferredDirection(leg.entry, leg.exit)) {
+			applied++;
+		} else {
+			unassigned++;
+		}
+	}
+
+	return { path, applied, unassigned };
+}
+
+/** Outcome of {@link clearPreferredDirectionsAlongPath}. */
+export interface PreferredDirectionRemovalResult {
+	/** The path the directions were removed along, start→end inclusive. */
+	path: Track[];
+	/** Path tracks that lost at least one pair. */
+	removed: number;
+	/** Path tracks that had nothing to remove (undeterminable or never set). */
+	untouched: number;
+}
+
+/**
+ * Undo {@link setPreferredDirectionsAlongPath}: clear the route each track
+ * along the start→end path carries — both the entry→exit pair that gesture
+ * would have assigned *and* its mirror — leaving every other pair on those
+ * tracks in place.
+ *
+ * Taking the mirror too is what "erase this route" means: a stretch set to run
+ * both ways is one route in the user's head, so retracing it either way round
+ * clears it rather than silently leaving it one-way. Routes that merely cross
+ * it survive — a spur set separately through a switch keeps its directions.
+ *
+ * Returns the path plus how many of its tracks were changed (tracks mutated in
+ * place), or `null` when the tracks are disconnected (nothing is mutated).
+ * `removed === 0` means the gesture changed nothing — no track along the path
+ * carried the route — which callers should surface rather than reporting
+ * success.
+ */
+export function clearPreferredDirectionsAlongPath(
+	map: Map_,
+	start: Track,
+	end: Track,
+): PreferredDirectionRemovalResult | null {
+	const path = findPathBetween(map, start, end, { respectOneWay: true });
+	if (path === null) return null;
+
+	const legs = resolvePathDirections(map, path);
+	let removed = 0;
+	let untouched = 0;
+
+	for (let i = 0; i < path.length; i++) {
+		const leg = legs[i];
+		// Both calls run: a track may carry either direction, or both.
+		const forward = leg
+			? path[i].removePreferredDirection(leg.entry, leg.exit)
+			: false;
+		const backward = leg
+			? path[i].removePreferredDirection(leg.exit, leg.entry)
+			: false;
+		if (forward || backward) removed++;
+		else untouched++;
+	}
+
+	return { path, removed, untouched };
+}
+
+/**
+ * Work out which entry→exit pair each track of `path` would receive, without
+ * mutating anything — the derivation {@link setPreferredDirectionsAlongPath}
+ * then writes.
+ *
+ * Returns one slot per path track, in path order. A `null` slot means no pair
+ * is determinable for that track: a facing-switch endpoint (ambiguous
+ * diverging exit), a single-track path, or a path track that is not actually a
+ * grid neighbour of its predecessor. A non-null slot is the pair that *would*
+ * be added — it says nothing about whether that pair is already set.
+ *
+ * Exported so a UI can preview the exact legs a gesture will affect, rather
+ * than highlighting whole cells and implying that legs which are not on the
+ * route — a switch's untouched spur, say — are part of it.
+ */
+export function resolvePathDirections(
+	map: Map_,
+	path: readonly Track[],
+): (PreferredDirection | null)[] {
+	const step = map.getImageSize();
+
+	/** Link index on `from` pointing at `to`, or null if not a neighbour. */
+	const linkToward = (from: Track, to: Track): number | null => {
+		const dx = (to.getLocationX() - from.getLocationX()) / step;
+		const dy = (to.getLocationY() - from.getLocationY()) / step;
+		return linkIndexForOffset(dx, dy);
+	};
+
+	return path.map((track, i) => {
+		const prev = i > 0 ? path[i - 1] : null;
+		const next = i < path.length - 1 ? path[i + 1] : null;
+
+		let entry: number | null;
+		let exit: number | null;
+
+		if (prev && next) {
+			entry = linkToward(track, prev);
+			exit = linkToward(track, next);
+		} else if (next) {
+			// Start endpoint: exit toward next, entry = the endpoint's other link.
+			exit = linkToward(track, next);
+			entry = exit === null ? null : endpointOtherLink(track, exit);
+		} else if (prev) {
+			// End endpoint: entry from prev, exit = the endpoint's other link.
+			entry = linkToward(track, prev);
+			exit = entry === null ? null : endpointOtherLink(track, entry);
+		} else {
+			// Single-track path (start === end) — nothing to assign.
+			return null;
+		}
+
+		if (entry === null || exit === null) return null;
+		return { entry, exit };
+	});
 }

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+	BufferType,
+	CrossoverType,
 	CurvedType,
+	DirectedType,
 	ExitType,
 	LinkedType,
 	StraightType,
@@ -9,12 +12,15 @@ import {
 import { Map_ } from "../map";
 import {
 	checkAllTracksConnected,
+	clearPreferredDirectionsAlongPath,
 	findAllLinkedTracks,
 	findPathBetween,
 	findUnpairedLinkedTracks,
 	getConnectivityReport,
 	getLinkedTrackPairs,
 	getLinkedTrackReport,
+	linkIndexForOffset,
+	setPreferredDirectionsAlongPath,
 } from "../map/map-connectivity";
 
 // ============================================================================
@@ -721,5 +727,578 @@ describe("findPathBetween", () => {
 		for (const t of map.getTrackList()) {
 			expect(t.getFound()).toBe(false);
 		}
+	});
+});
+
+// ============================================================================
+// linkIndexForOffset
+// ============================================================================
+
+describe("linkIndexForOffset", () => {
+	it("maps the cardinal/diagonal offsets to link indices", () => {
+		expect(linkIndexForOffset(-1, 1)).toBe(0); // top-left
+		expect(linkIndexForOffset(0, 1)).toBe(1); // top
+		expect(linkIndexForOffset(1, 1)).toBe(2); // top-right
+		expect(linkIndexForOffset(-1, 0)).toBe(3); // left
+		expect(linkIndexForOffset(1, 0)).toBe(5); // right
+		expect(linkIndexForOffset(-1, -1)).toBe(6); // bottom-left
+		expect(linkIndexForOffset(0, -1)).toBe(7); // bottom
+		expect(linkIndexForOffset(1, -1)).toBe(8); // bottom-right
+	});
+
+	it("returns null for the unused centre (0,0)", () => {
+		expect(linkIndexForOffset(0, 0)).toBeNull();
+	});
+
+	it("returns null for out-of-range offsets", () => {
+		expect(linkIndexForOffset(2, 0)).toBeNull();
+		expect(linkIndexForOffset(0, -2)).toBeNull();
+	});
+
+	it("returns null for non-integer offsets", () => {
+		expect(linkIndexForOffset(0.5, 0)).toBeNull();
+		expect(linkIndexForOffset(0, -0.5)).toBeNull();
+		expect(linkIndexForOffset(Number.NaN, 0)).toBeNull();
+	});
+});
+
+// ============================================================================
+// setPreferredDirectionsAlongPath
+// ============================================================================
+
+describe("setPreferredDirectionsAlongPath", () => {
+	const straightH = (map: Map_, x: number, y = 0) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+
+	const straightV = (map: Map_, x: number, y: number) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+
+	it("assigns {3,5} to every track (incl. endpoints) in an L→R chain", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		straightH(map, 32);
+		const start = map.getTrackAt(0, 0)!;
+		const end = map.getTrackAt(32, 0)!;
+		const result = setPreferredDirectionsAlongPath(map, start, end);
+		expect(result).not.toBeNull();
+		expect(result!.path).toHaveLength(3);
+		expect(result!.applied).toBe(3);
+		for (const x of [0, 16, 32]) {
+			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([
+				{ entry: 3, exit: 5 },
+			]);
+		}
+	});
+
+	it("assigning L→R then R→L makes tracks bidirectional with no dupes", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		straightH(map, 32);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(32, 0)!;
+		setPreferredDirectionsAlongPath(map, left, right);
+		setPreferredDirectionsAlongPath(map, right, left);
+		for (const x of [0, 16, 32]) {
+			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([
+				{ entry: 3, exit: 5 },
+				{ entry: 5, exit: 3 },
+			]);
+		}
+		// Re-running L→R must not add duplicates, and must report nothing applied.
+		const repeat = setPreferredDirectionsAlongPath(map, left, right);
+		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toHaveLength(2);
+		expect(repeat!.applied).toBe(0);
+		expect(repeat!.unassigned).toBe(3);
+	});
+
+	it("endpoint on a curve borrows the curve's other link (not 8-entry)", () => {
+		const map = new Map_();
+		// TIGHTCURVE1 at (0,0): links 5 (right → 16,0) and 7 (bottom).
+		map.addTrack({ kind: "curved", subtype: CurvedType.TIGHTCURVE1 }, 0, 0);
+		straightH(map, 16);
+		const start = map.getTrackAt(16, 0)!;
+		const curve = map.getTrackAt(0, 0)!;
+		setPreferredDirectionsAlongPath(map, start, curve);
+		expect(curve.getPreferredDirections()).toEqual([{ entry: 5, exit: 7 }]);
+		expect(start.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
+	});
+
+	it("directs a buffer (1 link) endpoint into its dead-end, like ROS", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		// BUFFERRIGHT at (32,0): single link 3 (→ 16,0); dead-end edge is 8-3=5.
+		map.addTrack(
+			{
+				kind: "buffer",
+				subtype: BufferType.BUFFERRIGHT,
+				platform1: false,
+				platform2: false,
+			},
+			32,
+			0,
+		);
+		const start = map.getTrackAt(0, 0)!;
+		const buffer = map.getTrackAt(32, 0)!;
+		setPreferredDirectionsAlongPath(map, start, buffer);
+		// Entry from the network (link 3), exit into the buffer stop (link 5).
+		expect(buffer.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+		expect(map.getTrackAt(0, 0)!.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+		]);
+		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+		]);
+	});
+
+	it("assigns a switch both mid-path and as a trailing-point endpoint", () => {
+		const map = new Map_();
+		// SWITCHTIGHT1 at (0,0): links 1, 3, 5.
+		map.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map, -16);
+		straightH(map, 16);
+		const left = map.getTrackAt(-16, 0)!;
+		const right = map.getTrackAt(16, 0)!;
+		setPreferredDirectionsAlongPath(map, left, right);
+		// Switch is mid-path → gets entry(toward prev=left, link 3) → exit(toward next=right, link 5).
+		expect(map.getTrackAt(0, 0)!.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+		]);
+
+		// A path that ENDS on the switch approached along its straight (from the
+		// right, link 5) → straight-through exit 8-5=3 (an active link).
+		const map2 = new Map_();
+		map2.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map2, 16);
+		const startTrack = map2.getTrackAt(16, 0)!;
+		const switchTrack = map2.getTrackAt(0, 0)!;
+		setPreferredDirectionsAlongPath(map2, startTrack, switchTrack);
+		expect(switchTrack.getPreferredDirections()).toEqual([
+			{ entry: 5, exit: 3 },
+		]);
+		expect(startTrack.getPreferredDirections()).toEqual([
+			{ entry: 5, exit: 3 },
+		]);
+	});
+
+	it("leaves a facing switch endpoint unset (ambiguous diverging exit)", () => {
+		const map = new Map_();
+		// SWITCHTIGHT1 at (0,0): links 1, 3, 5. Approached from the toe (top,
+		// link 1) the exit diverges (8-1=7 is not a link) → left unset, matching
+		// ROS's entry-only facing-point handling.
+		map.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightV(map, 0, 16); // link 1 (top) neighbour of the switch
+		const start = map.getTrackAt(0, 16)!;
+		const switchTrack = map.getTrackAt(0, 0)!;
+		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
+		expect(switchTrack.getPreferredDirections()).toEqual([]);
+		// The endpoint yielded no pair → reported as unassigned, not as success.
+		expect(result!.applied).toBe(1); // only the approaching straight
+		expect(result!.unassigned).toBe(1);
+	});
+
+	it("returns null and mutates nothing for disconnected tracks", () => {
+		const map = new Map_();
+		straightH(map, 0, 0);
+		straightH(map, 0, 32);
+		const a = map.getTrackAt(0, 0)!;
+		const b = map.getTrackAt(0, 32)!;
+		expect(setPreferredDirectionsAlongPath(map, a, b)).toBeNull();
+		expect(a.getPreferredDirections()).toEqual([]);
+		expect(b.getPreferredDirections()).toEqual([]);
+	});
+
+	it("returns [start] and assigns nothing when start === end", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		const t = map.getTrackAt(0, 0)!;
+		const result = setPreferredDirectionsAlongPath(map, t, t);
+		expect(result!.path).toEqual([t]);
+		expect(result!.applied).toBe(0);
+		expect(t.getPreferredDirections()).toEqual([]);
+	});
+
+	it("returns null across a linked-pair portal (BFS does not teleport)", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 48, 0);
+		straightH(map, 64);
+		map.connectTwoLinkedTracks(16, 0);
+		map.connectTwoLinkedTracks(48, 0);
+		const a = map.getTrackAt(0, 0)!;
+		const b = map.getTrackAt(64, 0)!;
+		expect(setPreferredDirectionsAlongPath(map, a, b)).toBeNull();
+	});
+});
+
+// ============================================================================
+// clearPreferredDirectionsAlongPath
+// ============================================================================
+
+describe("clearPreferredDirectionsAlongPath", () => {
+	const straightH = (map: Map_, x: number, y = 0) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+
+	const straightV = (map: Map_, x: number, y: number) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+
+	/** Three straights at x = 0, 16, 32 with L→R directions already set. */
+	const chainLR = () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		straightH(map, 32);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(32, 0)!;
+		setPreferredDirectionsAlongPath(map, left, right);
+		return { map, left, right };
+	};
+
+	it("removes exactly what the same two clicks assigned", () => {
+		const { map, left, right } = chainLR();
+		const result = clearPreferredDirectionsAlongPath(map, left, right);
+		expect(result).not.toBeNull();
+		expect(result!.path).toHaveLength(3);
+		expect(result!.removed).toBe(3);
+		expect(result!.untouched).toBe(0);
+		for (const x of [0, 16, 32]) {
+			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
+			expect(map.getTrackAt(x, 0)!.hasPreferredDirection()).toBe(false);
+		}
+	});
+
+	it("clears both directions of a two-way route", () => {
+		const { map, left, right } = chainLR();
+		setPreferredDirectionsAlongPath(map, right, left);
+		const result = clearPreferredDirectionsAlongPath(map, left, right);
+		expect(result!.removed).toBe(3);
+		for (const x of [0, 16, 32]) {
+			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
+			expect(map.getTrackAt(x, 0)!.getDirectionality()).toBe("none");
+		}
+	});
+
+	it("erases a one-way route retraced against its arrows", () => {
+		const { map, left, right } = chainLR();
+		// Clicked end→start, the opposite way round from how it was drawn.
+		const result = clearPreferredDirectionsAlongPath(map, right, left);
+		expect(result!.removed).toBe(3);
+		for (const x of [0, 16, 32]) {
+			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
+		}
+	});
+
+	it("reports removed === 0 when the route carries no such directions", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(16, 0)!;
+		const result = clearPreferredDirectionsAlongPath(map, left, right);
+		expect(result!.removed).toBe(0);
+		expect(result!.untouched).toBe(2);
+	});
+
+	it("erasing one route through a switch leaves the other spur set", () => {
+		const map = new Map_();
+		// SWITCHTIGHT1 at (0,0): links 1, 3, 5 — straight 3↔5, spur toward 1.
+		map.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map, -16);
+		straightH(map, 16);
+		straightV(map, 0, 16);
+		const left = map.getTrackAt(-16, 0)!;
+		const right = map.getTrackAt(16, 0)!;
+		const top = map.getTrackAt(0, 16)!;
+		const sw = map.getTrackAt(0, 0)!;
+
+		setPreferredDirectionsAlongPath(map, left, right); // straight, 3→5
+		setPreferredDirectionsAlongPath(map, left, top); // spur, 3→1
+		expect(sw.getPreferredDirections()).toHaveLength(2);
+
+		clearPreferredDirectionsAlongPath(map, left, right);
+		// The spur is untouched; only the straight leg (and its mirror) went.
+		expect(sw.getPreferredDirections()).toEqual([{ entry: 3, exit: 1 }]);
+		// The straight's own tracks lost their directions.
+		expect(right.getPreferredDirections()).toEqual([]);
+	});
+
+	it("returns null and mutates nothing for disconnected tracks", () => {
+		const map = new Map_();
+		straightH(map, 0, 0);
+		straightH(map, 0, 32);
+		const a = map.getTrackAt(0, 0)!;
+		const b = map.getTrackAt(0, 32)!;
+		a.addPreferredDirection(3, 5);
+		expect(clearPreferredDirectionsAlongPath(map, a, b)).toBeNull();
+		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+	});
+
+	it("returns [start] and removes nothing when start === end", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		const t = map.getTrackAt(0, 0)!;
+		t.addPreferredDirection(3, 5);
+		const result = clearPreferredDirectionsAlongPath(map, t, t);
+		expect(result!.path).toEqual([t]);
+		expect(result!.removed).toBe(0);
+		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+	});
+});
+
+// ============================================================================
+// Traversability constraints (crossovers, one-way directed track)
+// ============================================================================
+
+describe("path traversability", () => {
+	const straightH = (map: Map_, x: number, y = 0) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+	const straightV = (map: Map_, x: number, y: number) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			y,
+		);
+
+	/** CROSSOVER1 at (0,0) with a straight on each of its four arms. */
+	const crossoverMap = () => {
+		const map = new Map_();
+		map.addTrack(
+			{ kind: "crossover", subtype: CrossoverType.CROSSOVER1 },
+			0,
+			0,
+		);
+		straightH(map, -16);
+		straightH(map, 16);
+		straightV(map, 0, 16);
+		straightV(map, 0, -16);
+		return map;
+	};
+
+	it("routes straight through a crossover but not between its two paths", () => {
+		const map = crossoverMap();
+		const left = map.getTrackAt(-16, 0)!;
+		const right = map.getTrackAt(16, 0)!;
+		const above = map.getTrackAt(0, 16)!;
+		// Horizontal path (3↔5) is fine.
+		expect(findPathBetween(map, left, right)).toHaveLength(3);
+		// Left arm to top arm would need the impossible turn 3→1.
+		expect(findPathBetween(map, left, above)).toBeNull();
+	});
+
+	it("never records an impossible turn across a crossover", () => {
+		const map = crossoverMap();
+		const crossover = map.getTrackAt(0, 0)!;
+		expect(crossover.addPreferredDirection(3, 1)).toBe(false);
+		expect(crossover.addPreferredDirection(3, 5)).toBe(true);
+		expect(crossover.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+	});
+
+	it("refuses a preferred direction against a one-way directed track", () => {
+		const map = new Map_();
+		// DIRECTEDRIGHT at (16,0): links [3,5], one-way 3→5.
+		straightH(map, 0);
+		map.addTrack(
+			{
+				kind: "directed",
+				subtype: DirectedType.DIRECTEDRIGHT,
+				platform1: false,
+				platform2: false,
+			},
+			16,
+			0,
+		);
+		straightH(map, 32);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(32, 0)!;
+		const directed = map.getTrackAt(16, 0)!;
+
+		// With the arrow: assigned all the way through.
+		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(3);
+		expect(directed.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+
+		// Against the arrow: no route exists, nothing is mutated.
+		expect(setPreferredDirectionsAlongPath(map, right, left)).toBeNull();
+		expect(directed.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+		expect(directed.addPreferredDirection(5, 3)).toBe(false);
+	});
+
+	it("section path-finding ignores the one-way sense", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack(
+			{
+				kind: "directed",
+				subtype: DirectedType.DIRECTEDRIGHT,
+				platform1: false,
+				platform2: false,
+			},
+			16,
+			0,
+		);
+		straightH(map, 32);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(32, 0)!;
+		// Default options (used by the section tool) route in both senses.
+		expect(findPathBetween(map, right, left)).toHaveLength(3);
+		expect(
+			findPathBetween(map, right, left, { respectOneWay: true }),
+		).toBeNull();
+	});
+
+	it("requires the neighbour to link back, not merely to be occupied", () => {
+		const map = new Map_();
+		// An H straight beside a V straight: adjacent cells, but link 5 of the H
+		// has no matching link 3 on the V — they do not join.
+		straightH(map, 0);
+		straightV(map, 16, 0);
+		const h = map.getTrackAt(0, 0)!;
+		const v = map.getTrackAt(16, 0)!;
+		expect(findPathBetween(map, h, v)).toBeNull();
+		expect(setPreferredDirectionsAlongPath(map, h, v)).toBeNull();
+		expect(h.getPreferredDirections()).toEqual([]);
+	});
+
+	it("will not leave a one-way start track against its arrow", () => {
+		const map = new Map_();
+		// DIRECTEDRIGHT at (0,0) runs 3→5; the only neighbour is to its left.
+		map.addTrack(
+			{
+				kind: "directed",
+				subtype: DirectedType.DIRECTEDRIGHT,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map, -16);
+		const directed = map.getTrackAt(0, 0)!;
+		const left = map.getTrackAt(-16, 0)!;
+		expect(
+			findPathBetween(map, directed, left, { respectOneWay: true }),
+		).toBeNull();
+		expect(setPreferredDirectionsAlongPath(map, directed, left)).toBeNull();
+		expect(left.getPreferredDirections()).toEqual([]);
+		// Section selection still reaches it.
+		expect(findPathBetween(map, directed, left)).toHaveLength(2);
+	});
+
+	it("will not reach a one-way goal track against its arrow", () => {
+		const map = new Map_();
+		// DIRECTEDLEFT at (0,0) runs 5→3, so it cannot be entered from the left.
+		map.addTrack(
+			{
+				kind: "directed",
+				subtype: DirectedType.DIRECTEDLEFT,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map, -16);
+		const directed = map.getTrackAt(0, 0)!;
+		const left = map.getTrackAt(-16, 0)!;
+		expect(
+			findPathBetween(map, left, directed, { respectOneWay: true }),
+		).toBeNull();
+		expect(setPreferredDirectionsAlongPath(map, left, directed)).toBeNull();
+		expect(left.getPreferredDirections()).toEqual([]);
+		expect(directed.getPreferredDirections()).toEqual([]);
 	});
 });

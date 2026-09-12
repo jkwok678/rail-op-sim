@@ -44,10 +44,17 @@ export type {
 	LinkedTrackPair,
 	LinkedTrackReport,
 	PathOptions,
+	PreferredDirectionRemovalResult,
+	PreferredDirectionResult,
 } from "./map/map-connectivity";
 export {
+	clearPreferredDirectionsAlongPath,
 	findPathBetween,
 	getConnectivityReport,
+	LINK_OFFSETS,
+	linkIndexForOffset,
+	resolvePathDirections,
+	setPreferredDirectionsAlongPath,
 } from "./map/map-connectivity";
 export type {
 	SerializedMap,
