@@ -4,6 +4,7 @@ import {
 	ElementAlreadyExistsError,
 	type FontInfo,
 	findPathBetween,
+	getConnectivityReport,
 	kindToLabel,
 	Map as Map_,
 	type ParapetType,
@@ -138,10 +139,22 @@ export class PlacementController {
 	 * module graph).
 	 */
 	private publishTrackStatus(): void {
-		const total = this.map.getTotalTrack();
+		const report = getConnectivityReport(this.map);
+		const connected = report.connected;
+
+		// Point the user at the first thing that is wrong: a dangling link if
+		// there is one, otherwise an unpaired portal.
+		const offender =
+			report.dangling[0]?.track ?? report.unpairedLinked[0] ?? null;
+
 		useEditorStore.getState().setTrackStatus({
-			total,
-			connected: total > 0 && this.map.checkAllTracksConnected(),
+			total: report.total,
+			connected,
+			dangling: report.dangling.length,
+			unpairedLinked: report.unpairedLinked.length,
+			firstIssue: offender
+				? { gx: offender.getLocationX(), gy: offender.getLocationY() }
+				: null,
 		});
 	}
 

@@ -73,6 +73,23 @@ export function isTrackKind(kind: AddKind): kind is TrackKind {
 	return TRACK_KINDS.has(kind);
 }
 
+/**
+ * Connectivity summary published by the placement controller, detailed enough
+ * for the UI to say *what* is incomplete rather than just that something is.
+ */
+export interface TrackStatus {
+	/** Total tracks on the map. */
+	total: number;
+	/** True when nothing dangles and every portal is paired. */
+	connected: boolean;
+	/** Tracks with an active link running into an empty cell. */
+	dangling: number;
+	/** Linked tracks (portals) with no partner. */
+	unpairedLinked: number;
+	/** Grid location of the first offending track, for "first at (x, y)". */
+	firstIssue: { gx: number; gy: number } | null;
+}
+
 export interface EditorState {
 	/** Current tool. */
 	tool: Tool;
@@ -118,7 +135,7 @@ export interface EditorState {
 	 * rather than reaching into the controller/pixi — keeps the SSR module graph
 	 * free of browser-only code.
 	 */
-	trackStatus: { total: number; connected: boolean } | null;
+	trackStatus: TrackStatus | null;
 
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
@@ -143,9 +160,7 @@ export interface EditorState {
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
-	setTrackStatus: (
-		status: { total: number; connected: boolean } | null,
-	) => void;
+	setTrackStatus: (status: TrackStatus | null) => void;
 
 	/** Current zoom level. */
 	zoom: number;

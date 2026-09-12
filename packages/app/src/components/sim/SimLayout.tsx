@@ -52,13 +52,35 @@ export function SimLayout() {
 		if (!trackStatus) {
 			return { label: "Loading…", color: "bg-muted-foreground" };
 		}
-		if (trackStatus.total === 0) {
+		const { total, dangling, unpairedLinked, firstIssue } = trackStatus;
+		const tracks = `${total} ${total === 1 ? "track" : "tracks"}`;
+
+		if (total === 0) {
 			return { label: "No tracks", color: "bg-muted-foreground" };
 		}
 		if (trackStatus.connected) {
-			return { label: "All tracks connected", color: "bg-lagoon" };
+			return { label: `${tracks} · all connected`, color: "bg-lagoon" };
 		}
-		return { label: "Tracks disconnected", color: "bg-amber-500" };
+
+		// Name each fault and where to start looking, rather than just saying
+		// something is wrong.
+		const faults: string[] = [];
+		if (dangling > 0) {
+			faults.push(`${dangling} with open ends`);
+		}
+		if (unpairedLinked > 0) {
+			faults.push(
+				`${unpairedLinked} unpaired ${unpairedLinked === 1 ? "portal" : "portals"}`,
+			);
+		}
+		const where = firstIssue
+			? ` · first at (${firstIssue.gx}, ${firstIssue.gy})`
+			: "";
+
+		return {
+			label: `${tracks} · ${faults.join(", ") || "incomplete"}${where}`,
+			color: "bg-amber-500",
+		};
 	}, [trackStatus]);
 
 	return (
