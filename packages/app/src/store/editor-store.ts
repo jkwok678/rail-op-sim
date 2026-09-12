@@ -246,20 +246,26 @@ export const useEditorStore = create<EditorState>((set) => ({
 
 	setTool: (tool) => {
 		debugLog("store", `setTool: ${tool}`);
-		set(
-			tool === "add"
-				? { tool, pendingNameTarget: null, pendingText: null }
-				: {
-						tool,
-						selectedKind: null,
-						selectedSubtype: null,
-						pendingNameTarget: null,
-						pendingText: null,
-						sectionStart: null,
-						sectionEnd: null,
-						sectionTracks: [],
-					},
-		);
+		// Picking any tool cancels the one being left, whatever it was: a
+		// half-made two-click gesture and an open dialog belong to the old tool,
+		// and a section selection keeps its edit panel on screen over the canvas
+		// (swallowing clicks meant for the new tool) for as long as it is set.
+		set({
+			tool,
+			pendingNameTarget: null,
+			pendingText: null,
+			sectionStart: null,
+			sectionEnd: null,
+			sectionTracks: [],
+			directionStart: null,
+			// Erase mode is disarmed too: a destructive mode should not be lying
+			// in wait when the direction tool is picked up again later.
+			directionMode: "set",
+			// The Add palette's selection is the exception — it survives a trip to
+			// another tool and back, so returning to Add resumes with the same
+			// track ready to place.
+			...(tool === "add" ? {} : { selectedKind: null, selectedSubtype: null }),
+		});
 	},
 
 	selectKind: (kind) => {
