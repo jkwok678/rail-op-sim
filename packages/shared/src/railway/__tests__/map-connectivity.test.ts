@@ -967,7 +967,7 @@ describe("setPreferredDirectionsAlongPath", () => {
 		expect(t.getPreferredDirections()).toEqual([]);
 	});
 
-	it("returns null across a linked-pair portal (BFS does not teleport)", () => {
+	it("assigns through a linked-pair portal in one gesture", () => {
 		const map = new Map_();
 		straightH(map, 0);
 		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
@@ -977,7 +977,30 @@ describe("setPreferredDirectionsAlongPath", () => {
 		map.connectTwoLinkedTracks(48, 0);
 		const a = map.getTrackAt(0, 0)!;
 		const b = map.getTrackAt(64, 0)!;
-		expect(setPreferredDirectionsAlongPath(map, a, b)).toBeNull();
+		const result = setPreferredDirectionsAlongPath(map, a, b);
+		expect(result).not.toBeNull();
+		expect(result!.path).toHaveLength(4);
+		expect(result!.applied).toBe(4);
+		// LINKRIGHT: enter from the railway (3), leave through the mouth (5).
+		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+		]);
+		// LINKLEFT: enter through the mouth (3), leave onto the far railway (5).
+		expect(map.getTrackAt(48, 0)!.getPreferredDirections()).toEqual([
+			{ entry: 3, exit: 5 },
+		]);
+	});
+
+	it("leaves a portal endpoint unset rather than routing into the mouth", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		const start = map.getTrackAt(0, 0)!;
+		const portal = map.getTrackAt(16, 0)!;
+		const result = setPreferredDirectionsAlongPath(map, start, portal);
+		expect(result!.applied).toBe(1);
+		expect(start.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+		expect(portal.getPreferredDirections()).toEqual([]);
 	});
 });
 

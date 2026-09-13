@@ -203,6 +203,10 @@ interface PathNode {
  * With `respectOneWay`, a `directed` track is entered only by its arrow's entry
  * edge and left only by its exit edge — including when it is the start track
  * (seeded with the arrow's entry) or the goal.
+ *
+ * Paired linked tracks are one edge: the search hops from a portal mouth to
+ * its partner's mouth, so a route (and a section) can be set across a portal
+ * in one gesture.
  */
 export function findPathBetween(
 	map: Map_,
@@ -234,11 +238,14 @@ export function findPathBetween(
 	};
 
 	/**
-	 * Whether `track` may be entered by `entry`: the link must be active, and a
-	 * one-way track accepts only its arrow's entry edge.
+	 * Whether `track` may be entered by `entry`: the link must be active or a
+	 * terminus dead-end (portal mouth), and a one-way track accepts only its
+	 * arrow's entry edge.
 	 */
 	const canEnter = (track: Track, entry: number): boolean => {
-		if (!track.getLinkAt(entry)) return false;
+		if (!track.getLinkAt(entry) && !track.isTerminusDeadEnd(entry)) {
+			return false;
+		}
 		if (!opts.respectOneWay || track.data.kind !== "directed") return true;
 		const flow = getDirectedFlow(track.data.subtype);
 		return flow === null || entry === flow.entry;
@@ -293,6 +300,41 @@ export function findPathBetween(
 				queue.push(node);
 			}
 		}
+
+		// Hop through a paired portal: leave via this cell's mouth, arrive
+		// via the partner's mouth. A U-turn back through the same mouth is
+		// rejected by isTraversableLinkPair (entry === exit).
+		if (goal === null) {
+			const partner = current.track.getOtherLinkedTrack();
+			const mouth = portalMouthLink(current.track);
+			const partnerMouth = partner ? portalMouthLink(partner) : null;
+			if (
+				partner &&
+				mouth !== null &&
+				partnerMouth !== null &&
+				(current.entry === null ||
+					isTraversableLinkPair(
+						current.track.data.kind,
+						current.track.data.subtype,
+						current.entry,
+						mouth,
+						opts.respectOneWay,
+					)) &&
+				canEnter(partner, partnerMouth) &&
+				markVisited(partner, partnerMouth)
+			) {
+				const node: PathNode = {
+					track: partner,
+					entry: partnerMouth,
+					prev: current,
+				};
+				if (partner === end) {
+					goal = node;
+				} else {
+					queue.push(node);
+				}
+			}
+		}
 	}
 
 	// Always reset found flags after traversal
@@ -337,6 +379,9 @@ export function linkIndexForOffset(dx: number, dy: number): number | null {
  *  - straights & curves (2 links): the track's other active link;
  *  - buffers & exits (1 link): the dead-end edge opposite the single link
  *    (`8 - known`), so the route records travel into the terminus;
+ *  - linked tracks (1 link): `null` — a portal is not a terminus; the route
+ *    either continues through the partner (an interior hop) or leaves the
+ *    portal unset;
  *  - switches & crossovers (3+ links): the straight-through edge (`8 - known`)
  *    when that edge is itself a link, otherwise `null` — a facing point, where
  *    the diverging exit is ambiguous and ROS leaves the exit unset.
@@ -348,7 +393,10 @@ function endpointOtherLink(track: Track, known: number): number | null {
 		if (track.getLinkAt(link)) active.push(link);
 	}
 	if (active.length === 2) return active.find((l) => l !== known) ?? null;
-	if (active.length === 1) return 8 - known;
+	if (active.length === 1) {
+		if (track.data.kind === "linked") return null;
+		return 8 - known;
+	}
 	const opposite = 8 - known;
 	return active.includes(opposite) ? opposite : null;
 }
@@ -380,8 +428,9 @@ export interface PreferredDirectionResult {
  * present, or none could be determined (e.g. both endpoints facing switches) —
  * which callers should surface rather than reporting success.
  *
- * Note: {@link findPathBetween} does not teleport across linked-track portals,
- * so a path stops at a portal boundary — assign each side separately.
+ * Paired portals are one edge ({@link findPathBetween} hops them), so a
+ * gesture that starts on one side and ends on the other assigns both mouths
+ * and the far railway in one go.
  */
 export function setPreferredDirectionsAlongPath(
 	map: Map_,
@@ -469,8 +518,9 @@ export function clearPreferredDirectionsAlongPath(
  *
  * Returns one slot per path track, in path order. A `null` slot means no pair
  * is determinable for that track: a facing-switch endpoint (ambiguous
- * diverging exit), a single-track path, or a path track that is not actually a
- * grid neighbour of its predecessor. A non-null slot is the pair that *would*
+ * diverging exit), a portal used as a path endpoint, a single-track path, or a
+ * path track that is not a grid neighbour (or portal partner) of its
+ * predecessor. A non-null slot is the pair that *would*
  * be added — it says nothing about whether that pair is already set.
  *
  * Exported so a UI can preview the exact legs a gesture will affect, rather
@@ -485,6 +535,7 @@ export function resolvePathDirections(
 
 	/** Link index on `from` pointing at `to`, or null if not a neighbour. */
 	const linkToward = (from: Track, to: Track): number | null => {
+		if (from.getOtherLinkedTrack() === to) return portalMouthLink(from);
 		const dx = (to.getLocationX() - from.getLocationX()) / step;
 		const dy = (to.getLocationY() - from.getLocationY()) / step;
 		return linkIndexForOffset(dx, dy);
@@ -516,4 +567,21 @@ export function resolvePathDirections(
 		if (entry === null || exit === null) return null;
 		return { entry, exit };
 	});
+}
+
+// ============================================================================
+// Linked-track portals
+// ============================================================================
+
+/**
+ * Portal mouth of a one-link linked track: the dead-end opposite its only
+ * active link. `null` when the track is not a portal (or has no single link).
+ */
+export function portalMouthLink(track: Track): number | null {
+	if (track.data.kind !== "linked") return null;
+	for (let link = 0; link <= 8; link++) {
+		if (link === 4) continue;
+		if (track.isTerminusDeadEnd(link)) return link;
+	}
+	return null;
 }

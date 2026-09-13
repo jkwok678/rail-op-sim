@@ -169,13 +169,14 @@ export class Track extends NamedElement {
 
 	/**
 	 * True when `link` is the dead-end edge of a single-connection terminus
-	 * (buffer/exit): the edge geometrically opposite its one active link
+	 * (buffer/exit/portal): the edge geometrically opposite its one active link
 	 * (`8 - only`, the centre index 4 excluded). A preferred direction may point
 	 * into that edge even though no track connects there, so a route terminating
 	 * at a buffer still records a travel direction — matching railway-dot-exe,
-	 * which sends the PrefDir into the buffer stop.
+	 * which sends the PrefDir into the buffer stop. Linked tracks use the same
+	 * mouth as the portal hop; it is not a place a route may end.
 	 */
-	private isTerminusDeadEnd(link: number): boolean {
+	isTerminusDeadEnd(link: number): boolean {
 		if (link === 4) return false;
 		// Exactly one active link ⇔ linkMask is a non-zero power of two.
 		if (this.linkMask === 0 || (this.linkMask & (this.linkMask - 1)) !== 0) {

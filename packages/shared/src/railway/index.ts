@@ -53,6 +53,7 @@ export {
 	getConnectivityReport,
 	LINK_OFFSETS,
 	linkIndexForOffset,
+	portalMouthLink,
 	resolvePathDirections,
 	setPreferredDirectionsAlongPath,
 } from "./map/map-connectivity";
