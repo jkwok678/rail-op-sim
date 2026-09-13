@@ -1,16 +1,16 @@
-# Graph Report - rail-op-sim  (2026-09-12)
+# Graph Report - rail-op-sim  (2026-09-13)
 
 ## Corpus Check
-- 97 files · ~98,095 words
+- 97 files · ~101,648 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1414 nodes · 2652 edges · 219 communities (109 shown, 110 thin omitted)
-- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 402 edges (avg confidence: 0.93)
+- 1425 nodes · 2707 edges · 221 communities (106 shown, 115 thin omitted)
+- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 421 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6fe0a7a0`
+- Built from commit: `5c53bc4f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,15 +26,15 @@
 - graphics
 - ViewportController
 - includes
-- AddPalette.tsx
-- Map_
-- textureCache.ts
-- PlacementController
 - railway/index.ts
-- track-data.ts
+- Map_
+- svgMap.ts
+- PlacementController
+- .serializeFieldGroups
+- findPathBetween
 - SimCanvas.tsx
 - dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics
-- PlacementController.ts
+- debugLog
 - Text
 - Technology Evaluation
 - components.json
@@ -45,11 +45,11 @@
 - compilerOptions
 - Map_ (railway map data structure)
 - railway/enums.ts
-- LinkHighlightLayer
+- PlacementController.ts
 - map.ts
 - ElementLayer.ts
-- NamedElement
-- ZoomSlider.tsx
+- Parapet
+- AddPalette.tsx
 - gestureOverlay.ts
 - .getTrackAt
 - Element
@@ -74,8 +74,8 @@
 - manifest.json
 - Toolbar.tsx
 - GroundLayer.ts
-- map-serialization.ts
-- deserializeMap
+- coordKey
+- .addTrack
 - root tsconfig.json
 - file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts
 - package.json — root monorepo config
@@ -83,7 +83,7 @@
 - parapet7.svg
 - CURVED_LINKS
 - shared/tsconfig.json
-- createTrackColorLayer
+- createDirectionLayer
 - CLAUDE.md
 - parapet1.svg
 - parapet10.svg
@@ -186,15 +186,17 @@
 - vite.config.ts
 - button.tsx
 - 34 Milestone Implementation Plan
-- button.tsx
-- round1
+- SaveLoadControls.tsx
+- SectionEditPanel.tsx
 - TextLayer
 - serializeMap
-- NamedLocation
+- EndpointOutlines
+- NamedElement
+- revalidatePreferredDirections
 
 ## God Nodes (most connected - your core abstractions)
-1. `Map_` - 119 edges
-2. `Track` - 90 edges
+1. `Map_` - 121 edges
+2. `Track` - 91 edges
 3. `PlacementController` - 50 edges
 4. `Text` - 41 edges
 5. `Implementation Milestones` - 35 edges
@@ -207,31 +209,27 @@
 ## Surprising Connections (you probably didn't know these)
 - `Knowledge Graph Project Rules` --references--> `Rail Ops Sim`  [INFERRED]
   CLAUDE.md → PLAN.md
-- `PanControlsProps` --references--> `ViewportController`  [EXTRACTED]
-  packages/app/src/components/sim/PanControls.tsx → packages/app/src/engine/ViewportController.ts
-- `EditorState` --references--> `SignalAspectValue`  [EXTRACTED]
-  packages/app/src/store/editor-store.ts → packages/shared/src/railway/track/signal-aspects.ts
+- `PathNode` --references--> `Track`  [EXTRACTED]
+  packages/shared/src/railway/map/map-connectivity.ts → packages/shared/src/railway/track/track.ts
 - `NameElementDialog()` --calls--> `useEditorStore`  [EXTRACTED]
   packages/app/src/components/sim/NameElementDialog.tsx → packages/app/src/store/editor-store.ts
+- `PanControlsProps` --references--> `ViewportController`  [EXTRACTED]
+  packages/app/src/components/sim/PanControls.tsx → packages/app/src/engine/ViewportController.ts
 - `SaveLoadControls()` --calls--> `debugLog()`  [EXTRACTED]
   packages/app/src/components/sim/SaveLoadControls.tsx → packages/app/src/lib/debugLogger.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (219 total, 110 thin omitted)
+## Communities (221 total, 115 thin omitted)
 
 ### Community 0 - "TextInputDialog.tsx"
-Cohesion: 0.12
-Nodes (26): getElementAt(), KIND_TITLES, NameElementDialog(), NameElementDialogProps, FONT_FAMILIES, TextInputDialogProps, Dialog(), DialogContent() (+18 more)
+Cohesion: 0.13
+Nodes (25): getElementAt(), KIND_TITLES, NameElementDialog(), NameElementDialogProps, FONT_FAMILIES, TextInputDialogProps, Dialog(), DialogContent() (+17 more)
 
 ### Community 1 - "track-data.ts"
 Cohesion: 0.16
 Nodes (24): Track (unified track class), Link grid layout (0-8 indices), KIND_META, track.test.ts, track-data.ts, track.ts, track/track-data.ts, KIND_META (per-kind flags) (+16 more)
-
-### Community 2 - "Track"
-Cohesion: 0.06
-Nodes (7): ConnectivityReport, DanglingLink, PathNode, PreferredDirectionRemovalResult, PreferredDirectionResult, getTrackColorState(), Track
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.04
@@ -254,40 +252,36 @@ Cohesion: 0.13
 Nodes (28): graphics, switch1.svg, switch10.svg, switch11.svg, switch12.svg, switch13.svg, switch14.svg, switch15.svg (+20 more)
 
 ### Community 9 - "ViewportController"
-Cohesion: 0.13
-Nodes (3): ZoomSliderProps, ViewportController, UsePixiAppReturn
+Cohesion: 0.08
+Nodes (17): PanControls(), PanControlsProps, SimCanvas(), ZoomSlider(), ZoomSliderProps, PAN_BUTTON_STEP, PAN_KEY_SPEED, ViewportController (+9 more)
 
 ### Community 10 - "includes"
 Cohesion: 0.07
 Nodes (29): source, assist, actions, files, ignoreUnknown, includes, formatter, enabled (+21 more)
 
-### Community 11 - "AddPalette.tsx"
-Cohesion: 0.15
-Nodes (33): ALL_LABELS, ASPECT_OPTIONS, CATEGORIES, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE, SUBTYPE_VALUES (+25 more)
+### Community 11 - "railway/index.ts"
+Cohesion: 0.06
+Nodes (90): ALL_TRACK_SUBTYPES, ELEMENT_KEYS, GRAPHICS_DIR, TRACK_ENUMS, Concourse, BridgeUnderpassType, BufferType, CrossoverType (+82 more)
 
-### Community 13 - "textureCache.ts"
-Cohesion: 0.11
-Nodes (25): AspectPreview(), DOM_COLOR_MAP, sanitizeSvg(), DOM_COLOR_MAP, sanitizeSvg(), TrackPreview(), buildDomColorMap(), buildThemeColorMap() (+17 more)
+### Community 13 - "svgMap.ts"
+Cohesion: 0.13
+Nodes (21): AspectPreview(), DOM_COLOR_MAP, sanitizeSvg(), DOM_COLOR_MAP, sanitizeSvg(), TrackPreview(), buildDomColorMap(), buildThemeColorMap() (+13 more)
 
 ### Community 14 - "PlacementController"
-Cohesion: 0.11
-Nodes (9): PlacementController, platformSubtypeToSide(), debugLog(), createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync() (+1 more)
+Cohesion: 0.14
+Nodes (3): PlacementController, platformSubtypeToSide(), isTrackKind()
 
-### Community 15 - "railway/index.ts"
-Cohesion: 0.15
-Nodes (25): COLOR_LEGEND, SignalAspectValue, DEFAULT_MAIN_LENGTH, DEFAULT_MAIN_SPEED, DEFAULT_SECONDARY_LENGTH, DEFAULT_SECONDARY_SPEED, TRACK_COLOR_ALPHA, TRACK_COLOR_BOTH (+17 more)
-
-### Community 16 - "track-data.ts"
-Cohesion: 0.07
-Nodes (28): BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES, CROSSOVER_LINKS, CURVED_CODES (+20 more)
+### Community 16 - "findPathBetween"
+Cohesion: 0.19
+Nodes (10): endpointOtherLink(), expectedEntryOnNeighbor(), findPathBetween(), getConnectivityReport(), neighborThroughLink(), portalMouthLink(), preferredDirectionIssue, trueLinks() (+2 more)
 
 ### Community 18 - "dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics"
 Cohesion: 0.10
 Nodes (20): dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg (+12 more)
 
-### Community 19 - "PlacementController.ts"
-Cohesion: 0.23
-Nodes (10): DEFAULT_OPTIONS, themeKey(), usePixiApp(), Subsystem, CELL_SIZE, worldToGrid(), createTrackLayer(), Entry (+2 more)
+### Community 19 - "debugLog"
+Cohesion: 0.11
+Nodes (13): DEFAULT_OPTIONS, themeKey(), usePixiApp(), debugLog(), Subsystem, ColorMap, canvasCache, svgToCanvas() (+5 more)
 
 ### Community 21 - "Technology Evaluation"
 Cohesion: 0.20
@@ -325,29 +319,25 @@ Nodes (27): Map_ (railway map data structure), map-connectivity.test.ts — test
 Cohesion: 0.14
 Nodes (14): BridgeUnderpassType (4 variants), BufferType (8 variants), CrossoverType (6 variants), CurvedType (12 variants), DirectedType (8 variants), ExitType (8 variants), FlyoverType (12 variants), LinkedType (8 variants) (+6 more)
 
-### Community 30 - "LinkHighlightLayer"
-Cohesion: 0.09
-Nodes (6): PlacementControllerOptions, Coord, DirectionLayer, LinkHighlightLayer, TrackColorLayer, TrackLayer
+### Community 30 - "PlacementController.ts"
+Cohesion: 0.07
+Nodes (9): PlacementControllerOptions, worldToGrid(), Coord, DirectionLayer, LinkHighlightLayer, createTrackColorLayer(), TrackColorLayer, TrackLayer (+1 more)
 
 ### Community 31 - "map.ts"
-Cohesion: 0.12
-Nodes (22): checkAllTracksConnected(), clearPreferredDirectionsAlongPath(), endpointOtherLink(), findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks(), getConnectivityReport(), getLinkedTrackPairs() (+14 more)
+Cohesion: 0.16
+Nodes (20): checkAllTracksConnected(), clearPreferredDirectionsAlongPath(), ConnectivityReport, DanglingLink, findAllLinkedTracks(), findUnpairedLinkedTracks(), getLinkedTrackPairs(), getLinkedTrackReport() (+12 more)
 
 ### Community 32 - "ElementLayer.ts"
-Cohesion: 0.13
-Nodes (7): createElementLayer(), ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, TextureCache
+Cohesion: 0.16
+Nodes (6): createElementLayer(), ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry
 
-### Community 33 - "NamedElement"
+### Community 34 - "AddPalette.tsx"
 Cohesion: 0.17
-Nodes (3): Concourse, NamedElement, TestNamedElement
-
-### Community 34 - "ZoomSlider.tsx"
-Cohesion: 0.19
-Nodes (13): PanControls(), PanControlsProps, SimCanvas(), ZoomSlider(), PAN_BUTTON_STEP, PAN_KEY_SPEED, ViewportControllerOptions, ViewportState (+5 more)
+Nodes (11): ALL_LABELS, ASPECT_OPTIONS, CATEGORIES, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE, SUBTYPE_VALUES (+3 more)
 
 ### Community 35 - "gestureOverlay.ts"
-Cohesion: 0.09
-Nodes (30): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), EndpointOutlines, GESTURE_END_COLOR, GESTURE_INVALID_COLOR (+22 more)
+Cohesion: 0.11
+Nodes (31): CELL_SIZE, gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), GESTURE_END_COLOR, GESTURE_INVALID_COLOR (+23 more)
 
 ### Community 36 - ".getTrackAt"
 Cohesion: 0.26
@@ -410,8 +400,8 @@ Cohesion: 0.53
 Nodes (5): encodeRow(), mergeRuns(), pngFiles, pngToSvg(), rgbToHex()
 
 ### Community 53 - "editor-store.ts"
-Cohesion: 0.17
-Nodes (9): DEFAULT_ZOOM, AddKind, DirectionMode, EditorState, ElementKind, HoveredTrackInfo, isTrackKind(), PendingText (+1 more)
+Cohesion: 0.20
+Nodes (8): AddKind, DirectionMode, EditorState, ElementKind, HoveredTrackInfo, PendingText, TrackStatus, SignalAspectValue
 
 ### Community 54 - "tooltip.tsx"
 Cohesion: 0.40
@@ -433,13 +423,9 @@ Nodes (5): TOOLS, Tooltip(), TooltipContent(), TooltipTrigger(), Tool
 Cohesion: 0.32
 Nodes (7): createGroundLayer(), redraw(), DEFAULTS, GroundLayer, GroundLayerOptions, niceSpacing(), resolve()
 
-### Community 59 - "map-serialization.ts"
+### Community 60 - ".addTrack"
 Cohesion: 0.20
-Nodes (10): Parapet, ParapetType, SERIALIZED_MAP_VERSION, SerializedMap, SerializedNamedElement, SerializedParapet, SerializedText, SerializedTrack (+2 more)
-
-### Community 60 - "deserializeMap"
-Cohesion: 0.21
-Nodes (4): mapDebug(), deserializeMap(), addStraightH(), buildSampleMap()
+Nodes (3): mapDebug(), addStraightH(), buildSampleMap()
 
 ### Community 61 - "root tsconfig.json"
 Cohesion: 0.67
@@ -469,41 +455,45 @@ Nodes (5): tightCurve1.svg, tightCurve2.svg, tightCurve3.svg, tightCurve4.svg, C
 Cohesion: 0.40
 Nodes (4): extends, include, src/**/*, ../../tsconfig.json
 
-### Community 214 - "button.tsx"
-Cohesion: 0.31
-Nodes (7): SaveLoadControls(), Button(), buttonVariants, assertSerializedMap(), downloadMap(), InvalidMapFileError, pickAndReadMapFile()
+### Community 68 - "createDirectionLayer"
+Cohesion: 0.43
+Nodes (5): createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync()
 
-### Community 215 - "round1"
-Cohesion: 0.67
-Nodes (5): SectionEditPanel(), formatImperialLength(), kmhToMph(), metresToImperial(), round1()
+### Community 214 - "SaveLoadControls.tsx"
+Cohesion: 0.43
+Nodes (5): SaveLoadControls(), assertSerializedMap(), downloadMap(), InvalidMapFileError, pickAndReadMapFile()
+
+### Community 215 - "SectionEditPanel.tsx"
+Cohesion: 0.42
+Nodes (6): COLOR_LEGEND, SectionEditPanel(), formatImperialLength(), kmhToMph(), metresToImperial(), round1()
 
 ### Community 216 - "TextLayer"
 Cohesion: 0.29
 Nodes (3): createTextLayer(), removeAll(), TextLayer
 
-### Community 217 - "serializeMap"
-Cohesion: 0.22
-Nodes (3): serializeMap(), changeDeleteText(), deleteTextFromAllElements()
+### Community 219 - "NamedElement"
+Cohesion: 0.15
+Nodes (3): NamedElement, NamedLocation, TestNamedElement
 
 ## Knowledge Gaps
-- **322 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+317 more)
+- **323 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+318 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **115 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Map_` to `ElementLayer.ts`, `NamedElement`, `Track`, `gestureOverlay.ts`, `.getTrackAt`, `Element`, `AddPalette.tsx`, `NamedLocation`, `railway/index.ts`, `PlacementController.ts`, `Text`, `TextLayer`, `serializeMap`, `map-serialization.ts`, `deserializeMap`, `LinkHighlightLayer`, `map.ts`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
-- **Why does `Track` connect `Track` to `ElementLayer.ts`, `NamedElement`, `.getTrackAt`, `AddPalette.tsx`, `Map_`, `NamedLocation`, `railway/index.ts`, `PlacementController.ts`, `serializeMap`, `map-serialization.ts`, `deserializeMap`, `LinkHighlightLayer`, `map.ts`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `ViewportController` connect `ViewportController` to `ZoomSlider.tsx`, `PlacementController.ts`, `PlacementController`, `LinkHighlightLayer`?**
+- **Why does `Map_` connect `Map_` to `ElementLayer.ts`, `Parapet`, `Track`, `gestureOverlay.ts`, `.getTrackAt`, `Element`, `coordKey`, `railway/index.ts`, `findPathBetween`, `debugLog`, `Text`, `revalidatePreferredDirections`, `TextLayer`, `serializeMap`, `NamedElement`, `.addTrack`, `PlacementController.ts`, `map.ts`?**
+  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+- **Why does `Track` connect `Track` to `ElementLayer.ts`, `gestureOverlay.ts`, `.getTrackAt`, `railway/index.ts`, `Map_`, `NamedElement`, `.serializeFieldGroups`, `findPathBetween`, `revalidatePreferredDirections`, `coordKey`, `.addTrack`, `PlacementController.ts`, `map.ts`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `ViewportController` connect `ViewportController` to `debugLog`, `PlacementController.ts`, `PlacementController`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `$schema`, `enabled`, `clientKind` to the rest of the system?**
-  _322 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _323 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `TextInputDialog.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12063492063492064 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12878787878787878 - nodes in this community are weakly interconnected._
 - **Should `Track` be split into smaller, more focused modules?**
-  _Cohesion score 0.05701754385964912 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08602150537634409 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
