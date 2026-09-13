@@ -654,9 +654,20 @@ export class PlacementController {
 				);
 				if (result === null) {
 					debugLog("placement", "direction click → no path found");
+				} else if (result.facingSwitchEndpoint) {
+					// Nothing was written. Keep the start click so the next cell
+					// past the switch can choose the branch.
+					useEditorStore
+						.getState()
+						.setDirectionHint("Click past the switch to choose a branch");
+					debugLog(
+						"placement",
+						`direction click → facing switch, kept start (path length=${result.path.length})`,
+					);
+					return;
 				} else if (result.applied === 0) {
 					// Path exists but nothing changed — every pair was already set, or
-					// none could be determined (e.g. both endpoints facing switches).
+					// none could be determined.
 					debugLog(
 						"placement",
 						`direction click → no directions applied (path length=${result.path.length})`,

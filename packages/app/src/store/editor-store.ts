@@ -217,6 +217,14 @@ export interface EditorState {
 	/** Set (or clear) the pending direction start track. */
 	setDirectionStart: (loc: { gx: number; gy: number } | null) => void;
 
+	/**
+	 * Hint for the direction tool (e.g. "click past the switch"). Shown in the
+	 * footer while the gesture is still open. Null when there is nothing to say.
+	 */
+	directionHint: string | null;
+	/** Set (or clear) the direction-tool hint. */
+	setDirectionHint: (hint: string | null) => void;
+
 	/** Whether the direction tool assigns or erases along the route it finds. */
 	directionMode: DirectionMode;
 	/** Switch the direction tool between assigning and erasing. */
@@ -242,6 +250,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	sectionEnd: null,
 	sectionTracks: [],
 	directionStart: null,
+	directionHint: null,
 	directionMode: "set",
 
 	setTool: (tool) => {
@@ -258,6 +267,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 			sectionEnd: null,
 			sectionTracks: [],
 			directionStart: null,
+			directionHint: null,
 			// Erase mode is disarmed too: a destructive mode should not be lying
 			// in wait when the direction tool is picked up again later.
 			directionMode: "set",
@@ -354,13 +364,20 @@ export const useEditorStore = create<EditorState>((set) => ({
 			"store",
 			`setDirectionStart: ${loc ? `(${loc.gx},${loc.gy})` : "null"}`,
 		);
-		set({ directionStart: loc });
+		// Clearing the start also drops any "click past the switch" hint — the
+		// gesture that produced it is over (cancel, success, or empty-cell).
+		set({ directionStart: loc, ...(loc ? {} : { directionHint: null }) });
+	},
+
+	setDirectionHint: (hint) => {
+		debugLog("store", `setDirectionHint: ${hint ?? "null"}`);
+		set({ directionHint: hint });
 	},
 
 	setDirectionMode: (mode) => {
 		debugLog("store", `setDirectionMode: ${mode}`);
 		// A pending start belongs to the gesture being abandoned — switching what
 		// the second click would do mid-gesture would surprise.
-		set({ directionMode: mode, directionStart: null });
+		set({ directionMode: mode, directionStart: null, directionHint: null });
 	},
 }));

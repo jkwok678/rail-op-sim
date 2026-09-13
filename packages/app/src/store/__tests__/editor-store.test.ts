@@ -13,6 +13,7 @@ const reset = () => {
 		sectionEnd: null,
 		sectionTracks: [],
 		directionStart: null,
+		directionHint: null,
 		directionMode: "set",
 	});
 };
@@ -88,5 +89,14 @@ describe("setTool", () => {
 		s.setDirectionStart({ gx: 3, gy: 4 });
 		useEditorStore.getState().setTool("direction");
 		expect(useEditorStore.getState().directionStart).toBeNull();
+	});
+
+	it("clears a facing-switch hint when the gesture is cancelled", () => {
+		const s = useEditorStore.getState();
+		s.setTool("direction");
+		s.setDirectionStart({ gx: 0, gy: 0 });
+		s.setDirectionHint("Click past the switch to choose a branch");
+		useEditorStore.getState().setDirectionStart(null);
+		expect(useEditorStore.getState().directionHint).toBeNull();
 	});
 });

@@ -21,6 +21,8 @@ export function SimLayout() {
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const trackStatus = useEditorStore((s) => s.trackStatus);
+	const tool = useEditorStore((s) => s.tool);
+	const directionHint = useEditorStore((s) => s.directionHint);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
 	const [textDialogOpen, setTextDialogOpen] = useState(false);
@@ -104,6 +106,11 @@ export function SimLayout() {
 				<span className="inline-flex items-center gap-1.5">
 					<span className={`size-1.5 rounded-full ${connectivity.color}`} />
 					{connectivity.label}
+					{tool === "direction" && directionHint ? (
+						<span className="text-amber-600 dark:text-amber-400">
+							· {directionHint}
+						</span>
+					) : null}
 				</span>
 				<div className="flex items-center gap-1">
 					<SaveLoadControls />

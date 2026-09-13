@@ -896,8 +896,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			{ entry: 3, exit: 5 },
 		]);
 
-		// A path that ENDS on the switch approached along its straight (from the
-		// right, link 5) → straight-through exit 8-5=3 (an active link).
+		// A path that ENDS on the switch approached along its through (from the
+		// right, link 5) → unique partner 3 (8-5 happens to agree).
 		const map2 = new Map_();
 		map2.addTrack(
 			{
@@ -921,11 +921,11 @@ describe("setPreferredDirectionsAlongPath", () => {
 		]);
 	});
 
-	it("leaves a facing switch endpoint unset (ambiguous diverging exit)", () => {
+	it("assigns a trailing spur endpoint via its unique partner", () => {
 		const map = new Map_();
 		// SWITCHTIGHT1 at (0,0): links 1, 3, 5. Approached from the toe (top,
-		// link 1) the exit diverges (8-1=7 is not a link) → left unset, matching
-		// ROS's entry-only facing-point handling.
+		// link 1) the only legal exit is 3 — 8-1=7 is not a link, but geometry
+		// is unambiguous.
 		map.addTrack(
 			{
 				kind: "switch",
@@ -940,10 +940,88 @@ describe("setPreferredDirectionsAlongPath", () => {
 		const start = map.getTrackAt(0, 16)!;
 		const switchTrack = map.getTrackAt(0, 0)!;
 		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
+		expect(switchTrack.getPreferredDirections()).toEqual([
+			{ entry: 1, exit: 3 },
+		]);
+		expect(result!.applied).toBe(2);
+		expect(result!.unassigned).toBe(0);
+	});
+
+	it("refuses a facing switch endpoint instead of partially committing", () => {
+		const map = new Map_();
+		// SWITCHTIGHT1 approached from the stem (left, link 3): 3→5 and 3→1
+		// are both legal, so inventing a continuation would silently pick the
+		// through. The user chooses by clicking past the switch — nothing is
+		// written until they do.
+		map.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHTIGHT1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(map, -16);
+		const start = map.getTrackAt(-16, 0)!;
+		const switchTrack = map.getTrackAt(0, 0)!;
+		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
 		expect(switchTrack.getPreferredDirections()).toEqual([]);
-		// The endpoint yielded no pair → reported as unassigned, not as success.
-		expect(result!.applied).toBe(1); // only the approaching straight
-		expect(result!.unassigned).toBe(1);
+		expect(start.getPreferredDirections()).toEqual([]);
+		expect(result!.applied).toBe(0);
+		expect(result!.facingSwitchEndpoint).toBe(true);
+	});
+
+	it("SWITCH1 trailing on the diverging leg assigns 2→3, facing 3 stays unset", () => {
+		// SWITCH1 ([2, 3, 5]): 2↔3 is the curve, 3↔5 the through, 2↔5 illegal.
+		const trailing = new Map_();
+		trailing.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCH1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		trailing.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTRIGHTUP,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			16,
+		);
+		const spur = trailing.getTrackAt(16, 16)!;
+		const swTrail = trailing.getTrackAt(0, 0)!;
+		const trailResult = setPreferredDirectionsAlongPath(trailing, spur, swTrail);
+		expect(swTrail.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
+		expect(trailResult!.unassigned).toBe(0);
+
+		const facing = new Map_();
+		facing.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCH1,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		straightH(facing, -16);
+		const stem = facing.getTrackAt(-16, 0)!;
+		const swFace = facing.getTrackAt(0, 0)!;
+		const faceResult = setPreferredDirectionsAlongPath(facing, stem, swFace);
+		expect(swFace.getPreferredDirections()).toEqual([]);
+		expect(stem.getPreferredDirections()).toEqual([]);
+		expect(faceResult!.applied).toBe(0);
+		expect(faceResult!.facingSwitchEndpoint).toBe(true);
 	});
 
 	it("returns null and mutates nothing for disconnected tracks", () => {
@@ -1457,7 +1535,11 @@ describe("split-switch geometry", () => {
 		expect(findPathBetween(map, left, bottom)).toHaveLength(3);
 		expect(findPathBetween(map, diag, bottom)).toBeNull();
 
-		// The branch-to-branch pairing GEOMETRIC_PAIRS would admit is not a rail.
+		// Trailing on a branch uniquely infers the stem (2↔7 is not a rail).
+		const trail = setPreferredDirectionsAlongPath(map, diag, sw);
+		expect(trail!.facingSwitchEndpoint).toBe(false);
+		expect(trail!.applied).toBe(2);
+		expect(sw.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
 		expect(sw.addPreferredDirection(2, 7)).toBe(false);
 	});
 });

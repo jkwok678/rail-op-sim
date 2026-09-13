@@ -382,9 +382,9 @@ export function linkIndexForOffset(dx: number, dy: number): number | null {
  *  - linked tracks (1 link): `null` — a portal is not a terminus; the route
  *    either continues through the partner (an interior hop) or leaves the
  *    portal unset;
- *  - switches & crossovers (3+ links): the straight-through edge (`8 - known`)
- *    when that edge is itself a link, otherwise `null` — a facing point, where
- *    the diverging exit is ambiguous and ROS leaves the exit unset.
+ *  - switches & crossovers (3+ links): the unique traversable partner among
+ *    active links, so a trailing entry (or a crossover's only legal pair)
+ *    resolves and a facing/stem entry — two surviving partners — stays unset.
  */
 function endpointOtherLink(track: Track, known: number): number | null {
 	const active: number[] = [];
@@ -397,8 +397,12 @@ function endpointOtherLink(track: Track, known: number): number | null {
 		if (track.data.kind === "linked") return null;
 		return 8 - known;
 	}
-	const opposite = 8 - known;
-	return active.includes(opposite) ? opposite : null;
+	const partners = active.filter(
+		(l) =>
+			l !== known &&
+			isTraversableLinkPair(track.data.kind, track.data.subtype, known, l),
+	);
+	return partners.length === 1 ? partners[0] : null;
 }
 
 /** Outcome of {@link setPreferredDirectionsAlongPath}. */
@@ -409,6 +413,12 @@ export interface PreferredDirectionResult {
 	applied: number;
 	/** Path tracks that received no new pair (undeterminable, rejected, or duplicate). */
 	unassigned: number;
+	/**
+	 * True when a path endpoint is a facing switch (two legal exits). Nothing
+	 * was written — the caller should keep the gesture open so the user can
+	 * click past the switch and pick a branch.
+	 */
+	facingSwitchEndpoint: boolean;
 }
 
 /**
@@ -419,14 +429,17 @@ export interface PreferredDirectionResult {
  * toward the next. Endpoints (the first/last clicked track) also receive a
  * direction, borrowing their missing link via {@link endpointOtherLink}: the
  * other active link for straights/curves, the dead-end edge for buffers/exits,
- * and the straight-through edge for switches — leaving only a facing switch
- * endpoint (ambiguous diverging exit) unset.
+ * and the unique traversable partner for switches and crossovers. A facing
+ * switch endpoint (two legal exits) refuses the whole write — see below.
  *
  * Returns the path plus what was actually written (tracks mutated in place), or
  * `null` when the tracks are disconnected (in which case nothing is mutated).
  * `applied === 0` means the gesture changed nothing — every pair was already
- * present, or none could be determined (e.g. both endpoints facing switches) —
- * which callers should surface rather than reporting success.
+ * present, or none could be determined.
+ *
+ * A facing-switch endpoint (two legal exits) is not a partial write: nothing
+ * is mutated and `facingSwitchEndpoint` is set, so the caller can keep the
+ * start click and ask the user to click past the switch.
  *
  * Paired portals are one edge ({@link findPathBetween} hops them), so a
  * gesture that starts on one side and ends on the other assigns both mouths
@@ -441,6 +454,20 @@ export function setPreferredDirectionsAlongPath(
 	if (path === null) return null;
 
 	const legs = resolvePathDirections(map, path);
+	const facingSwitchEndpoint =
+		path.length > 1 &&
+		((legs[0] === null && path[0].data.kind === "switch") ||
+			(legs[path.length - 1] === null &&
+				path[path.length - 1].data.kind === "switch"));
+	if (facingSwitchEndpoint) {
+		return {
+			path,
+			applied: 0,
+			unassigned: path.length,
+			facingSwitchEndpoint: true,
+		};
+	}
+
 	let applied = 0;
 	let unassigned = 0;
 
@@ -453,7 +480,7 @@ export function setPreferredDirectionsAlongPath(
 		}
 	}
 
-	return { path, applied, unassigned };
+	return { path, applied, unassigned, facingSwitchEndpoint: false };
 }
 
 /** Outcome of {@link clearPreferredDirectionsAlongPath}. */
@@ -517,11 +544,11 @@ export function clearPreferredDirectionsAlongPath(
  * then writes.
  *
  * Returns one slot per path track, in path order. A `null` slot means no pair
- * is determinable for that track: a facing-switch endpoint (ambiguous
- * diverging exit), a portal used as a path endpoint, a single-track path, or a
- * path track that is not a grid neighbour (or portal partner) of its
- * predecessor. A non-null slot is the pair that *would*
- * be added — it says nothing about whether that pair is already set.
+ * is determinable for that track: a facing-switch endpoint (two legal exits),
+ * a portal used as a path endpoint, a single-track path, or a path track that
+ * is not a grid neighbour (or portal partner) of its predecessor. A non-null
+ * slot is the pair that *would* be added — it says nothing about whether that
+ * pair is already set.
  *
  * Exported so a UI can preview the exact legs a gesture will affect, rather
  * than highlighting whole cells and implying that legs which are not on the
