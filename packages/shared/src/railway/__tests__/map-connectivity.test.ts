@@ -1302,3 +1302,139 @@ describe("path traversability", () => {
 		expect(directed.getPreferredDirections()).toEqual([]);
 	});
 });
+
+// ============================================================================
+// Tight-radius switch geometry
+// ============================================================================
+
+describe("tight-radius switch geometry", () => {
+	const arms = (subtype: (typeof SwitchType)[keyof typeof SwitchType]) => {
+		const map = new Map_();
+		map.addTrack(
+			{ kind: "switch", subtype, platform1: false, platform2: false },
+			0,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			-16,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			16,
+		);
+		return {
+			map,
+			sw: map.getTrackAt(0, 0)!,
+			left: map.getTrackAt(-16, 0)!,
+			right: map.getTrackAt(16, 0)!,
+			top: map.getTrackAt(0, 16)!,
+		};
+	};
+
+	it("SWITCHTIGHT1 routes left→up (the curve the art has) and through", () => {
+		const { map, sw, left, right, top } = arms(SwitchType.SWITCHTIGHT1);
+		expect(findPathBetween(map, left, right)).toHaveLength(3);
+		expect(findPathBetween(map, left, top)).toHaveLength(3);
+		expect(sw.addPreferredDirection(3, 1)).toBe(true);
+		expect(sw.addPreferredDirection(5, 1)).toBe(false);
+	});
+
+	it("SWITCHTIGHT2 refuses left→up (that curve belongs to variant 1)", () => {
+		const { map, sw, left, right, top } = arms(SwitchType.SWITCHTIGHT2);
+		expect(findPathBetween(map, left, right)).toHaveLength(3);
+		expect(findPathBetween(map, left, top)).toBeNull();
+		expect(findPathBetween(map, right, top)).toHaveLength(3);
+		expect(sw.addPreferredDirection(3, 1)).toBe(false);
+		expect(sw.addPreferredDirection(5, 1)).toBe(true);
+	});
+});
+
+// ============================================================================
+// Split-switch geometry (explicit pairs; 3–6 are not GEOMETRIC_PAIRS-safe)
+// ============================================================================
+
+describe("split-switch geometry", () => {
+	it("SWITCHSPLIT3 routes stem→branches and refuses the phantom 2↔7", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "switch",
+				subtype: SwitchType.SWITCHSPLIT3,
+				platform1: false,
+				platform2: false,
+			},
+			0,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			-16,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTRIGHTUP,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			16,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			-16,
+		);
+		const left = map.getTrackAt(-16, 0)!;
+		const diag = map.getTrackAt(16, 16)!;
+		const bottom = map.getTrackAt(0, -16)!;
+		const sw = map.getTrackAt(0, 0)!;
+
+		expect(findPathBetween(map, left, diag)).toHaveLength(3);
+		expect(findPathBetween(map, left, bottom)).toHaveLength(3);
+		expect(findPathBetween(map, diag, bottom)).toBeNull();
+
+		// The branch-to-branch pairing GEOMETRIC_PAIRS would admit is not a rail.
+		expect(sw.addPreferredDirection(2, 7)).toBe(false);
+	});
+});

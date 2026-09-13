@@ -1813,4 +1813,31 @@ describe("Track preferred directions", () => {
 		t.restoreDefaults();
 		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 	});
+
+	it.each([
+		[SwitchType.SWITCHTIGHT1, [3, 1], [5, 1]],
+		[SwitchType.SWITCHTIGHT2, [5, 1], [3, 1]],
+		[SwitchType.SWITCHTIGHT3, [3, 7], [5, 7]],
+		[SwitchType.SWITCHTIGHT4, [5, 7], [3, 7]],
+		[SwitchType.SWITCHTIGHT5, [3, 7], [1, 3]],
+		[SwitchType.SWITCHTIGHT6, [5, 7], [1, 5]],
+		[SwitchType.SWITCHTIGHT7, [1, 3], [3, 7]],
+		[SwitchType.SWITCHTIGHT8, [1, 5], [5, 7]],
+		[SwitchType.SWITCHSPLIT1, [2, 3], [2, 8]],
+		[SwitchType.SWITCHSPLIT2, [0, 5], [0, 6]],
+		[SwitchType.SWITCHSPLIT3, [2, 3], [2, 7]],
+		[SwitchType.SWITCHSPLIT4, [1, 5], [1, 6]],
+		[SwitchType.SWITCHSPLIT5, [1, 3], [1, 8]],
+		[SwitchType.SWITCHSPLIT6, [0, 5], [0, 7]],
+		[SwitchType.SWITCHSPLIT7, [0, 7], [0, 2]],
+		[SwitchType.SWITCHSPLIT8, [1, 6], [6, 8]],
+	] as const)("%s accepts the real diverge %j and rejects the phantom %j", (subtype, real, phantom) => {
+		const t = new Track(
+			{ kind: "switch", subtype, platform1: false, platform2: false },
+			0,
+			0,
+		);
+		expect(t.addPreferredDirection(real[0], real[1])).toBe(true);
+		expect(t.addPreferredDirection(phantom[0], phantom[1])).toBe(false);
+	});
 });

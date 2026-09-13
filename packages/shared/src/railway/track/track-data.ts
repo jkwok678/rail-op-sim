@@ -398,16 +398,154 @@ export function getDirectedFlow(
 }
 
 /**
+ * Pack an unordered link pair as both directed keys (`a→b` and `b→a`).
+ * The 9-wide encoding matches {@link GEOMETRIC_PAIRS}.
+ */
+const bothWays = (pairs: readonly (readonly [number, number])[]): number[] =>
+	pairs.flatMap(([a, b]) => [a * 9 + b, b * 9 + a]);
+
+/**
  * Every unordered link pair that forms a single continuous piece of track —
  * i.e. the link sets of all straight and curved subtypes. A multi-link track
  * (switch) can only route between links that some two-link geometry connects,
  * which rejects e.g. 2↔5 on SWITCH1 ([2, 3, 5]).
+ *
+ * Tight-radius and split switches share a link set between variants (the
+ * art diverges on opposite sides of the through / stem), so they are *not*
+ * looked up here — see {@link SWITCH_PAIRS}.
  */
 const GEOMETRIC_PAIRS: ReadonlySet<number> = new Set(
 	[...Object.values(STRAIGHT_LINKS), ...Object.values(CURVED_LINKS)].flatMap(
 		([a, b]) => [a * 9 + b, b * 9 + a],
 	),
 );
+
+/**
+ * The two real rails of each tight-radius and split switch, read off the art:
+ * a through/stem plus one diverging curve. Variants that share a link mask
+ * differ only in which way the curve goes.
+ *
+ * Tight (1/2, 3/4, 5/7, 6/8 share masks):
+ *   1: through 3↔5, diverge left→up   1↔3
+ *   2: through 3↔5, diverge right→up  1↔5
+ *   3: through 3↔5, diverge left→down 3↔7
+ *   4: through 3↔5, diverge right→down 5↔7
+ *   5: through 1↔7, diverge left→down 3↔7
+ *   6: through 1↔7, diverge right→down 5↔7
+ *   7: through 1↔7, diverge left→up   1↔3
+ *   8: through 1↔7, diverge right→up  1↔5
+ *
+ * Split — a stem plus two branches. The branch-to-branch pair is not a rail.
+ * GEOMETRIC_PAIRS accidentally admits that third pairing on variants 3–6,
+ * where every combination of the three links is some straight or curve.
+ *   1: stem 3, branches 2 and 8
+ *   2: stem 5, branches 0 and 6
+ *   3: stem 3, branches 2 and 7
+ *   4: stem 5, branches 1 and 6
+ *   5: stem 3, branches 1 and 8
+ *   6: stem 5, branches 0 and 7
+ *   7: stem 7, branches 0 and 2
+ *   8: stem 1, branches 6 and 8
+ */
+const SWITCH_PAIRS: Readonly<Partial<Record<SubtypeKey, ReadonlySet<number>>>> =
+	{
+		SWITCHTIGHT1: new Set(
+			bothWays([
+				[3, 5],
+				[1, 3],
+			]),
+		),
+		SWITCHTIGHT2: new Set(
+			bothWays([
+				[3, 5],
+				[1, 5],
+			]),
+		),
+		SWITCHTIGHT3: new Set(
+			bothWays([
+				[3, 5],
+				[3, 7],
+			]),
+		),
+		SWITCHTIGHT4: new Set(
+			bothWays([
+				[3, 5],
+				[5, 7],
+			]),
+		),
+		SWITCHTIGHT5: new Set(
+			bothWays([
+				[1, 7],
+				[3, 7],
+			]),
+		),
+		SWITCHTIGHT6: new Set(
+			bothWays([
+				[1, 7],
+				[5, 7],
+			]),
+		),
+		SWITCHTIGHT7: new Set(
+			bothWays([
+				[1, 7],
+				[1, 3],
+			]),
+		),
+		SWITCHTIGHT8: new Set(
+			bothWays([
+				[1, 7],
+				[1, 5],
+			]),
+		),
+		SWITCHSPLIT1: new Set(
+			bothWays([
+				[2, 3],
+				[3, 8],
+			]),
+		),
+		SWITCHSPLIT2: new Set(
+			bothWays([
+				[0, 5],
+				[5, 6],
+			]),
+		),
+		SWITCHSPLIT3: new Set(
+			bothWays([
+				[2, 3],
+				[3, 7],
+			]),
+		),
+		SWITCHSPLIT4: new Set(
+			bothWays([
+				[1, 5],
+				[5, 6],
+			]),
+		),
+		SWITCHSPLIT5: new Set(
+			bothWays([
+				[1, 3],
+				[3, 8],
+			]),
+		),
+		SWITCHSPLIT6: new Set(
+			bothWays([
+				[0, 5],
+				[5, 7],
+			]),
+		),
+		SWITCHSPLIT7: new Set(
+			bothWays([
+				[0, 7],
+				[2, 7],
+			]),
+		),
+		SWITCHSPLIT8: new Set(
+			bothWays([
+				[1, 6],
+				[1, 8],
+			]),
+		),
+	};
 
 /**
  * Whether a train can physically run from link `entry` to link `exit` within a
@@ -417,9 +555,9 @@ const GEOMETRIC_PAIRS: ReadonlySet<number> = new Set(
  *  - no U-turns (`entry === exit`);
  *  - crossovers/flyovers carry two independent paths that cross without
  *    connecting, so only the opposite link (`8 - entry`) is reachable;
- *  - switches route only along a real two-link geometry (see
- *    {@link GEOMETRIC_PAIRS}) — note this cannot separate the two tight-switch
- *    variants that share a link set, so it stays permissive there;
+ *  - switches route only along a real two-link geometry: tight-radius
+ *    and split subtypes use {@link SWITCH_PAIRS} (the art of each variant),
+ *    every other switch uses {@link GEOMETRIC_PAIRS};
  *  - `directed` track is one-way, enforced only when `respectOneWay` is set
  *    (path-finding for section selection ignores it, preferred directions do not).
  */
@@ -432,7 +570,11 @@ export function isTraversableLinkPair(
 ): boolean {
 	if (entry === exit) return false;
 	if (kind === "crossover" || kind === "flyover") return exit === 8 - entry;
-	if (kind === "switch") return GEOMETRIC_PAIRS.has(entry * 9 + exit);
+	if (kind === "switch") {
+		const explicit = SWITCH_PAIRS[subtype];
+		if (explicit) return explicit.has(entry * 9 + exit);
+		return GEOMETRIC_PAIRS.has(entry * 9 + exit);
+	}
 	if (kind === "directed" && respectOneWay) {
 		const flow = DIRECTED_FLOW[subtype];
 		return flow === undefined || (entry === flow.entry && exit === flow.exit);
