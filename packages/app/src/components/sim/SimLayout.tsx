@@ -54,18 +54,23 @@ export function SimLayout() {
 		if (!trackStatus) {
 			return { label: "Loading…", color: "bg-muted-foreground" };
 		}
-		const { total, dangling, unpairedLinked, firstIssue } = trackStatus;
+		const {
+			total,
+			dangling,
+			unpairedLinked,
+			brokenRoutes = 0,
+			firstIssue,
+		} = trackStatus;
 		const tracks = `${total} ${total === 1 ? "track" : "tracks"}`;
 
 		if (total === 0) {
 			return { label: "No tracks", color: "bg-muted-foreground" };
 		}
-		if (trackStatus.connected) {
-			return { label: `${tracks} · all connected`, color: "bg-lagoon" };
-		}
 
 		// Name each fault and where to start looking, rather than just saying
-		// something is wrong.
+		// something is wrong. Physical connectivity and broken preferred
+		// directions are listed separately — the direction tool still unlocks
+		// when every cell has a neighbour.
 		const faults: string[] = [];
 		if (dangling > 0) {
 			faults.push(`${dangling} with open ends`);
@@ -75,9 +80,18 @@ export function SimLayout() {
 				`${unpairedLinked} unpaired ${unpairedLinked === 1 ? "portal" : "portals"}`,
 			);
 		}
+		if (brokenRoutes > 0) {
+			faults.push(
+				`${brokenRoutes} broken ${brokenRoutes === 1 ? "route" : "routes"}`,
+			);
+		}
 		const where = firstIssue
 			? ` · first at (${firstIssue.gx}, ${firstIssue.gy})`
 			: "";
+
+		if (trackStatus.connected && brokenRoutes === 0) {
+			return { label: `${tracks} · all connected`, color: "bg-lagoon" };
+		}
 
 		return {
 			label: `${tracks} · ${faults.join(", ") || "incomplete"}${where}`,

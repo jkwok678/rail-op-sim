@@ -93,6 +93,8 @@ export interface TrackStatus {
 	dangling: number;
 	/** Linked tracks (portals) with no partner. */
 	unpairedLinked: number;
+	/** Preferred-direction pairs that do not continue through the map. */
+	brokenRoutes: number;
 	/** Grid location of the first offending track, for "first at (x, y)". */
 	firstIssue: { gx: number; gy: number } | null;
 }

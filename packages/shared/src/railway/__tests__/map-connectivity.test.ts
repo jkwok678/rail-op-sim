@@ -20,6 +20,7 @@ import {
 	getLinkedTrackPairs,
 	getLinkedTrackReport,
 	linkIndexForOffset,
+	revalidatePreferredDirections,
 	setPreferredDirectionsAlongPath,
 } from "../map/map-connectivity";
 
@@ -310,6 +311,7 @@ describe("getConnectivityReport", () => {
 			connected: false,
 			dangling: [],
 			unpairedLinked: [],
+			brokenRoutes: [],
 		});
 	});
 
@@ -1541,5 +1543,123 @@ describe("split-switch geometry", () => {
 		expect(trail!.applied).toBe(2);
 		expect(sw.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
 		expect(sw.addPreferredDirection(2, 7)).toBe(false);
+	});
+});
+
+// ============================================================================
+// Preferred-direction revalidation after map edits
+// ============================================================================
+
+describe("revalidatePreferredDirections", () => {
+	const straightH = (map: Map_, x: number) =>
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			x,
+			0,
+		);
+
+	it("prunes neighbours when the middle cell is deleted", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		straightH(map, 16);
+		straightH(map, 32);
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(32, 0)!;
+		setPreferredDirectionsAlongPath(map, left, right);
+		expect(left.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+
+		map.deleteElement(16, 0);
+		expect(left.getPreferredDirections()).toEqual([]);
+		expect(right.getPreferredDirections()).toEqual([]);
+	});
+
+	it("prunes a pair that exits into a cell with no reciprocal link", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
+		);
+		const left = map.getTrackAt(0, 0)!;
+		expect(left.addPreferredDirection(3, 5)).toBe(true);
+		expect(revalidatePreferredDirections(map)).toBe(1);
+		expect(left.getPreferredDirections()).toEqual([]);
+	});
+
+	it("cascades: deleting one portal approach also drops the partner mouth", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 48, 0);
+		straightH(map, 64);
+		map.connectTwoLinkedTracks(16, 0);
+		map.connectTwoLinkedTracks(48, 0);
+
+		const left = map.getTrackAt(0, 0)!;
+		const right = map.getTrackAt(64, 0)!;
+		const west = map.getTrackAt(16, 0)!;
+		const east = map.getTrackAt(48, 0)!;
+		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(4);
+
+		map.deleteElement(0, 0);
+		// Single-pass revalidation would prune only the west mouth (no neighbour)
+		// and leave east pointing into a hop that no longer continues.
+		expect(west.getPreferredDirections()).toEqual([]);
+		expect(east.getPreferredDirections()).toEqual([]);
+		expect(right.getPreferredDirections()).toEqual([]);
+	});
+
+	it("drops both portal mouths when they point into their dead-ends", () => {
+		const map = new Map_();
+		straightH(map, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKLEFT }, 48, 0);
+		straightH(map, 64);
+		map.connectTwoLinkedTracks(16, 0);
+		map.connectTwoLinkedTracks(48, 0);
+
+		const west = map.getTrackAt(16, 0)!;
+		const east = map.getTrackAt(48, 0)!;
+		// Both mouths pointing into the hop — trains arrive at both, leave from neither.
+		expect(west.addPreferredDirection(3, 5)).toBe(true);
+		expect(east.addPreferredDirection(5, 3)).toBe(true);
+
+		const report = getConnectivityReport(map);
+		expect(report.brokenRoutes.length).toBeGreaterThan(0);
+		expect(revalidatePreferredDirections(map)).toBe(2);
+		expect(west.getPreferredDirections()).toEqual([]);
+		expect(east.getPreferredDirections()).toEqual([]);
+	});
+
+	it("flags contradictory neighbours without pruning until topology changes", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightH(map, 0);
+		straightH(map, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+		const a = map.getTrackAt(0, 0)!;
+		const b = map.getTrackAt(16, 0)!;
+		a.addPreferredDirection(3, 5);
+		b.addPreferredDirection(5, 3);
+
+		const report = getConnectivityReport(map);
+		expect(report.brokenRoutes.some((i) => i.reason === "no-continuation")).toBe(
+			true,
+		);
+		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
+		expect(b.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
 	});
 });

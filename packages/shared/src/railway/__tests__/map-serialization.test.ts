@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	ExitType,
 	LinkedType,
 	ParapetType,
 	SignalType,
@@ -211,10 +212,12 @@ describe("preferred directions serialization", () => {
 			0,
 		);
 
-	it("round-trips preferred-direction pairs", () => {
+	it("round-trips preferred-direction pairs on a complete railway", () => {
 		const map = new Map_();
 		map.setImageSize(1);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -1, 0);
 		const t = addStraightH(map, 0);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 1, 0);
 		t.addPreferredDirection(3, 5);
 		t.addPreferredDirection(5, 3);
 
@@ -224,6 +227,18 @@ describe("preferred directions serialization", () => {
 			{ entry: 3, exit: 5 },
 			{ entry: 5, exit: 3 },
 		]);
+	});
+
+	it("drops pairs that point into empty space on load", () => {
+		const map = new Map_();
+		map.setImageSize(1);
+		const t = addStraightH(map, 0);
+		t.addPreferredDirection(3, 5);
+		t.addPreferredDirection(5, 3);
+
+		const restored = new Map_();
+		deserializeMap(serializeMap(map), restored);
+		expect(restored.getTrackAt(0, 0)?.getPreferredDirections()).toEqual([]);
 	});
 
 	it("omits the field when a track has no preferred directions", () => {

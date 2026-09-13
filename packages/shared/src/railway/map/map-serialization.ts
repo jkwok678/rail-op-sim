@@ -146,63 +146,69 @@ export function serializeMap(map: Map_): SerializedMap {
 export function deserializeMap(data: SerializedMap, target: Map_): void {
 	target.setImageSize(data.imageSize);
 
-	// 1. Recreate the authoritative Text list so elements can reference by index.
-	const texts = data.texts.map((s) => {
-		const t = new Text(s.x, s.y, s.readableText, { ...s.font });
-		target.addText(t);
-		return t;
+	// Rebuild under one prune pass: each addTrack would otherwise drop pairs
+	// whose neighbours have not been loaded yet.
+	target.deferPreferredDirectionRevalidation(() => {
+		// 1. Recreate the authoritative Text list so elements can reference by index.
+		const texts = data.texts.map((s) => {
+			const t = new Text(s.x, s.y, s.readableText, { ...s.font });
+			target.addText(t);
+			return t;
+		});
+
+		const attachLabel = (
+			el: Track | NamedLocation | Concourse,
+			textIndex: number | undefined,
+		): void => {
+			if (textIndex !== undefined && texts[textIndex]) {
+				el.setText(texts[textIndex]);
+			}
+		};
+
+		// 2. Tracks — data carries platforms/level-crossing/aspect; always restore the
+		//    full speed/length quad rather than leaving the constructor's defaults.
+		const linkPairs: Array<[[number, number], [number, number]]> = [];
+		for (const s of data.tracks) {
+			const track = target.addTrack(structuredClone(s.data), s.x, s.y);
+			track.setTrackMainSpeed(s.mainSpeed);
+			track.setTrackMainLength(s.mainLength);
+			track.setTrackSecondarySpeed(s.secondarySpeed);
+			track.setTrackSecondaryLength(s.secondaryLength);
+			// Restore through the adder so link-mask and traversability validation
+			// still apply — a pair an older build wrote through an impossible turn
+			// (or against a one-way track) is dropped rather than reloaded. A
+			// second pass at the end of this batch then drops pairs that do not
+			// continue through the finished topology.
+			for (const p of s.preferredDirections ?? []) {
+				track.addPreferredDirection(p.entry, p.exit);
+			}
+			attachLabel(track, s.textIndex);
+			if (s.linkedTo) linkPairs.push([[s.x, s.y], s.linkedTo]);
+		}
+
+		// 3. Re-wire linked-track pairs by coordinate (both directions serialise the
+		//    partner, so each side gets set as its own entry is processed).
+		for (const [a, b] of linkPairs) {
+			const ta = target.getTrackAt(a[0], a[1]);
+			const tb = target.getTrackAt(b[0], b[1]);
+			if (ta && tb) ta.setOtherLinkedTrack(tb);
+		}
+
+		// 4. Non-track elements.
+		for (const s of data.namedLocations) {
+			const nl = new NamedLocation(s.x, s.y);
+			target.addNamedLocation(nl);
+			attachLabel(nl, s.textIndex);
+		}
+		for (const s of data.concourses) {
+			const c = new Concourse(s.x, s.y);
+			target.addConcourse(c);
+			attachLabel(c, s.textIndex);
+		}
+		for (const s of data.parapets) {
+			target.addParapet(new Parapet(s.type, s.x, s.y));
+		}
+
+		target.makeTrackList();
 	});
-
-	const attachLabel = (
-		el: Track | NamedLocation | Concourse,
-		textIndex: number | undefined,
-	): void => {
-		if (textIndex !== undefined && texts[textIndex]) {
-			el.setText(texts[textIndex]);
-		}
-	};
-
-	// 2. Tracks — data carries platforms/level-crossing/aspect; always restore the
-	//    full speed/length quad rather than leaving the constructor's defaults.
-	const linkPairs: Array<[[number, number], [number, number]]> = [];
-	for (const s of data.tracks) {
-		const track = target.addTrack(structuredClone(s.data), s.x, s.y);
-		track.setTrackMainSpeed(s.mainSpeed);
-		track.setTrackMainLength(s.mainLength);
-		track.setTrackSecondarySpeed(s.secondarySpeed);
-		track.setTrackSecondaryLength(s.secondaryLength);
-		// Restore through the adder so link-mask and traversability validation
-		// still apply — a pair an older build wrote through an impossible turn
-		// (or against a one-way track) is dropped rather than reloaded.
-		for (const p of s.preferredDirections ?? []) {
-			track.addPreferredDirection(p.entry, p.exit);
-		}
-		attachLabel(track, s.textIndex);
-		if (s.linkedTo) linkPairs.push([[s.x, s.y], s.linkedTo]);
-	}
-
-	// 3. Re-wire linked-track pairs by coordinate (both directions serialise the
-	//    partner, so each side gets set as its own entry is processed).
-	for (const [a, b] of linkPairs) {
-		const ta = target.getTrackAt(a[0], a[1]);
-		const tb = target.getTrackAt(b[0], b[1]);
-		if (ta && tb) ta.setOtherLinkedTrack(tb);
-	}
-
-	// 4. Non-track elements.
-	for (const s of data.namedLocations) {
-		const nl = new NamedLocation(s.x, s.y);
-		target.addNamedLocation(nl);
-		attachLabel(nl, s.textIndex);
-	}
-	for (const s of data.concourses) {
-		const c = new Concourse(s.x, s.y);
-		target.addConcourse(c);
-		attachLabel(c, s.textIndex);
-	}
-	for (const s of data.parapets) {
-		target.addParapet(new Parapet(s.type, s.x, s.y));
-	}
-
-	target.makeTrackList();
 }

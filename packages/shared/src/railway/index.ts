@@ -44,17 +44,22 @@ export type {
 	LinkedTrackPair,
 	LinkedTrackReport,
 	PathOptions,
+	PreferredDirectionIssue,
+	PreferredDirectionIssueReason,
 	PreferredDirectionRemovalResult,
 	PreferredDirectionResult,
 } from "./map/map-connectivity";
 export {
 	clearPreferredDirectionsAlongPath,
+	collectPreferredDirectionIssues,
 	findPathBetween,
 	getConnectivityReport,
 	LINK_OFFSETS,
 	linkIndexForOffset,
 	portalMouthLink,
+	preferredDirectionIssue,
 	resolvePathDirections,
+	revalidatePreferredDirections,
 	setPreferredDirectionsAlongPath,
 } from "./map/map-connectivity";
 export type {

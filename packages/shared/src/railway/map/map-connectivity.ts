@@ -2,6 +2,20 @@ import type { PreferredDirection, Track } from "../track/track";
 import { getDirectedFlow, isTraversableLinkPair } from "../track/track-data";
 import type { Map_ } from "./map";
 
+/** Why a preferred-direction pair is not a valid route through the current map. */
+export type PreferredDirectionIssueReason =
+	| "not-traversable"
+	| "no-neighbor"
+	| "no-reciprocal"
+	| "no-continuation";
+
+/** One preferred-direction pair that does not continue through the map. */
+export interface PreferredDirectionIssue {
+	track: Track;
+	pair: PreferredDirection;
+	reason: PreferredDirectionIssueReason;
+}
+
 // ============================================================================
 // Connectivity helpers for Map_
 // ============================================================================
@@ -39,6 +53,13 @@ export interface ConnectivityReport {
 	dangling: DanglingLink[];
 	/** Linked tracks (portals) with no partner. */
 	unpairedLinked: Track[];
+	/**
+	 * Preferred-direction pairs that do not continue through the current
+	 * topology — pointing into empty space, into a cell that has no reciprocal
+	 * link, through a missing switch rail, or into a neighbour (or portal
+	 * partner) that does not receive the route.
+	 */
+	brokenRoutes: PreferredDirectionIssue[];
 }
 
 /**
@@ -71,6 +92,7 @@ export function getConnectivityReport(map: Map_): ConnectivityReport {
 	}
 
 	const unpairedLinked = findUnpairedLinkedTracks(map);
+	const brokenRoutes = collectPreferredDirectionIssues(map);
 
 	return {
 		total: trackList.length,
@@ -80,6 +102,7 @@ export function getConnectivityReport(map: Map_): ConnectivityReport {
 			unpairedLinked.length === 0,
 		dangling,
 		unpairedLinked,
+		brokenRoutes,
 	};
 }
 
@@ -597,7 +620,7 @@ export function resolvePathDirections(
 }
 
 // ============================================================================
-// Linked-track portals
+// Preferred-direction revalidation
 // ============================================================================
 
 /**
@@ -611,4 +634,144 @@ export function portalMouthLink(track: Track): number | null {
 		if (track.isTerminusDeadEnd(link)) return link;
 	}
 	return null;
+}
+
+/** Grid neighbour through an active link, or the portal partner through a mouth. */
+function neighborThroughLink(
+	map: Map_,
+	track: Track,
+	link: number,
+): Track | null {
+	if (track.isTerminusDeadEnd(link)) {
+		return track.data.kind === "linked" ? track.getOtherLinkedTrack() : null;
+	}
+	const step = map.getImageSize();
+	const [dx, dy] = LINK_OFFSETS[link];
+	return map.getTrackAt(
+		track.getLocationX() + dx * step,
+		track.getLocationY() + dy * step,
+	);
+}
+
+/** Entry link the neighbour must expose to receive travel leaving via `link`. */
+function expectedEntryOnNeighbor(
+	track: Track,
+	link: number,
+	neighbor: Track,
+): number | null {
+	if (track.isTerminusDeadEnd(link) && track.data.kind === "linked") {
+		return portalMouthLink(neighbor);
+	}
+	return 8 - link;
+}
+
+/**
+ * Why `pair` is not a valid route through `track` on this map, or `null`
+ * when the pair is locally legal and continues (or is allowed to stop).
+ *
+ * Incomplete routes — a neighbour with no preferred directions of its own —
+ * are not issues. A portal mouth, though, must continue on the partner:
+ * that is the only way a route crosses the hop.
+ */
+export function preferredDirectionIssue(
+	map: Map_,
+	track: Track,
+	pair: PreferredDirection,
+): PreferredDirectionIssueReason | null {
+	const usable = (link: number): boolean =>
+		track.getLinkAt(link) || track.isTerminusDeadEnd(link);
+	if (!usable(pair.entry) || !usable(pair.exit)) return "not-traversable";
+	if (
+		!isTraversableLinkPair(
+			track.data.kind,
+			track.data.subtype,
+			pair.entry,
+			pair.exit,
+			true,
+		)
+	) {
+		return "not-traversable";
+	}
+
+	for (const link of [pair.entry, pair.exit]) {
+		if (track.isTerminusDeadEnd(link)) {
+			if (track.data.kind !== "linked") continue;
+			const partner = track.getOtherLinkedTrack();
+			const mouth = partner ? portalMouthLink(partner) : null;
+			if (!partner || mouth === null) return "no-neighbor";
+			const continues = partner
+				.getPreferredDirections()
+				.some((p) =>
+					link === pair.exit ? p.entry === mouth : p.exit === mouth,
+				);
+			if (!continues) return "no-continuation";
+			continue;
+		}
+
+		const neighbor = neighborThroughLink(map, track, link);
+		if (!neighbor) return "no-neighbor";
+		const recip = expectedEntryOnNeighbor(track, link, neighbor);
+		if (recip === null || !neighbor.getLinkAt(recip)) return "no-reciprocal";
+		if (
+			neighbor.hasPreferredDirection() &&
+			!neighbor
+				.getPreferredDirections()
+				.some((p) =>
+					link === pair.exit ? p.entry === recip : p.exit === recip,
+				)
+		) {
+			return "no-continuation";
+		}
+	}
+	return null;
+}
+
+/** Every preferred-direction pair on the map that fails {@link preferredDirectionIssue}. */
+export function collectPreferredDirectionIssues(
+	map: Map_,
+): PreferredDirectionIssue[] {
+	const issues: PreferredDirectionIssue[] = [];
+	map.forEachTrack((track) => {
+		for (const pair of track.getPreferredDirections()) {
+			const reason = preferredDirectionIssue(map, track, pair);
+			if (reason) issues.push({ track, pair, reason });
+		}
+	});
+	return issues;
+}
+
+/**
+ * Drop every preferred-direction pair that is no longer valid on the current
+ * topology. Called after add/delete/relink and at the end of deserialize, so
+ * a pair pointing into empty space, into a cell that has no reciprocal link,
+ * through a missing switch rail, or into a portal with no continuation cannot
+ * survive a map edit or a save/load.
+ *
+ * Returns how many pairs were removed.
+ */
+export function revalidatePreferredDirections(map: Map_): number {
+	let pruned = 0;
+	// A portal mouth is valid only while its partner still carries the matching
+	// pair. Removing one can orphan the other, so one snapshot is not enough —
+	// repeat until a pass finds nothing left to drop.
+	for (;;) {
+		const doomed: { track: Track; pair: PreferredDirection }[] = [];
+		map.forEachTrack((track) => {
+			for (const pair of track.getPreferredDirections()) {
+				if (preferredDirectionIssue(map, track, pair) !== null) {
+					doomed.push({ track, pair });
+				}
+			}
+		});
+		if (doomed.length === 0) break;
+		let removedThisPass = 0;
+		for (const { track, pair } of doomed) {
+			if (track.removePreferredDirection(pair.entry, pair.exit)) {
+				removedThisPass++;
+			}
+		}
+		if (removedThisPass === 0) break;
+		pruned += removedThisPass;
+	}
+	return pruned;
 }

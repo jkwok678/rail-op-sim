@@ -160,13 +160,17 @@ export class PlacementController {
 		// Point the user at the first thing that is wrong: a dangling link if
 		// there is one, otherwise an unpaired portal.
 		const offender =
-			report.dangling[0]?.track ?? report.unpairedLinked[0] ?? null;
+			report.dangling[0]?.track ??
+			report.unpairedLinked[0] ??
+			report.brokenRoutes[0]?.track ??
+			null;
 
 		useEditorStore.getState().setTrackStatus({
 			total: report.total,
 			connected,
 			dangling: report.dangling.length,
 			unpairedLinked: report.unpairedLinked.length,
+			brokenRoutes: report.brokenRoutes.length,
 			firstIssue: offender
 				? { gx: offender.getLocationX(), gy: offender.getLocationY() }
 				: null,
@@ -638,6 +642,7 @@ export class PlacementController {
 					);
 				} else {
 					this.directionLayer.sync(this.map);
+					this.publishTrackStatus();
 					debugLog(
 						"placement",
 						`direction erase click → removed ${result.removed} along path length=${result.path.length}`,
@@ -674,6 +679,7 @@ export class PlacementController {
 					);
 				} else {
 					this.directionLayer.sync(this.map);
+					this.publishTrackStatus();
 					debugLog(
 						"placement",
 						`direction click → assigned ${result.applied} along path length=${result.path.length}`,
@@ -742,6 +748,7 @@ export class PlacementController {
 				);
 				this.linkHighlightLayer.sync(this.map);
 				this.trackColorLayer.sync(this.map);
+				this.directionLayer.sync(this.map);
 			} else {
 				// ── Element placement ──
 				this.handleElementPlacement(
@@ -771,6 +778,7 @@ export class PlacementController {
 			if (track?.hasPreferredDirection()) {
 				track.clearPreferredDirections();
 				this.directionLayer.sync(this.map);
+				this.publishTrackStatus();
 				debugLog(
 					"placement",
 					`right-click → clearPreferredDirections at (${cell.gx},${cell.gy})`,

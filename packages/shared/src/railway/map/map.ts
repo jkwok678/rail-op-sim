@@ -20,6 +20,7 @@ import {
 	getLinkedTrackReport as getLinkedTrackReportFn,
 	type LinkedTrackPair,
 	type LinkedTrackReport,
+	revalidatePreferredDirections,
 } from "./map-connectivity";
 import {
 	addLevelCrossing as addLevelCrossingFn,
@@ -91,6 +92,13 @@ export class Map_ {
 	// ── callbacks ────────────────────────────────────────────────────────
 	private textSelectionPrompt: TextSelectionPrompt | null;
 	private onMessage: MessageCallback | null;
+
+	/**
+	 * Nesting depth for {@link deferPreferredDirectionRevalidation}. While
+	 * non-zero, add/delete/relink skip the prune pass so a deserialize can
+	 * rebuild the whole map before pairs are judged against their neighbours.
+	 */
+	private preferredDirRevalidateDepth = 0;
 
 	constructor(options?: {
 		textSelectionPrompt?: TextSelectionPrompt;
@@ -302,7 +310,31 @@ export class Map_ {
 		this.getOrCreateKindArray(data.kind).push(track);
 		this.totalTrack++;
 		mapDebug(`addTrack — OK, totalTrack=${this.totalTrack}`);
+		this.afterTrackTopologyChange();
 		return track;
+	}
+
+	/**
+	 * Run `fn` without pruning preferred directions after each topology
+	 * change, then prune once at the end. Deserialize uses this so pairs are
+	 * judged against the finished map, not against half-loaded neighbours.
+	 */
+	deferPreferredDirectionRevalidation(fn: () => void): void {
+		this.preferredDirRevalidateDepth++;
+		try {
+			fn();
+		} finally {
+			this.preferredDirRevalidateDepth--;
+			if (this.preferredDirRevalidateDepth === 0) {
+				revalidatePreferredDirections(this);
+			}
+		}
+	}
+
+	private afterTrackTopologyChange(): void {
+		if (this.preferredDirRevalidateDepth === 0) {
+			revalidatePreferredDirections(this);
+		}
 	}
 
 	// ── Add NamedLocation ───────────────────────────────────────────────
@@ -497,6 +529,7 @@ export class Map_ {
 		}
 
 		this.unindexElement(x, y);
+		if (el instanceof Track) this.afterTrackTopologyChange();
 		return true;
 	}
 
@@ -584,11 +617,13 @@ export class Map_ {
 			this.linkedTrack2.setOtherLinkedTrack(this.linkedTrack1);
 		}
 		this.resetConnectLinkedTrack();
+		this.afterTrackTopologyChange();
 	}
 
 	private disconnectLinkedTrack(a: Track, b: Track): void {
 		a.removeOtherLinkedTrack();
 		b.removeOtherLinkedTrack();
+		this.afterTrackTopologyChange();
 	}
 
 	private resetConnectLinkedTrack(): void {
