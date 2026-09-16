@@ -1,8 +1,7 @@
-import { Container, Sprite, Texture } from "pixi.js";
-import { Map as Map_ } from "@rail-op-sim/shared";
-import type { Track } from "@rail-op-sim/shared";
-import { CELL_SIZE, gridToWorld } from "#/lib/grid";
+import type { Map as Map_, Track } from "@rail-op-sim/shared";
+import { Container, Sprite, type Texture } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
+import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 import type { TextureCache } from "#/renderer/textureCache";
 
 // ============================================================================

@@ -1,5 +1,5 @@
 import { recordField } from "./effect-journal";
-import { ParapetType } from "./enums";
+import type { ParapetType } from "./enums";
 import type { FontInfo } from "./types";
 
 // ============================================================================

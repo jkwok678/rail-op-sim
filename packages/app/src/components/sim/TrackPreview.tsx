@@ -1,17 +1,10 @@
-import { useEffect, useState } from "react";
 import { SignalAspect } from "@rail-op-sim/shared";
+import { useEffect, useState } from "react";
+import { InlineSvg } from "#/components/sim/InlineSvg";
 import { buildDomColorMap, recolorSvg } from "#/lib/svgColors";
 import { loadRawSvg, loadRawSvgByFilename, SHUNT_SVG_MAP } from "#/lib/svgMap";
 
 const DOM_COLOR_MAP = buildDomColorMap();
-
-/** Sanitize SVG markup by removing `<script>` elements via DOMParser. */
-function sanitizeSvg(markup: string): string {
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(markup, "image/svg+xml");
-	for (const el of doc.querySelectorAll("script")) el.remove();
-	return doc.documentElement.outerHTML;
-}
 
 /**
  * Renders a track subtype's actual SVG art (recoloured for the theme) as inline
@@ -41,7 +34,7 @@ export function TrackPreview({
 
 		loader
 			.then((svg) => {
-				if (active) setMarkup(sanitizeSvg(recolorSvg(svg, DOM_COLOR_MAP)));
+				if (active) setMarkup(recolorSvg(svg, DOM_COLOR_MAP));
 			})
 			.catch(() => {
 				if (active) setMarkup(null);
@@ -54,10 +47,10 @@ export function TrackPreview({
 	if (!markup) return <span className="block size-7" aria-hidden="true" />;
 
 	return (
-		<span
+		<InlineSvg
+			markup={markup}
 			className="block size-7 text-foreground [&_svg]:size-full"
 			title={aspect ? `${subtype} (shunt)` : subtype}
-			dangerouslySetInnerHTML={{ __html: markup }}
 		/>
 	);
 }

@@ -12,10 +12,10 @@ import {
 	StraightType,
 	SwitchType,
 } from "../enums";
-import { Track } from "../track/track";
-import { createTrackData } from "../track/track-factory";
-import { KIND_META, type TrackKind } from "../track/track-data";
 import { SignalAspect } from "../track/signal-aspects";
+import { Track } from "../track/track";
+import { KIND_META, type TrackKind } from "../track/track-data";
+import { createTrackData } from "../track/track-factory";
 
 /** One representative subtype per kind, used to exercise every branch. */
 const SAMPLE_SUBTYPE: Record<TrackKind, string> = {
@@ -75,7 +75,11 @@ describe("createTrackData", () => {
 			aspect: 2,
 			platform1: true,
 		});
-		expect(data).toMatchObject({ aspect: 2, platform1: true, platform2: false });
+		expect(data).toMatchObject({
+			aspect: 2,
+			platform1: true,
+			platform2: false,
+		});
 	});
 
 	it.each([
@@ -89,8 +93,8 @@ describe("createTrackData", () => {
 	});
 
 	it("throws on an unknown kind", () => {
-		expect(() =>
-			createTrackData("nope" as TrackKind, "X"),
-		).toThrow(/Unknown track kind/);
+		expect(() => createTrackData("nope" as TrackKind, "X")).toThrow(
+			/Unknown track kind/,
+		);
 	});
 });

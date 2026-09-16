@@ -22,8 +22,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsc --noEmit -p packages/shared/tsconfig.json
-      - run: pnpm exec tsc --noEmit -p packages/app/tsconfig.json
+      - run: pnpm typecheck
 
   biome:
     name: Biome

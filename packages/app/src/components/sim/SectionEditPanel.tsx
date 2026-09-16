@@ -295,10 +295,14 @@ export function SectionEditPanel() {
 			</div>
 
 			{/* Main speed */}
-			<label className="block mb-1 text-muted-foreground">
+			<label
+				htmlFor="section-main-speed"
+				className="block mb-1 text-muted-foreground"
+			>
 				Main Speed (km/h)
 			</label>
 			<Input
+				id="section-main-speed"
 				type="number"
 				min={1}
 				value={mainSpeed}
@@ -307,10 +311,14 @@ export function SectionEditPanel() {
 			/>
 
 			{/* Main length */}
-			<label className="block mb-1 text-muted-foreground">
+			<label
+				htmlFor="section-main-length"
+				className="block mb-1 text-muted-foreground"
+			>
 				Main Length — total (m)
 			</label>
 			<Input
+				id="section-main-length"
 				type="number"
 				min={1}
 				value={mainLength}
@@ -326,10 +334,14 @@ export function SectionEditPanel() {
 						Secondary Path
 					</div>
 
-					<label className="block mb-1 text-muted-foreground">
+					<label
+						htmlFor="section-secondary-speed"
+						className="block mb-1 text-muted-foreground"
+					>
 						Secondary Speed (km/h)
 					</label>
 					<Input
+						id="section-secondary-speed"
 						type="number"
 						min={1}
 						value={secondarySpeed}
@@ -337,10 +349,14 @@ export function SectionEditPanel() {
 						className="mb-2"
 					/>
 
-					<label className="block mb-1 text-muted-foreground">
+					<label
+						htmlFor="section-secondary-length"
+						className="block mb-1 text-muted-foreground"
+					>
 						Secondary Length (m)
 					</label>
 					<Input
+						id="section-secondary-length"
 						type="number"
 						min={1}
 						value={secondaryLength}
@@ -357,10 +373,14 @@ export function SectionEditPanel() {
 			{/* Speed converter */}
 			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-2">
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-kmh"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						km/h
 					</label>
 					<Input
+						id="section-conv-kmh"
 						type="number"
 						min={0}
 						value={convKmh}
@@ -369,10 +389,14 @@ export function SectionEditPanel() {
 				</div>
 				<span className="text-muted-foreground pt-3.5">=</span>
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-mph"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						mph
 					</label>
 					<Input
+						id="section-conv-mph"
 						type="number"
 						min={0}
 						value={convMph}
@@ -384,10 +408,14 @@ export function SectionEditPanel() {
 			{/* Length converter — row 1: metres ↔ chains */}
 			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-1.5">
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-m"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						metres
 					</label>
 					<Input
+						id="section-conv-m"
 						type="number"
 						min={0}
 						value={convM}
@@ -396,10 +424,14 @@ export function SectionEditPanel() {
 				</div>
 				<span className="text-muted-foreground pt-3.5">=</span>
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-ch"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						chains
 					</label>
 					<Input
+						id="section-conv-ch"
 						type="number"
 						min={0}
 						step="0.1"
@@ -411,10 +443,14 @@ export function SectionEditPanel() {
 			{/* Length converter — row 2: yards ↔ miles */}
 			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-1">
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-yd"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						yards
 					</label>
 					<Input
+						id="section-conv-yd"
 						type="number"
 						min={0}
 						step="0.1"
@@ -424,10 +460,14 @@ export function SectionEditPanel() {
 				</div>
 				<span className="text-muted-foreground pt-3.5">=</span>
 				<div>
-					<label className="block mb-0.5 text-muted-foreground text-[10px]">
+					<label
+						htmlFor="section-conv-mi"
+						className="block mb-0.5 text-muted-foreground text-[10px]"
+					>
 						miles
 					</label>
 					<Input
+						id="section-conv-mi"
 						type="number"
 						min={0}
 						step="0.01"

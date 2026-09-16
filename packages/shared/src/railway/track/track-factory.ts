@@ -11,9 +11,9 @@ import type {
 	StraightType,
 	SwitchType,
 } from "../enums";
+import { SignalAspect } from "./signal-aspects";
 import type { TrackData, TrackKind } from "./track-data";
 import { isValidSubtype, KIND_META } from "./track-data";
-import { SignalAspect } from "./signal-aspects";
 
 /** Options for constructing a new track's data. */
 export interface CreateTrackDataOptions {
@@ -37,6 +37,16 @@ export interface CreateTrackDataOptions {
  *
  * @throws If `subtype` is not a recognised value for `kind`.
  */
+export function createTrackData<K extends TrackKind>(
+	kind: K,
+	subtype: string,
+	options?: CreateTrackDataOptions,
+): Extract<TrackData, { kind: K }>;
+export function createTrackData(
+	kind: TrackKind,
+	subtype: string,
+	options?: CreateTrackDataOptions,
+): TrackData;
 export function createTrackData(
 	kind: TrackKind,
 	subtype: string,
@@ -47,7 +57,7 @@ export function createTrackData(
 	if (kind in KIND_META && !isValidSubtype(kind, subtype)) {
 		throw new Error(
 			`Invalid subtype "${subtype}" for track kind "${kind}". ` +
-			`Ensure the subtype matches the kind.`,
+				`Ensure the subtype matches the kind.`,
 		);
 	}
 
@@ -61,7 +71,7 @@ export function createTrackData(
 	switch (kind) {
 		case "straight":
 			return {
-				kind,
+				kind: "straight",
 				subtype: subtype as StraightType,
 				platform1,
 				platform2,
@@ -69,27 +79,27 @@ export function createTrackData(
 			};
 		case "directed":
 			return {
-				kind,
+				kind: "directed",
 				subtype: subtype as DirectedType,
 				platform1,
 				platform2,
 			};
 		case "curved":
-			return { kind, subtype: subtype as CurvedType };
+			return { kind: "curved", subtype: subtype as CurvedType };
 		case "linked":
-			return { kind, subtype: subtype as LinkedType };
+			return { kind: "linked", subtype: subtype as LinkedType };
 		case "exit":
-			return { kind, subtype: subtype as ExitType };
+			return { kind: "exit", subtype: subtype as ExitType };
 		case "buffer":
 			return {
-				kind,
+				kind: "buffer",
 				subtype: subtype as BufferType,
 				platform1,
 				platform2,
 			};
 		case "signal":
 			return {
-				kind,
+				kind: "signal",
 				subtype: subtype as SignalType,
 				aspect,
 				platform1,
@@ -97,22 +107,22 @@ export function createTrackData(
 			};
 		case "bridgeUnderpass":
 			return {
-				kind,
+				kind: "bridgeUnderpass",
 				subtype: subtype as BridgeUnderpassType,
 				platform1,
 				platform2,
 			};
 		case "switch":
 			return {
-				kind,
+				kind: "switch",
 				subtype: subtype as SwitchType,
 				platform1,
 				platform2,
 			};
 		case "crossover":
-			return { kind, subtype: subtype as CrossoverType };
+			return { kind: "crossover", subtype: subtype as CrossoverType };
 		case "flyover":
-			return { kind, subtype: subtype as FlyoverType };
+			return { kind: "flyover", subtype: subtype as FlyoverType };
 		default: {
 			// Exhaustiveness guard — a new kind must be handled above.
 			const _never: never = kind;
