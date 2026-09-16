@@ -6,6 +6,7 @@ import {
 import { create } from "zustand";
 import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
 import { debugLog } from "#/lib/debugLogger";
+import type { MapFileFormat } from "#/lib/mapFile";
 
 /** The active editing tool. */
 export type Tool = "select" | "add" | "text" | "link" | "section" | "direction";
@@ -135,6 +136,12 @@ export interface EditorState {
 	showGrid: boolean;
 
 	/**
+	 * Encoding used by Save (and remembered from the last successful Load so a
+	 * YAML map isn't rewritten as JSON on the next Cmd+S). JSON is the default.
+	 */
+	saveFormat: MapFileFormat;
+
+	/**
 	 * Whether the keyboard-shortcut reference overlay is open. Lives in the store
 	 * rather than in the layout's local state so the Escape cascade can see it —
 	 * it is one of the things Escape has to yield to.
@@ -190,6 +197,8 @@ export interface EditorState {
 	toggleShowTrackInfo: () => void;
 	/** Toggle the ground grid on/off. */
 	toggleShowGrid: () => void;
+	/** Choose JSON or YAML for the next Save. */
+	setSaveFormat: (format: MapFileFormat) => void;
 	/** Toggle the keyboard-shortcut reference overlay. */
 	toggleShortcuts: () => void;
 	/** Open or close the keyboard-shortcut reference overlay. */
@@ -274,6 +283,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showDirections: false,
 	showTrackInfo: false,
 	showGrid: true,
+	saveFormat: "json",
 	showShortcuts: false,
 	hoveredTrackInfo: null,
 	trackStatus: null,
@@ -366,6 +376,10 @@ export const useEditorStore = create<EditorState>((set) => ({
 			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
 		})),
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
+	setSaveFormat: (format) => {
+		debugLog("store", `setSaveFormat: ${format}`);
+		set({ saveFormat: format });
+	},
 	toggleShortcuts: () => set((s) => ({ showShortcuts: !s.showShortcuts })),
 	setShortcuts: (open) => set({ showShortcuts: open }),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),

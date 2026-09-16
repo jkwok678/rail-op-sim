@@ -2,6 +2,7 @@ import { FloppyDisk, FolderOpen } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { useShortcutDisplay } from "#/hooks/useShortcutDisplay";
 import { loadMap, saveMap } from "#/lib/mapActions";
+import { useEditorStore } from "#/store/editor-store";
 
 /**
  * Footer Save/Load buttons. The work itself lives in `lib/mapActions` so these
@@ -10,6 +11,9 @@ import { loadMap, saveMap } from "#/lib/mapActions";
 export function SaveLoadControls() {
 	const saveKey = useShortcutDisplay("save");
 	const loadKey = useShortcutDisplay("load");
+	const saveFormat = useEditorStore((s) => s.saveFormat);
+	const formatLabel = saveFormat === "yaml" ? "YAML" : "JSON";
+	const saveLabel = `Save map as ${formatLabel}`;
 
 	return (
 		<>
@@ -17,8 +21,8 @@ export function SaveLoadControls() {
 				variant="ghost"
 				size="icon-xs"
 				onClick={saveMap}
-				aria-label="Save map to file"
-				title={saveKey ? `Save map to file (${saveKey})` : "Save map to file"}
+				aria-label={saveLabel}
+				title={saveKey ? `${saveLabel} (${saveKey})` : saveLabel}
 			>
 				<FloppyDisk />
 			</Button>
@@ -26,9 +30,11 @@ export function SaveLoadControls() {
 				variant="ghost"
 				size="icon-xs"
 				onClick={loadMap}
-				aria-label="Load map from file"
+				aria-label="Load map from JSON or YAML"
 				title={
-					loadKey ? `Load map from file (${loadKey})` : "Load map from file"
+					loadKey
+						? `Load map from JSON or YAML (${loadKey})`
+						: "Load map from JSON or YAML"
 				}
 			>
 				<FolderOpen />

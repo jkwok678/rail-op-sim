@@ -16,6 +16,7 @@ const reset = () => {
 		directionHint: null,
 		directionMode: "set",
 		showShortcuts: false,
+		saveFormat: "json",
 		canUndo: false,
 		canRedo: false,
 		undoLabel: null,
@@ -159,5 +160,18 @@ describe("showShortcuts", () => {
 		useEditorStore.getState().setShortcuts(true);
 		useEditorStore.getState().setTool("add");
 		expect(useEditorStore.getState().showShortcuts).toBe(true);
+	});
+});
+
+describe("saveFormat", () => {
+	beforeEach(reset);
+
+	it("defaults to JSON", () => {
+		expect(useEditorStore.getState().saveFormat).toBe("json");
+	});
+
+	it("remembers YAML for the next save", () => {
+		useEditorStore.getState().setSaveFormat("yaml");
+		expect(useEditorStore.getState().saveFormat).toBe("yaml");
 	});
 });

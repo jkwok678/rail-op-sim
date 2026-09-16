@@ -1,11 +1,11 @@
 # Graph Report - rail-op-sim  (2026-09-16)
 
 ## Corpus Check
-- 114 files · ~112,692 words
+- 115 files · ~112,773 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1532 nodes · 3090 edges · 221 communities (111 shown, 110 thin omitted)
+- 1532 nodes · 3091 edges · 216 communities (109 shown, 107 thin omitted)
 - Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 424 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
@@ -31,10 +31,10 @@
 - textureCache.ts
 - PlacementController
 - effect-journal.test.ts
-- preferredDirectionIssue
+- .addTrack
 - SimCanvas.tsx
 - dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics
-- PlacementController.ts
+- usePixiApp.ts
 - Text
 - Technology Evaluation
 - components.json
@@ -45,8 +45,8 @@
 - compilerOptions
 - Map_ (railway map data structure)
 - railway/enums.ts
-- LinkHighlightLayer
-- track/index.ts
+- PlacementController.ts
+- TextLayer
 - ElementLayer.ts
 - NamedElement
 - ViewportController
@@ -59,7 +59,6 @@
 - rail-op-sim/packages/shared/src/railway/element.ts
 - Element
 - Transport Protocol (Engine ↔ Host)
-- packages/shared/src/railway/errors.ts
 - app/tsconfig.json
 - SimLayout.tsx
 - railway/errors.ts
@@ -74,8 +73,6 @@
 - manifest.json
 - shortcuts.ts
 - GroundLayer.ts
-- createTrackColorLayer
-- Element
 - root tsconfig.json
 - file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts
 - package.json — root monorepo config
@@ -187,11 +184,9 @@
 - button.tsx
 - 34 Milestone Implementation Plan
 - useEditorHotkeys.ts
-- TrackLayer
+- TrackLayer.ts
 - EndpointOutlines
 - map-serialization.ts
-- .serializeFieldGroups
-- SectionEditPanel
 - Toolbar.tsx
 
 ## God Nodes (most connected - your core abstractions)
@@ -221,7 +216,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (221 total, 110 thin omitted)
+## Communities (216 total, 107 thin omitted)
 
 ### Community 0 - "TextInputDialog.tsx"
 Cohesion: 0.12
@@ -264,12 +259,12 @@ Cohesion: 0.06
 Nodes (66): ALL_LABELS, ASPECT_OPTIONS, CATEGORIES, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE, SUBTYPE_VALUES (+58 more)
 
 ### Community 12 - "Map_"
-Cohesion: 0.06
-Nodes (8): record(), coordKey(), Map_, mapDebug(), deserializeMap(), buildSampleMap(), MessageCallback, TextSelectionPrompt
+Cohesion: 0.07
+Nodes (5): record(), coordKey(), Map_, MessageCallback, TextSelectionPrompt
 
 ### Community 13 - "textureCache.ts"
-Cohesion: 0.11
-Nodes (25): AspectPreview(), DOM_COLOR_MAP, sanitizeSvg(), DOM_COLOR_MAP, sanitizeSvg(), TrackPreview(), buildDomColorMap(), buildThemeColorMap() (+17 more)
+Cohesion: 0.13
+Nodes (19): AspectPreview(), DOM_COLOR_MAP, InlineSvg(), DOM_COLOR_MAP, TrackPreview(), buildDomColorMap(), escapeRegExp(), recolorSvg() (+11 more)
 
 ### Community 14 - "PlacementController"
 Cohesion: 0.13
@@ -279,21 +274,21 @@ Nodes (4): RefreshFlags, PlacementController, platformSubtypeToSide(), debugLog(
 Cohesion: 0.11
 Nodes (17): DEFAULT_HISTORY_LIMIT, EditCommand, EditHistory, HistoryState, beginRecording(), EffectEntry, endRecording(), isRecording() (+9 more)
 
-### Community 16 - "preferredDirectionIssue"
-Cohesion: 0.29
-Nodes (7): endpointOtherLink(), expectedEntryOnNeighbor(), neighborThroughLink(), portalMouthLink(), preferredDirectionIssue, trueLinks(), isTraversableLinkPair()
+### Community 16 - ".addTrack"
+Cohesion: 0.16
+Nodes (3): mapDebug(), deserializeMap(), buildSampleMap()
 
 ### Community 18 - "dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics"
 Cohesion: 0.10
 Nodes (20): dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg (+12 more)
 
-### Community 19 - "PlacementController.ts"
+### Community 19 - "usePixiApp.ts"
 Cohesion: 0.25
-Nodes (8): DEFAULT_OPTIONS, ELEMENT_LABELS, themeKey(), usePixiApp(), Subsystem, CELL_SIZE, worldToGrid(), Entry
+Nodes (8): DEFAULT_OPTIONS, themeKey(), usePixiApp(), Subsystem, buildThemeColorMap(), normalizeCssColor(), normalizedCache, rgbToHex()
 
 ### Community 20 - "Text"
-Cohesion: 0.11
-Nodes (4): createTextLayer(), removeAll(), TextLayer, Text
+Cohesion: 0.09
+Nodes (4): recordField(), Element, Text, TestElement
 
 ### Community 21 - "Technology Evaluation"
 Cohesion: 0.20
@@ -331,17 +326,17 @@ Nodes (27): Map_ (railway map data structure), map-connectivity.test.ts — test
 Cohesion: 0.14
 Nodes (14): BridgeUnderpassType (4 variants), BufferType (8 variants), CrossoverType (6 variants), CurvedType (12 variants), DirectedType (8 variants), ExitType (8 variants), FlyoverType (12 variants), LinkedType (8 variants) (+6 more)
 
-### Community 30 - "LinkHighlightLayer"
-Cohesion: 0.13
-Nodes (5): PlacementControllerOptions, Coord, DirectionLayer, LinkHighlightLayer, TrackColorLayer
+### Community 30 - "PlacementController.ts"
+Cohesion: 0.12
+Nodes (7): ELEMENT_LABELS, PlacementControllerOptions, worldToGrid(), Coord, DirectionLayer, LinkHighlightLayer, TrackColorLayer
 
-### Community 31 - "track/index.ts"
-Cohesion: 0.17
-Nodes (20): COLOR_LEGEND, DEFAULT_MAIN_LENGTH, DEFAULT_MAIN_SPEED, DEFAULT_SECONDARY_LENGTH, DEFAULT_SECONDARY_SPEED, TRACK_COLOR_ALPHA, TRACK_COLOR_BOTH, TRACK_COLOR_LENGTH (+12 more)
+### Community 31 - "TextLayer"
+Cohesion: 0.25
+Nodes (3): createTextLayer(), removeAll(), TextLayer
 
 ### Community 32 - "ElementLayer.ts"
-Cohesion: 0.12
-Nodes (7): createElementLayer(), ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, TextureCache
+Cohesion: 0.11
+Nodes (8): ColorMap, createElementLayer(), ElementLayer, makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, TextureCache
 
 ### Community 33 - "NamedElement"
 Cohesion: 0.13
@@ -352,16 +347,16 @@ Cohesion: 0.13
 Nodes (3): ZoomSliderProps, ViewportController, UsePixiAppReturn
 
 ### Community 35 - "gestureOverlay.ts"
-Cohesion: 0.10
-Nodes (29): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET (+21 more)
+Cohesion: 0.11
+Nodes (30): CELL_SIZE, gridToWorld(), CellOutlineOptions, createEndpointOutlines(), dashedLine(), GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET (+22 more)
 
 ### Community 36 - "map.ts"
-Cohesion: 0.21
+Cohesion: 0.23
 Nodes (14): MAP_DEBUG, addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform(), changeDeleteText(), collectNeighbourTexts(), deleteTextFromAllElements() (+6 more)
 
 ### Community 37 - "railway/index.ts"
-Cohesion: 0.13
-Nodes (24): checkAllTracksConnected(), clearPreferredDirectionsAlongPath(), collectPreferredDirectionIssues(), ConnectivityReport, DanglingLink, findAllLinkedTracks(), findPathBetween(), findUnpairedLinkedTracks() (+16 more)
+Cohesion: 0.06
+Nodes (62): COLOR_LEGEND, SectionEditPanel(), ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError, TrackNotConnectedError, ZeroTrackError (+54 more)
 
 ### Community 38 - "shared/package.json"
 Cohesion: 0.13
@@ -382,10 +377,6 @@ Nodes (8): TestElement, TestNamedElement, Concourse, Element, NamedElement, Name
 ### Community 43 - "Transport Protocol (Engine ↔ Host)"
 Cohesion: 0.67
 Nodes (3): Adapter Implementations, How the engine boots (host-agnostic), Transport Protocol (Engine ↔ Host)
-
-### Community 44 - "packages/shared/src/railway/errors.ts"
-Cohesion: 0.26
-Nodes (6): ElementAlreadyExistsError, ElementNotFoundError, LinkedTrackError, RailwayError, TrackNotConnectedError, ZeroTrackError
 
 ### Community 45 - "app/tsconfig.json"
 Cohesion: 0.15
@@ -479,17 +470,13 @@ Nodes (5): createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sy
 Cohesion: 0.21
 Nodes (10): Harness(), useEditorHotkeys(), resolveEscape(), loadMap(), saveMap(), assertSerializedMap(), downloadMap(), InvalidMapFileError (+2 more)
 
-### Community 215 - "TrackLayer"
-Cohesion: 0.20
-Nodes (4): createTrackLayer(), entryKey(), makeTrackSprite(), TrackLayer
+### Community 215 - "TrackLayer.ts"
+Cohesion: 0.14
+Nodes (5): createTrackColorLayer(), createTrackLayer(), Entry, entryKey(), TrackLayer
 
 ### Community 217 - "map-serialization.ts"
 Cohesion: 0.15
 Nodes (13): Concourse, Parapet, ParapetType, SERIALIZED_MAP_VERSION, SerializedMap, SerializedNamedElement, SerializedParapet, SerializedText (+5 more)
-
-### Community 222 - "SectionEditPanel"
-Cohesion: 0.67
-Nodes (5): SectionEditPanel(), formatImperialLength(), kmhToMph(), metresToImperial(), round1()
 
 ### Community 223 - "Toolbar.tsx"
 Cohesion: 0.29
@@ -498,22 +485,22 @@ Nodes (7): HISTORY_ACTIONS, TOOLS, Kbd(), KbdGroup(), Tooltip(), TooltipContent(
 ## Knowledge Gaps
 - **333 isolated node(s):** `$schema`, `enabled`, `clientKind`, `useIgnoreFile`, `ignoreUnknown` (+328 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **107 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Map_` to `ElementLayer.ts`, `NamedElement`, `Track`, `gestureOverlay.ts`, `map.ts`, `railway/index.ts`, `track-data.ts`, `effect-journal.test.ts`, `PlacementController.ts`, `Text`, `TrackLayer`, `map-serialization.ts`, `Element`, `LinkHighlightLayer`?**
+- **Why does `Map_` connect `Map_` to `ElementLayer.ts`, `NamedElement`, `Track`, `gestureOverlay.ts`, `map.ts`, `railway/index.ts`, `track-data.ts`, `effect-journal.test.ts`, `.addTrack`, `usePixiApp.ts`, `Text`, `TrackLayer.ts`, `map-serialization.ts`, `PlacementController.ts`, `TextLayer`?**
   _High betweenness centrality (0.056) - this node is a cross-community bridge._
-- **Why does `Track` connect `Track` to `ElementLayer.ts`, `NamedElement`, `map.ts`, `railway/index.ts`, `track-data.ts`, `Map_`, `preferredDirectionIssue`, `PlacementController.ts`, `map-serialization.ts`, `.serializeFieldGroups`, `track/index.ts`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
-- **Why does `PlacementController` connect `PlacementController` to `TextInputDialog.tsx`, `ElementLayer.ts`, `ViewportController`, `PlacementController.ts`, `Text`, `useEditorHotkeys.ts`, `TrackLayer`, `map-serialization.ts`, `track/index.ts`, `LinkHighlightLayer`, `Toolbar.tsx`?**
+- **Why does `Track` connect `Track` to `ElementLayer.ts`, `NamedElement`, `gestureOverlay.ts`, `map.ts`, `railway/index.ts`, `track-data.ts`, `Map_`, `.addTrack`, `Text`, `map-serialization.ts`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `PlacementController` connect `PlacementController` to `TextInputDialog.tsx`, `ElementLayer.ts`, `ViewportController`, `railway/index.ts`, `usePixiApp.ts`, `Text`, `useEditorHotkeys.ts`, `TrackLayer.ts`, `map-serialization.ts`, `TextLayer`, `PlacementController.ts`, `Toolbar.tsx`?**
   _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **What connects `$schema`, `enabled`, `clientKind` to the rest of the system?**
   _333 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `TextInputDialog.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.11875843454790823 - nodes in this community are weakly interconnected._
 - **Should `Track` be split into smaller, more focused modules?**
-  _Cohesion score 0.07419712070874862 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07922705314009662 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
