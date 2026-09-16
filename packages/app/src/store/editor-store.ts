@@ -88,15 +88,28 @@ export function isTrackKind(kind: AddKind): kind is TrackKind {
 export interface TrackStatus {
 	/** Total tracks on the map. */
 	total: number;
-	/** True when nothing dangles and every portal is paired. */
+	/**
+	 * True when every active link joins a neighbour and every portal is paired.
+	 * This is the gate for the direction tool; full operational readiness is
+	 * {@link complete}.
+	 */
 	connected: boolean;
-	/** Tracks with an active link running into an empty cell. */
+	/**
+	 * True when the railway is ready: connected, every nameable element named,
+	 * and preferred directions set on every track with none broken.
+	 */
+	complete: boolean;
+	/** Tracks with an active link that does not join a neighbour. */
 	dangling: number;
 	/** Linked tracks (portals) with no partner. */
 	unpairedLinked: number;
+	/** Nameable elements still missing a label. */
+	unnamed: number;
+	/** Tracks with no preferred-direction pair set. */
+	undirected: number;
 	/** Preferred-direction pairs that do not continue through the map. */
 	brokenRoutes: number;
-	/** Grid location of the first offending track, for "first at (x, y)". */
+	/** Grid location of the first offending element, for "first at (x, y)". */
 	firstIssue: { gx: number; gy: number } | null;
 }
 

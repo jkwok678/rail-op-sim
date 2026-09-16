@@ -191,26 +191,33 @@ export class PlacementController {
 		const connected = report.connected;
 
 		// Point the user at the first thing that is wrong: a dangling link if
-		// there is one, otherwise an unpaired portal.
+		// there is one, otherwise an unpaired portal, unnamed element, or
+		// undirected track.
 		const offender =
 			report.dangling[0]?.track ??
 			report.unpairedLinked[0] ??
+			report.unnamed[0] ??
+			report.undirected[0] ??
 			report.brokenRoutes[0]?.track ??
 			null;
 
 		useEditorStore.getState().setTrackStatus({
 			total: report.total,
 			connected,
+			complete: report.complete,
 			dangling: report.dangling.length,
 			unpairedLinked: report.unpairedLinked.length,
+			unnamed: report.unnamed.length,
+			undirected: report.undirected.length,
 			brokenRoutes: report.brokenRoutes.length,
 			firstIssue: offender
 				? { gx: offender.getLocationX(), gy: offender.getLocationY() }
 				: null,
 		});
 
-		// The direction tool requires a complete railway; if the map just became
-		// incomplete (e.g. a track deleted, or a load), drop back to the select tool.
+		// The direction tool requires physically joined track; if the map just
+		// became disconnected (e.g. a track deleted, or a load), drop back to
+		// the select tool. Names and preferred directions are not this gate.
 		if (!connected && useEditorStore.getState().tool === "direction") {
 			useEditorStore.getState().setTool("select");
 		}
@@ -746,10 +753,10 @@ export class PlacementController {
 		// of the same legs when the tool is in erase mode.
 		if (tool === "direction") {
 			const erasing = useEditorStore.getState().directionMode === "erase";
-			// Gated on a complete railway; the toolbar disables the tool otherwise,
-			// but guard here too in case the map changed mid-gesture.
+			// Gated on physically joined track; the toolbar disables the tool
+			// otherwise, but guard here too in case the map changed mid-gesture.
 			if (!useEditorStore.getState().trackStatus?.connected) {
-				debugLog("placement", "direction click ignored — railway incomplete");
+				debugLog("placement", "direction click ignored — railway not joined");
 				return;
 			}
 

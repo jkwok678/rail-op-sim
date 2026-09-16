@@ -62,6 +62,8 @@ export function SimLayout() {
 			total,
 			dangling,
 			unpairedLinked,
+			unnamed = 0,
+			undirected = 0,
 			brokenRoutes = 0,
 			firstIssue,
 		} = trackStatus;
@@ -71,10 +73,8 @@ export function SimLayout() {
 			return { label: "No tracks", color: "bg-muted-foreground" };
 		}
 
-		// Name each fault and where to start looking, rather than just saying
-		// something is wrong. Physical connectivity and broken preferred
-		// directions are listed separately — the direction tool still unlocks
-		// when every cell has a neighbour.
+		// Name each fault and where to start looking. Physical joining unlocks
+		// the direction tool; the lagoon pill is reserved for a complete railway.
 		const faults: string[] = [];
 		if (dangling > 0) {
 			faults.push(`${dangling} with open ends`);
@@ -82,6 +82,14 @@ export function SimLayout() {
 		if (unpairedLinked > 0) {
 			faults.push(
 				`${unpairedLinked} unpaired ${unpairedLinked === 1 ? "portal" : "portals"}`,
+			);
+		}
+		if (unnamed > 0) {
+			faults.push(`${unnamed} unnamed`);
+		}
+		if (undirected > 0) {
+			faults.push(
+				`${undirected} without ${undirected === 1 ? "direction" : "directions"}`,
 			);
 		}
 		if (brokenRoutes > 0) {
@@ -93,8 +101,8 @@ export function SimLayout() {
 			? ` · first at (${firstIssue.gx}, ${firstIssue.gy})`
 			: "";
 
-		if (trackStatus.connected && brokenRoutes === 0) {
-			return { label: `${tracks} · all connected`, color: "bg-lagoon" };
+		if (trackStatus.complete) {
+			return { label: `${tracks} · complete`, color: "bg-lagoon" };
 		}
 
 		return {

@@ -79,8 +79,11 @@ describe("useEditorHotkeys", () => {
 			trackStatus: {
 				total: 4,
 				connected: true,
+				complete: false,
 				dangling: 0,
 				unpairedLinked: 0,
+				unnamed: 0,
+				undirected: 4,
 				brokenRoutes: 0,
 				firstIssue: null,
 			},

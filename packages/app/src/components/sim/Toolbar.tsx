@@ -102,7 +102,7 @@ export function Toolbar() {
 	const pos = useEditorStore((s) => s.toolbarPos);
 	const setPos = useEditorStore((s) => s.setToolbarPos);
 
-	const railwayComplete = trackStatus?.connected ?? false;
+	const railwayConnected = trackStatus?.connected ?? false;
 
 	// Say which fault is blocking the direction tool, not just that one exists.
 	const incompleteReason = useMemo(() => {
@@ -119,7 +119,7 @@ export function Toolbar() {
 		if (unpairedLinked > 0) {
 			return `Set direction — ${unpairedLinked} unpaired ${unpairedLinked === 1 ? "portal" : "portals"}${where}`;
 		}
-		return "Set direction — complete the railway first";
+		return "Set direction — join the tracks first";
 	}, [trackStatus]);
 
 	// Offset between the pointer and the toolbar's top-left at drag start, so the
@@ -169,10 +169,10 @@ export function Toolbar() {
 				<DotsSixVertical size={16} weight="bold" />
 			</button>
 			{TOOLS.map(({ tool: t, label, Icon, shortcut }) => {
-				// The direction tool needs a complete railway. A disabled <button>
+				// The direction tool needs joined track. A disabled <button>
 				// swallows pointer events, so wrap it in a focusable <span> to keep
 				// the explanatory tooltip firing.
-				const disabled = t === "direction" && !railwayComplete;
+				const disabled = t === "direction" && !railwayConnected;
 				const tooltip = disabled ? incompleteReason : label;
 				const button = (
 					<Button

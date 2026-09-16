@@ -27,7 +27,7 @@ export function useEditorHotkeys(): void {
 	const tool = useEditorStore((s) => s.tool);
 	const canUndo = useEditorStore((s) => s.canUndo);
 	const canRedo = useEditorStore((s) => s.canRedo);
-	const railwayComplete = useEditorStore(
+	const railwayConnected = useEditorStore(
 		(s) => s.trackStatus?.connected ?? false,
 	);
 	const pendingText = useEditorStore((s) => s.pendingText);
@@ -110,7 +110,7 @@ export function useEditorHotkeys(): void {
 	const enabledFor = (id: ShortcutId): boolean => {
 		switch (id) {
 			case "toolDirection":
-				return !overlayOpen && railwayComplete;
+				return !overlayOpen && railwayConnected;
 			case "toggleEraseMode":
 				return !overlayOpen && tool === "direction";
 			case "undo":

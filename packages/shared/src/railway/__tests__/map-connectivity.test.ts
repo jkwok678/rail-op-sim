@@ -6,6 +6,7 @@ import {
 	DirectedType,
 	ExitType,
 	LinkedType,
+	Platform,
 	StraightType,
 	SwitchType,
 } from "../enums";
@@ -13,12 +14,14 @@ import { Map_ } from "../map";
 import {
 	checkAllTracksConnected,
 	clearPreferredDirectionsAlongPath,
+	elementNeedsName,
 	findAllLinkedTracks,
 	findPathBetween,
 	findUnpairedLinkedTracks,
 	getConnectivityReport,
 	getLinkedTrackPairs,
 	getLinkedTrackReport,
+	isRailwayComplete,
 	linkIndexForOffset,
 	revalidatePreferredDirections,
 	setPreferredDirectionsAlongPath,
@@ -309,13 +312,16 @@ describe("getConnectivityReport", () => {
 		expect(report).toMatchObject({
 			total: 0,
 			connected: false,
+			complete: false,
 			dangling: [],
 			unpairedLinked: [],
+			unnamed: [],
+			undirected: [],
 			brokenRoutes: [],
 		});
 	});
 
-	it("a complete railway reports connected with nothing dangling", () => {
+	it("a joined railway is connected but not complete until directed", () => {
 		const map = new Map_();
 		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
 		straightAt(map, 0);
@@ -324,8 +330,20 @@ describe("getConnectivityReport", () => {
 
 		const report = getConnectivityReport(map);
 		expect(report.connected).toBe(true);
+		expect(report.complete).toBe(false);
 		expect(report.total).toBe(4);
 		expect(report.dangling).toEqual([]);
+		expect(report.undirected).toHaveLength(4);
+
+		setPreferredDirectionsAlongPath(
+			map,
+			map.getTrackAt(-16, 0)!,
+			map.getTrackAt(32, 0)!,
+		);
+		const directed = getConnectivityReport(map);
+		expect(directed.connected).toBe(true);
+		expect(directed.complete).toBe(true);
+		expect(directed.undirected).toEqual([]);
 	});
 
 	it("names every track with an open end, not just the first", () => {
@@ -355,6 +373,147 @@ describe("getConnectivityReport", () => {
 		expect(report.connected).toBe(false);
 		expect(report.unpairedLinked).toHaveLength(1);
 		expect(report.unpairedLinked[0].getLocationX()).toBe(96);
+	});
+
+	it("does not treat occupancy as a join — H next to V is incomplete", () => {
+		const map = new Map_();
+		// STRAIGHTH links left/right; STRAIGHTV links up/down. Adjacent cells,
+		// but the H's right link has no matching left link on the V.
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightAt(map, 0);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTV,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
+		);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITUP }, 16, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITDOWN }, 16, -16);
+
+		const report = getConnectivityReport(map);
+		expect(report.connected).toBe(false);
+		expect(report.dangling.map((d) => d.track.getLocationX())).toContain(0);
+		expect(
+			report.dangling.find((d) => d.track.getLocationX() === 0)?.links,
+		).toEqual([5]);
+	});
+});
+
+// ============================================================================
+// isRailwayComplete
+// ============================================================================
+
+describe("isRailwayComplete", () => {
+	const FONT = { family: "Arial", pointSize: 12 };
+
+	const joinedLine = (map: Map_): void => {
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			16,
+			0,
+		);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+	};
+
+	const directLine = (map: Map_): void => {
+		setPreferredDirectionsAlongPath(
+			map,
+			map.getTrackAt(-16, 0)!,
+			map.getTrackAt(32, 0)!,
+		);
+	};
+
+	it("empty map is not complete and does not message", () => {
+		const onMessage = vi.fn();
+		const map = new Map_({ onMessage });
+		expect(isRailwayComplete(map)).toBe(false);
+		expect(map.isRailwayComplete()).toBe(false);
+		expect(onMessage).not.toHaveBeenCalled();
+	});
+
+	it("joined track is not complete until preferred directions are set", () => {
+		const map = new Map_();
+		joinedLine(map);
+		expect(getConnectivityReport(map).connected).toBe(true);
+		expect(isRailwayComplete(map)).toBe(false);
+
+		directLine(map);
+		expect(isRailwayComplete(map)).toBe(true);
+		expect(map.isRailwayComplete()).toBe(true);
+	});
+
+	it("an open end is not complete", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+		expect(isRailwayComplete(map)).toBe(false);
+	});
+
+	it("an unnamed location keeps the railway incomplete", () => {
+		const map = new Map_();
+		joinedLine(map);
+		directLine(map);
+		map.createAddNamedLocation(0, 32);
+		expect(getConnectivityReport(map).connected).toBe(true);
+		expect(isRailwayComplete(map)).toBe(false);
+		expect(getConnectivityReport(map).unnamed).toHaveLength(1);
+
+		map
+			.getNamedLocationAt(0, 32)!
+			.setText(map.createAddText(0, 32, "Depot", FONT));
+		expect(isRailwayComplete(map)).toBe(true);
+	});
+
+	it("an unnamed platform keeps the railway incomplete", () => {
+		const map = new Map_();
+		joinedLine(map);
+		directLine(map);
+		map.addPlatform(Platform.UP, 0, 0);
+		expect(elementNeedsName(map.getTrackAt(0, 0)!)).toBe(true);
+		expect(isRailwayComplete(map)).toBe(false);
+
+		map.getTrackAt(0, 0)!.setText(map.createAddText(0, 0, "Platform 1", FONT));
+		expect(isRailwayComplete(map)).toBe(true);
+	});
+
+	it("an unpaired portal is not complete", () => {
+		const map = new Map_();
+		joinedLine(map);
+		directLine(map);
+		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 96, 96);
+		expect(isRailwayComplete(map)).toBe(false);
 	});
 });
 

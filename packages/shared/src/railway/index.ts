@@ -57,10 +57,13 @@ export type {
 	PreferredDirectionResult,
 } from "./map/map-connectivity";
 export {
+	checkAllTracksConnected,
 	clearPreferredDirectionsAlongPath,
 	collectPreferredDirectionIssues,
+	elementNeedsName,
 	findPathBetween,
 	getConnectivityReport,
+	isRailwayComplete,
 	LINK_OFFSETS,
 	linkIndexForOffset,
 	portalMouthLink,

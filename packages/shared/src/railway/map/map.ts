@@ -19,6 +19,7 @@ import {
 	findUnpairedLinkedTracks as findUnpairedLinkedTracksFn,
 	getLinkedTrackPairs as getLinkedTrackPairsFn,
 	getLinkedTrackReport as getLinkedTrackReportFn,
+	isRailwayComplete as isRailwayCompleteFn,
 	type LinkedTrackPair,
 	type LinkedTrackReport,
 	revalidatePreferredDirections,
@@ -826,6 +827,10 @@ export class Map_ {
 
 	checkAllTracksConnected(): boolean {
 		return checkAllTracksConnectedFn(this);
+	}
+
+	isRailwayComplete(): boolean {
+		return isRailwayCompleteFn(this);
 	}
 
 	findAllLinkedTracks(): Track[] {

@@ -1,4 +1,5 @@
-import type { PreferredDirection, Track } from "../track/track";
+import { Concourse, type NamedElement, NamedLocation } from "../element";
+import { type PreferredDirection, Track } from "../track/track";
 import { getDirectedFlow, isTraversableLinkPair } from "../track/track-data";
 import type { Map_ } from "./map";
 
@@ -36,23 +37,52 @@ export const LINK_OFFSETS: readonly [number, number][] = [
 	[1, -1], // 8: bottom-right
 ];
 
-/** A track with at least one active link pointing at an empty cell. */
+/** A track with at least one active link that does not join a neighbour. */
 export interface DanglingLink {
 	track: Track;
-	/** Link indices (0-8) whose neighbouring cell is empty. */
+	/**
+	 * Link indices (0–8) whose neighbouring cell is empty, or whose neighbour
+	 * does not expose the reciprocal link (`8 - link`). Occupancy alone is not
+	 * a join — an H straight beside a V straight sits next door without
+	 * connecting.
+	 */
 	links: number[];
 }
 
-/** A full account of why a map is (or is not) a complete railway. */
+/**
+ * A full account of why a map is (or is not) a complete railway.
+ *
+ * {@link connected} is the physical gate (joined tracks, paired portals) that
+ * unlocks the direction tool. {@link complete} is the operational railway:
+ * connected, every nameable element named, every track directed, no broken
+ * routes.
+ */
 export interface ConnectivityReport {
 	/** Total tracks on the map. */
 	total: number;
-	/** True when nothing is dangling and every linked track is paired. */
+	/**
+	 * True when every active link joins a neighbour that links back and every
+	 * portal is paired. Empty maps are not connected. Naming and preferred
+	 * directions are not part of this flag.
+	 */
 	connected: boolean;
-	/** Tracks with an active link running into an empty cell, in map order. */
+	/**
+	 * True when the railway is ready: {@link connected}, nothing unnamed,
+	 * every track has preferred directions, and none of those routes are
+	 * broken.
+	 */
+	complete: boolean;
+	/** Tracks with an active link that does not join a neighbour, in map order. */
 	dangling: DanglingLink[];
 	/** Linked tracks (portals) with no partner. */
 	unpairedLinked: Track[];
+	/**
+	 * Nameable elements still missing a label: named locations, concourses,
+	 * platforms, and bridges/underpasses.
+	 */
+	unnamed: NamedElement[];
+	/** Tracks with no preferred-direction pair set. */
+	undirected: Track[];
 	/**
 	 * Preferred-direction pairs that do not continue through the current
 	 * topology — pointing into empty space, into a cell that has no reciprocal
@@ -63,8 +93,9 @@ export interface ConnectivityReport {
 }
 
 /**
- * Describe the connectivity of the whole map: every dangling link and every
- * unpaired portal, not just whether a problem exists.
+ * Describe the connectivity of the whole map: every dangling link, unpaired
+ * portal, unnamed element, and undirected track, not just whether a problem
+ * exists.
  *
  * Unlike {@link checkAllTracksConnected} this does not short-circuit, so the
  * counts are complete and the UI can point the user at the first offender.
@@ -83,8 +114,7 @@ export function getConnectivityReport(map: Map_): ConnectivityReport {
 		for (let link = 0; link <= 8; link++) {
 			if (link === 4) continue; // unused slot
 			if (!track.getLinkAt(link)) continue;
-			const [dx, dy] = LINK_OFFSETS[link];
-			if (map.getTrackAt(cx + dx * grid, cy + dy * grid) === null) {
+			if (!isActiveLinkJoined(map, link, grid, cx, cy)) {
 				links.push(link);
 			}
 		}
@@ -92,25 +122,81 @@ export function getConnectivityReport(map: Map_): ConnectivityReport {
 	}
 
 	const unpairedLinked = findUnpairedLinkedTracks(map);
+	const unnamed = collectUnnamedElements(map);
+	const undirected = collectUndirectedTracks(map);
 	const brokenRoutes = collectPreferredDirectionIssues(map);
+	const connected =
+		trackList.length > 0 &&
+		dangling.length === 0 &&
+		unpairedLinked.length === 0;
 
 	return {
 		total: trackList.length,
-		connected:
-			trackList.length > 0 &&
-			dangling.length === 0 &&
-			unpairedLinked.length === 0,
+		connected,
+		complete:
+			connected &&
+			unnamed.length === 0 &&
+			undirected.length === 0 &&
+			brokenRoutes.length === 0,
 		dangling,
 		unpairedLinked,
+		unnamed,
+		undirected,
 		brokenRoutes,
 	};
+}
+
+/**
+ * True when the railway is ready to operate: tracks joined, portals paired,
+ * every nameable element named, and preferred directions set on every track
+ * with none broken.
+ *
+ * Physical joining alone is {@link ConnectivityReport.connected} (and
+ * {@link checkAllTracksConnected}); this is the stricter operational check.
+ */
+export function isRailwayComplete(map: Map_): boolean {
+	return getConnectivityReport(map).complete;
+}
+
+/** Named locations, concourses, platforms, and bridges/underpasses need a label. */
+export function elementNeedsName(el: NamedElement): boolean {
+	if (el instanceof NamedLocation || el instanceof Concourse) return true;
+	if (el instanceof Track) {
+		return el.data.kind === "bridgeUnderpass" || el.hasPlatform();
+	}
+	return false;
+}
+
+function collectUnnamedElements(map: Map_): NamedElement[] {
+	const unnamed: NamedElement[] = [];
+	for (const el of map.getNamedLocationList()) {
+		if (!el.getNamed()) unnamed.push(el);
+	}
+	for (const el of map.getConcourseList()) {
+		if (!el.getNamed()) unnamed.push(el);
+	}
+	map.forEachTrack((track) => {
+		if (elementNeedsName(track) && !track.getNamed()) unnamed.push(track);
+	});
+	return unnamed;
+}
+
+function collectUndirectedTracks(map: Map_): Track[] {
+	const undirected: Track[] = [];
+	map.forEachTrack((track) => {
+		if (!track.hasPreferredDirection()) undirected.push(track);
+	});
+	return undirected;
 }
 
 /**
  * Check that all tracks on the map are properly connected.
  *
  * A thin wrapper over {@link getConnectivityReport} — use that instead when the
- * caller wants to tell the user *what* is wrong.
+ * caller wants to tell the user *what* is wrong, {@link isRailwayComplete}
+ * when the railway must also be named and directed, or
+ * {@link ConnectivityReport.connected} when a boolean with no message is enough
+ * for physical joining alone.
  */
 export function checkAllTracksConnected(map: Map_): boolean {
 	const report = getConnectivityReport(map);
@@ -121,6 +207,23 @@ export function checkAllTracksConnected(map: Map_): boolean {
 	}
 
 	return report.connected;
+}
+
+/**
+ * Whether the active `link` at `(cx, cy)` joins a neighbour that exposes the
+ * reciprocal edge. Empty cells and occupancy-only neighbours (H next to V)
+ * both fail — same test railway-dot-exe uses when filling `ConnLinkPos`.
+ */
+function isActiveLinkJoined(
+	map: Map_,
+	link: number,
+	step: number,
+	cx: number,
+	cy: number,
+): boolean {
+	const [dx, dy] = LINK_OFFSETS[link];
+	const neighbor = map.getTrackAt(cx + dx * step, cy + dy * step);
+	return neighbor?.getLinkAt(8 - link) === true;
 }
 
 // ============================================================================
@@ -220,8 +323,8 @@ interface PathNode {
  * crossover/flyover, nor take an impossible turn across a switch. A step is
  * also only taken when the neighbour links back: occupancy alone is not a
  * connection (an H straight sits beside a V straight without joining it), and
- * {@link checkAllTracksConnected} only checks that neighbouring cells are
- * occupied, so the check has to happen here.
+ * {@link isRailwayComplete} requires the same reciprocal join, so the check
+ * has to happen here as well as in the completeness report.
  *
  * With `respectOneWay`, a `directed` track is entered only by its arrow's entry
  * edge and left only by its exit edge — including when it is the start track
