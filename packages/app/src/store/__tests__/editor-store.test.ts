@@ -15,6 +15,10 @@ const reset = () => {
 		directionStart: null,
 		directionHint: null,
 		directionMode: "set",
+		canUndo: false,
+		canRedo: false,
+		undoLabel: null,
+		redoLabel: null,
 	});
 };
 
@@ -98,5 +102,31 @@ describe("setTool", () => {
 		s.setDirectionHint("Click past the switch to choose a branch");
 		useEditorStore.getState().setDirectionStart(null);
 		expect(useEditorStore.getState().directionHint).toBeNull();
+	});
+});
+
+describe("setHistoryState", () => {
+	beforeEach(reset);
+
+	it("defaults to both buttons disabled and unlabelled", () => {
+		const s = useEditorStore.getState();
+		expect(s.canUndo).toBe(false);
+		expect(s.canRedo).toBe(false);
+		expect(s.undoLabel).toBeNull();
+		expect(s.redoLabel).toBeNull();
+	});
+
+	it("mirrors the whole summary the controller pushes", () => {
+		useEditorStore.getState().setHistoryState({
+			canUndo: true,
+			canRedo: true,
+			undoLabel: "Add platform",
+			redoLabel: "Delete element",
+		});
+		const s = useEditorStore.getState();
+		expect(s.canUndo).toBe(true);
+		expect(s.canRedo).toBe(true);
+		expect(s.undoLabel).toBe("Add platform");
+		expect(s.redoLabel).toBe("Delete element");
 	});
 });

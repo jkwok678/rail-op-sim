@@ -1,6 +1,7 @@
 import { Moon, Sun } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "#/components/ui/button";
+import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
 import { useTheme } from "#/hooks/useTheme";
 import { useEditorStore } from "#/store/editor-store";
 import { AddPalette } from "./AddPalette";
@@ -18,6 +19,7 @@ import { TrackInfoTooltip } from "./TrackInfoTooltip";
  */
 export function SimLayout() {
 	const { theme, toggle } = useTheme();
+	useEditorHotkeys();
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const trackStatus = useEditorStore((s) => s.trackStatus);

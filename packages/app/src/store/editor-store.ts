@@ -149,6 +149,18 @@ export interface EditorState {
 	 */
 	trackStatus: TrackStatus | null;
 
+	/**
+	 * Mirror of the placement controller's undo stack, pushed as plain data after
+	 * every edit — same arrangement as {@link trackStatus}: the controller owns
+	 * the document, the store carries only what the UI has to render.
+	 */
+	canUndo: boolean;
+	canRedo: boolean;
+	/** Name of the edit the undo button would reverse (null when disabled). */
+	undoLabel: string | null;
+	/** Name of the edit the redo button would re-apply (null when disabled). */
+	redoLabel: string | null;
+
 	/** Switch the active tool. Leaving "add" clears the palette selection. */
 	setTool: (tool: Tool) => void;
 	/** Choose a category (clears any subtype). Pass null to go back to categories. */
@@ -175,6 +187,13 @@ export interface EditorState {
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
 	setTrackStatus: (status: TrackStatus | null) => void;
+	/** Push a fresh undo/redo summary for the toolbar to read. */
+	setHistoryState: (state: {
+		canUndo: boolean;
+		canRedo: boolean;
+		undoLabel: string | null;
+		redoLabel: string | null;
+	}) => void;
 
 	/** Current zoom level. */
 	zoom: number;
@@ -246,6 +265,10 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showGrid: true,
 	hoveredTrackInfo: null,
 	trackStatus: null,
+	canUndo: false,
+	canRedo: false,
+	undoLabel: null,
+	redoLabel: null,
 	zoom: DEFAULT_ZOOM,
 	toolbarPos: { x: 16, y: 16 },
 	sectionStart: null,
@@ -333,6 +356,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
+	setHistoryState: (state) => set(state),
 	setZoom: (z) => set({ zoom: z }),
 	setToolbarPos: (pos) => set({ toolbarPos: pos }),
 

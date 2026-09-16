@@ -1,3 +1,4 @@
+import { record, recordField } from "../effect-journal";
 import { NamedElement, type NamedLocation } from "../element";
 import {
 	DEFAULT_MAIN_LENGTH,
@@ -118,32 +119,44 @@ export class Track extends NamedElement {
 	}
 
 	setTrackMainSpeed(v: number): void {
+		recordField("mainSpeed", this.trackMainSpeed, v, (x) => {
+			this.trackMainSpeed = x;
+		});
 		this.trackMainSpeed = v;
 	}
 
 	setTrackMainLength(v: number): void {
+		recordField("mainLength", this.trackMainLength, v, (x) => {
+			this.trackMainLength = x;
+		});
 		this.trackMainLength = v;
 	}
 
 	setTrackSecondarySpeed(v: number): void {
 		if (hasSecondaryPath(this.data.kind)) {
+			recordField("secondarySpeed", this.trackSecondarySpeed, v, (x) => {
+				this.trackSecondarySpeed = x;
+			});
 			this.trackSecondarySpeed = v;
 		}
 	}
 
 	setTrackSecondaryLength(v: number): void {
 		if (hasSecondaryPath(this.data.kind)) {
+			recordField("secondaryLength", this.trackSecondaryLength, v, (x) => {
+				this.trackSecondaryLength = x;
+			});
 			this.trackSecondaryLength = v;
 		}
 	}
 
 	/** Reset speed/length to defaults (200/100). Secondary only reset when applicable. */
 	restoreDefaults(): void {
-		this.trackMainSpeed = DEFAULT_MAIN_SPEED;
-		this.trackMainLength = DEFAULT_MAIN_LENGTH;
+		this.setTrackMainSpeed(DEFAULT_MAIN_SPEED);
+		this.setTrackMainLength(DEFAULT_MAIN_LENGTH);
 		if (hasSecondaryPath(this.data.kind)) {
-			this.trackSecondarySpeed = DEFAULT_SECONDARY_SPEED;
-			this.trackSecondaryLength = DEFAULT_SECONDARY_LENGTH;
+			this.setTrackSecondarySpeed(DEFAULT_SECONDARY_SPEED);
+			this.setTrackSecondaryLength(DEFAULT_SECONDARY_LENGTH);
 		}
 	}
 
@@ -216,6 +229,18 @@ export class Track extends NamedElement {
 			return false;
 		}
 		this.preferredDirections.push({ entry, exit });
+		record(
+			"addPreferredDirection",
+			() => {
+				const i = this.preferredDirections.findIndex(
+					(p) => p.entry === entry && p.exit === exit,
+				);
+				if (i !== -1) this.preferredDirections.splice(i, 1);
+			},
+			() => {
+				this.preferredDirections.push({ entry, exit });
+			},
+		);
 		return true;
 	}
 
@@ -229,12 +254,37 @@ export class Track extends NamedElement {
 			(p) => p.entry === entry && p.exit === exit,
 		);
 		if (i === -1) return false;
-		this.preferredDirections.splice(i, 1);
+		const [removed] = this.preferredDirections.splice(i, 1);
+		// Splice the pair back at the index it came from rather than going through
+		// addPreferredDirection: that re-validates against the current topology,
+		// and during an undo the neighbour this pair depends on may not have been
+		// restored yet. The state being restored was valid when it was recorded.
+		record(
+			"removePreferredDirection",
+			() => {
+				this.preferredDirections.splice(i, 0, removed);
+			},
+			() => {
+				const j = this.preferredDirections.findIndex(
+					(p) => p.entry === entry && p.exit === exit,
+				);
+				if (j !== -1) this.preferredDirections.splice(j, 1);
+			},
+		);
 		return true;
 	}
 
+	/**
+	 * Drop every preferred-direction pair on this track.
+	 *
+	 * Goes through removePreferredDirection one pair at a time rather than
+	 * replacing the array, so each removal is journalled and the whole clear can
+	 * be undone. Iterates a copy because the loop mutates the array it reads.
+	 */
 	clearPreferredDirections(): void {
-		this.preferredDirections = [];
+		for (const pair of [...this.preferredDirections]) {
+			this.removePreferredDirection(pair.entry, pair.exit);
+		}
 	}
 
 	hasPreferredDirection(): boolean {
@@ -290,6 +340,9 @@ export class Track extends NamedElement {
 	}
 
 	setLinkedNamedLocation(nl: NamedLocation | null): void {
+		recordField("linkedNamedLocation", this.linkedNamedLocation, nl, (x) => {
+			this.linkedNamedLocation = x;
+		});
 		this.linkedNamedLocation = nl;
 	}
 
@@ -332,7 +385,11 @@ export class Track extends NamedElement {
 
 	setPlatform1(val: boolean): void {
 		const pd = this.platformData();
-		if (pd) pd.platform1 = val;
+		if (!pd) return;
+		recordField("platform1", pd.platform1, val, (v) => {
+			pd.platform1 = v;
+		});
+		pd.platform1 = val;
 	}
 
 	getPlatform2(): boolean {
@@ -341,7 +398,11 @@ export class Track extends NamedElement {
 
 	setPlatform2(val: boolean): void {
 		const pd = this.platformData();
-		if (pd) pd.platform2 = val;
+		if (!pd) return;
+		recordField("platform2", pd.platform2, val, (v) => {
+			pd.platform2 = v;
+		});
+		pd.platform2 = val;
 	}
 
 	platformsToString(): string {
@@ -358,15 +419,20 @@ export class Track extends NamedElement {
 	}
 
 	addLevelCrossing(): void {
-		if (this.data.kind === "straight") {
-			this.data.levelCrossing = true;
-		}
+		this.setLevelCrossing(true);
 	}
 
 	removeLevelCrossing(): void {
-		if (this.data.kind === "straight") {
-			this.data.levelCrossing = false;
-		}
+		this.setLevelCrossing(false);
+	}
+
+	private setLevelCrossing(val: boolean): void {
+		const d = this.data;
+		if (d.kind !== "straight") return;
+		recordField("levelCrossing", d.levelCrossing, val, (v) => {
+			d.levelCrossing = v;
+		});
+		d.levelCrossing = val;
 	}
 
 	levelCrossingToString(): string {
@@ -394,11 +460,14 @@ export class Track extends NamedElement {
 	}
 
 	setOtherLinkedTrack(t: Track | null): void {
+		recordField("otherLinkedTrack", this.otherLinkedTrack, t, (x) => {
+			this.otherLinkedTrack = x;
+		});
 		this.otherLinkedTrack = t;
 	}
 
 	removeOtherLinkedTrack(): void {
-		this.otherLinkedTrack = null;
+		this.setOtherLinkedTrack(null);
 	}
 
 	// ── Subtype code ────────────────────────────────────────────────────

@@ -26,18 +26,18 @@ export function addPlatform(
 			if (t.hasLevelCrossing() || t.hasLinkedNamedLocation()) break;
 			if (d.subtype === "STRAIGHTH") {
 				if (side === Platform.UP) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.DOWN) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			} else if (d.subtype === "STRAIGHTV") {
 				if (side === Platform.LEFT) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.RIGHT) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			}
@@ -47,10 +47,10 @@ export function addPlatform(
 			if (t.hasLinkedNamedLocation()) break;
 			if (d.subtype === "DIRECTEDUP" || d.subtype === "DIRECTEDDOWN") {
 				if (side === Platform.LEFT) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.RIGHT) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			} else if (
@@ -58,10 +58,10 @@ export function addPlatform(
 				d.subtype === "DIRECTEDRIGHT"
 			) {
 				if (side === Platform.UP) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.DOWN) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			}
@@ -71,18 +71,18 @@ export function addPlatform(
 			if (t.hasLinkedNamedLocation()) break;
 			if (d.subtype === "BUFFERUP" || d.subtype === "BUFFERDOWN") {
 				if (side === Platform.LEFT) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.RIGHT) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			} else if (d.subtype === "BUFFERLEFT" || d.subtype === "BUFFERRIGHT") {
 				if (side === Platform.UP) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.DOWN) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			}
@@ -92,18 +92,18 @@ export function addPlatform(
 			if (t.hasLinkedNamedLocation()) break;
 			if (d.subtype === "SIGNALUP" || d.subtype === "SIGNALDOWN") {
 				if (side === Platform.LEFT) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.RIGHT) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			} else if (d.subtype === "SIGNALLEFT" || d.subtype === "SIGNALRIGHT") {
 				if (side === Platform.UP) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.DOWN) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			}
@@ -112,18 +112,18 @@ export function addPlatform(
 		case "bridgeUnderpass": {
 			if (d.subtype === "BRIDGE2" || d.subtype === "UNDERPASS2") {
 				if (side === Platform.LEFT) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.RIGHT) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			} else if (d.subtype === "BRIDGE1" || d.subtype === "UNDERPASS1") {
 				if (side === Platform.UP) {
-					d.platform1 = true;
+					t.setPlatform1(true);
 					added = true;
 				} else if (side === Platform.DOWN) {
-					d.platform2 = true;
+					t.setPlatform2(true);
 					added = true;
 				}
 			}
@@ -136,7 +136,7 @@ export function addPlatform(
 				case "SWITCH1":
 				case "SWITCH2":
 					if (side === Platform.DOWN) {
-						d.platform2 = true;
+						t.setPlatform2(true);
 						added = true;
 					}
 					break;
@@ -145,7 +145,7 @@ export function addPlatform(
 				case "SWITCH3":
 				case "SWITCH4":
 					if (side === Platform.UP) {
-						d.platform1 = true;
+						t.setPlatform1(true);
 						added = true;
 					}
 					break;
@@ -154,7 +154,7 @@ export function addPlatform(
 				case "SWITCH5":
 				case "SWITCH7":
 					if (side === Platform.RIGHT) {
-						d.platform2 = true;
+						t.setPlatform2(true);
 						added = true;
 					}
 					break;
@@ -163,7 +163,7 @@ export function addPlatform(
 				case "SWITCH6":
 				case "SWITCH8":
 					if (side === Platform.LEFT) {
-						d.platform1 = true;
+						t.setPlatform1(true);
 						added = true;
 					}
 					break;

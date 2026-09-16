@@ -1,8 +1,10 @@
 import {
+	beginRecording,
 	clearPreferredDirectionsAlongPath,
 	createTrackData,
 	deserializeMap,
 	ElementAlreadyExistsError,
+	endRecording,
 	type FontInfo,
 	findPathBetween,
 	getConnectivityReport,
@@ -10,17 +12,20 @@ import {
 	Map as Map_,
 	type ParapetType,
 	Platform,
+	redoEntries,
 	type SerializedMap,
 	serializeMap,
 	setPreferredDirectionsAlongPath,
 	subtypeToCode,
 	type Text,
+	undoEntries,
 } from "@rail-op-sim/shared";
 import {
 	type Application,
 	Container,
 	type Sprite as SpriteType,
 } from "pixi.js";
+import { EditHistory, type RefreshFlags } from "#/engine/EditHistory";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
@@ -72,6 +77,15 @@ function platformSubtypeToSide(subtype: string): Platform | null {
 	}
 }
 
+/** Undo labels for the non-track elements the Add palette can place. */
+const ELEMENT_LABELS: Record<ElementKind, string> = {
+	namedLocation: "Add named location",
+	concourse: "Add concourse",
+	parapet: "Add parapet",
+	platform: "Add platform",
+	levelCrossing: "Add level crossing",
+};
+
 /**
  * Owns all canvas placement interaction: click-to-add, click-to-delete, grid
  * snapping, and the cursor ghost preview. Reads tool/selection from the editor
@@ -85,6 +99,8 @@ export class PlacementController {
 
 	/** The authoritative layout. Owned here; React doesn't read it in this scope. */
 	readonly map = new Map_();
+	/** Undo/redo over the document, as recorded journal deltas. */
+	private readonly history = new EditHistory();
 	/** Container holding the ghost sprite; the host adds this to the world. */
 	readonly ghost = new Container();
 
@@ -156,6 +172,7 @@ export class PlacementController {
 		PlacementController.instance = this;
 		// Publish the initial (empty) status so the UI leaves its "loading" state.
 		this.publishTrackStatus();
+		this.publishHistoryState();
 	}
 
 	/**
@@ -192,6 +209,87 @@ export class PlacementController {
 		if (!connected && useEditorStore.getState().tool === "direction") {
 			useEditorStore.getState().setTool("select");
 		}
+	}
+
+	/** Push the undo/redo summary to the store for the toolbar to render. */
+	private publishHistoryState(): void {
+		useEditorStore.getState().setHistoryState(this.history.getState());
+	}
+
+	/**
+	 * Run `fn` as one undoable step.
+	 *
+	 * Records the primitive mutations it causes and pushes a command only if it
+	 * actually changed something. That single rule is what keeps the silently
+	 * refused edits off the stack — a platform on a side the track cannot take,
+	 * the first click of a portal pairing, a speed re-applied unchanged — without
+	 * every call site having to test for its own particular kind of no-op.
+	 *
+	 * The window closes in a `finally` because addTrack throws on a real
+	 * conflict, and a window left open would swallow the next edit.
+	 */
+	private commit<T>(label: string, refresh: RefreshFlags, fn: () => T): T {
+		beginRecording();
+		try {
+			return fn();
+		} finally {
+			const entries = endRecording();
+			if (entries.length > 0) {
+				this.history.push({ label, entries, refresh });
+				this.publishHistoryState();
+			}
+		}
+	}
+
+	/** Re-sync the layers a command touched, after an undo or a redo. */
+	private applyRefresh(refresh: RefreshFlags): void {
+		if (refresh.track) this.trackLayer.sync(this.map);
+		if (refresh.element) this.elementLayer.sync(this.map);
+		if (refresh.text) this.textLayer.sync(this.map);
+		if (refresh.linkHighlight) {
+			this.linkHighlightLayer.sync(this.map);
+			this.linkHighlightLayer.syncSelection(this.map);
+		}
+		if (refresh.trackColor) this.trackColorLayer.sync(this.map);
+		if (refresh.direction) this.directionLayer.sync(this.map);
+		if (refresh.status) this.publishTrackStatus();
+	}
+
+	/**
+	 * Drop any half-made gesture and hover preview. Both describe a topology that
+	 * the edit being undone or redone is about to change underneath them, and a
+	 * pending direction start may name a track that is about to disappear.
+	 */
+	private resetPreviewsForHistory(): void {
+		this.directionHoverKey = null;
+		this.sectionHoverKey = null;
+		this.linkHoverKey = null;
+		this.directionLayer.setSelection(null);
+		useEditorStore.getState().setDirectionStart(null);
+	}
+
+	// ── Undo / redo ─────────────────────────────────────────────────
+
+	/** Step the document back one edit. No-op when there is nothing to undo. */
+	undo(): void {
+		const command = this.history.undo();
+		if (!command) return;
+		this.resetPreviewsForHistory();
+		undoEntries(this.map, command.entries);
+		this.applyRefresh(command.refresh);
+		this.publishHistoryState();
+		debugLog("placement", `undo — ${command.label}`);
+	}
+
+	/** Re-apply the edit the last undo reversed. No-op when there is no redo. */
+	redo(): void {
+		const command = this.history.redo();
+		if (!command) return;
+		this.resetPreviewsForHistory();
+		redoEntries(this.map, command.entries);
+		this.applyRefresh(command.refresh);
+		this.publishHistoryState();
+		debugLog("placement", `redo — ${command.label}`);
 	}
 
 	/** Attach pointer listeners and subscribe to tool/selection changes. */
@@ -536,7 +634,13 @@ export class PlacementController {
 		if (tool === "link") {
 			const cell = this.screenToGrid(e.clientX, e.clientY);
 			if (!cell) return;
-			this.map.connectTwoLinkedTracks(cell.gx, cell.gy);
+			this.commit(
+				"Link portals",
+				{ track: true, linkHighlight: true, status: true },
+				() => {
+					this.map.connectTwoLinkedTracks(cell.gx, cell.gy);
+				},
+			);
 			this.publishTrackStatus();
 			this.trackLayer.sync(this.map);
 			// Always keep highlight data fresh; visibility controls display
@@ -686,10 +790,10 @@ export class PlacementController {
 				this.directionHoverKey = null;
 				debugLog("placement", "direction click → start track gone, cleared");
 			} else if (erasing) {
-				const result = clearPreferredDirectionsAlongPath(
-					this.map,
-					startTrack,
-					track,
+				const result = this.commit(
+					"Erase directions",
+					{ direction: true, status: true },
+					() => clearPreferredDirectionsAlongPath(this.map, startTrack, track),
 				);
 				if (result === null) {
 					debugLog("placement", "direction erase click → no path found");
@@ -712,10 +816,10 @@ export class PlacementController {
 				this.directionLayer.setSelection(null, erasing);
 				this.directionHoverKey = null;
 			} else {
-				const result = setPreferredDirectionsAlongPath(
-					this.map,
-					startTrack,
-					track,
+				const result = this.commit(
+					"Set directions",
+					{ direction: true, status: true },
+					() => setPreferredDirectionsAlongPath(this.map, startTrack, track),
 				);
 				if (result === null) {
 					debugLog("placement", "direction click → no path found");
@@ -779,7 +883,19 @@ export class PlacementController {
 						selectedSubtype,
 						options,
 					);
-					this.map.addTrack(trackData, cell.gx, cell.gy);
+					this.commit(
+						`Add ${kindToLabel(selectedKind)}`,
+						{
+							track: true,
+							linkHighlight: true,
+							trackColor: true,
+							direction: true,
+							status: true,
+						},
+						() => {
+							this.map.addTrack(trackData, cell.gx, cell.gy);
+						},
+					);
 					this.publishTrackStatus();
 					debugLog(
 						"placement",
@@ -836,7 +952,13 @@ export class PlacementController {
 			if (!cell) return;
 			const track = this.map.getTrackAt(cell.gx, cell.gy);
 			if (track?.hasPreferredDirection()) {
-				track.clearPreferredDirections();
+				this.commit(
+					"Clear directions",
+					{ direction: true, status: true },
+					() => {
+						track.clearPreferredDirections();
+					},
+				);
 				this.directionLayer.sync(this.map);
 				this.publishTrackStatus();
 				debugLog(
@@ -860,7 +982,11 @@ export class PlacementController {
 			if (!cell) return;
 
 			// 1) Level crossing first.
-			if (this.map.removeLevelCrossing(cell.gx, cell.gy)) {
+			if (
+				this.commit("Remove level crossing", { element: true }, () =>
+					this.map.removeLevelCrossing(cell.gx, cell.gy),
+				)
+			) {
 				this.elementLayer.sync(this.map);
 				debugLog(
 					"placement",
@@ -870,7 +996,11 @@ export class PlacementController {
 			}
 
 			// 2) Platform next (may unlink shared text on non-bridge tracks).
-			if (this.map.removePlatform(cell.gx, cell.gy)) {
+			if (
+				this.commit("Remove platform", { element: true, text: true }, () =>
+					this.map.removePlatform(cell.gx, cell.gy),
+				)
+			) {
 				this.elementLayer.sync(this.map);
 				this.textLayer.sync(this.map);
 				debugLog(
@@ -882,7 +1012,19 @@ export class PlacementController {
 
 			// 3) Otherwise delete the whole element (track / NamedLocation /
 			//    Concourse / Parapet) plus any text cascade.
-			const deleted = this.map.deleteElement(cell.gx, cell.gy);
+			const deleted = this.commit(
+				"Delete element",
+				{
+					track: true,
+					element: true,
+					text: true,
+					linkHighlight: true,
+					trackColor: true,
+					direction: true,
+					status: true,
+				},
+				() => this.map.deleteElement(cell.gx, cell.gy),
+			);
 			debugLog(
 				"placement",
 				`right-click → deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
@@ -907,35 +1049,40 @@ export class PlacementController {
 		gy: number,
 	): void {
 		try {
-			switch (kind) {
-				case "namedLocation":
-					this.map.createAddNamedLocation(gx, gy);
-					debugLog("placement", `createAddNamedLocation at (${gx},${gy})`);
-					break;
-				case "concourse":
-					this.map.createAddConcourse(gx, gy);
-					debugLog("placement", `createAddConcourse at (${gx},${gy})`);
-					break;
-				case "parapet":
-					this.map.createAddParapet(subtype as ParapetType, gx, gy);
-					debugLog(
-						"placement",
-						`createAddParapet type=${subtype} at (${gx},${gy})`,
-					);
-					break;
-				case "platform": {
-					const side = platformSubtypeToSide(subtype);
-					if (side !== null) {
-						this.map.addPlatform(side, gx, gy);
-						debugLog("placement", `addPlatform side=${side} at (${gx},${gy})`);
+			this.commit(ELEMENT_LABELS[kind], { element: true, text: true }, () => {
+				switch (kind) {
+					case "namedLocation":
+						this.map.createAddNamedLocation(gx, gy);
+						debugLog("placement", `createAddNamedLocation at (${gx},${gy})`);
+						break;
+					case "concourse":
+						this.map.createAddConcourse(gx, gy);
+						debugLog("placement", `createAddConcourse at (${gx},${gy})`);
+						break;
+					case "parapet":
+						this.map.createAddParapet(subtype as ParapetType, gx, gy);
+						debugLog(
+							"placement",
+							`createAddParapet type=${subtype} at (${gx},${gy})`,
+						);
+						break;
+					case "platform": {
+						const side = platformSubtypeToSide(subtype);
+						if (side !== null) {
+							this.map.addPlatform(side, gx, gy);
+							debugLog(
+								"placement",
+								`addPlatform side=${side} at (${gx},${gy})`,
+							);
+						}
+						break;
 					}
-					break;
+					case "levelCrossing":
+						this.map.addLevelCrossing(gx, gy);
+						debugLog("placement", `addLevelCrossing at (${gx},${gy})`);
+						break;
 				}
-				case "levelCrossing":
-					this.map.addLevelCrossing(gx, gy);
-					debugLog("placement", `addLevelCrossing at (${gx},${gy})`);
-					break;
-			}
+			});
 		} catch (err) {
 			// Silently skip duplicates / invalid placements
 			debugLog("placement", `handleElementPlacement SKIP — ${err}`);
@@ -954,7 +1101,9 @@ export class PlacementController {
 	placeText(wx: number, wy: number, content: string, font: FontInfo): void {
 		const gx = wx / CELL_SIZE;
 		const gy = -wy / CELL_SIZE;
-		this.map.createAddText(gx, gy, content, font);
+		this.commit("Add text", { text: true }, () => {
+			this.map.createAddText(gx, gy, content, font);
+		});
 		this.textLayer.sync(this.map);
 		debugLog(
 			"placement",
@@ -972,9 +1121,11 @@ export class PlacementController {
 		const gy = -wy / CELL_SIZE;
 		// moveText() also refreshes the editable bounds the model keeps alongside
 		// the location, so go through the map rather than setLocationX/Y.
-		this.map.setTextToMove(text);
-		this.map.moveText(gx, gy);
-		this.map.setTextToMove(null);
+		this.commit("Move text", { text: true }, () => {
+			this.map.setTextToMove(text);
+			this.map.moveText(gx, gy);
+			this.map.setTextToMove(null);
+		});
 		this.textLayer.sync(this.map);
 		debugLog(
 			"placement",
@@ -1006,17 +1157,29 @@ export class PlacementController {
 		const text = this.getTextByLocation(tx, ty);
 		if (!text) return;
 		const trimmed = content.trim();
-		this.map.changeDeleteText(trimmed, trimmed !== "", text);
-		// changeDeleteText deletes the text when trimmed is empty; only restyle
-		// when it survived (non-empty content) and a new font was supplied.
-		if (trimmed !== "" && font) text.setFont(font);
+		this.commit(
+			trimmed === "" ? "Delete text" : "Edit text",
+			{ text: true, element: true, track: true },
+			() => {
+				this.map.changeDeleteText(trimmed, trimmed !== "", text);
+				// changeDeleteText deletes the text when trimmed is empty; only
+				// restyle when it survived (non-empty content) and a font was given.
+				if (trimmed !== "" && font) text.setFont(font);
+			},
+		);
 		this.syncAfterTextChange();
 		debugLog("placement", `updateTextAt (${tx},${ty}) → "${trimmed}"`);
 	}
 
 	/** Delete a Text and unlink it from every element that shared it. */
 	deleteTextObject(text: Text): void {
-		this.map.changeDeleteText("", false, text);
+		this.commit(
+			"Delete text",
+			{ text: true, element: true, track: true },
+			() => {
+				this.map.changeDeleteText("", false, text);
+			},
+		);
 		this.syncAfterTextChange();
 		debugLog("placement", "deleteTextObject");
 	}
@@ -1062,17 +1225,27 @@ export class PlacementController {
 
 		const trimmed = content.trim();
 
-		if (element.getNamed()) {
-			const text = element.getText();
-			if (text) {
-				this.map.changeDeleteText(trimmed, trimmed !== "", text);
-			}
-		} else if (trimmed !== "") {
-			this.map.createAddLinkText(gx, gy, trimmed, true, {
-				family: "JetBrains Mono",
-				pointSize: 12,
-			});
-		}
+		this.commit(
+			trimmed === "" ? "Remove name" : "Name element",
+			{
+				text: true,
+				element: true,
+				track: kind === "bridgeUnderpass",
+			},
+			() => {
+				if (element.getNamed()) {
+					const text = element.getText();
+					if (text) {
+						this.map.changeDeleteText(trimmed, trimmed !== "", text);
+					}
+				} else if (trimmed !== "") {
+					this.map.createAddLinkText(gx, gy, trimmed, true, {
+						family: "JetBrains Mono",
+						pointSize: 12,
+					});
+				}
+			},
+		);
 
 		this.textLayer.sync(this.map);
 		this.elementLayer.sync(this.map);
@@ -1106,18 +1279,24 @@ export class PlacementController {
 		secondaryLength?: number;
 	}): void {
 		const { sectionTracks } = useEditorStore.getState();
-		for (const coord of sectionTracks) {
-			const track = this.map.getTrackAt(coord.gx, coord.gy);
-			if (!track) continue;
-			track.setTrackMainSpeed(values.mainSpeed);
-			track.setTrackMainLength(values.mainLength);
-			if (values.secondarySpeed !== undefined) {
-				track.setTrackSecondarySpeed(values.secondarySpeed);
-			}
-			if (values.secondaryLength !== undefined) {
-				track.setTrackSecondaryLength(values.secondaryLength);
-			}
-		}
+		this.commit(
+			"Change speed & length",
+			{ track: true, trackColor: true, status: true },
+			() => {
+				for (const coord of sectionTracks) {
+					const track = this.map.getTrackAt(coord.gx, coord.gy);
+					if (!track) continue;
+					track.setTrackMainSpeed(values.mainSpeed);
+					track.setTrackMainLength(values.mainLength);
+					if (values.secondarySpeed !== undefined) {
+						track.setTrackSecondarySpeed(values.secondarySpeed);
+					}
+					if (values.secondaryLength !== undefined) {
+						track.setTrackSecondaryLength(values.secondaryLength);
+					}
+				}
+			},
+		);
 		this.trackLayer.sync(this.map);
 		this.trackColorLayer.sync(this.map);
 		// Drop the purple route tint (keeping the endpoint outlines) so the
@@ -1138,11 +1317,17 @@ export class PlacementController {
 	/** Restore defaults for all tracks in the selected section. */
 	restoreSection(): void {
 		const { sectionTracks } = useEditorStore.getState();
-		for (const coord of sectionTracks) {
-			const track = this.map.getTrackAt(coord.gx, coord.gy);
-			if (!track) continue;
-			track.restoreDefaults();
-		}
+		this.commit(
+			"Restore section defaults",
+			{ track: true, trackColor: true, status: true },
+			() => {
+				for (const coord of sectionTracks) {
+					const track = this.map.getTrackAt(coord.gx, coord.gy);
+					if (!track) continue;
+					track.restoreDefaults();
+				}
+			},
+		);
 		this.trackLayer.sync(this.map);
 		this.trackColorLayer.sync(this.map);
 		this.linkHighlightLayer.setSectionRouteVisible(false);
@@ -1199,6 +1384,12 @@ export class PlacementController {
 
 		// Any prior section selection now points at removed tracks — clear it.
 		useEditorStore.getState().clearSectionSelection();
+		// Opening a file starts a new document. clearAll is not invertible from a
+		// delta, and the steps that built the previous map are not reachable from
+		// here, so they are dropped rather than left to undo into a map the user
+		// never had on screen.
+		this.history.clear();
+		this.publishHistoryState();
 		this.publishTrackStatus();
 		debugLog(
 			"placement",

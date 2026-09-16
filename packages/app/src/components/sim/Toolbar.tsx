@@ -1,6 +1,8 @@
 import type { Icon } from "@phosphor-icons/react";
 import {
 	ArrowRight,
+	ArrowUUpLeft,
+	ArrowUUpRight,
 	Cursor,
 	DotsSixVertical,
 	Eraser,
@@ -19,7 +21,14 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
+import { PlacementController } from "#/engine/PlacementController";
 import { type Tool, useEditorStore } from "#/store/editor-store";
+
+/** Undo/redo buttons, rendered as a pair between the tools and the toggles. */
+const HISTORY_ACTIONS: { key: "undo" | "redo"; label: string; Icon: Icon }[] = [
+	{ key: "undo", label: "Undo", Icon: ArrowUUpLeft },
+	{ key: "redo", label: "Redo", Icon: ArrowUUpRight },
+];
 
 const TOOLS: { tool: Tool; label: string; Icon: Icon }[] = [
 	{ tool: "select", label: "Select", Icon: Cursor },
@@ -41,6 +50,10 @@ export function Toolbar() {
 	const showDirections = useEditorStore((s) => s.showDirections);
 	const toggleShowDirections = useEditorStore((s) => s.toggleShowDirections);
 	const trackStatus = useEditorStore((s) => s.trackStatus);
+	const canUndo = useEditorStore((s) => s.canUndo);
+	const canRedo = useEditorStore((s) => s.canRedo);
+	const undoLabel = useEditorStore((s) => s.undoLabel);
+	const redoLabel = useEditorStore((s) => s.redoLabel);
 	const pos = useEditorStore((s) => s.toolbarPos);
 	const setPos = useEditorStore((s) => s.setToolbarPos);
 
@@ -163,6 +176,43 @@ export function Toolbar() {
 					</TooltipContent>
 				</Tooltip>
 			)}
+			<div className="mx-1 border-t" />
+			{HISTORY_ACTIONS.map(({ key, label, Icon }) => {
+				const disabled = key === "undo" ? !canUndo : !canRedo;
+				const action = key === "undo" ? undoLabel : redoLabel;
+				// Name the step, so the button says what it will reverse rather than
+				// only that it can.
+				const tip = disabled
+					? `Nothing to ${label.toLowerCase()}`
+					: action
+						? `${label} ${action.charAt(0).toLowerCase()}${action.slice(1)}`
+						: label;
+				const button = (
+					<Button
+						variant="ghost"
+						size="icon"
+						aria-label={label}
+						disabled={disabled}
+						onClick={() =>
+							key === "undo"
+								? PlacementController.instance?.undo()
+								: PlacementController.instance?.redo()
+						}
+					>
+						<Icon size={18} />
+					</Button>
+				);
+				return (
+					<Tooltip key={key}>
+						{/* A disabled button swallows pointer events, so the tooltip
+						    needs a wrapper to fire from — same as the tool buttons. */}
+						<TooltipTrigger asChild>
+							{disabled ? <span tabIndex={-1}>{button}</span> : button}
+						</TooltipTrigger>
+						<TooltipContent side="right">{tip}</TooltipContent>
+					</Tooltip>
+				);
+			})}
 			<div className="mx-1 border-t" />
 			<Tooltip>
 				<TooltipTrigger asChild>

@@ -1,5 +1,14 @@
 // Barrel exports for the railway module
 
+// Undo/redo effect journal
+export {
+	beginRecording,
+	type EffectEntry,
+	endRecording,
+	isRecording,
+	redoEntries,
+	undoEntries,
+} from "./effect-journal";
 // Element classes
 export {
 	Concourse,
@@ -9,7 +18,6 @@ export {
 	Parapet,
 	Text,
 } from "./element";
-
 // Enums
 export {
 	BridgeUnderpassType,
@@ -26,7 +34,6 @@ export {
 	StraightType,
 	SwitchType,
 } from "./enums";
-
 // Errors
 export {
 	ElementAlreadyExistsError,

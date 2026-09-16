@@ -1,3 +1,4 @@
+import { recordField } from "./effect-journal";
 import { ParapetType } from "./enums";
 import type { FontInfo } from "./types";
 
@@ -33,6 +34,9 @@ export abstract class Element {
 	}
 
 	setLocationX(newLocationX: number): void {
+		recordField("locationX", this.locationX, newLocationX, (x) => {
+			this.locationX = x;
+		});
 		this.locationX = newLocationX;
 	}
 
@@ -41,6 +45,9 @@ export abstract class Element {
 	}
 
 	setLocationY(newLocationY: number): void {
+		recordField("locationY", this.locationY, newLocationY, (y) => {
+			this.locationY = y;
+		});
 		this.locationY = newLocationY;
 	}
 
@@ -90,6 +97,9 @@ export class Text extends Element {
 	}
 
 	setEditableX(newEditableX: number): void {
+		recordField("editableX", this.editableX, newEditableX, (x) => {
+			this.editableX = x;
+		});
 		this.editableX = newEditableX;
 	}
 
@@ -98,6 +108,9 @@ export class Text extends Element {
 	}
 
 	setEditableY(newEditableY: number): void {
+		recordField("editableY", this.editableY, newEditableY, (y) => {
+			this.editableY = y;
+		});
 		this.editableY = newEditableY;
 	}
 
@@ -106,6 +119,9 @@ export class Text extends Element {
 	}
 
 	setFontSize(newFontSize: number): void {
+		recordField("fontSize", this.fontSize, newFontSize, (n) => {
+			this.fontSize = n;
+		});
 		this.fontSize = newFontSize;
 	}
 
@@ -114,6 +130,9 @@ export class Text extends Element {
 	}
 
 	setReadableText(newReadableText: string): void {
+		recordField("readableText", this.readableText, newReadableText, (t) => {
+			this.readableText = t;
+		});
 		this.readableText = newReadableText;
 	}
 
@@ -122,6 +141,9 @@ export class Text extends Element {
 	}
 
 	setFont(newFont: FontInfo): void {
+		recordField("font", this.font, newFont, (f) => {
+			this.font = f;
+		});
 		this.font = newFont;
 	}
 
@@ -168,8 +190,18 @@ export abstract class NamedElement extends Element {
 		return this.text;
 	}
 
-	/** Sets the linked Text object */
+	/**
+	 * Sets the linked Text object.
+	 *
+	 * Every text link and unlink in the package funnels through here, including
+	 * the unbounded neighbour recursion in linkLocalText and the global unlink in
+	 * deleteTextFromAllElements. Journalling this one method is therefore what
+	 * makes naming and deletion invertible without predicting their blast radius.
+	 */
 	setText(newText: Text | null): void {
+		recordField("setText", this.text, newText, (x) => {
+			this.text = x;
+		});
 		this.text = newText;
 	}
 

@@ -1,3 +1,4 @@
+import { record, recordField } from "../effect-journal";
 import {
 	Concourse,
 	type Element,
@@ -269,11 +270,81 @@ export class Map_ {
 	// ====================================================================
 
 	private indexElement(el: Element): void {
-		this.elementsByCoord.set(el.locationToString(), el);
+		const key = el.locationToString();
+		const prev = this.elementsByCoord.get(key);
+		record(
+			"indexElement",
+			() => {
+				if (prev === undefined) this.elementsByCoord.delete(key);
+				else this.elementsByCoord.set(key, prev);
+			},
+			() => {
+				this.elementsByCoord.set(key, el);
+			},
+		);
+		this.elementsByCoord.set(key, el);
 	}
 
 	private unindexElement(x: number, y: number): void {
-		this.elementsByCoord.delete(coordKey(x, y));
+		const key = coordKey(x, y);
+		const prev = this.elementsByCoord.get(key);
+		if (prev === undefined) return;
+		record(
+			"unindexElement",
+			() => {
+				this.elementsByCoord.set(key, prev);
+			},
+			() => {
+				this.elementsByCoord.delete(key);
+			},
+		);
+		this.elementsByCoord.delete(key);
+	}
+
+	/** Append to a model list, journalling the insertion. */
+	private pushTo<T>(list: T[], item: T): void {
+		list.push(item);
+		record(
+			"listPush",
+			() => {
+				const i = list.indexOf(item);
+				if (i !== -1) list.splice(i, 1);
+			},
+			() => {
+				list.push(item);
+			},
+		);
+	}
+
+	/**
+	 * Remove from a model list by identity, journalling the index it came from so
+	 * an undo restores position as well as membership — serializeMap references
+	 * shared labels by their index in textList, so order is part of the state.
+	 */
+	private removeFrom<T>(list: T[], item: T): boolean {
+		const i = list.indexOf(item);
+		if (i === -1) return false;
+		list.splice(i, 1);
+		record(
+			"listRemove",
+			() => {
+				list.splice(i, 0, item);
+			},
+			() => {
+				const j = list.indexOf(item);
+				if (j !== -1) list.splice(j, 1);
+			},
+		);
+		return true;
+	}
+
+	/** Adjust the track counter, journalling the previous value. */
+	private bumpTotalTrack(delta: number): void {
+		const next = this.totalTrack + delta;
+		recordField("totalTrack", this.totalTrack, next, (n) => {
+			this.totalTrack = n;
+		});
+		this.totalTrack = next;
 	}
 
 	// ── Add Track ───────────────────────────────────────────────────────
@@ -307,8 +378,8 @@ export class Map_ {
 		}
 		const track = new Track(data, x, y);
 		this.indexElement(track);
-		this.getOrCreateKindArray(data.kind).push(track);
-		this.totalTrack++;
+		this.pushTo(this.getOrCreateKindArray(data.kind), track);
+		this.bumpTotalTrack(1);
 		mapDebug(`addTrack — OK, totalTrack=${this.totalTrack}`);
 		this.afterTrackTopologyChange();
 		return track;
@@ -345,7 +416,7 @@ export class Map_ {
 		if (this.checkCanAddNamedLocation(x, y)) {
 			// Capture the track BEFORE indexElement overwrites the coordinate entry
 			const track = this.getTrackAt(x, y);
-			this.namedLocationList.push(nl);
+			this.pushTo(this.namedLocationList, nl);
 			this.indexElement(nl);
 			if (track) {
 				track.setLinkedNamedLocation(nl);
@@ -363,7 +434,7 @@ export class Map_ {
 
 	addConcourse(c: Concourse): void {
 		if (!this.checkElementExists(c.getLocationX(), c.getLocationY())) {
-			this.concourseList.push(c);
+			this.pushTo(this.concourseList, c);
 			this.indexElement(c);
 		}
 	}
@@ -378,7 +449,7 @@ export class Map_ {
 
 	addParapet(p: Parapet): void {
 		if (!this.checkElementExists(p.getLocationX(), p.getLocationY())) {
-			this.parapetList.push(p);
+			this.pushTo(this.parapetList, p);
 			this.indexElement(p);
 		}
 	}
@@ -395,7 +466,7 @@ export class Map_ {
 	// ── Text ────────────────────────────────────────────────────────────
 
 	addText(t: Text): void {
-		this.textList.push(t);
+		this.pushTo(this.textList, t);
 	}
 
 	createAddText(
@@ -440,13 +511,7 @@ export class Map_ {
 	}
 
 	deleteText(t: Text): boolean {
-		for (let i = 0; i < this.textList.length; i++) {
-			if (this.textList[i] === t) {
-				this.textList.splice(i, 1);
-				return true;
-			}
-		}
-		return false;
+		return this.removeFrom(this.textList, t);
 	}
 
 	getTextToMove(): Text | null {
@@ -506,14 +571,10 @@ export class Map_ {
 
 			// Remove from kind array
 			const kindArr = this.tracksByKind.get(el.data.kind);
-			if (kindArr) {
-				const idx = kindArr.indexOf(el);
-				if (idx !== -1) kindArr.splice(idx, 1);
-			}
-			this.totalTrack--;
+			if (kindArr) this.removeFrom(kindArr, el);
+			this.bumpTotalTrack(-1);
 		} else if (el instanceof NamedLocation) {
-			const idx = this.namedLocationList.indexOf(el);
-			if (idx !== -1) this.namedLocationList.splice(idx, 1);
+			this.removeFrom(this.namedLocationList, el);
 			// Restore co-located track to the spatial index (it was displaced
 			// when the NamedLocation was indexed in addNamedLocation).
 			for (const arr of this.tracksByKind.values()) {
@@ -527,11 +588,9 @@ export class Map_ {
 				}
 			}
 		} else if (el instanceof Concourse) {
-			const idx = this.concourseList.indexOf(el);
-			if (idx !== -1) this.concourseList.splice(idx, 1);
+			this.removeFrom(this.concourseList, el);
 		} else if (el instanceof Parapet) {
-			const idx = this.parapetList.indexOf(el);
-			if (idx !== -1) this.parapetList.splice(idx, 1);
+			this.removeFrom(this.parapetList, el);
 		}
 
 		this.unindexElement(x, y);
