@@ -703,6 +703,36 @@ describe("deleteElement", () => {
 		expect(b.isLinked()).toBe(false);
 	});
 
+	it("deleting a NamedLocation restores the track it displaced", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+		const track = map.getTrackAt(0, 0)!;
+		map.createAddNamedLocation(0, 0);
+		// The NamedLocation takes the coordinate slot while the track stays in
+		// tracksByKind, so the track is unreachable by coordinate until deleted.
+		expect(map.getNamedLocationAt(0, 0)).not.toBeNull();
+		expect(map.getTrackAt(0, 0)).toBeNull();
+
+		expect(map.deleteElement(0, 0)).toBe(true);
+
+		expect(map.getNamedLocationAt(0, 0)).toBeNull();
+		expect(map.getNamedLocationList()).toHaveLength(0);
+		// The same object, back in the spatial index — not orphaned in tracksByKind.
+		expect(map.getTrackAt(0, 0)).toBe(track);
+		expect(map.getTotalTrack()).toBe(1);
+		expect(track.getLinkedNamedLocation()).toBeNull();
+	});
+
 	it("deleteElement cascades text cleanup for named tracks", () => {
 		const map = new Map_();
 		map.addTrack(

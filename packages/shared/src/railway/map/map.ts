@@ -483,6 +483,12 @@ export class Map_ {
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (!el) return false;
 
+		// A NamedLocation displaces the track it sits on out of the spatial index,
+		// so deleting it has to put that track back. The re-index must happen
+		// *after* unindexElement below, which clears this very coordinate — doing
+		// it inline here would write the key and then immediately lose it.
+		let displacedTrack: Track | null = null;
+
 		// Handle text cleanup for named elements
 		if (el instanceof NamedElement && el.getNamed()) {
 			const txt = el.getText();
@@ -515,7 +521,7 @@ export class Map_ {
 					(t) => t.getLocationX() === x && t.getLocationY() === y,
 				);
 				if (colocated) {
-					this.indexElement(colocated);
+					displacedTrack = colocated;
 					colocated.setLinkedNamedLocation(null);
 					break;
 				}
@@ -529,6 +535,7 @@ export class Map_ {
 		}
 
 		this.unindexElement(x, y);
+		if (displacedTrack) this.indexElement(displacedTrack);
 		if (el instanceof Track) this.afterTrackTopologyChange();
 		return true;
 	}
