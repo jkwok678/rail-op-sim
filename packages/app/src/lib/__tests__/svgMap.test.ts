@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 import {
 	BridgeUnderpassType,
 	BufferType,
@@ -15,6 +14,7 @@ import {
 	StraightType,
 	SwitchType,
 } from "@rail-op-sim/shared";
+import { describe, expect, it } from "vitest";
 import { SVG_MAP } from "../svgMap";
 
 /** Every track subtype enum — the full set the editor can place. */

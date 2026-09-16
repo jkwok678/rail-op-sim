@@ -1001,7 +1001,11 @@ describe("setPreferredDirectionsAlongPath", () => {
 		);
 		const spur = trailing.getTrackAt(16, 16)!;
 		const swTrail = trailing.getTrackAt(0, 0)!;
-		const trailResult = setPreferredDirectionsAlongPath(trailing, spur, swTrail);
+		const trailResult = setPreferredDirectionsAlongPath(
+			trailing,
+			spur,
+			swTrail,
+		);
 		expect(swTrail.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
 		expect(trailResult!.unassigned).toBe(0);
 
@@ -1656,9 +1660,9 @@ describe("revalidatePreferredDirections", () => {
 		b.addPreferredDirection(5, 3);
 
 		const report = getConnectivityReport(map);
-		expect(report.brokenRoutes.some((i) => i.reason === "no-continuation")).toBe(
-			true,
-		);
+		expect(
+			report.brokenRoutes.some((i) => i.reason === "no-continuation"),
+		).toBe(true);
 		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 		expect(b.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
 	});

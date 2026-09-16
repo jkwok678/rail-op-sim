@@ -1,5 +1,5 @@
-import { Container } from "pixi.js";
 import type { Map as Map_ } from "@rail-op-sim/shared";
+import { Container } from "pixi.js";
 import type { TrackLayer } from "#/renderer/layers/TrackLayer";
 
 export interface TrackColorLayer {

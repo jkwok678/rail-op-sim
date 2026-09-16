@@ -1,13 +1,15 @@
 {
   "name": "rail-op-sim-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",

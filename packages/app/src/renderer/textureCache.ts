@@ -1,7 +1,7 @@
-import { Texture } from "pixi.js";
 import { SignalAspect } from "@rail-op-sim/shared";
+import { Texture } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
-import { recolorSvg, SOURCE_FILLS, type ColorMap } from "#/lib/svgColors";
+import { type ColorMap, recolorSvg, SOURCE_FILLS } from "#/lib/svgColors";
 import { loadRawSvg, loadRawSvgByFilename, SHUNT_SVG_MAP } from "#/lib/svgMap";
 import { svgToCanvas } from "#/lib/svgToCanvas";
 

@@ -242,7 +242,12 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		// Name top-left — edge-connected flood should cover all four
 		map.createAddLinkText(0, 0, "Depot", true, testFont);
 
-		for (const [gx, gy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+		for (const [gx, gy] of [
+			[0, 0],
+			[1, 0],
+			[0, 1],
+			[1, 1],
+		]) {
 			const nl = map.getNamedLocationAt(gx, gy)!;
 			expect(nl.getNamed()).toBe(true);
 			expect(nl.getText()!.getReadableText()).toBe("Depot");

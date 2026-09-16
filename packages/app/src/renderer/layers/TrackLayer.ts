@@ -1,4 +1,3 @@
-import { Container, Sprite, Texture } from "pixi.js";
 import type { Map as Map_ } from "@rail-op-sim/shared";
 import {
 	getTrackColorState,
@@ -6,8 +5,9 @@ import {
 	TRACK_COLOR_LENGTH,
 	TRACK_COLOR_SPEED,
 } from "@rail-op-sim/shared";
-import { CELL_SIZE, gridToWorld } from "#/lib/grid";
+import { Container, Sprite, type Texture } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
+import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 import type { TextureCache } from "#/renderer/textureCache";
 
 interface Entry {

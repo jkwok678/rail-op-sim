@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatImperialLength, kmhToMph, metresToImperial, round1 } from "../units";
+import {
+	formatImperialLength,
+	kmhToMph,
+	metresToImperial,
+	round1,
+} from "../units";
 
 describe("round1", () => {
 	it("rounds to 1 decimal place", () => {
