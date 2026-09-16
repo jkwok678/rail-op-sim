@@ -117,6 +117,17 @@ export class PlacementController {
 
 	/** Cached `getBoundingClientRect` from the last pointerdown (avoids forced layout per pointermove). */
 	private downRect: DOMRect | null = null;
+	/**
+	 * In-progress text drag: the grabbed Text plus the world-space offset from
+	 * its anchor to the pointer, so the text keeps its grab point under the
+	 * cursor. Only the rendered sprite follows the pointer — the model is written
+	 * once on release, so every cancel path is just a re-sync.
+	 */
+	private textDrag: {
+		text: Text;
+		offsetX: number;
+		offsetY: number;
+	} | null = null;
 
 	private abort?: AbortController;
 	private unsubStore?: () => void;
@@ -352,14 +363,42 @@ export class PlacementController {
 		this.downPos = { x: e.clientX, y: e.clientY };
 		this.downRect = this.app.canvas.getBoundingClientRect();
 		this.downWasPanning = this.viewport.isPanning;
+
+		// Text tool: pressing on an existing text arms a drag-to-move. A release
+		// that never passes the drag threshold still opens the edit dialog.
+		this.textDrag = null;
+		if (
+			e.button === 0 &&
+			!this.downWasPanning &&
+			useEditorStore.getState().tool === "text"
+		) {
+			const wp = this.screenToWorld(e.clientX, e.clientY);
+			const hit = wp ? this.textLayer.hitTest(wp.x, wp.y) : null;
+			if (wp && hit) {
+				const anchor = gridToWorld(hit.getLocationX(), hit.getLocationY());
+				this.textDrag = {
+					text: hit,
+					offsetX: wp.x - anchor.x,
+					offsetY: wp.y - anchor.y,
+				};
+				debugLog(
+					"placement",
+					`text drag armed at grid(${hit.getLocationX()},${hit.getLocationY()})`,
+				);
+			}
+		}
 	};
 
 	private onPointerUp = (e: PointerEvent): void => {
 		if (e.button !== 0 && e.button !== 2) return;
 
 		const down = this.downPos;
+		const drag = this.textDrag;
+		// Resolve the release point while downRect still describes this gesture.
+		const dragTo = drag ? this.screenToWorld(e.clientX, e.clientY) : null;
 		this.downPos = null;
 		this.downRect = null;
+		this.textDrag = null;
 
 		const { tool, selectedKind, selectedSubtype } = useEditorStore.getState();
 		debugLog(
@@ -369,6 +408,7 @@ export class PlacementController {
 
 		if (this.downWasPanning || this.viewport.isPanning) {
 			debugLog("placement", "pointerup ignored — was panning");
+			if (drag) this.textLayer.sync(this.map);
 			return;
 		}
 		if (!down) {
@@ -376,10 +416,30 @@ export class PlacementController {
 				"placement",
 				"pointerup ignored — no matching pointerdown on canvas",
 			);
+			if (drag) this.textLayer.sync(this.map);
 			return;
 		}
 		const dx = e.clientX - down.x;
 		const dy = e.clientY - down.y;
+
+		// A text drag past the threshold commits the move and swallows the click.
+		// Below it the text never really moved, so fall through to the click
+		// handling that opens the edit dialog.
+		if (drag) {
+			if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+				if (dragTo)
+					this.moveTextTo(
+						drag.text,
+						dragTo.x - drag.offsetX,
+						dragTo.y - drag.offsetY,
+					);
+				else this.textLayer.sync(this.map);
+				return;
+			}
+			// Drop any sub-threshold preview drift.
+			this.textLayer.sync(this.map);
+		}
+
 		if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
 			debugLog(
 				"placement",
@@ -902,6 +962,34 @@ export class PlacementController {
 		);
 	}
 
+	/**
+	 * Move a Text to the given world position — the left edge and vertical centre
+	 * of its rendered box, matching how the text layer anchors it. Fractional grid
+	 * coords keep gridToWorld() round-tripping to the same pixel.
+	 */
+	moveTextTo(text: Text, wx: number, wy: number): void {
+		const gx = wx / CELL_SIZE;
+		const gy = -wy / CELL_SIZE;
+		// moveText() also refreshes the editable bounds the model keeps alongside
+		// the location, so go through the map rather than setLocationX/Y.
+		this.map.setTextToMove(text);
+		this.map.moveText(gx, gy);
+		this.map.setTextToMove(null);
+		this.textLayer.sync(this.map);
+		debugLog(
+			"placement",
+			`moveTextTo "${text.getReadableText()}" → grid(${gx.toFixed(2)},${gy.toFixed(2)})`,
+		);
+	}
+
+	/** Abandon an in-progress text drag, restoring the rendered position. */
+	private cancelTextDrag(): void {
+		if (!this.textDrag) return;
+		this.textDrag = null;
+		this.textLayer.sync(this.map);
+		debugLog("placement", "text drag cancelled");
+	}
+
 	/** Find the Text at exact grid coordinates (used to prefill/apply text edits). */
 	getTextByLocation(tx: number, ty: number): Text | null {
 		for (const t of this.map.getTextList()) {
@@ -1237,7 +1325,27 @@ export class PlacementController {
 	}
 
 	private onPointerMove = (e: PointerEvent): void => {
+		// A text drag owns the pointer: drive the rendered text and skip the hover
+		// previews below. The model stays untouched until the release.
+		if (this.textDrag) {
+			const wp = this.screenToWorld(e.clientX, e.clientY);
+			if (wp)
+				this.textLayer.moveTo(
+					this.textDrag.text,
+					wp.x - this.textDrag.offsetX,
+					wp.y - this.textDrag.offsetY,
+				);
+			return;
+		}
+
 		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
+
+		// Text tool: hovering a placed text advertises the drag-to-move gesture.
+		if (tool === "text") {
+			const wp = this.screenToWorld(e.clientX, e.clientY);
+			this.app.canvas.style.cursor =
+				wp && this.textLayer.hitTest(wp.x, wp.y) ? "move" : "text";
+		}
 
 		// Each two-click gesture previews what its second click would do. Only
 		// the active tool's preview runs; the other two are cleared, so a tool
@@ -1289,6 +1397,7 @@ export class PlacementController {
 	};
 
 	private onPointerLeave = (): void => {
+		this.cancelTextDrag();
 		this.ghost.visible = false;
 		this.clearDirectionPreview();
 		this.clearSectionPreview();
@@ -1298,6 +1407,7 @@ export class PlacementController {
 
 	private onPointerCancel = (): void => {
 		debugLog("placement", "pointercancel — clearing state");
+		this.cancelTextDrag();
 		this.downPos = null;
 		this.downRect = null;
 		this.ghost.visible = false;

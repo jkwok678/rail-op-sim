@@ -18,6 +18,12 @@ export interface TextLayer {
 	 * legacy `Map_.getTextAt` bounding box, which doesn't match rendered pixels).
 	 */
 	hitTest(worldX: number, worldY: number): MapText | null;
+	/**
+	 * Reposition an already-rendered text (and its decoration) without a full
+	 * rebuild. Used for live drag feedback, where the model is only written once
+	 * the drag is released — a {@link sync} puts everything back.
+	 */
+	moveTo(text: MapText, worldX: number, worldY: number): void;
 	/** Drop everything so the next sync rebuilds. */
 	clear(): void;
 	destroy(): void;
@@ -95,19 +101,22 @@ export function createTextLayer(): TextLayer {
 				if (font.underline || font.strikethrough) {
 					const deco = new Graphics();
 					const thickness = Math.max(1, font.pointSize / 8);
+					// Drawn in the text's own local space and then positioned on top of
+					// it, so moveTo() can shift text and decoration together.
 					if (font.strikethrough) {
 						deco
-							.moveTo(x, y)
-							.lineTo(x + pixiText.width, y)
+							.moveTo(0, 0)
+							.lineTo(pixiText.width, 0)
 							.stroke({ color: fill, width: thickness });
 					}
 					if (font.underline) {
-						const uy = y + pixiText.height / 2 - thickness;
+						const uy = pixiText.height / 2 - thickness;
 						deco
-							.moveTo(x, uy)
-							.lineTo(x + pixiText.width, uy)
+							.moveTo(0, uy)
+							.lineTo(pixiText.width, uy)
 							.stroke({ color: fill, width: thickness });
 					}
+					deco.position.set(x, y);
 					deco.label = `text-deco-${i}`;
 					container.addChild(deco);
 					decorations.push(deco);
@@ -141,6 +150,13 @@ export function createTextLayer(): TextLayer {
 				}
 			}
 			return null;
+		},
+
+		moveTo(text, worldX, worldY) {
+			const i = textModels.indexOf(text);
+			if (i === -1) return;
+			textEntries[i].position.set(worldX, worldY);
+			decorations[i]?.position.set(worldX, worldY);
 		},
 
 		clear() {
