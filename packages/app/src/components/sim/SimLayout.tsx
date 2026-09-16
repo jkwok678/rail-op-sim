@@ -1,4 +1,4 @@
-import { Moon, Sun } from "@phosphor-icons/react";
+import { Keyboard, Moon, Sun } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
@@ -9,6 +9,7 @@ import { NameElementDialog } from "./NameElementDialog";
 import { SaveLoadControls } from "./SaveLoadControls";
 import { SectionEditPanel } from "./SectionEditPanel";
 import { SettingsMenu } from "./SettingsMenu";
+import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SimCanvas } from "./SimCanvas";
 import { TextInputDialog } from "./TextInputDialog";
 import { Toolbar } from "./Toolbar";
@@ -25,6 +26,7 @@ export function SimLayout() {
 	const trackStatus = useEditorStore((s) => s.trackStatus);
 	const tool = useEditorStore((s) => s.tool);
 	const directionHint = useEditorStore((s) => s.directionHint);
+	const toggleShortcuts = useEditorStore((s) => s.toggleShortcuts);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
 	const [textDialogOpen, setTextDialogOpen] = useState(false);
@@ -116,6 +118,7 @@ export function SimLayout() {
 					open={textDialogOpen}
 					onOpenChange={setTextDialogOpen}
 				/>
+				<ShortcutsDialog />
 				<TrackInfoTooltip />
 			</div>
 			<footer className="h-7 border-t border-border bg-muted/30 flex items-center justify-between px-3 text-[11px] text-muted-foreground select-none">
@@ -129,6 +132,15 @@ export function SimLayout() {
 					) : null}
 				</span>
 				<div className="flex items-center gap-1">
+					<Button
+						variant="ghost"
+						size="icon-xs"
+						onClick={toggleShortcuts}
+						aria-label="Keyboard shortcuts"
+						title="Keyboard shortcuts (?)"
+					>
+						<Keyboard />
+					</Button>
 					<SaveLoadControls />
 					<SettingsMenu />
 					<Button

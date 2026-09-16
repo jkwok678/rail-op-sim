@@ -4,9 +4,10 @@ import type { ViewportController } from "#/engine/ViewportController";
 import {
 	DEFAULT_MAX_ZOOM,
 	DEFAULT_MIN_ZOOM,
-	ZOOM_BUTTON_STEP,
 	ZOOM_SLIDER_STEP,
 } from "#/engine/zoomConstants";
+import { shortcutDisplay } from "#/lib/shortcuts";
+import { zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
 import { Button } from "../ui/button";
 
@@ -17,25 +18,10 @@ interface ZoomSliderProps {
 export function ZoomSlider({ viewportRef }: ZoomSliderProps) {
 	const zoom = useEditorStore((s) => s.zoom);
 
-	const handleZoomIn = () => {
-		if (viewportRef.current) {
-			const newZoom = Math.min(
-				DEFAULT_MAX_ZOOM,
-				viewportRef.current.state.zoom + ZOOM_BUTTON_STEP,
-			);
-			viewportRef.current.zoomTo(newZoom);
-		}
-	};
-
-	const handleZoomOut = () => {
-		if (viewportRef.current) {
-			const newZoom = Math.max(
-				DEFAULT_MIN_ZOOM,
-				viewportRef.current.state.zoom - ZOOM_BUTTON_STEP,
-			);
-			viewportRef.current.zoomTo(newZoom);
-		}
-	};
+	// The clamping lives in viewportActions so these buttons and their hotkeys
+	// can't drift apart.
+	const handleZoomIn = () => zoomIn(viewportRef.current);
+	const handleZoomOut = () => zoomOut(viewportRef.current);
 
 	const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (viewportRef.current) {
@@ -49,7 +35,7 @@ export function ZoomSlider({ viewportRef }: ZoomSliderProps) {
 				variant="ghost"
 				size="icon-xs"
 				onClick={handleZoomOut}
-				title="Zoom out"
+				title={`Zoom out (${shortcutDisplay("zoomOut")})`}
 				className="rounded-lg"
 			>
 				<Minus />
@@ -69,7 +55,7 @@ export function ZoomSlider({ viewportRef }: ZoomSliderProps) {
 				variant="ghost"
 				size="icon-xs"
 				onClick={handleZoomIn}
-				title="Zoom in"
+				title={`Zoom in (${shortcutDisplay("zoomIn")})`}
 				className="rounded-lg"
 			>
 				<Plus />

@@ -135,6 +135,13 @@ export interface EditorState {
 	showGrid: boolean;
 
 	/**
+	 * Whether the keyboard-shortcut reference overlay is open. Lives in the store
+	 * rather than in the layout's local state so the Escape cascade can see it —
+	 * it is one of the things Escape has to yield to.
+	 */
+	showShortcuts: boolean;
+
+	/**
 	 * Plain-data snapshot of the track currently under the pointer, or null when
 	 * the pointer isn't over a track (or the feature is disabled).
 	 */
@@ -183,6 +190,10 @@ export interface EditorState {
 	toggleShowTrackInfo: () => void;
 	/** Toggle the ground grid on/off. */
 	toggleShowGrid: () => void;
+	/** Toggle the keyboard-shortcut reference overlay. */
+	toggleShortcuts: () => void;
+	/** Open or close the keyboard-shortcut reference overlay. */
+	setShortcuts: (open: boolean) => void;
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
@@ -263,6 +274,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showDirections: false,
 	showTrackInfo: false,
 	showGrid: true,
+	showShortcuts: false,
 	hoveredTrackInfo: null,
 	trackStatus: null,
 	canUndo: false,
@@ -354,6 +366,8 @@ export const useEditorStore = create<EditorState>((set) => ({
 			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
 		})),
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
+	toggleShortcuts: () => set((s) => ({ showShortcuts: !s.showShortcuts })),
+	setShortcuts: (open) => set({ showShortcuts: open }),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
 	setHistoryState: (state) => set(state),

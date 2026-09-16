@@ -15,6 +15,7 @@ const reset = () => {
 		directionStart: null,
 		directionHint: null,
 		directionMode: "set",
+		showShortcuts: false,
 		canUndo: false,
 		canRedo: false,
 		undoLabel: null,
@@ -128,5 +129,35 @@ describe("setHistoryState", () => {
 		expect(s.canRedo).toBe(true);
 		expect(s.undoLabel).toBe("Add platform");
 		expect(s.redoLabel).toBe("Delete element");
+	});
+});
+
+describe("showShortcuts", () => {
+	beforeEach(reset);
+
+	it("starts closed", () => {
+		expect(useEditorStore.getState().showShortcuts).toBe(false);
+	});
+
+	it("toggles both ways", () => {
+		useEditorStore.getState().toggleShortcuts();
+		expect(useEditorStore.getState().showShortcuts).toBe(true);
+		useEditorStore.getState().toggleShortcuts();
+		expect(useEditorStore.getState().showShortcuts).toBe(false);
+	});
+
+	it("can be set directly, for the dialog's onOpenChange", () => {
+		useEditorStore.getState().setShortcuts(true);
+		expect(useEditorStore.getState().showShortcuts).toBe(true);
+		useEditorStore.getState().setShortcuts(false);
+		expect(useEditorStore.getState().showShortcuts).toBe(false);
+	});
+
+	// setTool cancels the tool being left, but the shortcut reference is not part
+	// of any tool — closing it on a tool key would fight the key that opened it.
+	it("survives a tool change", () => {
+		useEditorStore.getState().setShortcuts(true);
+		useEditorStore.getState().setTool("add");
+		expect(useEditorStore.getState().showShortcuts).toBe(true);
 	});
 });

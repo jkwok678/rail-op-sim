@@ -1,6 +1,8 @@
 import { Check, GearSix } from "@phosphor-icons/react";
 import { Popover as PopoverPrimitive } from "radix-ui";
 import { Button } from "#/components/ui/button";
+import { KbdGroup } from "#/components/ui/kbd";
+import { shortcutKeys } from "#/lib/shortcuts";
 import { useEditorStore } from "#/store/editor-store";
 
 /**
@@ -22,6 +24,9 @@ export function SettingsMenu() {
 			</PopoverPrimitive.Trigger>
 			<PopoverPrimitive.Portal>
 				<PopoverPrimitive.Content
+					// Same reason as the dialogs: Escape should close the popover and
+					// stop there, not fall through to the editor's Escape cascade.
+					onEscapeKeyDown={(e) => e.stopPropagation()}
 					side="top"
 					align="end"
 					sideOffset={4}
@@ -34,7 +39,10 @@ export function SettingsMenu() {
 						onClick={toggleShowTrackInfo}
 						className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-muted hover:text-foreground"
 					>
-						<span>Show track info</span>
+						<span className="inline-flex items-center gap-1.5">
+							Show track info
+							<KbdGroup keys={shortcutKeys("toggleTrackInfo")} />
+						</span>
 						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
 							{showTrackInfo ? <Check weight="bold" /> : null}
 						</span>
@@ -46,7 +54,10 @@ export function SettingsMenu() {
 						onClick={toggleShowGrid}
 						className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-muted hover:text-foreground"
 					>
-						<span>Show grid</span>
+						<span className="inline-flex items-center gap-1.5">
+							Show grid
+							<KbdGroup keys={shortcutKeys("toggleGrid")} />
+						</span>
 						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
 							{showGrid ? <Check weight="bold" /> : null}
 						</span>

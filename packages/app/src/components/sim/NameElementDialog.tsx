@@ -125,7 +125,13 @@ export function NameElementDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
 				showCloseButton={false}
-				onEscapeKeyDown={handleCancel}
+				// Radix dismisses from a capture-phase listener on document; stopping
+				// propagation here keeps the global Escape from *also* firing and
+				// cancelling the tool gesture sitting underneath this dialog.
+				onEscapeKeyDown={(e) => {
+					e.stopPropagation();
+					handleCancel();
+				}}
 				onPointerDownOutside={handleCancel}
 			>
 				<DialogHeader>

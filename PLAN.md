@@ -619,6 +619,7 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
   - `reverse_train(id)` — train stops, reverses direction
 - [ ] HUD overlay on selected train: shows speed, next signal aspect, current edge speed limit
 - [ ] Keyboard shortcuts: Space to start/stop selected train, R to reverse
+  - NOTE: Space is already taken — `ViewportController` uses it held for grab-pan. Pick another key for start/stop (or re-home grab-pan) and add it to the `SHORTCUTS` registry rather than binding it directly.
 
 ### Milestone 12: Block Occupancy
 
@@ -954,7 +955,7 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
 - [ ] **Error boundaries** around the canvas, each panel, and the router — graceful degradation
 - [ ] **Loading states**: skeleton screens while session loads, spinner during worker init
 - [ ] **Empty states**: helpful prompts when no track built, no trains placed, no timetable loaded
-- [ ] **Keyboard shortcut reference**: `?` key shows overlay with all shortcuts
+- [x] **Keyboard shortcut reference**: `?` key shows overlay with all shortcuts — generated from the `SHORTCUTS` registry in `packages/app/src/lib/shortcuts.ts`, which every binding site, the toolbar badges and the overlay read from
 - [ ] **Tutorial scenario**: pre-built simple network with step-by-step instructions (build track → place signal → place train → set route → run)
 - [ ] **PWA**: service worker for offline use, installable (manifest.json already exists)
 - [ ] **Favicon and app icons** (already have logo files)

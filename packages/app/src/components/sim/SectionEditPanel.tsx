@@ -8,10 +8,13 @@ import {
 	TRACK_COLOR_LENGTH,
 	TRACK_COLOR_SPEED,
 } from "@rail-op-sim/shared";
+import { useHotkey } from "@tanstack/react-hotkeys";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
+import { KbdGroup } from "#/components/ui/kbd";
 import { PlacementController } from "#/engine/PlacementController";
+import { SHORTCUTS, shortcutKeys } from "#/lib/shortcuts";
 import { useEditorStore } from "#/store/editor-store";
 
 /** A PixiJS 0xRRGGBB colour as a CSS hex string. */
@@ -69,6 +72,7 @@ export function SectionEditPanel() {
 	const [convYd, setConvYd] = useState("109.4");
 	const [convMi, setConvMi] = useState("0.06");
 	const confirmingRef = useRef(false);
+	const panelRef = useRef<HTMLDivElement>(null);
 
 	const visible = sectionStart && sectionEnd && sectionTracks.length > 0;
 
@@ -252,12 +256,30 @@ export function SectionEditPanel() {
 		}
 	}, [clearSectionSelection]);
 
+	// Enter applies the edit. Bound here rather than globally because the values
+	// being applied are this component's local state.
+	//
+	// `ignoreInputs: false` is the load-bearing option — Enter defaults to
+	// ignoring input-originated events, and the cursor sitting in a speed field is
+	// exactly where you want Enter to mean "apply". Scoping to the panel keeps it
+	// from firing anywhere else; element listeners also run before the document
+	// one and stop propagation by default, so this beats any global binding for
+	// free. `handleApply`'s `confirmingRef` latch makes key-repeat safe.
+	useHotkey(SHORTCUTS.applySection.hotkey, handleApply, {
+		target: panelRef,
+		ignoreInputs: false,
+		enabled: Boolean(visible),
+	});
+
 	if (!visible) return null;
 
 	const convImperial = formatImperialLength(Number(convM) || 0);
 
 	return (
-		<div className="absolute right-4 top-16 z-10 w-80 rounded-none border border-border bg-background/95 p-3 shadow-sm backdrop-blur-sm text-xs">
+		<div
+			ref={panelRef}
+			className="absolute right-4 top-16 z-10 w-80 rounded-none border border-border bg-background/95 p-3 shadow-sm backdrop-blur-sm text-xs"
+		>
 			<div className="font-medium mb-2">Section Editor</div>
 
 			{/* Section info */}
@@ -446,9 +468,11 @@ export function SectionEditPanel() {
 				</Button>
 				<Button variant="outline" size="xs" onClick={handleCancel}>
 					Cancel
+					<KbdGroup className="ml-1" keys={shortcutKeys("escape")} />
 				</Button>
 				<Button variant="default" size="xs" onClick={handleApply}>
 					Apply
+					<KbdGroup className="ml-1" keys={shortcutKeys("applySection")} />
 				</Button>
 			</div>
 		</div>

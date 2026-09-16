@@ -6,6 +6,7 @@ import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE } from "#/lib/grid";
 import { buildThemeColorMap } from "#/lib/svgColors";
 import { SVG_MAP } from "#/lib/svgMap";
+import { FIT_EXTENT, FIT_PADDING } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
 
 export interface UsePixiAppReturn {
@@ -159,10 +160,10 @@ export function usePixiApp(): UsePixiAppReturn {
 			const viewport = new VC({ world, app, onChange: redrawGrid });
 			viewport.attach();
 			// A tile-scale starting view (≈ origin centred, cells ~cell-size on screen).
-			viewport.fitToView(320, 40);
+			viewport.fitToView(FIT_EXTENT, FIT_PADDING);
 			debugLog(
 				"pixi",
-				`viewport attached — fitToView(320,40), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`,
+				`viewport attached — fitToView(${FIT_EXTENT},${FIT_PADDING}), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`,
 			);
 			redrawGrid();
 

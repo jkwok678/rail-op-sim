@@ -113,7 +113,12 @@ export class PlacementController {
 	private readonly trackColorLayer: TrackColorLayer;
 	private readonly directionLayer: DirectionLayer;
 	private readonly textures: TextureCache;
-	private readonly viewport: ViewportController;
+	/**
+	 * Public so React can reach the viewport through {@link instance}, the same
+	 * seam the dialogs use to reach the map — rather than a second singleton on
+	 * ViewportController, or prop-drilling the ref out of usePixiApp.
+	 */
+	readonly viewport: ViewportController;
 
 	private ghostSprite: SpriteType | null = null;
 	private ghostSubtype: string | null = null;

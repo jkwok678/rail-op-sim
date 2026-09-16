@@ -16,28 +16,73 @@ import {
 } from "@phosphor-icons/react";
 import { useMemo, useRef } from "react";
 import { Button } from "#/components/ui/button";
+import { KbdGroup } from "#/components/ui/kbd";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
 import { PlacementController } from "#/engine/PlacementController";
+import { useShortcutKeys } from "#/hooks/useShortcutDisplay";
+import type { ShortcutId } from "#/lib/shortcuts";
 import { type Tool, useEditorStore } from "#/store/editor-store";
 
 /** Undo/redo buttons, rendered as a pair between the tools and the toggles. */
-const HISTORY_ACTIONS: { key: "undo" | "redo"; label: string; Icon: Icon }[] = [
-	{ key: "undo", label: "Undo", Icon: ArrowUUpLeft },
-	{ key: "redo", label: "Redo", Icon: ArrowUUpRight },
+const HISTORY_ACTIONS: {
+	key: "undo" | "redo";
+	label: string;
+	Icon: Icon;
+	shortcut: ShortcutId;
+}[] = [
+	{ key: "undo", label: "Undo", Icon: ArrowUUpLeft, shortcut: "undo" },
+	{ key: "redo", label: "Redo", Icon: ArrowUUpRight, shortcut: "redo" },
 ];
 
-const TOOLS: { tool: Tool; label: string; Icon: Icon }[] = [
-	{ tool: "select", label: "Select", Icon: Cursor },
-	{ tool: "add", label: "Add track", Icon: Plus },
-	{ tool: "text", label: "Add Text", Icon: TextT },
-	{ tool: "link", label: "Link", Icon: Link },
-	{ tool: "section", label: "Set speed & length", Icon: Ruler },
-	{ tool: "direction", label: "Set direction", Icon: ArrowRight },
+const TOOLS: {
+	tool: Tool;
+	label: string;
+	Icon: Icon;
+	shortcut: ShortcutId;
+}[] = [
+	{ tool: "select", label: "Select", Icon: Cursor, shortcut: "toolSelect" },
+	{ tool: "add", label: "Add track", Icon: Plus, shortcut: "toolAdd" },
+	{ tool: "text", label: "Add Text", Icon: TextT, shortcut: "toolText" },
+	{ tool: "link", label: "Link", Icon: Link, shortcut: "toolLink" },
+	{
+		tool: "section",
+		label: "Set speed & length",
+		Icon: Ruler,
+		shortcut: "toolSection",
+	},
+	{
+		tool: "direction",
+		label: "Set direction",
+		Icon: ArrowRight,
+		shortcut: "toolDirection",
+	},
 ];
+
+/**
+ * Tooltip body with the shortcut badge alongside it. Reads the key from the
+ * registry, so a rebind moves the badge with it. Pass no `shortcut` (or one the
+ * button can't currently use) to render prose only.
+ */
+function Tip({
+	children,
+	shortcut,
+}: {
+	children: React.ReactNode;
+	shortcut?: ShortcutId;
+}) {
+	// Hooks can't be conditional, so always resolve and decide at render.
+	const keys = useShortcutKeys(shortcut ?? "toolSelect");
+	return (
+		<TooltipContent side="right">
+			<span>{children}</span>
+			<KbdGroup keys={shortcut ? keys : []} />
+		</TooltipContent>
+	);
+}
 
 /** Floating left toolbar for choosing the active editing tool. */
 export function Toolbar() {
@@ -123,7 +168,7 @@ export function Toolbar() {
 			>
 				<DotsSixVertical size={16} weight="bold" />
 			</button>
-			{TOOLS.map(({ tool: t, label, Icon }) => {
+			{TOOLS.map(({ tool: t, label, Icon, shortcut }) => {
 				// The direction tool needs a complete railway. A disabled <button>
 				// swallows pointer events, so wrap it in a focusable <span> to keep
 				// the explanatory tooltip firing.
@@ -146,7 +191,9 @@ export function Toolbar() {
 						<TooltipTrigger asChild>
 							{disabled ? <span tabIndex={-1}>{button}</span> : button}
 						</TooltipTrigger>
-						<TooltipContent side="right">{tooltip}</TooltipContent>
+						{/* No badge while disabled — the tooltip is explaining the
+						    fault that blocks the tool, and the key is blocked too. */}
+						<Tip shortcut={disabled ? undefined : shortcut}>{tooltip}</Tip>
 					</Tooltip>
 				);
 			})}
@@ -169,15 +216,15 @@ export function Toolbar() {
 							<Eraser size={18} />
 						</Button>
 					</TooltipTrigger>
-					<TooltipContent side="right">
+					<Tip shortcut="toggleEraseMode">
 						{directionMode === "erase"
 							? "Erasing directions — click two tracks to clear the route between them"
 							: "Erase directions — retrace a route to remove it"}
-					</TooltipContent>
+					</Tip>
 				</Tooltip>
 			)}
 			<div className="mx-1 border-t" />
-			{HISTORY_ACTIONS.map(({ key, label, Icon }) => {
+			{HISTORY_ACTIONS.map(({ key, label, Icon, shortcut }) => {
 				const disabled = key === "undo" ? !canUndo : !canRedo;
 				const action = key === "undo" ? undoLabel : redoLabel;
 				// Name the step, so the button says what it will reverse rather than
@@ -209,7 +256,7 @@ export function Toolbar() {
 						<TooltipTrigger asChild>
 							{disabled ? <span tabIndex={-1}>{button}</span> : button}
 						</TooltipTrigger>
-						<TooltipContent side="right">{tip}</TooltipContent>
+						<Tip shortcut={disabled ? undefined : shortcut}>{tip}</Tip>
 					</Tooltip>
 				);
 			})}
@@ -230,9 +277,9 @@ export function Toolbar() {
 						{showLinkHighlights ? <Eye size={18} /> : <EyeSlash size={18} />}
 					</Button>
 				</TooltipTrigger>
-				<TooltipContent side="right">
+				<Tip shortcut="toggleLinkHighlights">
 					{showLinkHighlights ? "Hide link highlights" : "Show link highlights"}
-				</TooltipContent>
+				</Tip>
 			</Tooltip>
 			<Tooltip>
 				<TooltipTrigger asChild>
@@ -251,9 +298,9 @@ export function Toolbar() {
 						<FlowArrow size={18} />
 					</Button>
 				</TooltipTrigger>
-				<TooltipContent side="right">
+				<Tip shortcut="toggleDirections">
 					{showDirections ? "Hide direction arrows" : "Show direction arrows"}
-				</TooltipContent>
+				</Tip>
 			</Tooltip>
 		</div>
 	);
