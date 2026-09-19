@@ -1,5 +1,6 @@
 import { ArrowLeft, X } from "@phosphor-icons/react";
 import {
+	aspectToLabel,
 	BridgeUnderpassType,
 	BufferType,
 	CrossoverType,
@@ -7,6 +8,7 @@ import {
 	DirectedType,
 	ExitType,
 	FlyoverType,
+	kindToShortLabel,
 	LinkedType,
 	ParapetType,
 	SignalAspect,
@@ -14,6 +16,7 @@ import {
 	SignalType,
 	StraightType,
 	SwitchType,
+	subtypeWithAspect,
 	type TrackKind,
 } from "@rail-op-sim/shared";
 import { Button } from "#/components/ui/button";
@@ -23,20 +26,28 @@ import { type ElementKind, useEditorStore } from "#/store/editor-store";
 import { AspectPreview } from "./AspectPreview";
 import { TrackPreview } from "./TrackPreview";
 
-/** Track categories in display order (most common first). */
-const CATEGORIES: { kind: TrackKind; label: string }[] = [
-	{ kind: "straight", label: "Straight" },
-	{ kind: "curved", label: "Curved" },
-	{ kind: "switch", label: "Switch" },
-	{ kind: "signal", label: "Signal" },
-	{ kind: "buffer", label: "Buffer" },
-	{ kind: "exit", label: "Exit" },
-	{ kind: "directed", label: "Directed" },
-	{ kind: "crossover", label: "Crossover" },
-	{ kind: "flyover", label: "Flyover" },
-	{ kind: "linked", label: "Linked" },
-	{ kind: "bridgeUnderpass", label: "Bridge / Underpass" },
+/**
+ * Track categories in display order (most common first). The order is a
+ * palette concern and lives here; the wording is shared with the hover tooltip
+ * and the undo labels, so it comes from the track vocabulary in `shared`.
+ */
+const CATEGORY_KINDS: TrackKind[] = [
+	"straight",
+	"curved",
+	"switch",
+	"signal",
+	"buffer",
+	"exit",
+	"directed",
+	"crossover",
+	"flyover",
+	"linked",
+	"bridgeUnderpass",
 ];
+
+const CATEGORIES: { kind: TrackKind; label: string }[] = CATEGORY_KINDS.map(
+	(kind) => ({ kind, label: kindToShortLabel(kind) }),
+);
 
 const CATEGORY_LABELS: Record<TrackKind, string> = Object.fromEntries(
 	CATEGORIES.map((c) => [c.kind, c.label]),
@@ -113,22 +124,22 @@ const ASPECT_OPTIONS: {
 }[] = [
 	{
 		value: SignalAspect.FOUR_ASPECT,
-		label: "4-aspect",
+		label: aspectToLabel(SignalAspect.FOUR_ASPECT),
 		filename: ASPECT_SVG_MAP[SignalAspect.FOUR_ASPECT],
 	},
 	{
 		value: SignalAspect.THREE_ASPECT,
-		label: "3-aspect",
+		label: aspectToLabel(SignalAspect.THREE_ASPECT),
 		filename: ASPECT_SVG_MAP[SignalAspect.THREE_ASPECT],
 	},
 	{
 		value: SignalAspect.TWO_ASPECT,
-		label: "2-aspect",
+		label: aspectToLabel(SignalAspect.TWO_ASPECT),
 		filename: ASPECT_SVG_MAP[SignalAspect.TWO_ASPECT],
 	},
 	{
 		value: SignalAspect.SHUNT,
-		label: "Shunt",
+		label: aspectToLabel(SignalAspect.SHUNT),
 		filename: ASPECT_SVG_MAP[SignalAspect.SHUNT],
 	},
 ];
@@ -220,7 +231,9 @@ export function AddPalette() {
 									key={subtype}
 									variant={selectedSubtype === subtype ? "secondary" : "ghost"}
 									size="icon-lg"
-									aria-label={subtype}
+									// Same name the tile's hover title uses, so the two can't
+									// disagree about which aspect is selected.
+									aria-label={subtypeWithAspect(subtype, previewAspect)}
 									aria-pressed={selectedSubtype === subtype}
 									onClick={() => selectSubtype(subtype)}
 								>

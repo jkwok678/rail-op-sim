@@ -45,8 +45,14 @@ const TOOLS: {
 	shortcut: ShortcutId;
 }[] = [
 	{ tool: "select", label: "Select", Icon: Cursor, shortcut: "toolSelect" },
-	{ tool: "add", label: "Add track", Icon: Plus, shortcut: "toolAdd" },
-	{ tool: "text", label: "Add Text", Icon: TextT, shortcut: "toolText" },
+	{
+		tool: "add",
+		// Also places elements, not only track — see the shortcut registry.
+		label: "Add track or element",
+		Icon: Plus,
+		shortcut: "toolAdd",
+	},
+	{ tool: "text", label: "Add text", Icon: TextT, shortcut: "toolText" },
 	{ tool: "link", label: "Link", Icon: Link, shortcut: "toolLink" },
 	{
 		tool: "section",

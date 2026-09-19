@@ -31,3 +31,10 @@ export {
 } from "./track-data";
 export type { CreateTrackDataOptions } from "./track-factory";
 export { createTrackData } from "./track-factory";
+export type { TrackKindLabels } from "./track-labels";
+export {
+	aspectToLabel,
+	kindToPhrase,
+	kindToShortLabel,
+	subtypeWithAspect,
+} from "./track-labels";
