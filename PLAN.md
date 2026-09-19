@@ -307,7 +307,7 @@ interface Train {
   position: TrainPosition;
   speed: number;                  // current m/s
   route?: Route;                  // assigned route through network
-  timetable?: TimetableEntry;
+  service?: Service;              // the working this train is running
   state: 'running' | 'stopped' | 'failed' | 'derailed';
   directionOfTravel: 'forward' | 'reverse';
 }
@@ -335,31 +335,37 @@ interface RouteSegment {
 }
 
 // === Timetable ===
+//
+// Superseded by packages/shared/src/railway/timetable/types.ts, which is the
+// implementation as of Milestone 20. The sketch below put the service *kind*
+// on the entry ('new-service' | 'follow-on' | 'shuttle' | 'split' | 'join'),
+// which cannot express a service that splits mid-journey, changes direction in
+// a platform, or waits to be joined — all of which "full feature parity" and
+// Milestone 23 require. The shipped model is RailOS's: a start time plus one
+// Service per working, each an ordered Action[] of exactly one start, any
+// number of intermediates, and exactly one finish. The milestones below are
+// unchanged; only these types are.
 
 interface Timetable {
-  id: string;
-  entries: TimetableEntry[];
-  repeatRule?: 'daily' | 'weekday' | 'saturday' | 'sunday' | 'none';
+  version: 1;
+  title?: string;
+  startTime: SimTime;              // seconds since 00:00 on day one, unwrapped
+  services: Service[];             // repeatRule is per-service `Repeat`
 }
 
-interface TimetableEntry {
-  trainId: string;
-  headcode: string;
-  origin: string;                  // station/siding name
-  destination: string;
-  departureTime: number;           // sim time (seconds from midnight)
-  stoppingPattern: Stop[];
-  type: 'new-service' | 'follow-on' | 'shuttle' | 'split' | 'join';
-  parentEntryId?: string;          // for follow-on/split/join
+interface Service {
+  ref: ServiceRef;                 // <= 8 chars; last 4 are the headcode
+  description?: string;
+  train?: TrainSpec;               // only on a service that *creates* a train
+  actions: Action[];
+  repeat?: Repeat;                 // expanded by the engine, not stored
 }
 
-interface Stop {
-  locationName: string;
-  arrivalTime: number;
-  departureTime: number;
-  platform?: string;
-  passing?: boolean;
-}
+// Action is a discriminated union: startNew | startNewService | startFromSplit
+// | stop | pass | changeDirection | frontSplit | rearSplit | joinedBy
+// | changeDescription | changeMaxSpeed | finishNewService | finishJoin
+// | finishExit | finishRemainHere (plus the shuttle variants, typed but not
+// yet supported). See timetable/types.ts for the fields of each.
 
 // === Failures & Disruptions ===
 
@@ -743,23 +749,33 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
 
 **Deliverable**: A UI to create and edit timetables. Save/load timetable files. No execution yet.
 
-- [ ] Build `TimetableEditor.tsx` — split-panel layout:
-  - **Left**: list of timetable entries (headcode, origin→destination, departure time)
-  - **Right**: detail editor for selected entry
-- [ ] Entry editor fields:
-  - Headcode, train type, origin station, destination station
-  - Departure time (HH:MM:SS from midnight)
-  - Stopping pattern: add/remove/reorder stops
-    - Each stop: station name, arrival time, departure time, platform number, passing checkbox
-  - Entry type: new-service / follow-on / shuttle / split / join
-  - Parent entry (for follow-on/split/join)
-- [ ] Validation in editor:
-  - Arrival must be before departure at each stop
-  - Stops must be in chronological order
-  - Follow-on: parent entry must end where this entry begins
-  - Split: parent's destination must match this entry's origin
-- [ ] Import/export timetable as JSON file
+The entry-shaped types this milestone was sketched against are superseded — see
+the note in the Data Model section. The list below is restated against the
+action-list model; the deliverable is unchanged.
+
+- [x] Build `TimetableEditor.tsx` — split-panel layout:
+  - **Left**: list of services (headcode, origin→destination, first departure, issue count)
+  - **Right**: detail editor for the selected service
+  - A floating panel rather than a modal: "pick on map" needs the canvas clickable.
+  - Gated on `trackStatus.complete` — a timetable books trains to named
+    platforms and runs them along preferred directions.
+- [x] Service editor fields:
+  - Headcode, description, and a train spec shown only for a service that creates a train
+  - Action list: add (kind picker), remove, reorder
+  - Per-kind fields: times (`HH:MM`/`HH:MM:SS`), location and service-reference
+    pickers, grid cells with pick-on-map
+  - Service kind is an *action*, not a field: startNew / startNewService /
+    startFromSplit, and the splits and joins along the way
+- [x] Validation, live, as `validateTimetable(tt, map?)`:
+  - Arrival before departure at each stop; times never decrease along a service
+  - One start first, one finish last, nothing after it
+  - Every cross-reference matched exactly once from both ends, with times agreeing
+  - Locations exist on the railway; start positions are joined track; exits are exits
+- [x] Import/export timetable as a JSON *or* YAML file, over the same helpers
+      the map uses (`lib/documentFile.ts`)
 - [ ] Timetable is saved as part of the session in IndexedDB
+- [ ] Shuttle actions in the editor (typed in the model, reported as unsupported)
+- [ ] `.ttb` import/export (`timetable/ttb.ts`, designed for, not built)
 
 ### Milestone 21: Timetable Engine — Basic Dispatch
 
@@ -1026,7 +1042,7 @@ type SimEvent =
   | { type: 'train_failure'; trainId: string; failure: Failure }
   | { type: 'collision'; trainId1: string; trainId2: string }
   | { type: 'derailment'; trainId: string; cause: string }
-  | { type: 'timetable_departure'; entry: TimetableEntry }
+  | { type: 'timetable_departure'; serviceRef: ServiceRef; action: Action }
   | { type: 'route_conflict'; routeId: string; conflictingRouteId: string };
 
 // === Host → Engine ===

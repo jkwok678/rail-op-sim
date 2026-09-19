@@ -5,6 +5,7 @@ import { loadMap, saveMap } from "#/lib/mapActions";
 import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 /**
  * Bind the editor's keyboard shortcuts. Mount once, from the layout that owns
@@ -30,6 +31,10 @@ export function useEditorHotkeys(): void {
 	const railwayConnected = useEditorStore(
 		(s) => s.trackStatus?.connected ?? false,
 	);
+	const railwayComplete = useEditorStore(
+		(s) => s.trackStatus?.complete ?? false,
+	);
+	const timetableOpen = useTimetableStore((s) => s.open);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const showShortcuts = useEditorStore((s) => s.showShortcuts);
@@ -45,8 +50,19 @@ export function useEditorHotkeys(): void {
 	/** Escape's target depends on state; `resolveEscape` decides, this applies. */
 	const runEscape = (): void => {
 		const state = useEditorStore.getState();
-		const action = resolveEscape(state);
+		const timetable = useTimetableStore.getState();
+		const action = resolveEscape({
+			...state,
+			timetableCellPick: timetable.pendingCellPick,
+			timetableOpen: timetable.open,
+		});
 		switch (action.type) {
+			case "cancelCellPick":
+				timetable.cancelCellPick();
+				break;
+			case "closeTimetable":
+				timetable.setOpen(false);
+				break;
 			case "cancelSection":
 				// Both halves: the store action alone leaves the pixi highlight on
 				// screen, which is why the panel's Cancel button does the same pair.
@@ -86,6 +102,8 @@ export function useEditorHotkeys(): void {
 		toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
 		toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
 
+		toggleTimetable: () => useTimetableStore.getState().toggleOpen(),
+
 		zoomIn: () => zoomIn(PlacementController.instance?.viewport),
 		zoomOut: () => zoomOut(PlacementController.instance?.viewport),
 		fitToView: () => fitToView(PlacementController.instance?.viewport),
@@ -111,6 +129,11 @@ export function useEditorHotkeys(): void {
 		switch (id) {
 			case "toolDirection":
 				return !overlayOpen && railwayConnected;
+			// Mirrors the footer button: the timetable needs a railway that is
+			// operationally complete, not merely joined. The key that opens the
+			// editor also closes it, so it is not gated on the editor itself.
+			case "toggleTimetable":
+				return !overlayOpen && (railwayComplete || timetableOpen);
 			case "toggleEraseMode":
 				return !overlayOpen && tool === "direction";
 			case "undo":

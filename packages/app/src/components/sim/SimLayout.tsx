@@ -12,8 +12,10 @@ import { SettingsMenu } from "./SettingsMenu";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SimCanvas } from "./SimCanvas";
 import { TextInputDialog } from "./TextInputDialog";
+import { TimetableControls } from "./TimetableControls";
 import { Toolbar } from "./Toolbar";
 import { TrackInfoTooltip } from "./TrackInfoTooltip";
+import { TimetableEditor } from "./timetable/TimetableEditor";
 
 /**
  * Full-screen simulation layout — the PixiJS canvas fills the entire viewport.
@@ -127,6 +129,7 @@ export function SimLayout() {
 					onOpenChange={setTextDialogOpen}
 				/>
 				<ShortcutsDialog />
+				<TimetableEditor />
 				<TrackInfoTooltip />
 			</div>
 			<footer className="h-7 border-t border-border bg-muted/30 flex items-center justify-between px-3 text-[11px] text-muted-foreground select-none">
@@ -149,6 +152,7 @@ export function SimLayout() {
 					>
 						<Keyboard />
 					</Button>
+					<TimetableControls />
 					<SaveLoadControls />
 					<SettingsMenu />
 					<Button

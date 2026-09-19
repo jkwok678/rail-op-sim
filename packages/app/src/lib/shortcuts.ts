@@ -25,6 +25,7 @@ export type ShortcutId =
 	| "toggleLinkHighlights"
 	| "toggleDirections"
 	| "toggleTrackInfo"
+	| "toggleTimetable"
 	| "zoomIn"
 	| "zoomOut"
 	| "fitToView"
@@ -123,6 +124,16 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		group: "Display",
 	},
 
+	// The timetable is a document laid over the map rather than a tool on it, so
+	// it takes a mnemonic letter rather than one of the toolbar's digits, and is
+	// listed under Edit rather than Display — it opens an editor, not an overlay.
+	toggleTimetable: {
+		id: "toggleTimetable",
+		hotkey: "T",
+		label: "Timetable editor",
+		group: "Edit",
+	},
+
 	// View. Deliberately unmodified: Ctrl/Cmd +/-/0 are UA-level browser zoom and
 	// preventDefault does not reliably cancel them, so a modified binding would
 	// zoom the page *and* the canvas.
@@ -188,6 +199,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleLinkHighlights",
 	"toggleDirections",
 	"toggleTrackInfo",
+	"toggleTimetable",
 	"zoomIn",
 	"zoomOut",
 	"fitToView",
