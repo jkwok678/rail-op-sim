@@ -84,6 +84,18 @@ export {
 	SERIALIZED_MAP_VERSION,
 	serializeMap,
 } from "./map/map-serialization";
+// Timetable — clock arithmetic
+export {
+	dayOffset,
+	formatDuration,
+	formatSimTime,
+	formatWallClock,
+	InvalidTimeError,
+	parseSimTime,
+	SECONDS_PER_DAY,
+	type SimTime,
+	tryParseSimTime,
+} from "./timetable/time";
 export type {
 	CreateTrackDataOptions,
 	PreferredDirection,
