@@ -6,6 +6,7 @@
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
+    "coverage": "pnpm -r run coverage && node scripts/merge-coverage.mjs",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",

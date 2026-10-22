@@ -63,8 +63,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Real coverage, so complexity is scored against what the tests exercise
+      # rather than Fallow's estimate from export references.
+      - run: pnpm run coverage
       - name: Fallow audit against merge base
-        run: pnpm exec fallow audit --base ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
+        run: pnpm exec fallow audit --base ${{ github.event.pull_request.base.sha || 'HEAD~1' }} --coverage coverage/coverage-final.json
 
   build:
     name: Build

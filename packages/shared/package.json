@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "echo 'Shared dev stub'",
     "build": "echo 'Shared build stub'",
-    "test": "vitest run"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage.enabled --coverage.reporter=json"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^5.0.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"
   }
