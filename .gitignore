@@ -13,3 +13,4 @@ __unconfig*
 todos.json
 .agents/
 *.tsbuildinfo
+.claude/agent-memory/
