@@ -1,0 +1,2 @@
+- [Disk Map locked OQs](disk-sunburst-locked-oqs.md) — OQ-1..7 frozen 2026-10-22; implement, don’t debate
+- [Locked defaults](feedback-locked-defaults.md) — recommended defaults marked locked are requirements
