@@ -15,3 +15,4 @@ todos.json
 *.tsbuildinfo
 .claude/agent-memory/
 coverage
+railway-plan.json
