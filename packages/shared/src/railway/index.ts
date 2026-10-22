@@ -159,10 +159,12 @@ export type {
 	TrackData,
 	TrackDirectionality,
 	TrackKind,
+	TrackKindLabels,
 	TrackKindMeta,
 } from "./track";
 // Track class
 export {
+	aspectToLabel,
 	createTrackData,
 	DEFAULT_MAIN_LENGTH,
 	DEFAULT_MAIN_SPEED,
@@ -176,8 +178,11 @@ export {
 	isValidSubtype,
 	KIND_META,
 	kindToLabel,
+	kindToPhrase,
+	kindToShortLabel,
 	SignalAspect,
 	subtypeToCode,
+	subtypeWithAspect,
 	supportsLevelCrossing,
 	supportsPlatforms,
 	TRACK_COLOR_ALPHA,

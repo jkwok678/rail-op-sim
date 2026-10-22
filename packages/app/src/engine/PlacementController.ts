@@ -8,7 +8,7 @@ import {
 	type FontInfo,
 	findPathBetween,
 	getConnectivityReport,
-	kindToLabel,
+	kindToPhrase,
 	Map as Map_,
 	type ParapetType,
 	Platform,
@@ -16,7 +16,6 @@ import {
 	type SerializedMap,
 	serializeMap,
 	setPreferredDirectionsAlongPath,
-	subtypeToCode,
 	type Text,
 	undoEntries,
 } from "@rail-op-sim/shared";
@@ -29,6 +28,7 @@ import { EditHistory, type RefreshFlags } from "#/engine/EditHistory";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
+import { buildHoveredTrackInfo } from "#/lib/trackInfo";
 import type { DirectionLayer } from "#/renderer/layers/DirectionLayer";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
@@ -933,7 +933,7 @@ export class PlacementController {
 						options,
 					);
 					this.commit(
-						`Add ${kindToLabel(selectedKind)}`,
+						`Add ${kindToPhrase(selectedKind)}`,
 						{
 							track: true,
 							linkHighlight: true,
@@ -1575,6 +1575,9 @@ export class PlacementController {
 					wp.x - this.textDrag.offsetX,
 					wp.y - this.textDrag.offsetY,
 				);
+			// This branch skips the track-info hover below, so a tooltip opened
+			// before the drag would otherwise hang frozen until the release.
+			useEditorStore.getState().setHoveredTrackInfo(null);
 			return;
 		}
 
@@ -1606,20 +1609,19 @@ export class PlacementController {
 			const track = hoverCell
 				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
 				: null;
-			useEditorStore.getState().setHoveredTrackInfo(
-				track && hoverCell
-					? {
-							kindLabel: kindToLabel(track.data.kind),
-							subtypeCode: subtypeToCode(track.data.kind, track.data.subtype),
-							mainSpeed: track.getTrackMainSpeed(),
-							mainLength: track.getTrackMainLength(),
-							gx: hoverCell.gx,
-							gy: hoverCell.gy,
-							screenX: e.clientX,
-							screenY: e.clientY,
-						}
-					: null,
-			);
+			useEditorStore
+				.getState()
+				.setHoveredTrackInfo(
+					track && hoverCell
+						? buildHoveredTrackInfo(
+								track,
+								hoverCell.gx,
+								hoverCell.gy,
+								e.clientX,
+								e.clientY,
+							)
+						: null,
+				);
 		}
 
 		if (tool !== "add" || !selectedSubtype || !this.ghostSprite) {

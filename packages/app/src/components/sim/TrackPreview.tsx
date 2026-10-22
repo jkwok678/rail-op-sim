@@ -1,4 +1,4 @@
-import { SignalAspect } from "@rail-op-sim/shared";
+import { SignalAspect, subtypeWithAspect } from "@rail-op-sim/shared";
 import { useEffect, useState } from "react";
 import { InlineSvg } from "#/components/sim/InlineSvg";
 import { buildDomColorMap, recolorSvg } from "#/lib/svgColors";
@@ -50,7 +50,7 @@ export function TrackPreview({
 		<InlineSvg
 			markup={markup}
 			className="block size-7 text-foreground [&_svg]:size-full"
-			title={aspect ? `${subtype} (shunt)` : subtype}
+			title={subtypeWithAspect(subtype, aspect)}
 		/>
 	);
 }

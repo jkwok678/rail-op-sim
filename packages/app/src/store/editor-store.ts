@@ -56,6 +56,15 @@ export type HoveredTrackInfo = {
 	subtypeCode: string;
 	mainSpeed: number;
 	mainLength: number;
+	/**
+	 * Second path's speed/length on the kinds that have one (switch, crossover,
+	 * flyover); null elsewhere. Without it the tooltip would show a switch's
+	 * main figures as if they were the whole track.
+	 */
+	secondarySpeed: number | null;
+	secondaryLength: number | null;
+	/** Aspect capability label, signals only ("4-aspect"); null otherwise. */
+	aspectLabel: string | null;
 	gx: number;
 	gy: number;
 	/** Viewport coordinates of the pointer (for fixed-position rendering). */

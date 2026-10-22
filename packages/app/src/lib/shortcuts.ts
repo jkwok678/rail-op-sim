@@ -77,7 +77,14 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		label: "Select",
 		group: "Tools",
 	},
-	toolAdd: { id: "toolAdd", hotkey: "2", label: "Add track", group: "Tools" },
+	// "Add", not "Add track": the same palette also places the non-track
+	// elements (platform, concourse, parapet, named location, level crossing).
+	toolAdd: {
+		id: "toolAdd",
+		hotkey: "2",
+		label: "Add track or element",
+		group: "Tools",
+	},
 	toolText: { id: "toolText", hotkey: "3", label: "Add text", group: "Tools" },
 	toolLink: { id: "toolLink", hotkey: "4", label: "Link", group: "Tools" },
 	toolSection: {
