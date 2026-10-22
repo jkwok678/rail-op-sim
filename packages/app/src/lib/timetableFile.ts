@@ -28,9 +28,6 @@ export type TimetableFileFormat = DocumentFileFormat;
 /** A timetable plus the encoding it was read from (so a later save can match). */
 export type LoadedTimetableFile = LoadedDocument<Timetable>;
 
-/** File picker `accept` for both encodings, including the shorter `.yml`. */
-export { DOCUMENT_FILE_ACCEPT as TIMETABLE_FILE_ACCEPT } from "#/lib/documentFile";
-
 /** Default download name for each encoding. */
 export function timetableFileName(format: TimetableFileFormat): string {
 	return format === "yaml" ? "timetable.yaml" : "timetable.json";

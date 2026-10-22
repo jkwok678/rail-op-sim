@@ -18,7 +18,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 export type DocumentFileFormat = "json" | "yaml";
 
 /** File picker `accept` for both encodings, including the shorter `.yml`. */
-export const DOCUMENT_FILE_ACCEPT =
+const DOCUMENT_FILE_ACCEPT =
 	"application/json,.json,application/yaml,text/yaml,.yaml,.yml";
 
 /** A parsed document plus the encoding it was read from. */

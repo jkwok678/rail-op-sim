@@ -216,6 +216,13 @@ export type FinishAction = ActionBase &
 
 export type Action = StartAction | IntermediateAction | FinishAction;
 
+/**
+ * The action of one `kind`, narrowed out of the union. An intersection rather
+ * than `Extract`, because `frontSplit` and `rearSplit` share one member and
+ * `Extract` would find neither.
+ */
+export type ActionOf<K extends Action["kind"]> = Action & { kind: K };
+
 /** Every `kind` a {@link StartAction} can have. */
 export const START_KINDS = [
 	"startNew",

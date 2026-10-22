@@ -22,6 +22,7 @@ import { getLocationNames, trackAtCell } from "./locations";
 import { formatSimTime, type SimTime } from "./time";
 import {
 	type Action,
+	type ActionOf,
 	actionTime,
 	type Cell,
 	createsTrain,
@@ -30,6 +31,7 @@ import {
 	isShuttleAction,
 	isStartAction,
 	MAX_SERVICE_REF_LENGTH,
+	type Repeat,
 	type Service,
 	type ServiceRef,
 	START_KINDS,
@@ -133,10 +135,16 @@ function validateService(
 	service: Service,
 	out: IssueList,
 ): void {
-	const ref = service.ref;
-	const at = (actionIndex: number) => ({ serviceRef: ref, actionIndex });
+	validateRef(service.ref, out);
+	if (service.repeat) validateRepeat(service.ref, service.repeat, out);
+	if (!validateShape(service, out)) return;
+	validateTrainPresence(service, out);
+	if (service.train) validateTrainSpec(service, out);
+	validateTimes(tt, service, out);
+}
 
-	// ── The service's own identity ───────────────────────────────────────
+/** The service's own identity. */
+function validateRef(ref: ServiceRef, out: IssueList): void {
 	if (ref.trim() === "") {
 		out.error("empty-ref", "A service has no headcode.", { serviceRef: ref });
 	} else if (ref.length > MAX_SERVICE_REF_LENGTH) {
@@ -146,61 +154,66 @@ function validateService(
 			{ serviceRef: ref },
 		);
 	}
+}
 
-	// ── Repeats ──────────────────────────────────────────────────────────
-	if (service.repeat) {
-		const { intervalMinutes, count, headcodeIncrement } = service.repeat;
-		if (!(intervalMinutes > 0)) {
-			out.error(
-				"repeat-interval",
-				"A repeat must have an interval of at least one minute.",
-				{ serviceRef: ref },
-			);
-		}
-		if (!(count >= 1)) {
-			out.error("repeat-count", "A repeat must run at least once more.", {
-				serviceRef: ref,
-			});
-		}
-		if (!Number.isInteger(headcodeIncrement) || headcodeIncrement < 0) {
-			out.error(
-				"repeat-increment",
-				"A repeat's headcode increment must be zero or a positive whole number.",
-				{ serviceRef: ref },
-			);
-		}
-		// RailOS increments the numeric tail of the headcode, so it has to be
-		// numeric for the repeats to have distinct, legible names.
-		if (headcodeIncrement > 0 && !/\d\d$/.test(ref)) {
-			out.error(
-				"repeat-headcode",
-				`"${ref}" must end in two digits for its repeats to be numbered.`,
-				{ serviceRef: ref },
-			);
-		}
+function validateRepeat(ref: ServiceRef, repeat: Repeat, out: IssueList): void {
+	const { intervalMinutes, count, headcodeIncrement } = repeat;
+	if (!(intervalMinutes > 0)) {
+		out.error(
+			"repeat-interval",
+			"A repeat must have an interval of at least one minute.",
+			{ serviceRef: ref },
+		);
 	}
+	if (!(count >= 1)) {
+		out.error("repeat-count", "A repeat must run at least once more.", {
+			serviceRef: ref,
+		});
+	}
+	if (!Number.isInteger(headcodeIncrement) || headcodeIncrement < 0) {
+		out.error(
+			"repeat-increment",
+			"A repeat's headcode increment must be zero or a positive whole number.",
+			{ serviceRef: ref },
+		);
+	}
+	// RailOS increments the numeric tail of the headcode, so it has to be
+	// numeric for the repeats to have distinct, legible names.
+	if (headcodeIncrement > 0 && !/\d\d$/.test(ref)) {
+		out.error(
+			"repeat-headcode",
+			`"${ref}" must end in two digits for its repeats to be numbered.`,
+			{ serviceRef: ref },
+		);
+	}
+}
 
-	// ── The shape of the action list ─────────────────────────────────────
-	const actions = service.actions;
+/**
+ * The shape of the action list: one start, first; one finish, last; nothing
+ * unsupported in between. False when there are no actions at all, since
+ * nothing after this has anything to check.
+ */
+function validateShape(service: Service, out: IssueList): boolean {
+	const { ref, actions } = service;
+	const at = (actionIndex: number) => ({ serviceRef: ref, actionIndex });
 	if (actions.length === 0) {
 		out.error("no-actions", `"${ref}" does nothing.`, { serviceRef: ref });
-		return;
+		return false;
 	}
 
-	const first = actions[0];
-	if (!isStartAction(first)) {
+	if (!isStartAction(actions[0])) {
 		out.error(
 			"no-start",
 			`"${ref}" must begin with a start action (${START_KINDS.join(", ")}).`,
 			at(0),
 		);
 	}
-	const last = actions[actions.length - 1];
-	if (!isFinishAction(last)) {
+	const lastIndex = actions.length - 1;
+	if (!isFinishAction(actions[lastIndex])) {
 		out.error(
 			"no-finish",
 			`"${ref}" must end with a finish action (${FINISH_KINDS.join(", ")}).`,
-			at(actions.length - 1),
+			at(lastIndex),
 		);
 	}
 
@@ -212,7 +225,7 @@ function validateService(
 				at(i),
 			);
 		}
-		if (i < actions.length - 1 && isFinishAction(action)) {
+		if (i < lastIndex && isFinishAction(action)) {
 			out.error(
 				"action-after-finish",
 				`"${ref}" carries on after it finishes.`,
@@ -227,8 +240,13 @@ function validateService(
 			);
 		}
 	});
+	return true;
+}
 
-	// ── The train spec ───────────────────────────────────────────────────
+/** A train spec is required exactly when the service creates the train. */
+function validateTrainPresence(service: Service, out: IssueList): void {
+	const { ref } = service;
+	const first = service.actions[0];
 	const startCreatesTrain = isStartAction(first) && createsTrain(first);
 	if (startCreatesTrain && !service.train) {
 		out.error(
@@ -246,10 +264,6 @@ function validateService(
 			{ serviceRef: ref },
 		);
 	}
-	if (service.train) validateTrainSpec(service, out);
-
-	// ── Times ────────────────────────────────────────────────────────────
-	validateTimes(tt, service, out);
 }
 
 function validateTrainSpec(service: Service, out: IssueList): void {
@@ -328,37 +342,11 @@ function validateTimes(tt: Timetable, service: Service, out: IssueList): void {
 		const where = { serviceRef: ref, actionIndex: i };
 
 		if (action.kind === "stop") {
-			const { arrive, depart } = action;
-			if (arrive === undefined && depart === undefined) {
+			if (action.arrive === undefined && action.depart === undefined) {
 				out.error("stop-without-time", "A stop needs a time.", where);
 				return;
 			}
-			if (arrive !== undefined && depart !== undefined && depart < arrive) {
-				out.error(
-					"depart-before-arrive",
-					`"${ref}" leaves ${action.location} at ${formatSimTime(depart)}, before it arrives at ${formatSimTime(arrive)}.`,
-					where,
-				);
-			}
-			if (
-				action.minDwellSeconds !== undefined &&
-				!(action.minDwellSeconds >= 0)
-			) {
-				out.error(
-					"invalid-dwell",
-					"A minimum dwell cannot be negative.",
-					where,
-				);
-			}
-			// A lone time at the first location is a departure; elsewhere it is an
-			// arrival, and the stop's own span runs from there to `depart`.
-			const effectiveArrive =
-				arrive ?? (seenLocation ? (depart as SimTime) : undefined);
-			const effectiveDepart = depart ?? (arrive as SimTime);
-			if (effectiveArrive !== undefined) {
-				previous = checkOrder(out, ref, i, previous, effectiveArrive);
-			}
-			previous = checkOrder(out, ref, i, previous, effectiveDepart);
+			previous = checkStop(out, ref, i, action, previous, seenLocation);
 			seenLocation = true;
 			return;
 		}
@@ -373,6 +361,42 @@ function validateTimes(tt: Timetable, service: Service, out: IssueList): void {
 		}
 		previous = checkOrder(out, ref, i, previous, time);
 	});
+}
+
+/**
+ * One timed stop: its own span, its dwell, and where it falls in the service's
+ * order. Returns the time to carry forward.
+ */
+function checkStop(
+	out: IssueList,
+	ref: ServiceRef,
+	actionIndex: number,
+	stop: ActionOf<"stop">,
+	previous: SimTime | null,
+	seenLocation: boolean,
+): SimTime | null {
+	const { arrive, depart } = stop;
+	const where = { serviceRef: ref, actionIndex };
+	if (arrive !== undefined && depart !== undefined && depart < arrive) {
+		out.error(
+			"depart-before-arrive",
+			`"${ref}" leaves ${stop.location} at ${formatSimTime(depart)}, before it arrives at ${formatSimTime(arrive)}.`,
+			where,
+		);
+	}
+	if (stop.minDwellSeconds !== undefined && !(stop.minDwellSeconds >= 0)) {
+		out.error("invalid-dwell", "A minimum dwell cannot be negative.", where);
+	}
+	// A lone time at the first location is a departure; elsewhere it is an
+	// arrival, and the stop's own span runs from there to `depart`.
+	const effectiveArrive =
+		arrive ?? (seenLocation ? (depart as SimTime) : undefined);
+	const effectiveDepart = depart ?? (arrive as SimTime);
+	let carried = previous;
+	if (effectiveArrive !== undefined) {
+		carried = checkOrder(out, ref, actionIndex, carried, effectiveArrive);
+	}
+	return checkOrder(out, ref, actionIndex, carried, effectiveDepart);
 }
 
 /** Report a time that goes backwards, and carry the later of the two forward. */

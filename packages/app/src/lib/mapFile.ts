@@ -26,9 +26,6 @@ export type MapFileFormat = DocumentFileFormat;
 /** A map document plus the encoding it was read from (so a later save can match). */
 export type LoadedMapFile = LoadedDocument<SerializedMap>;
 
-/** File picker `accept` for both encodings, including the shorter `.yml`. */
-export { DOCUMENT_FILE_ACCEPT as MAP_FILE_ACCEPT } from "#/lib/documentFile";
-
 /** Thrown when a picked file cannot be parsed as a supported map document. */
 export class InvalidMapFileError extends Error {
 	constructor(message: string) {

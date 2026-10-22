@@ -117,6 +117,7 @@ export {
 // Timetable — the data model
 export type {
 	Action,
+	ActionOf,
 	Cell,
 	FinishAction,
 	IntermediateAction,

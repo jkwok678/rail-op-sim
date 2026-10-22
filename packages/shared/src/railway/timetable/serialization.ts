@@ -12,16 +12,14 @@
  */
 
 import { parseSimTime, type SimTime } from "./time";
-import {
-	type Action,
-	type Cell,
-	FINISH_KINDS,
-	INTERMEDIATE_KINDS,
-	type Repeat,
-	type Service,
-	START_KINDS,
-	type Timetable,
-	type TrainSpec,
+import type {
+	Action,
+	ActionOf,
+	Cell,
+	Repeat,
+	Service,
+	Timetable,
+	TrainSpec,
 } from "./types";
 
 /** Bump when the on-disk shape changes in a backwards-incompatible way. */
@@ -40,13 +38,6 @@ export class InvalidTimetableError extends Error {
 		this.name = "InvalidTimetableError";
 	}
 }
-
-/** Every action kind this build understands. */
-const KNOWN_KINDS: ReadonlySet<string> = new Set<string>([
-	...START_KINDS,
-	...INTERMEDIATE_KINDS,
-	...FINISH_KINDS,
-]);
 
 /** A timetable with nothing in it, ready for the editor to fill. */
 export function createEmptyTimetable(
@@ -156,6 +147,160 @@ function parseRepeat(input: unknown, ref: string): Repeat {
 }
 
 /**
+ * One action's fields, each read with a message naming the action and field,
+ * so the per-kind readers below are a line per field.
+ */
+interface ActionFields {
+	time(): SimTime;
+	ref(field: string): string;
+	text(field: string, what: string): string;
+	cell(field: string): Cell;
+	doc: Record<string, unknown>;
+	where: string;
+}
+
+/**
+ * How to read each kind, keeping only the fields it declares. The mapped type
+ * makes a kind added to the union a compile error here until it has a reader —
+ * which is also what makes this table the list of kinds this build accepts.
+ */
+const ACTION_READERS: {
+	[K in Action["kind"]]: (f: ActionFields) => ActionOf<K>;
+} = {
+	startNew: (f) => ({
+		kind: "startNew",
+		time: f.time(),
+		rear: f.cell("rear"),
+		front: f.cell("front"),
+		...(f.doc.signallerControl === undefined
+			? {}
+			: {
+					signallerControl: asBoolean(
+						f.doc.signallerControl,
+						`${f.where}'s signaller-control flag`,
+					),
+				}),
+	}),
+	startNewShuttle: (f) => ({
+		kind: "startNewShuttle",
+		time: f.time(),
+		rear: f.cell("rear"),
+		front: f.cell("front"),
+		otherRef: f.ref("otherRef"),
+	}),
+	startFromSplit: (f) => ({
+		kind: "startFromSplit",
+		time: f.time(),
+		fromRef: f.ref("fromRef"),
+	}),
+	startNewService: (f) => ({
+		kind: "startNewService",
+		time: f.time(),
+		fromRef: f.ref("fromRef"),
+	}),
+	startShuttle: (f) => ({
+		kind: "startShuttle",
+		time: f.time(),
+		fromRef: f.ref("fromRef"),
+	}),
+	startFromShuttle: (f) => ({
+		kind: "startFromShuttle",
+		time: f.time(),
+		fromRef: f.ref("fromRef"),
+	}),
+	stop: readStop,
+	pass: (f) => ({
+		kind: "pass",
+		time: f.time(),
+		location: f.text("location", "location"),
+	}),
+	changeDirection: (f) => ({ kind: "changeDirection", time: f.time() }),
+	frontSplit: (f) => ({
+		kind: "frontSplit",
+		time: f.time(),
+		newRef: f.ref("newRef"),
+	}),
+	rearSplit: (f) => ({
+		kind: "rearSplit",
+		time: f.time(),
+		newRef: f.ref("newRef"),
+	}),
+	joinedBy: (f) => ({
+		kind: "joinedBy",
+		time: f.time(),
+		otherRef: f.ref("otherRef"),
+	}),
+	finishJoin: (f) => ({
+		kind: "finishJoin",
+		time: f.time(),
+		otherRef: f.ref("otherRef"),
+	}),
+	changeDescription: (f) => ({
+		kind: "changeDescription",
+		time: f.time(),
+		description: f.text("description", "description"),
+	}),
+	changeMaxSpeed: (f) => ({
+		kind: "changeMaxSpeed",
+		time: f.time(),
+		maxSpeedKmh: asNumber(f.doc.maxSpeedKmh, `${f.where}'s maximum speed`),
+	}),
+	finishNewService: (f) => ({
+		kind: "finishNewService",
+		time: f.time(),
+		nextRef: f.ref("nextRef"),
+	}),
+	finishRemainHere: () => ({ kind: "finishRemainHere" }),
+	finishShuttleRemainHere: (f) => ({
+		kind: "finishShuttleRemainHere",
+		otherRef: f.ref("otherRef"),
+	}),
+	finishShuttleNewService: (f) => ({
+		kind: "finishShuttleNewService",
+		time: f.time(),
+		nextRef: f.ref("nextRef"),
+		otherRef: f.ref("otherRef"),
+	}),
+	finishExit: (f) => {
+		if (!Array.isArray(f.doc.exits)) {
+			throw new InvalidTimetableError(`${f.where} has no list of exits.`);
+		}
+		return {
+			kind: "finishExit",
+			time: f.time(),
+			exits: f.doc.exits.map((cell, i) =>
+				asCell(cell, `${f.where}'s exit ${i + 1}`),
+			),
+		};
+	},
+};
+
+/** A stop's times are each optional, so it is the one reader with branches. */
+function readStop(f: ActionFields): ActionOf<"stop"> {
+	const stop: ActionOf<"stop"> = {
+		kind: "stop",
+		location: f.text("location", "location"),
+	};
+	if (f.doc.arrive !== undefined) {
+		stop.arrive = asTime(f.doc.arrive, `${f.where}'s arrival`);
+	}
+	if (f.doc.depart !== undefined) {
+		stop.depart = asTime(f.doc.depart, `${f.where}'s departure`);
+	}
+	if (f.doc.minDwellSeconds !== undefined) {
+		stop.minDwellSeconds = asNumber(
+			f.doc.minDwellSeconds,
+			`${f.where}'s minimum dwell`,
+		);
+	}
+	return stop;
+}
+
+function isKnownKind(kind: string): kind is Action["kind"] {
+	return Object.hasOwn(ACTION_READERS, kind);
+}
+
+/**
  * Read one action, keeping only the fields its `kind` declares.
  *
  * Rebuilding field by field rather than spreading the input is what makes the
@@ -168,132 +313,24 @@ function parseAction(input: unknown, ref: string, index: number): Action {
 	const doc = asRecord(input, `${where} is not an action.`);
 	const kind = asString(doc.kind, `${where}'s kind`);
 
-	if (!KNOWN_KINDS.has(kind)) {
+	if (!isKnownKind(kind)) {
 		throw new InvalidTimetableError(`${where} has an unknown kind "${kind}".`);
 	}
 
-	const warning =
-		doc.warning === undefined
-			? {}
-			: { warning: asBoolean(doc.warning, `${where}'s warning flag`) };
-	const time = (): SimTime => asTime(doc.time, `${where}'s time`);
-	const refField = (field: string): string =>
-		asString(doc[field], `${where}'s ${field}`);
-
-	switch (kind) {
-		case "startNew":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				rear: asCell(doc.rear, `${where}'s rear`),
-				front: asCell(doc.front, `${where}'s front`),
-				...(doc.signallerControl === undefined
-					? {}
-					: {
-							signallerControl: asBoolean(
-								doc.signallerControl,
-								`${where}'s signaller-control flag`,
-							),
-						}),
-			};
-		case "startNewShuttle":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				rear: asCell(doc.rear, `${where}'s rear`),
-				front: asCell(doc.front, `${where}'s front`),
-				otherRef: refField("otherRef"),
-			};
-		case "startFromSplit":
-		case "startNewService":
-		case "startShuttle":
-		case "startFromShuttle":
-			return { ...warning, kind, time: time(), fromRef: refField("fromRef") };
-		case "stop": {
-			const stop: Action = {
-				...warning,
-				kind,
-				location: asString(doc.location, `${where}'s location`),
-			};
-			if (doc.arrive !== undefined) {
-				stop.arrive = asTime(doc.arrive, `${where}'s arrival`);
-			}
-			if (doc.depart !== undefined) {
-				stop.depart = asTime(doc.depart, `${where}'s departure`);
-			}
-			if (doc.minDwellSeconds !== undefined) {
-				stop.minDwellSeconds = asNumber(
-					doc.minDwellSeconds,
-					`${where}'s minimum dwell`,
-				);
-			}
-			return stop;
-		}
-		case "pass":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				location: asString(doc.location, `${where}'s location`),
-			};
-		case "changeDirection":
-			return { ...warning, kind, time: time() };
-		case "frontSplit":
-		case "rearSplit":
-			return { ...warning, kind, time: time(), newRef: refField("newRef") };
-		case "joinedBy":
-		case "finishJoin":
-			return { ...warning, kind, time: time(), otherRef: refField("otherRef") };
-		case "changeDescription":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				description: asString(doc.description, `${where}'s description`),
-			};
-		case "changeMaxSpeed":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				maxSpeedKmh: asNumber(doc.maxSpeedKmh, `${where}'s maximum speed`),
-			};
-		case "finishNewService":
-			return { ...warning, kind, time: time(), nextRef: refField("nextRef") };
-		case "finishRemainHere":
-			return { ...warning, kind };
-		case "finishShuttleRemainHere":
-			return { ...warning, kind, otherRef: refField("otherRef") };
-		case "finishShuttleNewService":
-			return {
-				...warning,
-				kind,
-				time: time(),
-				nextRef: refField("nextRef"),
-				otherRef: refField("otherRef"),
-			};
-		case "finishExit": {
-			if (!Array.isArray(doc.exits)) {
-				throw new InvalidTimetableError(`${where} has no list of exits.`);
-			}
-			return {
-				...warning,
-				kind,
-				time: time(),
-				exits: doc.exits.map((cell, i) =>
-					asCell(cell, `${where}'s exit ${i + 1}`),
-				),
-			};
-		}
-		default:
-			// KNOWN_KINDS is built from the same lists the switch covers, so this is
-			// only reachable if a kind is added to the union and not to the switch.
-			throw new InvalidTimetableError(
-				`${where} has an unhandled kind "${kind}".`,
-			);
+	const fields: ActionFields = {
+		doc,
+		where,
+		time: () => asTime(doc.time, `${where}'s time`),
+		ref: (field) => asString(doc[field], `${where}'s ${field}`),
+		text: (field, what) => asString(doc[field], `${where}'s ${what}`),
+		cell: (field) => asCell(doc[field], `${where}'s ${field}`),
+	};
+	const read = ACTION_READERS[kind] as (f: ActionFields) => Action;
+	const action = read(fields);
+	if (doc.warning !== undefined) {
+		action.warning = asBoolean(doc.warning, `${where}'s warning flag`);
 	}
+	return action;
 }
 
 // ── Field readers ───────────────────────────────────────────────────────
