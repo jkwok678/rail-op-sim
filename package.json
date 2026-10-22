@@ -10,7 +10,8 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json"
+    "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json",
+    "start": "pnpm --filter @rail-op-sim/app start"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
