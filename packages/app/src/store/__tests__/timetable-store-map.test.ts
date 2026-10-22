@@ -81,7 +81,6 @@ beforeEach(() => {
 		selectedServiceRef: null,
 		selectedActionIndex: null,
 		issues: [],
-		open: false,
 		pendingCellPick: null,
 		loadError: null,
 	});

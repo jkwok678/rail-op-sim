@@ -1,12 +1,4 @@
-import {
-	ArrowDown,
-	ArrowUp,
-	FloppyDisk,
-	FolderOpen,
-	Plus,
-	Trash,
-	X,
-} from "@phosphor-icons/react";
+import { ArrowDown, ArrowUp, Plus, Trash } from "@phosphor-icons/react";
 import {
 	type Action,
 	actionTime,
@@ -22,7 +14,7 @@ import {
 	type TimetableIssue,
 	type TrainSpec,
 } from "@rail-op-sim/shared";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Button } from "#/components/ui/button";
 import {
 	Select,
@@ -34,7 +26,6 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { PlacementController } from "#/engine/PlacementController";
-import { loadTimetable, saveTimetable } from "#/lib/timetableActions";
 import { useEditorStore } from "#/store/editor-store";
 import {
 	type PendingCellPick,
@@ -54,16 +45,17 @@ import { NumberField, TextField, TimeField } from "./fields";
  * The timetable editor: services on the left, the selected one on the right,
  * its issues underneath.
  *
- * A floating panel rather than a modal dialog, and that is a requirement
- * rather than a preference — "pick on map" needs the canvas clickable while
- * the editor is open, which a modal overlay would swallow.
+ * The whole of timetable mode's UI, docked beside the canvas rather than over
+ * it — "pick on map" needs the canvas clickable while the editor is open, and
+ * a docked panel can never cover the cell being picked. The layout mounts it
+ * only in timetable mode; saving and loading go through the footer, which acts
+ * on the current mode's document.
  *
  * The map is reached through the singleton placement controller, the way the
  * other panels do, and passed into every mutator so the store can re-validate
  * against it without importing pixi itself.
  */
 export function TimetableEditor() {
-	const open = useTimetableStore((s) => s.open);
 	const timetable = useTimetableStore((s) => s.timetable);
 	const issues = useTimetableStore((s) => s.issues);
 	const selectedServiceRef = useTimetableStore((s) => s.selectedServiceRef);
@@ -89,16 +81,12 @@ export function TimetableEditor() {
 	const map = PlacementController.instance?.map ?? null;
 	const selected = timetable.services.find((s) => s.ref === selectedServiceRef);
 
-	const handleLoad = useCallback(async () => {
-		const error = await loadTimetable();
-		useTimetableStore.getState().setLoadError(error);
-	}, []);
-
-	if (!open) return null;
-
 	return (
-		<div className="absolute right-4 top-16 bottom-12 z-10 flex w-[34rem] flex-col border border-border bg-background/95 text-xs shadow-sm backdrop-blur-sm">
-			<Header onLoad={handleLoad} />
+		<aside
+			aria-label="Timetable editor"
+			className="flex w-[34rem] shrink-0 flex-col border-l border-border bg-background text-xs"
+		>
+			<Header />
 
 			{loadError ? (
 				<div
@@ -151,18 +139,16 @@ export function TimetableEditor() {
 					/>
 				</div>
 			</div>
-		</div>
+		</aside>
 	);
 }
 
-/** Title, start time, and the file buttons. */
-function Header({ onLoad }: { onLoad: () => void }) {
+/** Title and start time. */
+function Header() {
 	const timetable = useTimetableStore((s) => s.timetable);
-	const setOpen = useTimetableStore((s) => s.setOpen);
 	const setTitle = useTimetableStore((s) => s.setTitle);
 	const setStartTime = useTimetableStore((s) => s.setStartTime);
 	const map = PlacementController.instance?.map ?? null;
-	const saveFormat = useEditorStore((s) => s.saveFormat);
 
 	return (
 		<div className="flex items-end gap-2 border-b border-border p-2">
@@ -181,32 +167,6 @@ function Header({ onLoad }: { onLoad: () => void }) {
 					onCommit={(startTime) => setStartTime(startTime, map)}
 				/>
 			</div>
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onClick={saveTimetable}
-				aria-label={`Save timetable as ${saveFormat === "yaml" ? "YAML" : "JSON"}`}
-				title={`Save timetable as ${saveFormat === "yaml" ? "YAML" : "JSON"}`}
-			>
-				<FloppyDisk />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onClick={onLoad}
-				aria-label="Load timetable from JSON or YAML"
-				title="Load timetable from JSON or YAML"
-			>
-				<FolderOpen />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onClick={() => setOpen(false)}
-				aria-label="Close the timetable editor"
-			>
-				<X />
-			</Button>
 		</div>
 	);
 }

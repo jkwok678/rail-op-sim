@@ -18,7 +18,8 @@ import { debugLog } from "#/lib/debugLogger";
  * `editor-store` is about placing things on a map, this is about a document
  * laid over it. They meet in exactly two places — the map is passed in to
  * validate against, and {@link TimetableState.pendingCellPick} borrows the
- * canvas for one click.
+ * canvas for one click. Whether the editor is on screen at all is the mode
+ * store's question, not this one's.
  *
  * Every mutator re-validates. The issue list is derived state that has to be
  * right after each keystroke for the editor to mark rows live, and deriving it
@@ -46,8 +47,6 @@ export interface TimetableState {
 	selectedActionIndex: number | null;
 	/** Everything currently wrong, refreshed by every mutator. */
 	issues: TimetableIssue[];
-	/** Whether the editor panel is on screen. */
-	open: boolean;
 	/**
 	 * Set while the editor is waiting for a click on the canvas to fill a cell
 	 * field. The placement controller checks this before its tool dispatch, so
@@ -57,8 +56,6 @@ export interface TimetableState {
 	/** A message about the last failed load, shown until it is dismissed. */
 	loadError: string | null;
 
-	setOpen: (open: boolean) => void;
-	toggleOpen: () => void;
 	selectService: (ref: ServiceRef | null) => void;
 	selectAction: (index: number | null) => void;
 
@@ -153,17 +150,8 @@ export const useTimetableStore = create<TimetableState>((set, get) => {
 		selectedServiceRef: null,
 		selectedActionIndex: null,
 		issues: [],
-		open: false,
 		pendingCellPick: null,
 		loadError: null,
-
-		setOpen: (open) => {
-			debugLog("store", `timetable setOpen: ${open}`);
-			// Closing the editor abandons a pick it started — the canvas should not
-			// keep waiting for a click on behalf of a panel that is gone.
-			set(open ? { open } : { open, pendingCellPick: null });
-		},
-		toggleOpen: () => get().setOpen(!get().open),
 
 		selectService: (ref) => {
 			set({

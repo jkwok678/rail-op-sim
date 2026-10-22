@@ -43,6 +43,7 @@ import {
 	type NameableKind,
 	useEditorStore,
 } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 /** Pointer travel (CSS px) above which a release counts as a drag, not a click. */
@@ -566,9 +567,14 @@ export class PlacementController {
 			return;
 		}
 
+		// Outside railway mode the map is a read-only backdrop. Entering another
+		// mode already puts the tool back to Select, which edits nothing — this
+		// is the backstop, so no path that leaves a tool armed can reach the map.
+		const mapEditable = useModeStore.getState().mode === "railway";
+
 		// Right-click is the delete gesture (Add + Text tools).
 		if (e.button === 2) {
-			this.handleRightClick(e);
+			if (mapEditable) this.handleRightClick(e);
 			return;
 		}
 
@@ -592,6 +598,8 @@ export class PlacementController {
 			}
 			return;
 		}
+
+		if (!mapEditable) return;
 
 		// Text tool — edit an existing text, name an element, or place new text.
 		if (tool === "text") {

@@ -1,10 +1,11 @@
 import { type UseHotkeyDefinition, useHotkeys } from "@tanstack/react-hotkeys";
 import { PlacementController } from "#/engine/PlacementController";
+import { loadDocument, saveDocument } from "#/lib/documentActions";
 import { resolveEscape } from "#/lib/escape";
-import { loadMap, saveMap } from "#/lib/mapActions";
 import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
+import { timetableBlockedReason, useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 /**
@@ -31,10 +32,10 @@ export function useEditorHotkeys(): void {
 	const railwayConnected = useEditorStore(
 		(s) => s.trackStatus?.connected ?? false,
 	);
-	const railwayComplete = useEditorStore(
-		(s) => s.trackStatus?.complete ?? false,
+	const timetableBlocked = useEditorStore(
+		(s) => timetableBlockedReason(s.trackStatus) !== null,
 	);
-	const timetableOpen = useTimetableStore((s) => s.open);
+	const mode = useModeStore((s) => s.mode);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const showShortcuts = useEditorStore((s) => s.showShortcuts);
@@ -54,14 +55,10 @@ export function useEditorHotkeys(): void {
 		const action = resolveEscape({
 			...state,
 			timetableCellPick: timetable.pendingCellPick,
-			timetableOpen: timetable.open,
 		});
 		switch (action.type) {
 			case "cancelCellPick":
 				timetable.cancelCellPick();
-				break;
-			case "closeTimetable":
-				timetable.setOpen(false);
 				break;
 			case "cancelSection":
 				// Both halves: the store action alone leaves the pixi highlight on
@@ -102,14 +99,15 @@ export function useEditorHotkeys(): void {
 		toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
 		toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
 
-		toggleTimetable: () => useTimetableStore.getState().toggleOpen(),
+		modeRailway: () => useModeStore.getState().setMode("railway"),
+		modeTimetable: () => useModeStore.getState().setMode("timetable"),
 
 		zoomIn: () => zoomIn(PlacementController.instance?.viewport),
 		zoomOut: () => zoomOut(PlacementController.instance?.viewport),
 		fitToView: () => fitToView(PlacementController.instance?.viewport),
 
-		save: () => saveMap(),
-		load: () => void loadMap(),
+		save: () => saveDocument(),
+		load: () => void loadDocument(),
 
 		undo: () => PlacementController.instance?.undo(),
 		redo: () => PlacementController.instance?.redo(),
@@ -126,20 +124,29 @@ export function useEditorHotkeys(): void {
 	 * states so a key is never able to do what its button refuses to.
 	 */
 	const enabledFor = (id: ShortcutId): boolean => {
+		// The map is read-only outside railway mode, so nothing that edits it —
+		// a tool, erase mode, the map's undo history — can be reachable by key
+		// while the toolbar that offers them is off screen.
+		const editingRailway = mode === "railway";
 		switch (id) {
+			case "toolSelect":
+			case "toolAdd":
+			case "toolText":
+			case "toolLink":
+			case "toolSection":
+				return !overlayOpen && editingRailway;
 			case "toolDirection":
-				return !overlayOpen && railwayConnected;
-			// Mirrors the footer button: the timetable needs a railway that is
-			// operationally complete, not merely joined. The key that opens the
-			// editor also closes it, so it is not gated on the editor itself.
-			case "toggleTimetable":
-				return !overlayOpen && (railwayComplete || timetableOpen);
+				return !overlayOpen && editingRailway && railwayConnected;
 			case "toggleEraseMode":
-				return !overlayOpen && tool === "direction";
+				return !overlayOpen && editingRailway && tool === "direction";
+			// Mirrors the switcher: the timetable needs a railway that is
+			// operationally complete, not merely joined.
+			case "modeTimetable":
+				return !overlayOpen && !timetableBlocked;
 			case "undo":
-				return canUndo;
+				return editingRailway && canUndo;
 			case "redo":
-				return canRedo;
+				return editingRailway && canRedo;
 			// The key that opens the reference has to close it again, so it can't
 			// be gated on the overlay it controls — only on the edit dialogs, where
 			// the user is typing.

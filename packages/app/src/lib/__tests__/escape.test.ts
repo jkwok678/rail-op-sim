@@ -10,7 +10,6 @@ const base: EscapeContext = {
 	sectionStart: null,
 	directionStart: null,
 	timetableCellPick: null,
-	timetableOpen: false,
 };
 
 const at = (over: Partial<EscapeContext>): EscapeContext => ({
@@ -52,32 +51,10 @@ describe("resolveEscape", () => {
 		// can wait its turn.
 		const ctx = at({
 			timetableCellPick: { serviceRef: "1A01", actionIndex: 0, field: "rear" },
-			timetableOpen: true,
 			tool: "section",
 			sectionStart: { gx: 2, gy: 3 },
 		});
 		expect(resolveEscape(ctx)).toEqual({ type: "cancelCellPick" });
-	});
-
-	it("closes the timetable editor once nothing on the canvas is pending", () => {
-		expect(resolveEscape(at({ timetableOpen: true }))).toEqual({
-			type: "closeTimetable",
-		});
-	});
-
-	it("finishes a canvas gesture before closing the timetable over it", () => {
-		const ctx = at({
-			timetableOpen: true,
-			tool: "direction",
-			directionStart: { gx: 4, gy: 5 },
-		});
-		expect(resolveEscape(ctx)).toEqual({ type: "cancelDirection" });
-	});
-
-	it("closes the timetable before resetting the tool underneath it", () => {
-		expect(resolveEscape(at({ timetableOpen: true, tool: "link" }))).toEqual({
-			type: "closeTimetable",
-		});
 	});
 
 	it("cancels a section selection before anything else", () => {

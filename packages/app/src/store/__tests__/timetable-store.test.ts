@@ -61,7 +61,6 @@ beforeEach(() => {
 		selectedServiceRef: null,
 		selectedActionIndex: null,
 		issues: [],
-		open: false,
 		pendingCellPick: null,
 		loadError: null,
 	});
@@ -304,16 +303,5 @@ describe("picking a cell on the map", () => {
 		const before = store().timetable;
 		store().completeCellPick({ gx: 1, gy: 1 }, null);
 		expect(store().timetable).toBe(before);
-	});
-
-	it("abandons the pick when the editor closes", () => {
-		store().setOpen(true);
-		store().beginCellPick({
-			serviceRef: "1A01",
-			actionIndex: 0,
-			field: "rear",
-		});
-		store().setOpen(false);
-		expect(store().pendingCellPick).toBeNull();
 	});
 });

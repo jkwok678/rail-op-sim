@@ -4,7 +4,9 @@ import { Button } from "#/components/ui/button";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
 import { useTheme } from "#/hooks/useTheme";
 import { useEditorStore } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
 import { AddPalette } from "./AddPalette";
+import { ModeSwitcher } from "./ModeSwitcher";
 import { NameElementDialog } from "./NameElementDialog";
 import { SaveLoadControls } from "./SaveLoadControls";
 import { SectionEditPanel } from "./SectionEditPanel";
@@ -12,13 +14,17 @@ import { SettingsMenu } from "./SettingsMenu";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SimCanvas } from "./SimCanvas";
 import { TextInputDialog } from "./TextInputDialog";
-import { TimetableControls } from "./TimetableControls";
 import { Toolbar } from "./Toolbar";
 import { TrackInfoTooltip } from "./TrackInfoTooltip";
 import { TimetableEditor } from "./timetable/TimetableEditor";
 
 /**
- * Full-screen simulation layout — the PixiJS canvas fills the entire viewport.
+ * Full-screen simulation layout — the PixiJS canvas fills the viewport, less
+ * the timetable editor docked beside it in timetable mode.
+ *
+ * The railway tools are mounted only in railway mode: in timetable mode the
+ * map is a read-only backdrop, and a toolbar that can't be used shouldn't be
+ * on screen pretending otherwise.
  */
 export function SimLayout() {
 	const { theme, toggle } = useTheme();
@@ -29,6 +35,7 @@ export function SimLayout() {
 	const tool = useEditorStore((s) => s.tool);
 	const directionHint = useEditorStore((s) => s.directionHint);
 	const toggleShortcuts = useEditorStore((s) => s.toggleShortcuts);
+	const mode = useModeStore((s) => s.mode);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
 	const [textDialogOpen, setTextDialogOpen] = useState(false);
@@ -115,22 +122,29 @@ export function SimLayout() {
 
 	return (
 		<div className="h-dvh w-full grid grid-rows-[1fr_auto]">
-			<div className="relative overflow-hidden">
-				<SimCanvas />
-				<Toolbar />
-				<AddPalette />
-				<SectionEditPanel />
-				<NameElementDialog
-					open={nameDialogOpen}
-					onOpenChange={setNameDialogOpen}
-				/>
-				<TextInputDialog
-					open={textDialogOpen}
-					onOpenChange={setTextDialogOpen}
-				/>
-				<ShortcutsDialog />
-				<TimetableEditor />
-				<TrackInfoTooltip />
+			<div className="flex min-h-0">
+				<div className="relative min-w-0 flex-1 overflow-hidden">
+					<SimCanvas />
+					<ModeSwitcher />
+					{mode === "railway" ? (
+						<>
+							<Toolbar />
+							<AddPalette />
+							<SectionEditPanel />
+						</>
+					) : null}
+					<NameElementDialog
+						open={nameDialogOpen}
+						onOpenChange={setNameDialogOpen}
+					/>
+					<TextInputDialog
+						open={textDialogOpen}
+						onOpenChange={setTextDialogOpen}
+					/>
+					<ShortcutsDialog />
+					<TrackInfoTooltip />
+				</div>
+				{mode === "timetable" ? <TimetableEditor /> : null}
 			</div>
 			<footer className="h-7 border-t border-border bg-muted/30 flex items-center justify-between px-3 text-[11px] text-muted-foreground select-none">
 				<span className="inline-flex items-center gap-1.5">
@@ -152,7 +166,6 @@ export function SimLayout() {
 					>
 						<Keyboard />
 					</Button>
-					<TimetableControls />
 					<SaveLoadControls />
 					<SettingsMenu />
 					<Button

@@ -756,9 +756,14 @@ action-list model; the deliverable is unchanged.
 - [x] Build `TimetableEditor.tsx` — split-panel layout:
   - **Left**: list of services (headcode, origin→destination, first departure, issue count)
   - **Right**: detail editor for the selected service
-  - A floating panel rather than a modal: "pick on map" needs the canvas clickable.
-  - Gated on `trackStatus.complete` — a timetable books trains to named
-    platforms and runs them along preferred directions.
+  - Its own **timetable mode**, exclusive with railway mode (`store/mode-store.ts`):
+    a segmented Railway | Timetable switcher (`R` / `T`). In timetable mode the
+    map is a read-only backdrop — pan, zoom, hover, pick on map — and the editor
+    is docked beside it; in railway mode the timetable is off screen. Save/load
+    act on the current mode's document. `"operate"` joins the union at Milestone 21.
+  - Docked rather than modal: "pick on map" needs the canvas clickable.
+  - Entering timetable mode is gated on `trackStatus.complete` — a timetable books
+    trains to named platforms and runs them along preferred directions.
 - [x] Service editor fields:
   - Headcode, description, and a train spec shown only for a service that creates a train
   - Action list: add (kind picker), remove, reorder
