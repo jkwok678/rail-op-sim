@@ -25,6 +25,8 @@ export type ShortcutId =
 	| "toggleLinkHighlights"
 	| "toggleDirections"
 	| "toggleTrackInfo"
+	| "modeRailway"
+	| "modeTimetable"
 	| "zoomIn"
 	| "zoomOut"
 	| "fitToView"
@@ -38,6 +40,7 @@ export type ShortcutId =
 
 /** Heading a shortcut is listed under in the reference overlay. */
 export type ShortcutGroup =
+	| "Mode"
 	| "Tools"
 	| "View"
 	| "Edit"
@@ -130,6 +133,23 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		group: "Display",
 	},
 
+	// Modes — one key per mode rather than a toggle, so a key always lands in
+	// the same place and an "operate" mode can take a letter of its own later.
+	// Mnemonic letters rather than digits: the tools own those, and a mode is
+	// not a tool.
+	modeRailway: {
+		id: "modeRailway",
+		hotkey: "R",
+		label: "Railway mode",
+		group: "Mode",
+	},
+	modeTimetable: {
+		id: "modeTimetable",
+		hotkey: "T",
+		label: "Timetable mode",
+		group: "Mode",
+	},
+
 	// View. Deliberately unmodified: Ctrl/Cmd +/-/0 are UA-level browser zoom and
 	// preventDefault does not reliably cancel them, so a modified binding would
 	// zoom the page *and* the canvas.
@@ -143,8 +163,10 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 	},
 
 	// File.
-	save: { id: "save", hotkey: "Mod+S", label: "Save map", group: "File" },
-	load: { id: "load", hotkey: "Mod+O", label: "Load map", group: "File" },
+	// The current mode's document: the map in railway mode, the timetable in
+	// timetable mode.
+	save: { id: "save", hotkey: "Mod+S", label: "Save", group: "File" },
+	load: { id: "load", hotkey: "Mod+O", label: "Load", group: "File" },
 
 	// Edit.
 	undo: { id: "undo", hotkey: "Mod+Z", label: "Undo", group: "Edit" },
@@ -195,6 +217,8 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleLinkHighlights",
 	"toggleDirections",
 	"toggleTrackInfo",
+	"modeRailway",
+	"modeTimetable",
 	"zoomIn",
 	"zoomOut",
 	"fitToView",
@@ -208,6 +232,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 
 /** Headings for the reference overlay, in the order it shows them. */
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
+	"Mode",
 	"Tools",
 	"Edit",
 	"View",

@@ -9,6 +9,7 @@ const base: EscapeContext = {
 	showShortcuts: false,
 	sectionStart: null,
 	directionStart: null,
+	timetableCellPick: null,
 };
 
 const at = (over: Partial<EscapeContext>): EscapeContext => ({
@@ -43,6 +44,17 @@ describe("resolveEscape", () => {
 				expect(resolveEscape(ctx)).toEqual({ type: "none" });
 			});
 		}
+	});
+
+	it("cancels an armed map pick before anything else", () => {
+		// The canvas is waiting for one specific click; everything underneath
+		// can wait its turn.
+		const ctx = at({
+			timetableCellPick: { serviceRef: "1A01", actionIndex: 0, field: "rear" },
+			tool: "section",
+			sectionStart: { gx: 2, gy: 3 },
+		});
+		expect(resolveEscape(ctx)).toEqual({ type: "cancelCellPick" });
 	});
 
 	it("cancels a section selection before anything else", () => {

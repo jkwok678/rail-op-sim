@@ -1831,13 +1831,16 @@ describe("Track preferred directions", () => {
 		[SwitchType.SWITCHSPLIT6, [0, 5], [0, 7]],
 		[SwitchType.SWITCHSPLIT7, [0, 7], [0, 2]],
 		[SwitchType.SWITCHSPLIT8, [1, 6], [6, 8]],
-	] as const)("%s accepts the real diverge %j and rejects the phantom %j", (subtype, real, phantom) => {
-		const t = new Track(
-			{ kind: "switch", subtype, platform1: false, platform2: false },
-			0,
-			0,
-		);
-		expect(t.addPreferredDirection(real[0], real[1])).toBe(true);
-		expect(t.addPreferredDirection(phantom[0], phantom[1])).toBe(false);
-	});
+	] as const)(
+		"%s accepts the real diverge %j and rejects the phantom %j",
+		(subtype, real, phantom) => {
+			const t = new Track(
+				{ kind: "switch", subtype, platform1: false, platform2: false },
+				0,
+				0,
+			);
+			expect(t.addPreferredDirection(real[0], real[1])).toBe(true);
+			expect(t.addPreferredDirection(phantom[0], phantom[1])).toBe(false);
+		},
+	);
 });

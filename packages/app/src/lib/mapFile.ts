@@ -2,26 +2,29 @@ import {
 	SERIALIZED_MAP_VERSION,
 	type SerializedMap,
 } from "@rail-op-sim/shared";
-import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
+import {
+	type DocumentFileFormat,
+	decodeDocument,
+	downloadDocument,
+	encodeDocument,
+	inferDocumentFormat,
+	type LoadedDocument,
+	pickAndReadDocument,
+} from "#/lib/documentFile";
 
 /**
- * Browser file helpers for saving/loading a {@link SerializedMap} to and from a
- * local JSON or YAML file. Kept free of pixi/model references so they can be
- * imported by plain React components.
+ * Saving and loading a {@link SerializedMap} as a local JSON or YAML file.
+ *
+ * The file handling itself lives in `documentFile` and is shared with the
+ * timetable; what is left here is the part that is specific to a map — what
+ * counts as one, what a map file is called, and the error a bad one raises.
  */
 
 /** On-disk encodings of a {@link SerializedMap}. Same object, different text. */
-export type MapFileFormat = "json" | "yaml";
+export type MapFileFormat = DocumentFileFormat;
 
 /** A map document plus the encoding it was read from (so a later save can match). */
-export interface LoadedMapFile {
-	data: SerializedMap;
-	format: MapFileFormat;
-}
-
-/** File picker `accept` for both encodings, including the shorter `.yml`. */
-export const MAP_FILE_ACCEPT =
-	"application/json,.json,application/yaml,text/yaml,.yaml,.yml";
+export type LoadedMapFile = LoadedDocument<SerializedMap>;
 
 /** Thrown when a picked file cannot be parsed as a supported map document. */
 export class InvalidMapFileError extends Error {
@@ -44,25 +47,12 @@ export function inferMapFileFormat(
 	filename?: string,
 	text?: string,
 ): MapFileFormat {
-	const lower = filename?.toLowerCase() ?? "";
-	if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "yaml";
-	if (lower.endsWith(".json")) return "json";
-	const trimmed = text?.trimStart() ?? "";
-	if (trimmed.startsWith("{") || trimmed.startsWith("[")) return "json";
-	return "yaml";
+	return inferDocumentFormat(filename, text);
 }
 
 /** Serialise `data` as pretty-printed JSON or block-style YAML. */
 export function encodeMap(data: SerializedMap, format: MapFileFormat): string {
-	if (format === "yaml") {
-		return stringifyYaml(data, {
-			indent: 2,
-			lineWidth: 0,
-			// Indices, not aliases — a save should stay readable as a document.
-			aliasDuplicateObjects: false,
-		});
-	}
-	return JSON.stringify(data, null, 2);
+	return encodeDocument(data, format);
 }
 
 /** Parse `text` as `format` and check it is a supported {@link SerializedMap}. */
@@ -70,14 +60,11 @@ export function parseMapText(
 	text: string,
 	format: MapFileFormat,
 ): SerializedMap {
-	let parsed: unknown;
-	try {
-		parsed = format === "yaml" ? parseYaml(text) : JSON.parse(text);
-	} catch {
-		throw new InvalidMapFileError(
-			format === "yaml" ? "File is not valid YAML." : "File is not valid JSON.",
-		);
-	}
+	const parsed = decodeDocument(
+		text,
+		format,
+		(message) => new InvalidMapFileError(message),
+	);
 	assertSerializedMap(parsed);
 	return parsed;
 }
@@ -88,18 +75,7 @@ export function downloadMap(
 	options: { format?: MapFileFormat; filename?: string } = {},
 ): void {
 	const format = options.format ?? "json";
-	const filename = options.filename ?? mapFileName(format);
-	const blob = new Blob([encodeMap(data, format)], {
-		type: format === "yaml" ? "application/yaml" : "application/json",
-	});
-	const url = URL.createObjectURL(blob);
-	const a = document.createElement("a");
-	a.href = url;
-	a.download = filename;
-	document.body.appendChild(a);
-	a.click();
-	a.remove();
-	URL.revokeObjectURL(url);
+	downloadDocument(data, format, options.filename ?? mapFileName(format));
 }
 
 /** Minimal structural check that a parsed object is a supported SerializedMap. */
@@ -130,29 +106,5 @@ function assertSerializedMap(value: unknown): asserts value is SerializedMap {
  * file is malformed. Resolves `null` if the user cancels the picker.
  */
 export function pickAndReadMapFile(): Promise<LoadedMapFile | null> {
-	return new Promise((resolve, reject) => {
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = MAP_FILE_ACCEPT;
-
-		// `cancel` fires on supporting browsers when the dialog is dismissed.
-		input.addEventListener("cancel", () => resolve(null));
-
-		input.addEventListener("change", () => {
-			const file = input.files?.[0];
-			if (!file) {
-				resolve(null);
-				return;
-			}
-			file
-				.text()
-				.then((text) => {
-					const format = inferMapFileFormat(file.name, text);
-					resolve({ data: parseMapText(text, format), format });
-				})
-				.catch(reject);
-		});
-
-		input.click();
-	});
+	return pickAndReadDocument(parseMapText);
 }

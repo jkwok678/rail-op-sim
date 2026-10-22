@@ -43,6 +43,8 @@ import {
 	type NameableKind,
 	useEditorStore,
 } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 /** Pointer travel (CSS px) above which a release counts as a drag, not a click. */
 const DRAG_THRESHOLD = 3;
@@ -221,6 +223,13 @@ export class PlacementController {
 		if (!connected && useEditorStore.getState().tool === "direction") {
 			useEditorStore.getState().setTool("select");
 		}
+
+		// The timetable is validated against this map, so a map edit can
+		// invalidate it — renaming a platform orphans every service booked to
+		// it. Re-checking here, where every mutation already lands, is what
+		// keeps the editor's issue list honest about a railway that moved
+		// underneath it.
+		useTimetableStore.getState().revalidate(this.map);
 	}
 
 	/** Push the undo/redo summary to the store for the toolbar to render. */
@@ -499,6 +508,52 @@ export class PlacementController {
 		}
 	};
 
+	/**
+	 * Handle a click that never reaches the railway tools, and say whether it
+	 * was one: a right-click, a click the timetable editor borrowed, or any
+	 * click outside railway mode.
+	 */
+	private claimClick(e: PointerEvent): boolean {
+		// Outside railway mode the map is a read-only backdrop. Entering another
+		// mode already puts the tool back to Select, which edits nothing — this
+		// is the backstop, so no path that leaves a tool armed can reach the map.
+		const mapEditable = useModeStore.getState().mode === "railway";
+
+		// Right-click is the delete gesture (Add + Text tools).
+		if (e.button === 2) {
+			if (mapEditable) this.handleRightClick(e);
+			return true;
+		}
+
+		// The timetable editor can borrow one click to fill a cell field
+		// ("pick on map"). It takes priority over every tool, since the user
+		// asked for this click specifically — and it deliberately does not need
+		// a tool of its own, so the map stays on whatever tool it was using.
+		const pendingCellPick = useTimetableStore.getState().pendingCellPick;
+		if (pendingCellPick) {
+			this.completeCellPick(e, pendingCellPick.field);
+			return true;
+		}
+
+		return !mapEditable;
+	}
+
+	/** Fill the timetable's pending cell field from where the click landed. */
+	private completeCellPick(e: PointerEvent, field: string): void {
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		if (cell) {
+			useTimetableStore.getState().completeCellPick(cell, this.map);
+			debugLog(
+				"placement",
+				`cell pick → (${cell.gx},${cell.gy}) into ${field}`,
+			);
+		} else {
+			// Off-grid: abandon the pick rather than leave the canvas armed.
+			useTimetableStore.getState().cancelCellPick();
+			debugLog("placement", "cell pick → off grid, cancelled");
+		}
+	}
+
 	private onPointerUp = (e: PointerEvent): void => {
 		if (e.button !== 0 && e.button !== 2) return;
 
@@ -558,11 +613,7 @@ export class PlacementController {
 			return;
 		}
 
-		// Right-click is the delete gesture (Add + Text tools).
-		if (e.button === 2) {
-			this.handleRightClick(e);
-			return;
-		}
+		if (this.claimClick(e)) return;
 
 		// Text tool — edit an existing text, name an element, or place new text.
 		if (tool === "text") {

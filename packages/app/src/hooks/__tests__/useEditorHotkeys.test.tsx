@@ -3,7 +3,8 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
 import { SHORTCUTS } from "#/lib/shortcuts";
-import { useEditorStore } from "#/store/editor-store";
+import { type TrackStatus, useEditorStore } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
 
 /**
  * Exercises the bindings end to end against a real DOM, because the things most
@@ -15,7 +16,20 @@ function Harness() {
 	return null;
 }
 
-const reset = () =>
+const completeRailway: TrackStatus = {
+	total: 4,
+	connected: true,
+	complete: true,
+	dangling: 0,
+	unpairedLinked: 0,
+	unnamed: 0,
+	undirected: 0,
+	brokenRoutes: 0,
+	firstIssue: null,
+};
+
+const reset = () => {
+	useModeStore.setState({ mode: "railway" });
 	useEditorStore.setState({
 		tool: "select",
 		selectedKind: null,
@@ -28,6 +42,7 @@ const reset = () =>
 		directionStart: null,
 		directionMode: "set",
 	});
+};
 
 /** Press a key on the document, the way the manager hears it. */
 const press = (key: string, init: KeyboardEventInit = {}) => {
@@ -146,5 +161,43 @@ describe("useEditorHotkeys", () => {
 		rerender(<Harness />);
 		press("?", { shiftKey: true });
 		expect(useEditorStore.getState().showShortcuts).toBe(false);
+	});
+	it("refuses timetable mode until the railway is complete", () => {
+		render(<Harness />);
+		press(String(SHORTCUTS.modeTimetable.hotkey));
+		expect(useModeStore.getState().mode).toBe("railway");
+	});
+
+	it("switches between the modes on their keys", () => {
+		const { rerender } = render(<Harness />);
+		useEditorStore.setState({ trackStatus: completeRailway });
+		rerender(<Harness />);
+
+		press(String(SHORTCUTS.modeTimetable.hotkey));
+		expect(useModeStore.getState().mode).toBe("timetable");
+
+		rerender(<Harness />);
+		press(String(SHORTCUTS.modeRailway.hotkey));
+		expect(useModeStore.getState().mode).toBe("railway");
+	});
+
+	// The toolbar is off screen in timetable mode, so its keys must be too —
+	// otherwise the map is editable from the keyboard behind the timetable.
+	it("leaves the railway tools and undo unreachable in timetable mode", () => {
+		const { rerender } = render(<Harness />);
+		useEditorStore.setState({
+			trackStatus: completeRailway,
+			canUndo: true,
+		});
+		useModeStore.getState().setMode("timetable");
+		rerender(<Harness />);
+
+		press(String(SHORTCUTS.toolAdd.hotkey));
+		press(String(SHORTCUTS.toolDirection.hotkey));
+		expect(useEditorStore.getState().tool).toBe("select");
+
+		// View keys are not edits, and stay live.
+		press(String(SHORTCUTS.toggleGrid.hotkey));
+		expect(useEditorStore.getState().showGrid).toBe(false);
 	});
 });

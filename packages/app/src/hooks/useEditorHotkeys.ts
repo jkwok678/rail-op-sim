@@ -1,10 +1,13 @@
 import { type UseHotkeyDefinition, useHotkeys } from "@tanstack/react-hotkeys";
 import { PlacementController } from "#/engine/PlacementController";
+import { loadDocument, saveDocument } from "#/lib/documentActions";
 import { resolveEscape } from "#/lib/escape";
-import { loadMap, saveMap } from "#/lib/mapActions";
+import { liveShortcuts } from "#/lib/shortcutGates";
 import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
+import { timetableBlockedReason, useModeStore } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 /**
  * Bind the editor's keyboard shortcuts. Mount once, from the layout that owns
@@ -24,29 +27,33 @@ import { useEditorStore } from "#/store/editor-store";
  * move for nothing.
  */
 export function useEditorHotkeys(): void {
-	const tool = useEditorStore((s) => s.tool);
-	const canUndo = useEditorStore((s) => s.canUndo);
-	const canRedo = useEditorStore((s) => s.canRedo);
-	const railwayConnected = useEditorStore(
-		(s) => s.trackStatus?.connected ?? false,
-	);
-	const pendingText = useEditorStore((s) => s.pendingText);
-	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
-	const showShortcuts = useEditorStore((s) => s.showShortcuts);
-
-	// Single-key shortcuts must not fire behind an overlay. The two edit dialogs
-	// put focus in an <input>, so `ignoreInputs` usually covers them, but not once
-	// the user tabs to a button — and the shortcuts overlay has no input at all,
-	// so every letter and digit would otherwise reach the canvas behind it.
-	const overlayOpen = Boolean(
-		pendingText || pendingNameTarget || showShortcuts,
-	);
+	const enabled = liveShortcuts({
+		mode: useModeStore((s) => s.mode),
+		tool: useEditorStore((s) => s.tool),
+		canUndo: useEditorStore((s) => s.canUndo),
+		canRedo: useEditorStore((s) => s.canRedo),
+		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
+		timetableBlocked: useEditorStore(
+			(s) => timetableBlockedReason(s.trackStatus) !== null,
+		),
+		editDialogOpen: useEditorStore((s) =>
+			Boolean(s.pendingText || s.pendingNameTarget),
+		),
+		shortcutsOpen: useEditorStore((s) => s.showShortcuts),
+	});
 
 	/** Escape's target depends on state; `resolveEscape` decides, this applies. */
 	const runEscape = (): void => {
 		const state = useEditorStore.getState();
-		const action = resolveEscape(state);
+		const timetable = useTimetableStore.getState();
+		const action = resolveEscape({
+			...state,
+			timetableCellPick: timetable.pendingCellPick,
+		});
 		switch (action.type) {
+			case "cancelCellPick":
+				timetable.cancelCellPick();
+				break;
 			case "cancelSection":
 				// Both halves: the store action alone leaves the pixi highlight on
 				// screen, which is why the panel's Cancel button does the same pair.
@@ -86,12 +93,15 @@ export function useEditorHotkeys(): void {
 		toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
 		toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
 
+		modeRailway: () => useModeStore.getState().setMode("railway"),
+		modeTimetable: () => useModeStore.getState().setMode("timetable"),
+
 		zoomIn: () => zoomIn(PlacementController.instance?.viewport),
 		zoomOut: () => zoomOut(PlacementController.instance?.viewport),
 		fitToView: () => fitToView(PlacementController.instance?.viewport),
 
-		save: () => saveMap(),
-		load: () => void loadMap(),
+		save: () => saveDocument(),
+		load: () => void loadDocument(),
 
 		undo: () => PlacementController.instance?.undo(),
 		redo: () => PlacementController.instance?.redo(),
@@ -101,36 +111,6 @@ export function useEditorHotkeys(): void {
 
 		// Bound by SectionEditPanel, which owns the values being applied.
 		applySection: () => {},
-	};
-
-	/**
-	 * Which shortcuts are live right now. Mirrors the toolbar's own disabled
-	 * states so a key is never able to do what its button refuses to.
-	 */
-	const enabledFor = (id: ShortcutId): boolean => {
-		switch (id) {
-			case "toolDirection":
-				return !overlayOpen && railwayConnected;
-			case "toggleEraseMode":
-				return !overlayOpen && tool === "direction";
-			case "undo":
-				return canUndo;
-			case "redo":
-				return canRedo;
-			// The key that opens the reference has to close it again, so it can't
-			// be gated on the overlay it controls — only on the edit dialogs, where
-			// the user is typing.
-			case "help":
-				return !pendingText && !pendingNameTarget;
-			// Escape has to work *because* an overlay is open, and the modified
-			// shortcuts are unambiguous enough to leave live.
-			case "escape":
-			case "save":
-			case "load":
-				return true;
-			default:
-				return !overlayOpen;
-		}
 	};
 
 	// One row per registry entry, always, in registry order: `useHotkeys` keys
@@ -149,7 +129,7 @@ export function useEditorHotkeys(): void {
 				// Escape is the deliberate exception — it must reach us from inside an
 				// input to cancel the gesture the input belongs to.
 				ignoreInputs: id !== "escape",
-				enabled: enabledFor(id),
+				enabled: enabled[id],
 				meta: { name: shortcut.label, description: shortcut.label },
 			},
 		};

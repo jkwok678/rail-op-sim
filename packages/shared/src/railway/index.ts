@@ -84,6 +84,74 @@ export {
 	SERIALIZED_MAP_VERSION,
 	serializeMap,
 } from "./map/map-serialization";
+// Timetable — locations a service can be booked to
+export {
+	cellToLocation,
+	getExitCells,
+	getLocationNames,
+	getStartableCells,
+	locationToCell,
+	trackAtCell,
+} from "./timetable/locations";
+// Timetable — save / load
+export {
+	createDefaultTrainSpec,
+	createEmptyTimetable,
+	InvalidTimetableError,
+	parseTimetable,
+	SERIALIZED_TIMETABLE_VERSION,
+	type SerializedTimetable,
+} from "./timetable/serialization";
+// Timetable — clock arithmetic
+export {
+	dayOffset,
+	formatDuration,
+	formatSimTime,
+	formatWallClock,
+	InvalidTimeError,
+	parseSimTime,
+	SECONDS_PER_DAY,
+	type SimTime,
+	tryParseSimTime,
+} from "./timetable/time";
+// Timetable — the data model
+export type {
+	Action,
+	ActionOf,
+	Cell,
+	FinishAction,
+	IntermediateAction,
+	Repeat,
+	Service,
+	ServiceRef,
+	StartAction,
+	Timetable,
+	TrainSpec,
+} from "./timetable/types";
+export {
+	actionLocation,
+	actionTime,
+	createsTrain,
+	FINISH_KINDS,
+	INTERMEDIATE_KINDS,
+	isFinishAction,
+	isIntermediateAction,
+	isShuttleAction,
+	isStartAction,
+	MAX_SERVICE_REF_LENGTH,
+	SHUTTLE_KINDS,
+	START_KINDS,
+	TRAIN_CREATING_KINDS,
+} from "./timetable/types";
+// Timetable — validation
+export type { TimetableIssue } from "./timetable/validate";
+export {
+	hasErrors,
+	issuesForService,
+	validateTimetable,
+	validateTimetableAgainstMap,
+	validateTimetableStructure,
+} from "./timetable/validate";
 export type {
 	CreateTrackDataOptions,
 	PreferredDirection,

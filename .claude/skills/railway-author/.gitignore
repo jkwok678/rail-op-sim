@@ -1,0 +1,3 @@
+# Compiled output of the authoring scripts, and scratch generators.
+.build/
+work/

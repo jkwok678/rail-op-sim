@@ -6,16 +6,17 @@
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
+    "coverage": "pnpm -r run coverage && node scripts/merge-coverage.mjs",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
     "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.5",
-    "fallow": "^2.102.0",
+    "@biomejs/biome": "2.5.15",
+    "fallow": "^3.33.1",
     "pngjs": "^7.0.0",
-    "typescript": "^6.0.2"
+    "typescript": "^7.0.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
