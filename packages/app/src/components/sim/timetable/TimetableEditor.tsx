@@ -14,7 +14,7 @@ import {
 	type TimetableIssue,
 	type TrainSpec,
 } from "@rail-op-sim/shared";
-import { useMemo } from "react";
+import { type Ref, useEffect, useMemo, useRef } from "react";
 import { Button } from "#/components/ui/button";
 import {
 	Select,
@@ -187,6 +187,13 @@ function ServiceList({
 	onAdd: () => void;
 	onRemove: (ref: ServiceRef) => void;
 }) {
+	// Keep the service `[` / `]` landed on inside the column.
+	const selectedRow = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (selectedRef)
+			selectedRow.current?.scrollIntoView?.({ block: "nearest" });
+	}, [selectedRef]);
+
 	return (
 		<div className="flex w-48 shrink-0 flex-col border-r border-border">
 			<div className="flex-1 overflow-y-auto">
@@ -198,6 +205,7 @@ function ServiceList({
 					return (
 						<div
 							key={service.ref}
+							ref={selected ? selectedRow : undefined}
 							className={`group flex items-center gap-1 border-b border-border/50 px-2 py-1 ${
 								selected ? "bg-accent" : ""
 							}`}
@@ -274,6 +282,13 @@ function ServiceDetail({
 	const store = useTimetableStore.getState;
 	const map = PlacementController.instance?.map ?? null;
 	const first = service.actions[0];
+	// Keep the action Alt+arrows landed on inside the column.
+	const selectedActionRow = useRef<HTMLLIElement>(null);
+	useEffect(() => {
+		if (selectedActionIndex !== null) {
+			selectedActionRow.current?.scrollIntoView?.({ block: "nearest" });
+		}
+	}, [selectedActionIndex]);
 	// A train spec belongs to the service that *creates* a train; a follow-on
 	// inherits one, so showing the fields would invite filling in something the
 	// engine will ignore.
@@ -335,6 +350,9 @@ function ServiceDetail({
 						action={action}
 						index={index}
 						expanded={selectedActionIndex === index}
+						scrollRef={
+							selectedActionIndex === index ? selectedActionRow : undefined
+						}
 						locations={locations}
 						otherRefs={otherRefs}
 						pendingCellPick={
@@ -452,6 +470,7 @@ function ActionRow({
 	action,
 	index,
 	expanded,
+	scrollRef,
 	locations,
 	otherRefs,
 	pendingCellPick,
@@ -460,6 +479,8 @@ function ActionRow({
 	action: Action;
 	index: number;
 	expanded: boolean;
+	/** Set on the selected row so a key that moves the selection can scroll to it. */
+	scrollRef?: Ref<HTMLLIElement>;
 	locations: string[];
 	otherRefs: ServiceRef[];
 	pendingCellPick: PendingCellPick | null;
@@ -469,7 +490,7 @@ function ActionRow({
 	const last = service.actions.length - 1;
 
 	return (
-		<li className="border border-border">
+		<li ref={scrollRef} className="border border-border">
 			<div className="flex items-center gap-1 px-1.5 py-1">
 				<button
 					type="button"

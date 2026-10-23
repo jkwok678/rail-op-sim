@@ -72,11 +72,13 @@ describe("shortcutDisplay", () => {
 });
 
 describe("isPlatformDependent", () => {
-	it("flags exactly the Mod-bearing shortcuts", () => {
+	it("flags shortcuts whose badge text depends on the platform", () => {
 		expect(isPlatformDependent("save")).toBe(true);
 		expect(isPlatformDependent("undo")).toBe(true);
+		expect(isPlatformDependent("moveActionUp")).toBe(true);
 		expect(isPlatformDependent("toolSelect")).toBe(false);
 		expect(isPlatformDependent("help")).toBe(false);
+		expect(isPlatformDependent("nextService")).toBe(false);
 	});
 
 	// Anything flagged must actually differ, or it is held back from SSR for

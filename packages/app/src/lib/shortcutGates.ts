@@ -16,6 +16,16 @@ export interface ShortcutGateState {
 	editDialogOpen: boolean;
 	/** The shortcuts reference is open. */
 	shortcutsOpen: boolean;
+	/** `[` and `]` have another service to select. */
+	timetableCanStep: boolean;
+	/** Alt+Up has an action it can move. */
+	timetableCanMoveUp: boolean;
+	/** Alt+Down has an action it can move. */
+	timetableCanMoveDown: boolean;
+	/** `N` has a problem it can land on. */
+	timetableCanNextIssue: boolean;
+	/** A canvas cell-pick is waiting; list keys stay out of it. */
+	timetablePicking: boolean;
 }
 
 /**
@@ -38,6 +48,11 @@ export function liveShortcuts(
 	// the toolbar that offers them is off screen.
 	const editingRailway = state.mode === "railway";
 	const toolsLive = !overlayOpen && editingRailway;
+	// The timetable keys drive the docked editor. They exist only while that
+	// editor is the mode on screen, and never during a cell-pick — Escape is
+	// how that gesture is cancelled.
+	const timetableLive =
+		!overlayOpen && state.mode === "timetable" && !state.timetablePicking;
 
 	/** Where a shortcut differs from the default of "not behind an overlay". */
 	const exceptions: Partial<Record<ShortcutId, boolean>> = {
@@ -51,6 +66,11 @@ export function liveShortcuts(
 		// Mirrors the switcher: the timetable needs a railway that is
 		// operationally complete, not merely joined.
 		modeTimetable: !overlayOpen && !state.timetableBlocked,
+		prevService: timetableLive && state.timetableCanStep,
+		nextService: timetableLive && state.timetableCanStep,
+		nextIssue: timetableLive && state.timetableCanNextIssue,
+		moveActionUp: timetableLive && state.timetableCanMoveUp,
+		moveActionDown: timetableLive && state.timetableCanMoveDown,
 		undo: editingRailway && state.canUndo,
 		redo: editingRailway && state.canRedo,
 		// The key that opens the reference has to close it again, so it can't be

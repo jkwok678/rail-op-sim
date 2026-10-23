@@ -1,10 +1,17 @@
 // @vitest-environment jsdom
+import {
+	createEmptyTimetable,
+	parseSimTime,
+	type Timetable,
+	type TimetableIssue,
+} from "@rail-op-sim/shared";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
 import { SHORTCUTS } from "#/lib/shortcuts";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 /**
  * Exercises the bindings end to end against a real DOM, because the things most
@@ -30,6 +37,13 @@ const completeRailway: TrackStatus = {
 
 const reset = () => {
 	useModeStore.setState({ mode: "railway" });
+	useTimetableStore.setState({
+		timetable: createEmptyTimetable(),
+		selectedServiceRef: null,
+		selectedActionIndex: null,
+		issues: [],
+		pendingCellPick: null,
+	});
 	useEditorStore.setState({
 		tool: "select",
 		selectedKind: null,
@@ -199,5 +213,153 @@ describe("useEditorHotkeys", () => {
 		// View keys are not edits, and stay live.
 		press(String(SHORTCUTS.toggleGrid.hotkey));
 		expect(useEditorStore.getState().showGrid).toBe(false);
+	});
+});
+
+const twoServices = (): Timetable => ({
+	version: 1,
+	startTime: parseSimTime("05:00"),
+	services: [
+		{
+			ref: "1A01",
+			actions: [
+				{ kind: "pass", time: parseSimTime("06:00"), location: "Ashfield" },
+				{ kind: "pass", time: parseSimTime("06:10"), location: "Barton" },
+				{ kind: "finishRemainHere" },
+			],
+		},
+		{ ref: "1A02", actions: [{ kind: "finishRemainHere" }] },
+	],
+});
+
+const problems: TimetableIssue[] = [
+	{
+		severity: "error",
+		code: "no-start",
+		message: "Ashfield",
+		serviceRef: "1A01",
+		actionIndex: 0,
+	},
+	{
+		severity: "error",
+		code: "no-start",
+		message: "Barton",
+		serviceRef: "1A01",
+		actionIndex: 1,
+	},
+];
+
+describe("timetable list keys", () => {
+	beforeEach(reset);
+	afterEach(() => {
+		cleanup();
+		document.body.innerHTML = "";
+	});
+
+	const seed = () => {
+		useModeStore.setState({ mode: "timetable" });
+		useTimetableStore.setState({
+			timetable: twoServices(),
+			issues: problems,
+			selectedServiceRef: "1A01",
+			selectedActionIndex: 1,
+			pendingCellPick: null,
+		});
+	};
+
+	it("steps through services and wraps", () => {
+		seed();
+		const { rerender } = render(<Harness />);
+
+		press("]");
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A02");
+
+		rerender(<Harness />);
+		press("]");
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A01");
+
+		rerender(<Harness />);
+		press("[");
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A02");
+	});
+
+	it("opens the next problem, wrapping within the service", () => {
+		seed();
+		useTimetableStore.setState({ selectedActionIndex: 0 });
+		const { rerender } = render(<Harness />);
+
+		press("N");
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(1);
+
+		rerender(<Harness />);
+		press("N");
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(0);
+	});
+
+	it("moves the selected action and follows it", () => {
+		seed();
+		const { rerender } = render(<Harness />);
+		const order = () =>
+			useTimetableStore
+				.getState()
+				.timetable.services[0].actions.map((action) =>
+					action.kind === "pass" ? action.location : action.kind,
+				);
+
+		press("ArrowDown", { altKey: true, code: "ArrowDown" });
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(2);
+		expect(order()).toEqual(["Ashfield", "finishRemainHere", "Barton"]);
+
+		rerender(<Harness />);
+		press("ArrowUp", { altKey: true, code: "ArrowUp" });
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(1);
+		expect(order()).toEqual(["Ashfield", "Barton", "finishRemainHere"]);
+	});
+
+	it("refuses the move at the end of the list", () => {
+		seed();
+		useTimetableStore.setState({ selectedActionIndex: 2 });
+		render(<Harness />);
+
+		press("ArrowDown", { altKey: true, code: "ArrowDown" });
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(2);
+	});
+
+	it("does not run while a cell pick is armed, or outside timetable mode", () => {
+		seed();
+		useTimetableStore.setState({
+			pendingCellPick: {
+				serviceRef: "1A01",
+				actionIndex: 1,
+				field: "rear",
+			},
+		});
+		const { rerender } = render(<Harness />);
+		press("]");
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A01");
+
+		useModeStore.setState({ mode: "railway" });
+		useTimetableStore.setState({ pendingCellPick: null });
+		rerender(<Harness />);
+		press("]");
+		press("N");
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A01");
+		expect(useTimetableStore.getState().selectedActionIndex).toBe(1);
+	});
+
+	it("does not steal a key the user is typing", () => {
+		seed();
+		render(<Harness />);
+		const input = document.createElement("input");
+		document.body.appendChild(input);
+		input.focus();
+		input.dispatchEvent(
+			new KeyboardEvent("keydown", {
+				key: "]",
+				bubbles: true,
+				cancelable: true,
+			}),
+		);
+		expect(useTimetableStore.getState().selectedServiceRef).toBe("1A01");
 	});
 });

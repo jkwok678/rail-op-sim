@@ -27,6 +27,11 @@ export type ShortcutId =
 	| "toggleTrackInfo"
 	| "modeRailway"
 	| "modeTimetable"
+	| "prevService"
+	| "nextService"
+	| "nextIssue"
+	| "moveActionUp"
+	| "moveActionDown"
 	| "zoomIn"
 	| "zoomOut"
 	| "fitToView"
@@ -41,6 +46,7 @@ export type ShortcutId =
 /** Heading a shortcut is listed under in the reference overlay. */
 export type ShortcutGroup =
 	| "Mode"
+	| "Timetable"
 	| "Tools"
 	| "View"
 	| "Edit"
@@ -150,6 +156,41 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		group: "Mode",
 	},
 
+	// Timetable lists. Brackets step through services the way the left column
+	// does. N jumps to the next problem in the issue list under the service on
+	// screen. Alt+arrows reorder the selected action and leave the plain arrows
+	// for panning the map.
+	prevService: {
+		id: "prevService",
+		hotkey: "[",
+		label: "Previous service",
+		group: "Timetable",
+	},
+	nextService: {
+		id: "nextService",
+		hotkey: "]",
+		label: "Next service",
+		group: "Timetable",
+	},
+	nextIssue: {
+		id: "nextIssue",
+		hotkey: "N",
+		label: "Next problem",
+		group: "Timetable",
+	},
+	moveActionUp: {
+		id: "moveActionUp",
+		hotkey: "Alt+ArrowUp",
+		label: "Move action up",
+		group: "Timetable",
+	},
+	moveActionDown: {
+		id: "moveActionDown",
+		hotkey: "Alt+ArrowDown",
+		label: "Move action down",
+		group: "Timetable",
+	},
+
 	// View. Deliberately unmodified: Ctrl/Cmd +/-/0 are UA-level browser zoom and
 	// preventDefault does not reliably cancel them, so a modified binding would
 	// zoom the page *and* the canvas.
@@ -219,6 +260,11 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleTrackInfo",
 	"modeRailway",
 	"modeTimetable",
+	"prevService",
+	"nextService",
+	"nextIssue",
+	"moveActionUp",
+	"moveActionDown",
 	"zoomIn",
 	"zoomOut",
 	"fitToView",
@@ -233,6 +279,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 /** Headings for the reference overlay, in the order it shows them. */
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 	"Mode",
+	"Timetable",
 	"Tools",
 	"Edit",
 	"View",
@@ -284,9 +331,27 @@ export function shortcutKeys(
 	}).split(SEGMENT_SEPARATOR);
 }
 
-/** Whether a shortcut's badge text depends on the platform (i.e. uses Mod). */
+/**
+ * Whether a shortcut's badge text depends on the platform.
+ *
+ * Any modifier does: Mod is ⌘ or Ctrl, Alt is ⌥ or Alt, and the same split
+ * applies to Shift, Control, and Meta. A plain key reads the same everywhere.
+ */
+const PLATFORM_MODIFIERS: readonly string[] = [
+	"Mod",
+	"Alt",
+	"Option",
+	"Shift",
+	"Control",
+	"Ctrl",
+	"Meta",
+	"Command",
+	"Cmd",
+];
+
 export function isPlatformDependent(id: ShortcutId): boolean {
 	const { hotkey, display } = SHORTCUTS[id];
 	if (display) return false;
-	return typeof hotkey === "string" && hotkey.includes("Mod");
+	if (typeof hotkey !== "string") return false;
+	return hotkey.split("+").some((part) => PLATFORM_MODIFIERS.includes(part));
 }

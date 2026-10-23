@@ -236,7 +236,9 @@ export class ViewportController {
 			return;
 		}
 
-		if (this.isArrowKey(e.code)) {
+		// Unmodified arrows pan. Alt, Ctrl, and Meta are editor chords — timetable
+		// action reorder among them — and must not also scroll the map.
+		if (this.isArrowKey(e.code) && !e.altKey && !e.ctrlKey && !e.metaKey) {
 			e.preventDefault();
 			this.heldKeys.add(e.code);
 		}
