@@ -1,17 +1,24 @@
 import { defineRailway, github, project, service } from "railway/iac";
 
 export default defineRailway(() => {
-	const app = service("@rail-op-sim/app", {
+	const app = service("app", {
 		source: github("jkwok678/rail-op-sim", { branch: "master" }),
 		build: {
 			buildCommand: "pnpm --filter @rail-op-sim/app build",
-			watchPatterns: ["/packages/app/**"],
+			watchPatterns: [
+				"/packages/app/**",
+				"/packages/shared/**",
+				"/package.json",
+				"/pnpm-lock.yaml",
+				"/pnpm-workspace.yaml",
+			],
 		},
 		start: "pnpm --filter @rail-op-sim/app start",
+		healthcheck: "/",
 		replicas: { "europe-west4-drams3a": 1 },
 	});
 
-	return project("grateful-forgiveness", {
+	return project("rail-op-sim", {
 		resources: [app],
 	});
 });
