@@ -10,7 +10,16 @@
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
-import { buildGraph, type RailGraph } from "./graph";
+import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
+import { trainKeys } from "./occupancy";
+import {
+	cancelRoute,
+	checkRouteStart,
+	commitPendingRoute,
+	setRoute,
+	togglePoints,
+} from "./routes";
+import { computeAspects } from "./signalling";
 import type {
 	CommandResult,
 	Counters,
@@ -18,6 +27,7 @@ import type {
 	SimCommand,
 	SimState,
 	SimView,
+	ViewSeg,
 } from "./types";
 
 export interface EngineOptions {
@@ -93,8 +103,37 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const log: LogLine[] = [];
 	let carry = 0;
 
+	const refreshAspects = (): void => {
+		const occupied = trainKeys(graph, state.trains);
+		state.aspects = computeAspects(graph, state, (route, i) =>
+			occupied.has(occKeyOf(graph, route.segs[i])),
+		);
+	};
+
 	const step = (): void => {
 		state.time += SIM_DT;
+		commitPendingRoute(graph, state);
+		refreshAspects();
+	};
+
+	const viewSeg = (seg: Seg, from = 0, to = 1): ViewSeg => {
+		const { gx, gy } = graph.nodes[seg.node].cell;
+		return { gx, gy, entry: seg.entry, exit: seg.exit, from, to };
+	};
+
+	const routeCommand = (cmd: SimCommand): CommandResult => {
+		switch (cmd.type) {
+			case "checkRouteStart":
+				return checkRouteStart(graph, state, cmd.at, cmd.kind);
+			case "setRoute":
+				return setRoute(graph, state, cmd.from, cmd.to, cmd.kind);
+			case "cancelRoute":
+				return cancelRoute(graph, state, cmd.at, () => false);
+			case "togglePoints":
+				return togglePoints(graph, state, cmd.at);
+			default:
+				return fail("Unknown command.");
+		}
 	};
 
 	return {
@@ -119,8 +158,11 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					if (!isSpeed(cmd.speed)) return fail("That is not a clock speed.");
 					state.speed = cmd.speed;
 					return ok;
-				default:
-					return fail("Not supported yet.");
+				default: {
+					const result = routeCommand(cmd);
+					refreshAspects();
+					return result;
+				}
 			}
 		},
 		advance(seconds) {
@@ -136,10 +178,30 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				time: state.time,
 				run: state.run,
 				speed: state.speed,
-				signals: [],
-				points: [],
-				routes: [],
-				pendingRoute: null,
+				signals: graph.nodes
+					.filter((n) => n.signalExit !== null)
+					.map((n) => ({
+						...n.cell,
+						aspect: state.aspects[n.id],
+						aspects: n.signalAspects,
+					})),
+				points: graph.nodes
+					.filter((n) => n.kind === "switch")
+					.map((n) => {
+						const rail = n.rails[state.lies[n.id]];
+						return { ...n.cell, a: rail.a, b: rail.b };
+					}),
+				routes: state.routes.map((r) => ({
+					id: r.id,
+					kind: r.kind,
+					segs: r.segs.map((seg) => viewSeg(seg)),
+				})),
+				pendingRoute: state.pending
+					? {
+							kind: state.pending.route.kind,
+							segs: state.pending.route.segs.map((seg) => viewSeg(seg)),
+						}
+					: null,
 				trains: [],
 				counters: { ...state.counters },
 			};
