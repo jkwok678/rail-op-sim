@@ -11,6 +11,7 @@ import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
 import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
+import { PerformanceLog } from "./log";
 import { trainKeys } from "./occupancy";
 import {
 	cancelOnWrongEntry,
@@ -22,6 +23,18 @@ import {
 	togglePoints,
 } from "./routes";
 import { computeAspects } from "./signalling";
+import {
+	dispatchDue,
+	expandRuns,
+	nextActionText,
+	onEnterLocation,
+	onLeftRailway,
+	onStationStop,
+	placeName,
+	type RunnerContext,
+	stopTarget,
+	workDwelling,
+} from "./timetable";
 import { approaching, type MoveEvent, moveTrain, trainSpans } from "./trains";
 import type {
 	CommandResult,
@@ -30,7 +43,9 @@ import type {
 	SimCommand,
 	SimState,
 	SimView,
+	Train,
 	ViewSeg,
+	WaitReason,
 } from "./types";
 
 export interface EngineOptions {
@@ -51,7 +66,7 @@ export interface Engine {
 	drainLog(): LogLine[];
 }
 
-export function emptyCounters(): Counters {
+function emptyCounters(): Counters {
 	return {
 		onTimeArrivals: 0,
 		lateArrivals: 0,
@@ -80,7 +95,7 @@ export function emptyCounters(): Counters {
 	};
 }
 
-export function initialState(graph: RailGraph, timetable: Timetable): SimState {
+function initialState(graph: RailGraph, timetable: Timetable): SimState {
 	return {
 		time: timetable.startTime,
 		run: "prestart",
@@ -103,7 +118,10 @@ const fail = (message: string): CommandResult => ({ ok: false, message });
 export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const graph = buildGraph(map);
 	const state = initialState(graph, timetable);
-	const log: LogLine[] = [];
+	state.runs = expandRuns(timetable);
+	const log = new PerformanceLog(state.counters);
+	const ctx: RunnerContext = { graph, state, timetable, log };
+	let drained = 0;
 	let carry = 0;
 
 	const refreshAspects = (): void => {
@@ -113,42 +131,81 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		);
 	};
 
+	const locationOf = (seg: Seg): string | null =>
+		graph.nodes[seg.node].location;
+
 	const handleEvent = (event: MoveEvent): void => {
+		const { train } = event;
 		switch (event.type) {
-			case "entered":
-				cancelOnWrongEntry(state, event.seg, event.from);
+			case "entered": {
+				const cancelled = cancelOnWrongEntry(state, event.seg, event.from);
+				if (cancelled) {
+					log.error(
+						state.time,
+						`${train.headcode} entered a route from the wrong end at ${placeName(graph.nodes[event.seg.node])}; the route was cancelled`,
+					);
+				}
+				const location = locationOf(event.seg);
+				if (location && location !== locationOf(event.from)) {
+					onEnterLocation(ctx, train, location);
+				}
 				return;
+			}
 			case "cleared":
 				releaseBehind(state, event.seg);
 				return;
 			case "left":
 				releaseBehind(state, event.seg);
-				state.trains = state.trains.filter((t) => t !== event.train);
+				state.trains = state.trains.filter((t) => t !== train);
+				onLeftRailway(ctx, train, event.seg);
 				return;
 			case "spad":
-				event.train.status = "spad";
-				event.train.speed = 0;
+				train.status = "spad";
+				train.speed = 0;
 				state.counters.spads++;
+				log.error(
+					state.time,
+					`SPAD: ${train.headcode} PASSED SIGNAL AT DANGER at ${placeName(graph.nodes[event.seg.node])}`,
+				);
 				return;
 			case "crash":
-				for (const t of [event.train, event.other]) {
+				for (const t of [train, event.other]) {
 					t.status = "crashed";
 					t.speed = 0;
 				}
 				state.counters.crashedTrains += 2;
+				log.error(
+					state.time,
+					`CRASH: ${train.headcode} collided with ${event.other.headcode}`,
+				);
 				return;
 			case "stopped":
+				arrived(train, event.reason);
 				return;
+		}
+	};
+
+	/** A train that has stopped on the platforms it is due at has arrived. */
+	const arrived = (train: Train, reason: WaitReason): void => {
+		const target = stopTarget(ctx, train);
+		const here = locationOf(train.segs[train.segs.length - 1]);
+		const shortOf = reason === "signal" || reason === "train";
+		if (target && here === target && (reason === "station" || shortOf)) {
+			onStationStop(ctx, train, target);
 		}
 	};
 
 	const step = (): void => {
 		state.time += SIM_DT;
 		commitPendingRoute(graph, state);
+		dispatchDue(ctx);
+		for (const train of state.trains) {
+			if (train.status === "dwelling") workDwelling(ctx, train);
+		}
 		refreshAspects();
 		const events: MoveEvent[] = [];
 		for (const train of [...state.trains]) {
-			moveTrain(graph, state, train, null, SIM_DT, events);
+			moveTrain(graph, state, train, stopTarget(ctx, train), SIM_DT, events);
 		}
 		for (const event of events) handleEvent(event);
 		refreshAspects();
@@ -252,13 +309,15 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					segs: trainSpans(graph, t).map((span) =>
 						viewSeg(span.seg, span.from, span.to),
 					),
-					next: "",
+					next: nextActionText(ctx, t),
 				})),
 				counters: { ...state.counters },
 			};
 		},
 		drainLog() {
-			return log.splice(0);
+			const lines = log.lines.slice(drained);
+			drained = log.lines.length;
+			return lines;
 		},
 	};
 }

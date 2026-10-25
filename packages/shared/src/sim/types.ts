@@ -131,6 +131,8 @@ export interface ServiceRun {
 	status: "pending" | "running" | "done";
 	/** Set once a blocked entry has been reported, so it is reported once. */
 	blockedReported: boolean;
+	/** The train this run brought on, once it has. */
+	trainId: number | null;
 }
 
 export interface SimState {
