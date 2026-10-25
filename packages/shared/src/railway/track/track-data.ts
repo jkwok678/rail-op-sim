@@ -582,6 +582,90 @@ export function isTraversableLinkPair(
 	return true;
 }
 
+/** One continuous rail through a cell, between two of its links. */
+export interface Rail {
+	a: number;
+	b: number;
+	/** The diverging leg of a switch, or the second path of a crossover. */
+	secondary: boolean;
+}
+
+/**
+ * The rails a train can run along inside one cell of this subtype.
+ *
+ * A switch has two, sharing a stem; a crossover or flyover has two independent
+ * ones; everything else has one. `secondary` marks the rail that
+ * `trackSecondarySpeed`/`trackSecondaryLength` describe, so a simulator can
+ * pick the right figures:
+ *  - switch: the main rail is the straight-through one (its links sum to 8),
+ *    otherwise the one whose far link is lowest; the other is secondary;
+ *  - crossover/flyover: the rail holding the lowest link is main.
+ *
+ * Tracks without a secondary path return a single main rail, or none when the
+ * cell is a dead end (buffer, exit, portal mouth) with a single link.
+ */
+export function getRails(kind: TrackKind, subtype: SubtypeKey): Rail[] {
+	const links = getLinksForSubtype(kind, subtype);
+	const rails: { a: number; b: number }[] = [];
+	for (let i = 0; i < links.length; i++) {
+		for (let j = i + 1; j < links.length; j++) {
+			if (isTraversableLinkPair(kind, subtype, links[i], links[j])) {
+				rails.push({ a: links[i], b: links[j] });
+			}
+		}
+	}
+	if (!hasSecondaryPath(kind) || rails.length < 2) {
+		return rails.map((r) => ({ ...r, secondary: false }));
+	}
+	const mainIndex =
+		kind === "switch"
+			? switchMainRailIndex(rails)
+			: rails.indexOf(
+					rails.reduce((best, r) =>
+						Math.min(r.a, r.b) < Math.min(best.a, best.b) ? r : best,
+					),
+				);
+	return rails.map((r, i) => ({ ...r, secondary: i !== mainIndex }));
+}
+
+function switchMainRailIndex(
+	rails: readonly { a: number; b: number }[],
+): number {
+	const straight = rails.findIndex((r) => r.a + r.b === 8);
+	if (straight !== -1) return straight;
+	const stem =
+		rails[0].a === rails[1].a || rails[0].a === rails[1].b
+			? rails[0].a
+			: rails[0].b;
+	const far = (r: { a: number; b: number }) => (r.a === stem ? r.b : r.a);
+	return far(rails[0]) <= far(rails[1]) ? 0 : 1;
+}
+
+/**
+ * Names of the signal subtypes, by the end of the cell their lamp sits at. A
+ * signal faces oncoming trains, so it protects travel *away* from its lamp:
+ * the exit link is the opposite one (`8 - lamp`).
+ */
+const SIGNAL_LAMP_LINK: Record<SubtypeKey, number> = {
+	SIGNALLEFT: 3,
+	SIGNALRIGHT: 5,
+	SIGNALUP: 1,
+	SIGNALDOWN: 7,
+	SIGNALLEFTUP: 0,
+	SIGNALRIGHTDOWN: 8,
+	SIGNALRIGHTUP: 2,
+	SIGNALLEFTDOWN: 6,
+};
+
+/**
+ * The exit link of a signal subtype: a train leaving the cell through this
+ * link has passed the signal facing it. Null for a non-signal subtype.
+ */
+export function signalFacingExit(subtype: SubtypeKey): number | null {
+	const lamp = SIGNAL_LAMP_LINK[subtype];
+	return lamp === undefined ? null : 8 - lamp;
+}
+
 // ============================================================================
 // Subtype → short code mappings (for toString / toSaveString)
 // ============================================================================

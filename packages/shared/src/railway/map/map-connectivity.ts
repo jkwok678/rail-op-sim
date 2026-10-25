@@ -740,7 +740,7 @@ export function portalMouthLink(track: Track): number | null {
 }
 
 /** Grid neighbour through an active link, or the portal partner through a mouth. */
-function neighborThroughLink(
+export function neighborThroughLink(
 	map: Map_,
 	track: Track,
 	link: number,
@@ -757,7 +757,7 @@ function neighborThroughLink(
 }
 
 /** Entry link the neighbour must expose to receive travel leaving via `link`. */
-function expectedEntryOnNeighbor(
+export function expectedEntryOnNeighbor(
 	track: Track,
 	link: number,
 	neighbor: Track,

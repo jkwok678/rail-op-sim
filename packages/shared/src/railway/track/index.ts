@@ -16,15 +16,17 @@ export {
 	TRACK_COLOR_LENGTH,
 	TRACK_COLOR_SPEED,
 } from "./track-color";
-export type { TrackData, TrackKind, TrackKindMeta } from "./track-data";
+export type { Rail, TrackData, TrackKind, TrackKindMeta } from "./track-data";
 export {
 	getDirectedFlow,
 	getLinksForSubtype,
+	getRails,
 	hasSecondaryPath,
 	isTraversableLinkPair,
 	isValidSubtype,
 	KIND_META,
 	kindToLabel,
+	signalFacingExit,
 	subtypeToCode,
 	supportsLevelCrossing,
 	supportsPlatforms,
