@@ -26,7 +26,7 @@ import { followSeg, liesAgainst, nextSeg, trainKeys } from "./occupancy";
 import type { Route, SimState, Train, TrainWorking, WaitReason } from "./types";
 
 /** Every train is RailOS's two default elements long. */
-export const DEFAULT_TRAIN_LENGTH_M = 200;
+const DEFAULT_TRAIN_LENGTH_M = 200;
 /** Acceleration is power-limited, but never more than adhesion allows. */
 const MAX_ACCEL = 1.0;
 const G = 9.81;
@@ -153,37 +153,44 @@ function lookAhead(
 		train.maxSpeed,
 		...train.segs.map((s) => speedLimit(graph, s)),
 	);
-	const stopHere = (reason: WaitReason): Ahead => ({
-		authority: Math.max(0, dist),
-		reason,
-		limit,
-	});
 	const bp = planningBrake(train);
 	const reach = horizon(train);
 	while (dist < reach) {
 		const next = nextSeg(graph, state.lies, seg);
-		if (
-			stopAt &&
-			locationOf(graph, seg) === stopAt &&
-			locationOf(graph, next) !== stopAt
-		) {
-			return stopHere("station");
-		}
-		if (!next) {
-			if (leavesMap(graph, seg)) break;
-			return stopHere("buffers");
-		}
-		if (isFacingSignal(graph, next) && state.aspects[next.node] === 0) {
-			return stopHere("signal");
-		}
-		if (others.has(occKeyOf(graph, next))) return stopHere("train");
-		if (liesAgainst(graph, state.lies, next)) return stopHere("points");
+		const reason = stopReason(graph, state, others, stopAt, seg, next);
+		if (reason) return { authority: Math.max(0, dist), reason, limit };
+		if (!next) break;
 		const lim = speedLimit(graph, next);
 		limit = Math.min(limit, Math.sqrt(lim * lim + 2 * bp * dist));
 		dist += segLength(graph, next);
 		seg = next;
 	}
 	return { authority: Number.POSITIVE_INFINITY, reason: null, limit };
+}
+
+/**
+ * Why a train must stop at the boundary between `seg` and `next`, or null
+ * when it may run on (`next` null then means it is leaving the railway).
+ */
+function stopReason(
+	graph: RailGraph,
+	state: SimState,
+	others: ReadonlyMap<number, number>,
+	stopAt: string | null,
+	seg: Seg,
+	next: Seg | null,
+): WaitReason {
+	const here = locationOf(graph, seg);
+	if (stopAt && here === stopAt && locationOf(graph, next) !== stopAt) {
+		return "station";
+	}
+	if (!next) return leavesMap(graph, seg) ? null : "buffers";
+	if (isFacingSignal(graph, next) && state.aspects[next.node] === 0) {
+		return "signal";
+	}
+	if (others.has(occKeyOf(graph, next))) return "train";
+	if (liesAgainst(graph, state.lies, next)) return "points";
+	return null;
 }
 
 /** Speed after one step of `dt` towards what lies ahead. */

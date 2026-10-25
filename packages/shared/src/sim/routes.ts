@@ -31,12 +31,12 @@ import {
 import type { CommandResult, Route, RouteKind, SimState } from "./types";
 
 /** How long a route takes to set, in timetable seconds. */
-export const SIGNALS_DELAY = 0.5;
-export const POINTS_DELAY = 2.5;
+const SIGNALS_DELAY = 0.5;
+const POINTS_DELAY = 2.5;
 /** Most segments a route search will look at before giving up. */
 const SEARCH_LIMIT = 20000;
 
-export type RouteFound =
+type RouteFound =
 	| { ok: true; segs: Seg[]; lies: [NodeId, number][] }
 	| { ok: false; message: string };
 
@@ -148,7 +148,7 @@ function unwind(found: SearchNode | null): Seg[] {
  * Each step must be free of trains and other routes; preferred routes follow
  * preferred directions and may not run past a signal facing them.
  */
-export function findRoute(
+function findRoute(
 	graph: RailGraph,
 	state: SimState,
 	from: Cell,
@@ -170,36 +170,65 @@ export function findRoute(
 		return !trains.has(key) && !routes.has(key);
 	};
 
-	const queue: SearchNode[] = starts
-		.filter(free)
-		.map((seg) => ({ seg, parent: null }));
-	if (queue.length === 0)
+	const open = starts.filter(free);
+	if (open.length === 0) {
 		return failed(blockedReason(graph, state, starts[0]) ?? "");
-	const seen = new Set<number>(queue.map((q) => q.seg.node * 9 + q.seg.entry));
-
-	for (let head = 0; head < queue.length && head < SEARCH_LIMIT; head++) {
-		const current = queue[head];
-		const step = stepFrom(graph, current.seg.node, current.seg.exit);
-		if (!step) continue;
-		for (const path of pathsFrom(graph, step.node, step.entry)) {
-			const seg = { node: step.node, entry: path.entry, exit: path.exit };
-			const reached = arrival(graph, kind, seg, endId);
-			if (reached === "before") return withLies(graph, state, unwind(current));
-			if (reached === "include" && free(seg)) {
-				return withLies(graph, state, unwind({ seg, parent: current }));
-			}
-			if (!canExtend(graph, kind, seg) || !free(seg)) continue;
-			const key = seg.node * 9 + seg.entry;
-			if (seen.has(key)) continue;
-			seen.add(key);
-			queue.push({ seg, parent: current });
-		}
 	}
+	const segs = search(graph, kind, open, endId, free);
+	if (segs) return withLies(graph, state, segs);
 	return failed(
 		followsPreferred(kind)
 			? "No route that way: it must follow preferred directions to the next signal, buffers or an exit."
 			: "No route between those two places.",
 	);
+}
+
+/** Breadth-first from `starts` until `end` is reached, or null. */
+function search(
+	graph: RailGraph,
+	kind: RouteKind,
+	starts: Seg[],
+	end: NodeId,
+	free: (seg: Seg) => boolean,
+): Seg[] | null {
+	const key = (seg: Seg): number => seg.node * 9 + seg.entry;
+	const queue: SearchNode[] = starts.map((seg) => ({ seg, parent: null }));
+	const seen = new Set<number>(starts.map(key));
+	const enqueue = (node: SearchNode): void => {
+		if (seen.has(key(node.seg))) return;
+		seen.add(key(node.seg));
+		queue.push(node);
+	};
+	for (let head = 0; head < queue.length && head < SEARCH_LIMIT; head++) {
+		const found = expand(graph, kind, queue[head], end, free, enqueue);
+		if (found) return found;
+	}
+	return null;
+}
+
+/** Look one step on from `current`: the route if it arrives, else queue the ways on. */
+function expand(
+	graph: RailGraph,
+	kind: RouteKind,
+	current: SearchNode,
+	end: NodeId,
+	free: (seg: Seg) => boolean,
+	enqueue: (node: SearchNode) => void,
+): Seg[] | null {
+	const step = stepFrom(graph, current.seg.node, current.seg.exit);
+	if (!step) return null;
+	for (const path of pathsFrom(graph, step.node, step.entry)) {
+		const seg = { node: step.node, entry: path.entry, exit: path.exit };
+		const reached = arrival(graph, kind, seg, end);
+		if (reached === "before") return unwind(current);
+		if (reached === "include" && free(seg)) {
+			return unwind({ seg, parent: current });
+		}
+		if (canExtend(graph, kind, seg) && free(seg)) {
+			enqueue({ seg, parent: current });
+		}
+	}
+	return null;
 }
 
 /** Whether a route of `kind` may carry on through `seg`. */

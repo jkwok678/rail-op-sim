@@ -21,8 +21,8 @@ import { beyondRoute } from "./routes";
 import type { Route, SimState } from "./types";
 
 /** Aspect values. */
-export const RED = 0;
-export const GREEN = 3;
+const RED = 0;
+const GREEN = 3;
 
 /** Nothing to step up from: a train or the plain end of a route lies ahead. */
 const BLOCKED = -1;
