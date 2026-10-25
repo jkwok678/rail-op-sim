@@ -13,7 +13,8 @@ type Subsystem =
 	| "pixi"
 	| "grid"
 	| "map"
-	| "saveload";
+	| "saveload"
+	| "sim";
 
 export function debugLog(
 	subsystem: Subsystem,
