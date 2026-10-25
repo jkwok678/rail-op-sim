@@ -11,6 +11,8 @@ import type {
 import type { TrackKind } from "../../railway/track/track-data";
 import { createTrackData } from "../../railway/track/track-factory";
 import { createEngine, type Engine } from "../engine";
+import { startPosition, trainFromSpec } from "../trains";
+import type { Train } from "../types";
 
 /**
  * Fixture railways for the engine tests, built on a default-scale map (cell ×
@@ -204,3 +206,43 @@ export function runFor(engine: Engine, seconds: number): void {
 }
 
 export const cell = (gx: number, gy = 0) => ({ gx, gy });
+
+/** Put a train straight onto the railway, outside any timetable. */
+export function addTrain(
+	engine: Engine,
+	rear: { gx: number; gy: number },
+	front: { gx: number; gy: number },
+	spec: Partial<TrainSpec> = {},
+): Train {
+	const position = startPosition(engine.graph, engine.state.lies, rear, front);
+	if (!position) throw new Error("cannot place a train there");
+	const train = trainFromSpec(
+		engine.state.nextTrainId++,
+		"1A01",
+		"",
+		{ ...TRAIN, ...spec },
+		{
+			ref: "1A01",
+			repeat: 0,
+			index: 0,
+			at: null,
+			arrivedAt: null,
+			lastActionAt: 0,
+			releaseAt: null,
+			heldReported: false,
+			done: false,
+		},
+	);
+	train.segs = position.segs;
+	train.frontM = position.frontM;
+	engine.state.trains.push(train);
+	return train;
+}
+
+/** The cell a train's front is in. */
+export function frontCell(
+	engine: Engine,
+	train: Train,
+): { gx: number; gy: number } {
+	return engine.graph.nodes[train.segs[train.segs.length - 1].node].cell;
+}

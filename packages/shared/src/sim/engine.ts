@@ -13,13 +13,16 @@ import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
 import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
 import { trainKeys } from "./occupancy";
 import {
+	cancelOnWrongEntry,
 	cancelRoute,
 	checkRouteStart,
 	commitPendingRoute,
+	releaseBehind,
 	setRoute,
 	togglePoints,
 } from "./routes";
 import { computeAspects } from "./signalling";
+import { approaching, type MoveEvent, moveTrain, trainSpans } from "./trains";
 import type {
 	CommandResult,
 	Counters,
@@ -110,9 +113,44 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		);
 	};
 
+	const handleEvent = (event: MoveEvent): void => {
+		switch (event.type) {
+			case "entered":
+				cancelOnWrongEntry(state, event.seg, event.from);
+				return;
+			case "cleared":
+				releaseBehind(state, event.seg);
+				return;
+			case "left":
+				releaseBehind(state, event.seg);
+				state.trains = state.trains.filter((t) => t !== event.train);
+				return;
+			case "spad":
+				event.train.status = "spad";
+				event.train.speed = 0;
+				state.counters.spads++;
+				return;
+			case "crash":
+				for (const t of [event.train, event.other]) {
+					t.status = "crashed";
+					t.speed = 0;
+				}
+				state.counters.crashedTrains += 2;
+				return;
+			case "stopped":
+				return;
+		}
+	};
+
 	const step = (): void => {
 		state.time += SIM_DT;
 		commitPendingRoute(graph, state);
+		refreshAspects();
+		const events: MoveEvent[] = [];
+		for (const train of [...state.trains]) {
+			moveTrain(graph, state, train, null, SIM_DT, events);
+		}
+		for (const event of events) handleEvent(event);
 		refreshAspects();
 	};
 
@@ -128,7 +166,9 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 			case "setRoute":
 				return setRoute(graph, state, cmd.from, cmd.to, cmd.kind);
 			case "cancelRoute":
-				return cancelRoute(graph, state, cmd.at, () => false);
+				return cancelRoute(graph, state, cmd.at, (route) =>
+					state.trains.some((t) => approaching(graph, state, t, route)),
+				);
 			case "togglePoints":
 				return togglePoints(graph, state, cmd.at);
 			default:
@@ -202,7 +242,18 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 							segs: state.pending.route.segs.map((seg) => viewSeg(seg)),
 						}
 					: null,
-				trains: [],
+				trains: state.trains.map((t) => ({
+					id: t.id,
+					headcode: t.headcode,
+					description: t.description,
+					status: t.status,
+					wait: t.wait,
+					speedKmh: t.speed * 3.6,
+					segs: trainSpans(graph, t).map((span) =>
+						viewSeg(span.seg, span.from, span.to),
+					),
+					next: "",
+				})),
 				counters: { ...state.counters },
 			};
 		},
