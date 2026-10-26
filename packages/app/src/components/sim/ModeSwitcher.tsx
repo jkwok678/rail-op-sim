@@ -8,14 +8,11 @@ import {
 } from "#/components/ui/tooltip";
 import { useShortcutKeys } from "#/hooks/useShortcutDisplay";
 import type { ShortcutId } from "#/lib/shortcuts";
-import { useEditorStore } from "#/store/editor-store";
 import {
 	type AppMode,
-	operateBlockedReason,
-	timetableBlockedReason,
+	useBlockedReasons,
 	useModeStore,
 } from "#/store/mode-store";
-import { useTimetableStore } from "#/store/timetable-store";
 
 const MODES: {
 	mode: AppMode;
@@ -45,14 +42,7 @@ const MODES: {
 export function ModeSwitcher() {
 	const mode = useModeStore((s) => s.mode);
 	const setMode = useModeStore((s) => s.setMode);
-	const trackStatus = useEditorStore((s) => s.trackStatus);
-	const timetable = useTimetableStore((s) => s.timetable);
-	const issues = useTimetableStore((s) => s.issues);
-	const blocked: Record<AppMode, string | null> = {
-		railway: null,
-		timetable: timetableBlockedReason(trackStatus),
-		operate: operateBlockedReason(trackStatus, timetable, issues),
-	};
+	const blocked = useBlockedReasons();
 
 	return (
 		<div

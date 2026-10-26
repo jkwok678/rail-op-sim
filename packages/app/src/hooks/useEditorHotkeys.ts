@@ -14,13 +14,150 @@ import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { moveActionTo, nextIssueTarget, stepService } from "#/lib/timetableNav";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
-import {
-	operateBlockedReason,
-	timetableBlockedReason,
-	useModeStore,
-} from "#/store/mode-store";
+import { useBlockedReasons, useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
+
+/** Escape's target depends on state; `resolveEscape` decides, this applies. */
+function runEscape(): void {
+	const state = useEditorStore.getState();
+	const timetable = useTimetableStore.getState();
+	const operate = useOperateStore.getState();
+	const action = resolveEscape({
+		...state,
+		timetableCellPick: timetable.pendingCellPick,
+		operateRouteStart: operate.routeStart,
+		operateCancelArmed: operate.cancelArmed,
+	});
+	switch (action.type) {
+		case "abandonRoute":
+			operate.setRouteStart(null);
+			break;
+		case "disarmRouteCancel":
+			operate.setCancelArmed(false);
+			break;
+		case "cancelCellPick":
+			timetable.cancelCellPick();
+			break;
+		case "cancelSection":
+			// Both halves: the store action alone leaves the pixi highlight on
+			// screen, which is why the panel's Cancel button does the same pair.
+			state.clearSectionSelection();
+			PlacementController.instance?.clearSectionHighlight();
+			break;
+		case "cancelDirection":
+			state.setDirectionStart(null);
+			break;
+		case "paletteBack":
+			state.selectKind(null);
+			break;
+		case "resetTool":
+			state.setTool("select");
+			break;
+		case "none":
+			break;
+	}
+}
+
+/** `[` / `]` — wrap through the service list. */
+function stepSelectedService(direction: 1 | -1): void {
+	const timetable = useTimetableStore.getState();
+	const next = stepService(
+		timetable.timetable.services.map((service) => service.ref),
+		timetable.selectedServiceRef,
+		direction,
+	);
+	if (next) timetable.selectService(next);
+}
+
+/** `N` — open the next problem under the service on screen. */
+function jumpToNextIssue(): void {
+	const timetable = useTimetableStore.getState();
+	const target = nextIssueTarget(
+		timetable.issues,
+		timetable.selectedServiceRef,
+		timetable.selectedActionIndex,
+	);
+	if (!target) return;
+	if (target.serviceRef && target.serviceRef !== timetable.selectedServiceRef) {
+		timetable.selectService(target.serviceRef);
+	}
+	useTimetableStore.getState().selectAction(target.actionIndex);
+}
+
+/** Alt+arrows — reorder the selected action, and follow it. */
+function moveSelectedAction(direction: -1 | 1): void {
+	const timetable = useTimetableStore.getState();
+	const ref = timetable.selectedServiceRef;
+	if (!ref) return;
+	const service = timetable.timetable.services.find((item) => item.ref === ref);
+	const to = moveActionTo(
+		service?.actions.length ?? 0,
+		timetable.selectedActionIndex,
+		direction,
+	);
+	if (to === null || timetable.selectedActionIndex === null) return;
+	timetable.moveAction(
+		ref,
+		timetable.selectedActionIndex,
+		to,
+		PlacementController.instance?.map ?? null,
+	);
+}
+
+/** What each shortcut does. Keys live in the registry, behaviour lives here. */
+const run: Record<ShortcutId, () => void> = {
+	toolSelect: () => useEditorStore.getState().setTool("select"),
+	toolAdd: () => useEditorStore.getState().setTool("add"),
+	toolText: () => useEditorStore.getState().setTool("text"),
+	toolLink: () => useEditorStore.getState().setTool("link"),
+	toolSection: () => useEditorStore.getState().setTool("section"),
+	toolDirection: () => useEditorStore.getState().setTool("direction"),
+	toggleEraseMode: () => {
+		const s = useEditorStore.getState();
+		s.setDirectionMode(s.directionMode === "erase" ? "set" : "erase");
+	},
+
+	toggleGrid: () => useEditorStore.getState().toggleShowGrid(),
+	toggleLinkHighlights: () => useEditorStore.getState().toggleLinkHighlights(),
+	toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
+	toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
+
+	modeRailway: () => useModeStore.getState().setMode("railway"),
+	modeTimetable: () => useModeStore.getState().setMode("timetable"),
+	modeOperate: () => useModeStore.getState().setMode("operate"),
+
+	operateRunPause: runOrPause,
+	operateSlower: () => changeSpeed(-1),
+	operateFaster: () => changeSpeed(1),
+	routeAuto: () => chooseRouteKind("auto"),
+	routePreferred: () => chooseRouteKind("preferred"),
+	routeUnrestricted: () => chooseRouteKind("unrestricted"),
+	routeCancel: toggleRouteCancel,
+	operateLog: toggleLog,
+
+	prevService: () => stepSelectedService(-1),
+	nextService: () => stepSelectedService(1),
+	nextIssue: jumpToNextIssue,
+	moveActionUp: () => moveSelectedAction(-1),
+	moveActionDown: () => moveSelectedAction(1),
+
+	zoomIn: () => zoomIn(PlacementController.instance?.viewport),
+	zoomOut: () => zoomOut(PlacementController.instance?.viewport),
+	fitToView: () => fitToView(PlacementController.instance?.viewport),
+
+	save: () => saveDocument(),
+	load: () => void loadDocument(),
+
+	undo: () => PlacementController.instance?.undo(),
+	redo: () => PlacementController.instance?.redo(),
+
+	help: () => useEditorStore.getState().toggleShortcuts(),
+	escape: runEscape,
+
+	// Bound by SectionEditPanel, which owns the values being applied.
+	applySection: () => {},
+};
 
 /**
  * Bind the editor's keyboard shortcuts. Mount once, from the layout that owns
@@ -45,8 +182,7 @@ export function useEditorHotkeys(): void {
 	const selectedServiceRef = useTimetableStore((s) => s.selectedServiceRef);
 	const selectedActionIndex = useTimetableStore((s) => s.selectedActionIndex);
 	const issues = useTimetableStore((s) => s.issues);
-	const timetable = useTimetableStore((s) => s.timetable);
-	const trackStatus = useEditorStore((s) => s.trackStatus);
+	const blocked = useBlockedReasons();
 	const timetablePicking = useTimetableStore((s) => s.pendingCellPick !== null);
 	const selectedActionCount =
 		services.find((service) => service.ref === selectedServiceRef)?.actions
@@ -59,9 +195,8 @@ export function useEditorHotkeys(): void {
 		canUndo: useEditorStore((s) => s.canUndo),
 		canRedo: useEditorStore((s) => s.canRedo),
 		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
-		timetableBlocked: timetableBlockedReason(trackStatus) !== null,
-		operateBlocked:
-			operateBlockedReason(trackStatus, timetable, issues) !== null,
+		timetableBlocked: blocked.timetable !== null,
+		operateBlocked: blocked.operate !== null,
 		editDialogOpen: useEditorStore((s) =>
 			Boolean(s.pendingText || s.pendingNameTarget),
 		),
@@ -77,153 +212,6 @@ export function useEditorHotkeys(): void {
 			nextIssueTarget(issues, selectedServiceRef, selectedActionIndex) !== null,
 		timetablePicking,
 	});
-
-	/** Escape's target depends on state; `resolveEscape` decides, this applies. */
-	const runEscape = (): void => {
-		const state = useEditorStore.getState();
-		const timetable = useTimetableStore.getState();
-		const operate = useOperateStore.getState();
-		const action = resolveEscape({
-			...state,
-			timetableCellPick: timetable.pendingCellPick,
-			operateRouteStart: operate.routeStart,
-			operateCancelArmed: operate.cancelArmed,
-		});
-		switch (action.type) {
-			case "abandonRoute":
-				operate.setRouteStart(null);
-				break;
-			case "disarmRouteCancel":
-				operate.setCancelArmed(false);
-				break;
-			case "cancelCellPick":
-				timetable.cancelCellPick();
-				break;
-			case "cancelSection":
-				// Both halves: the store action alone leaves the pixi highlight on
-				// screen, which is why the panel's Cancel button does the same pair.
-				state.clearSectionSelection();
-				PlacementController.instance?.clearSectionHighlight();
-				break;
-			case "cancelDirection":
-				state.setDirectionStart(null);
-				break;
-			case "paletteBack":
-				state.selectKind(null);
-				break;
-			case "resetTool":
-				state.setTool("select");
-				break;
-			case "none":
-				break;
-		}
-	};
-
-	/** `[` / `]` — wrap through the service list. */
-	const stepSelectedService = (direction: 1 | -1): void => {
-		const timetable = useTimetableStore.getState();
-		const next = stepService(
-			timetable.timetable.services.map((service) => service.ref),
-			timetable.selectedServiceRef,
-			direction,
-		);
-		if (next) timetable.selectService(next);
-	};
-
-	/** `N` — open the next problem under the service on screen. */
-	const jumpToNextIssue = (): void => {
-		const timetable = useTimetableStore.getState();
-		const target = nextIssueTarget(
-			timetable.issues,
-			timetable.selectedServiceRef,
-			timetable.selectedActionIndex,
-		);
-		if (!target) return;
-		if (
-			target.serviceRef &&
-			target.serviceRef !== timetable.selectedServiceRef
-		) {
-			timetable.selectService(target.serviceRef);
-		}
-		useTimetableStore.getState().selectAction(target.actionIndex);
-	};
-
-	/** Alt+arrows — reorder the selected action, and follow it. */
-	const moveSelectedAction = (direction: -1 | 1): void => {
-		const timetable = useTimetableStore.getState();
-		const ref = timetable.selectedServiceRef;
-		if (!ref) return;
-		const service = timetable.timetable.services.find(
-			(item) => item.ref === ref,
-		);
-		const to = moveActionTo(
-			service?.actions.length ?? 0,
-			timetable.selectedActionIndex,
-			direction,
-		);
-		if (to === null || timetable.selectedActionIndex === null) return;
-		timetable.moveAction(
-			ref,
-			timetable.selectedActionIndex,
-			to,
-			PlacementController.instance?.map ?? null,
-		);
-	};
-
-	/** What each shortcut does. Keys live in the registry, behaviour lives here. */
-	const run: Record<ShortcutId, () => void> = {
-		toolSelect: () => useEditorStore.getState().setTool("select"),
-		toolAdd: () => useEditorStore.getState().setTool("add"),
-		toolText: () => useEditorStore.getState().setTool("text"),
-		toolLink: () => useEditorStore.getState().setTool("link"),
-		toolSection: () => useEditorStore.getState().setTool("section"),
-		toolDirection: () => useEditorStore.getState().setTool("direction"),
-		toggleEraseMode: () => {
-			const s = useEditorStore.getState();
-			s.setDirectionMode(s.directionMode === "erase" ? "set" : "erase");
-		},
-
-		toggleGrid: () => useEditorStore.getState().toggleShowGrid(),
-		toggleLinkHighlights: () =>
-			useEditorStore.getState().toggleLinkHighlights(),
-		toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
-		toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
-
-		modeRailway: () => useModeStore.getState().setMode("railway"),
-		modeTimetable: () => useModeStore.getState().setMode("timetable"),
-		modeOperate: () => useModeStore.getState().setMode("operate"),
-
-		operateRunPause: runOrPause,
-		operateSlower: () => changeSpeed(-1),
-		operateFaster: () => changeSpeed(1),
-		routeAuto: () => chooseRouteKind("auto"),
-		routePreferred: () => chooseRouteKind("preferred"),
-		routeUnrestricted: () => chooseRouteKind("unrestricted"),
-		routeCancel: toggleRouteCancel,
-		operateLog: toggleLog,
-
-		prevService: () => stepSelectedService(-1),
-		nextService: () => stepSelectedService(1),
-		nextIssue: jumpToNextIssue,
-		moveActionUp: () => moveSelectedAction(-1),
-		moveActionDown: () => moveSelectedAction(1),
-
-		zoomIn: () => zoomIn(PlacementController.instance?.viewport),
-		zoomOut: () => zoomOut(PlacementController.instance?.viewport),
-		fitToView: () => fitToView(PlacementController.instance?.viewport),
-
-		save: () => saveDocument(),
-		load: () => void loadDocument(),
-
-		undo: () => PlacementController.instance?.undo(),
-		redo: () => PlacementController.instance?.redo(),
-
-		help: () => useEditorStore.getState().toggleShortcuts(),
-		escape: runEscape,
-
-		// Bound by SectionEditPanel, which owns the values being applied.
-		applySection: () => {},
-	};
 
 	// One row per registry entry, always, in registry order: `useHotkeys` keys
 	// registrations by array index, so a row that disappears would re-register

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import {
 	blockedReason,
+	operateBlockedReason,
 	timetableBlockedReason,
 	useModeStore,
 } from "#/store/mode-store";
@@ -173,5 +174,29 @@ describe("operate mode", () => {
 		useOperateStore.setState({ view: { run: "prestart" } as never });
 		useModeStore.setState({ confirmLeaveOperate: () => false });
 		expect(mode().setMode("timetable")).toBe(true);
+	});
+});
+
+describe("operateBlockedReason", () => {
+	const tt = (services: number) => ({
+		version: 1 as const,
+		startTime: 0,
+		services: Array.from({ length: services }, (_, i) => ({
+			ref: `1A0${i}`,
+			actions: [{ kind: "finishRemainHere" as const }],
+		})),
+	});
+
+	it("passes a complete railway with a clean timetable", () => {
+		expect(operateBlockedReason(status({}), tt(1), [])).toBeNull();
+	});
+
+	it("puts the railway first, then the services, then the errors", () => {
+		expect(operateBlockedReason(null, tt(0), [])).toBe("Build a railway first");
+		expect(operateBlockedReason(status({}), tt(0), [])).toBe(
+			"Write a timetable first",
+		);
+		const warning = { severity: "warning" as const, code: "w", message: "w" };
+		expect(operateBlockedReason(status({}), tt(1), [warning])).toBeNull();
 	});
 });

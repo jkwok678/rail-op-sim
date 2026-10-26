@@ -137,3 +137,15 @@ export function blockedReason(mode: AppMode): string | null {
 		}
 	}
 }
+
+/** Why each mode cannot be entered right now, kept live for the UI. */
+export function useBlockedReasons(): Record<AppMode, string | null> {
+	const trackStatus = useEditorStore((s) => s.trackStatus);
+	const timetable = useTimetableStore((s) => s.timetable);
+	const issues = useTimetableStore((s) => s.issues);
+	return {
+		railway: null,
+		timetable: timetableBlockedReason(trackStatus),
+		operate: operateBlockedReason(trackStatus, timetable, issues),
+	};
+}
