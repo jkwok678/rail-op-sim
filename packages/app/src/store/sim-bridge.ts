@@ -83,7 +83,7 @@ export function startSimBridge(
 }
 
 /** A transport to a fresh engine worker. */
-export function workerTransport(): HostTransport {
+function workerTransport(): HostTransport {
 	const worker = new Worker(
 		new URL("../host/worker-host.ts", import.meta.url),
 		{

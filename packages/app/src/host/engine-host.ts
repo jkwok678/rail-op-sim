@@ -23,11 +23,11 @@ export interface HostClock {
 }
 
 /** How often the loop runs. */
-export const FRAME_MS = 16;
+const FRAME_MS = 16;
 /** How often the view is published: 20 Hz is plenty for a signalling panel. */
-export const VIEW_MS = 50;
+const VIEW_MS = 50;
 /** Most wall time one frame may make up, so a stalled tab does not lurch. */
-export const MAX_FRAME_S = 0.25;
+const MAX_FRAME_S = 0.25;
 
 export function startEngineHost(
 	transport: EngineTransport,

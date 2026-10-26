@@ -28,6 +28,8 @@ import { EditHistory, type RefreshFlags } from "#/engine/EditHistory";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
+import { applyOperateIntent } from "#/lib/operateActions";
+import { resolveOperateClick } from "#/lib/operateInput";
 import { buildHoveredTrackInfo } from "#/lib/trackInfo";
 import type { DirectionLayer } from "#/renderer/layers/DirectionLayer";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
@@ -44,6 +46,7 @@ import {
 	useEditorStore,
 } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 /** Pointer travel (CSS px) above which a release counts as a drag, not a click. */
@@ -514,6 +517,12 @@ export class PlacementController {
 	 * click outside railway mode.
 	 */
 	private claimClick(e: PointerEvent): boolean {
+		// Operate mode: every click works the signalling, never the map.
+		if (useModeStore.getState().mode === "operate") {
+			this.handleOperateClick(e);
+			return true;
+		}
+
 		// Outside railway mode the map is a read-only backdrop. Entering another
 		// mode already puts the tool back to Select, which edits nothing — this
 		// is the backstop, so no path that leaves a tool armed can reach the map.
@@ -536,6 +545,21 @@ export class PlacementController {
 		}
 
 		return !mapEditable;
+	}
+
+	/** Set or cancel a route, or throw points, from a click in operate mode. */
+	private handleOperateClick(e: PointerEvent): void {
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		if (!cell) return;
+		const step = this.map.getImageSize();
+		const track = this.map.getTrackAt(cell.gx * step, cell.gy * step);
+		const intent = resolveOperateClick(useOperateStore.getState(), {
+			button: e.button === 2 ? "right" : "left",
+			cell,
+			onPoints: track?.data.kind === "switch",
+		});
+		debugLog("placement", `operate click → ${intent.type}`);
+		void applyOperateIntent(intent);
 	}
 
 	/** Fill the timetable's pending cell field from where the click landed. */

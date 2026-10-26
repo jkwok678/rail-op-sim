@@ -10,7 +10,7 @@ import { create } from "zustand";
  */
 
 /** Oldest lines are dropped beyond this, so a long session stays light. */
-export const LOG_LIMIT = 2000;
+const LOG_LIMIT = 2000;
 
 /** A log line with a sequence number, so a list can key it stably. */
 export type NumberedLogLine = LogLine & { seq: number };

@@ -40,6 +40,7 @@ export function usePixiApp(): UsePixiAppReturn {
 		let observer: ResizeObserver | null = null;
 		let themeObserver: MutationObserver | null = null;
 		let unsubGrid: (() => void) | null = null;
+		let stopOperate: () => void = () => {};
 		let textures: ReturnType<
 			typeof import("#/renderer/textureCache").createTextureCache
 		> | null = null;
@@ -61,6 +62,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ createLinkHighlightLayer },
 				{ createTrackColorLayer },
 				{ createDirectionLayer },
+				{ attachOperateLayers },
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
@@ -74,6 +76,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("#/renderer/layers/LinkHighlightLayer"),
 				import("#/renderer/layers/TrackColorLayer"),
 				import("#/renderer/layers/DirectionLayer"),
+				import("#/renderer/operateLayers"),
 				import("#/renderer/textureCache"),
 				import("#/engine/PlacementController"),
 			]);
@@ -139,6 +142,9 @@ export function usePixiApp(): UsePixiAppReturn {
 			// after the link highlights and below the ghost.
 			const directionLayer = createDirectionLayer();
 			world.addChild(directionLayer.container);
+
+			// Operate mode's routes, lamps and trains, driven by the engine's view.
+			stopOperate = attachOperateLayers(world);
 
 			app.stage.addChild(world);
 			debugLog(
@@ -256,6 +262,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			if (observer) observer.disconnect();
 			if (themeObserver) themeObserver.disconnect();
 			if (unsubGrid) unsubGrid();
+			stopOperate();
 			placementRef.current?.detach();
 			viewportRef.current?.detach();
 			textures?.destroy();
