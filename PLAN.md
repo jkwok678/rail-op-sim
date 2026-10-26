@@ -784,30 +784,58 @@ action-list model; the deliverable is unchanged.
 
 ### Milestone 21: Timetable Engine — Basic Dispatch
 
-**Deliverable**: At the scheduled time, a train appears at the origin and begins following its route.
+**Deliverable**: A third app mode, **Operate**, where the signaller sets routes and trains run the timetable.
 
-- [ ] Implement `engine/TimetableEngine.ts`:
-  - On each tick, check for entries whose `departureTime` has been reached
-  - `dispatchTrain(entry)`: creates a train at the entry's origin, assigns it the entry's route
-  - Train begins moving toward first stop (or destination if no stops)
-  - Handle time acceleration: at 16x sim speed, trains still dispatch correctly
-- [ ] `TimetableEngine` owns the timetable, sends dispatch commands to `SimState`
-- [ ] Visual: when a train is dispatched, notification appears in status bar
+Restated, as M20 was, against what the codebase actually is: a grid of cells with links, not the vertex/edge graph sketched in M2–M19. The engine sits on that grid and fills the parts of M7–M8 and M12–M19 that operating needs. OPERATE-MODE.md (railway-dot-exe's behaviour) is the reference, not the spec.
+
+- [x] Pure-TS engine in `packages/shared/src/sim/`, with no DOM:
+  - `graph.ts`: an immutable rail graph built from the map once on entry;
+  - `routes.ts`, `signalling.ts`, `trains.ts`, `timetable.ts`, `log.ts`;
+  - `engine.ts`: `createEngine({ map, timetable })` → `handle(cmd)` / `advance(seconds)` / `view()` / `drainLog()`.
+- [x] Fixed-step clock: `SIM_DT` = 0.1 s of timetable time. Speeds run ×¼ to ×16; the run state is PreStart → Running ⇄ Paused.
+- [x] Hosted in a Web Worker behind the transport from this plan:
+  - `transport/types.ts`, `postmessage-transport.ts`, and Valibot schemas for everything the engine accepts;
+  - `host/engine-host.ts`: a wall-clock accumulator with the clock injected, publishing at 20 Hz;
+  - `store/sim-bridge.ts` and `store/operate-store.ts` on the page side.
+- [x] RailOS route setting: automatic-signals, preferred and unrestricted routes, found by BFS over directed cell segments.
+  - A signal stands at the entry edge of its cell. A route starts on its entry signal and stops short of the next one, so routes never share a rail.
+  - Routes set after a delay: 0.5 s, or 2.5 s when points move.
+  - Preferred and unrestricted routes are released behind the train. Entering a route at the wrong end cancels it.
+  - Cancelling takes the whole route, and is refused while a train is on it or approaching it.
+- [x] Signal aspects are recomputed from routes and occupancy every step. Each signal is one step better than the next one ahead; buffers count as a red signal and an exit as clear.
+- [x] Points have a lie: the main rail by default, set by routes, and thrown by hand when nothing holds them.
+- [x] Trains are a 200 m body laid back from the front, measured in metres. Each step:
+  - they look ahead for their movement authority: a red signal, buffers, the train ahead, points lying against them, or their stop point;
+  - they brake on a curve at half their brake rate, and accelerate under power up to an adhesion cap;
+  - they keep to speed limits ahead;
+  - they enter from an exit or start standing on two cells, and leave by an exit.
+- [x] Faults: a SPAD stops the train, and two trains on one rail crash.
+- [x] Operate mode (`O`) is gated on a complete railway and a timetable with services and no errors.
+  - The docked panel has the clock, run/pause, speed, route kind, cancel, the train list and the performance log.
+  - The canvas shows route bands, signal lamps, point lies, and trains with headcodes.
+  - Keys: `P` run/pause, `,` and `.` for speed, `A`/`S`/`U` for route kind, `C` cancel, `J` log.
+- [ ] Interpolate train positions between published views (they currently step at 20 Hz)
 
 ### Milestone 22: Timetable Engine — Stops & Dwell
 
 **Deliverable**: Trains stop at stations, wait for dwell time, and depart on schedule.
 
-- [ ] Stopping behavior:
-  - As train approaches a station stop, it calculates braking point and decelerates
-  - Train stops at the correct platform position for the scheduled dwell time
-  - At departure time, train accelerates away
-- [ ] Early/late handling:
-  - If train arrives early: waits until scheduled departure time
-  - If train arrives late: minimum dwell (e.g., 30 seconds) then departs immediately
-  - Tries to recover time by running at max speed where possible
-- [ ] Passing stops: train passes through station without stopping (still logged)
-- [ ] Station display: when a train is stopped at a platform, show "1A23 to London 14:32" style indicator
+- [x] `startNew` services, and their repeats with headcode increments, come on at their time. A blocked entry is retried and reported once.
+- [x] Stops at the far end of the run of cells carrying the location's name. Passes register when the front enters the location.
+- [x] Departure is at the latest of the booked time, arrival plus the minimum dwell (default 30 s), and 30 s after the last action.
+- [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
+- [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
+- [ ] Next, still from OPERATE-MODE.md:
+  - signaller control of trains (§8);
+  - route truncation and approach locking (§5.7–5.8);
+  - continuation auto-signals (§5.10);
+  - calling on (§5.13);
+  - level crossings (§5.12);
+  - splits and joins (§6.8);
+  - random delays, failures and TSRs (§9);
+  - the Actions Due panel (§11);
+  - saved sessions (§14);
+  - a train length in the timetable's `TrainSpec`.
 
 ### Milestone 23: Timetable Engine — Advanced Operations
 
