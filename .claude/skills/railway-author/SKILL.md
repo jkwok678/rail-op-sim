@@ -46,7 +46,11 @@ of that, and `writeDocuments` refuses to save anything the validator rejects.
    ```
    Either argument alone is fine; without a railway only the timetable's
    structural half is checked. Exits non-zero when something is wrong.
-6. **Type-check the generator** if it is going to be kept:
+6. **Import a RailOS railway and timetable** (`.rly` + `.ttb`) as YAML with
+   `scripts/import-railos.ts <in.rly> <in.ttb> <railway.yaml> <timetable.yaml>`,
+   run through `run.sh` like any generator. It reports anything it could not
+   translate, then the railway's problems and the timetable's issues.
+7. **Type-check the generator** if it is going to be kept:
    `pnpm exec tsc -p .claude/skills/railway-author/tsconfig.json`.
 
 Keep the generator script. It is the readable source of a layout that is
