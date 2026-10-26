@@ -1098,7 +1098,8 @@ export class PlacementController {
 			}
 
 			// 3) Otherwise delete the whole element (track / NamedLocation /
-			//    Concourse / Parapet) plus any text cascade.
+			//    Concourse / Parapet) plus any text cascade. A named location on a
+			//    track is deleted before the track under it.
 			const deleted = this.commit(
 				"Delete element",
 				{
@@ -1116,16 +1117,20 @@ export class PlacementController {
 				"placement",
 				`right-click → deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
 			);
-			if (deleted) {
-				this.trackLayer.removeCell(cell.gx, cell.gy);
-				this.elementLayer.sync(this.map);
-				this.textLayer.sync(this.map);
-				this.linkHighlightLayer.sync(this.map);
-				this.trackColorLayer.sync(this.map);
-				this.directionLayer.sync(this.map);
-				this.publishTrackStatus();
-			}
+			if (deleted) this.refreshAfterDelete(cell.gx, cell.gy);
 		}
+	}
+
+	/** Bring every layer up to date after `deleteElement` removed something. */
+	private refreshAfterDelete(gx: number, gy: number): void {
+		// A named location riding on a track goes first; the track stays.
+		if (!this.map.getTrackAt(gx, gy)) this.trackLayer.removeCell(gx, gy);
+		this.elementLayer.sync(this.map);
+		this.textLayer.sync(this.map);
+		this.linkHighlightLayer.sync(this.map);
+		this.trackColorLayer.sync(this.map);
+		this.directionLayer.sync(this.map);
+		this.publishTrackStatus();
 	}
 
 	/** Place a non-track element on the map and sync the element layer. */

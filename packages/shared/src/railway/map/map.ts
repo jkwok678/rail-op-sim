@@ -71,6 +71,12 @@ export class Map_ {
 
 	// ── spatial index — O(1) lookups ────────────────────────────────────
 	private elementsByCoord = new Map<string, Element>();
+	/**
+	 * Named locations riding on a track, by coordinate. RailOS lets a timing
+	 * point or siding name sit on the track it names; keeping these out of
+	 * {@link elementsByCoord} leaves that track where neighbours look for it.
+	 */
+	private namedOnTrack = new Map<string, NamedLocation>();
 
 	// ── kind-based track arrays (for iteration without scanning) ────────
 	private tracksByKind = new Map<TrackKind, Track[]>();
@@ -149,6 +155,7 @@ export class Map_ {
 	 */
 	clearAll(): void {
 		this.elementsByCoord.clear();
+		this.namedOnTrack.clear();
 		this.tracksByKind.clear();
 		this.namedLocationList = [];
 		this.concourseList = [];
@@ -208,6 +215,7 @@ export class Map_ {
 	}
 
 	hasElementExcludingTrack(x: number, y: number): boolean {
+		if (this.namedOnTrack.has(coordKey(x, y))) return true;
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		return el !== undefined && !(el instanceof Track);
 	}
@@ -219,12 +227,16 @@ export class Map_ {
 	}
 
 	getElementExcludingTrackAt(x: number, y: number): Element | null {
+		const riding = this.namedOnTrack.get(coordKey(x, y));
+		if (riding) return riding;
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (el && !(el instanceof Track)) return el;
 		return null;
 	}
 
 	getNamedElementAt(x: number, y: number): NamedElement | null {
+		const riding = this.namedOnTrack.get(coordKey(x, y));
+		if (riding) return riding;
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (el instanceof NamedElement) return el;
 		return null;
@@ -284,6 +296,21 @@ export class Map_ {
 			},
 		);
 		this.elementsByCoord.set(key, el);
+	}
+
+	/** Set or clear the named location riding on the track at `key`, journalled. */
+	private setNamedOnTrack(key: string, nl: NamedLocation | null): void {
+		const prev = this.namedOnTrack.get(key) ?? null;
+		const apply = (value: NamedLocation | null) => {
+			if (value) this.namedOnTrack.set(key, value);
+			else this.namedOnTrack.delete(key);
+		};
+		record(
+			"namedOnTrack",
+			() => apply(prev),
+			() => apply(nl),
+		);
+		apply(nl);
 	}
 
 	private unindexElement(x: number, y: number): void {
@@ -415,12 +442,14 @@ export class Map_ {
 		const x = nl.getLocationX();
 		const y = nl.getLocationY();
 		if (this.checkCanAddNamedLocation(x, y)) {
-			// Capture the track BEFORE indexElement overwrites the coordinate entry
 			const track = this.getTrackAt(x, y);
 			this.pushTo(this.namedLocationList, nl);
-			this.indexElement(nl);
 			if (track) {
+				// Rides on the track rather than displacing it from the index.
+				this.setNamedOnTrack(nl.locationToString(), nl);
 				track.setLinkedNamedLocation(nl);
+			} else {
+				this.indexElement(nl);
 			}
 		}
 	}
@@ -546,23 +575,21 @@ export class Map_ {
 	// ── Remove ──────────────────────────────────────────────────────────
 
 	deleteElement(x: number, y: number): boolean {
+		// A named location riding on a track is what the user sees on top, so
+		// it goes first and the track stays.
+		const riding = this.namedOnTrack.get(coordKey(x, y));
+		if (riding) {
+			this.deleteNamedText(riding);
+			this.removeFrom(this.namedLocationList, riding);
+			this.getTrackAt(x, y)?.setLinkedNamedLocation(null);
+			this.setNamedOnTrack(coordKey(x, y), null);
+			return true;
+		}
+
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (!el) return false;
 
-		// A NamedLocation displaces the track it sits on out of the spatial index,
-		// so deleting it has to put that track back. The re-index must happen
-		// *after* unindexElement below, which clears this very coordinate — doing
-		// it inline here would write the key and then immediately lose it.
-		let displacedTrack: Track | null = null;
-
-		// Handle text cleanup for named elements
-		if (el instanceof NamedElement && el.getNamed()) {
-			const txt = el.getText();
-			if (txt) {
-				this.deleteTextFromAllElements(txt);
-				this.deleteText(txt);
-			}
-		}
+		this.deleteNamedText(el);
 
 		if (el instanceof Track) {
 			// Handle linked track cleanup
@@ -576,18 +603,6 @@ export class Map_ {
 			this.bumpTotalTrack(-1);
 		} else if (el instanceof NamedLocation) {
 			this.removeFrom(this.namedLocationList, el);
-			// Restore co-located track to the spatial index (it was displaced
-			// when the NamedLocation was indexed in addNamedLocation).
-			for (const arr of this.tracksByKind.values()) {
-				const colocated = arr.find(
-					(t) => t.getLocationX() === x && t.getLocationY() === y,
-				);
-				if (colocated) {
-					displacedTrack = colocated;
-					colocated.setLinkedNamedLocation(null);
-					break;
-				}
-			}
 		} else if (el instanceof Concourse) {
 			this.removeFrom(this.concourseList, el);
 		} else if (el instanceof Parapet) {
@@ -595,9 +610,18 @@ export class Map_ {
 		}
 
 		this.unindexElement(x, y);
-		if (displacedTrack) this.indexElement(displacedTrack);
 		if (el instanceof Track) this.afterTrackTopologyChange();
 		return true;
+	}
+
+	/** Drop a named element's label from every element sharing it, and the map. */
+	private deleteNamedText(el: Element): void {
+		if (!(el instanceof NamedElement) || !el.getNamed()) return;
+		const txt = el.getText();
+		if (txt) {
+			this.deleteTextFromAllElements(txt);
+			this.deleteText(txt);
+		}
 	}
 
 	// ══ NamedLocation accessors ══════════════════════════════════════════
@@ -607,6 +631,8 @@ export class Map_ {
 	}
 
 	getNamedLocationAt(x: number, y: number): NamedLocation | null {
+		const riding = this.namedOnTrack.get(coordKey(x, y));
+		if (riding) return riding;
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (el instanceof NamedLocation) return el;
 		return null;

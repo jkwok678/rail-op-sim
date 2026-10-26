@@ -143,7 +143,13 @@ export const KIND_META: Record<TrackKind, TrackKindMeta> = {
 		hasSecondaryPath: false,
 		supportsPlatforms: true,
 		supportsLevelCrossing: false,
-		canAddNamedLocationSubtypes: [],
+		// RailOS names timing points at signals, so straight signals take them.
+		canAddNamedLocationSubtypes: [
+			"SIGNALLEFT",
+			"SIGNALRIGHT",
+			"SIGNALUP",
+			"SIGNALDOWN",
+		],
 	},
 	bridgeUnderpass: {
 		hasSecondaryPath: false,

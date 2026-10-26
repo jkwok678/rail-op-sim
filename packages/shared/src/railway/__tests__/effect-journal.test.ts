@@ -177,7 +177,7 @@ describe("effect journal — placement and deletion", () => {
 		expect(map.getTrackAt(0, 0)?.hasPlatform()).toBe(false);
 	});
 
-	it("inverts deleting a NamedLocation that displaced a track", () => {
+	it("inverts deleting a NamedLocation riding on a track", () => {
 		const map = newMap();
 		map.addTrack(straight(), 0, 0);
 		const track = map.getTrackAt(0, 0);
@@ -185,10 +185,10 @@ describe("effect journal — placement and deletion", () => {
 		expectRoundTrip(map, () => {
 			map.deleteElement(0, 0);
 		});
-		// Back to the displaced arrangement: the NamedLocation holds the slot.
+		// Back to the named location riding on the track, both reachable.
 		expect(map.getNamedLocationAt(0, 0)).not.toBeNull();
-		expect(map.getTrackAt(0, 0)).toBeNull();
-		expect(track?.getLinkedNamedLocation()).not.toBeNull();
+		expect(map.getTrackAt(0, 0)).toBe(track);
+		expect(track?.getLinkedNamedLocation()).toBe(map.getNamedLocationAt(0, 0));
 	});
 });
 

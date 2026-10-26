@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Text } from "../../railway/element";
 import {
 	buildGraph,
 	endsAtBuffers,
@@ -7,7 +8,7 @@ import {
 	nodeAt,
 	stepFrom,
 } from "../graph";
-import { cell, line, nameCells, passingLoop } from "./fixtures";
+import { CELL, cell, line, nameCells, passingLoop } from "./fixtures";
 
 describe("buildGraph", () => {
 	it("numbers every track and finds it by cell", () => {
@@ -61,5 +62,22 @@ describe("buildGraph", () => {
 		expect(sw.rails[sw.defaultLie]).toMatchObject({ secondary: false });
 		expect(sw.paths).toHaveLength(4);
 		expect(sw.occKeys[0]).toBe(sw.occKeys[1]);
+	});
+
+	it("keeps a line joined through a named location riding on it", () => {
+		const map = line("X----X");
+		map.createAddNamedLocation(2 * CELL, 0);
+		const named = map.getNamedLocationAt(2 * CELL, 0);
+		if (!named) throw new Error("no named location");
+		named.setText(
+			new Text(2 * CELL, 0, "Junction", {
+				family: "sans-serif",
+				pointSize: 12,
+			}),
+		);
+		const graph = buildGraph(map);
+		expect(graph.nodes).toHaveLength(6);
+		expect(stepFrom(graph, 1, 5)).toEqual({ node: 2, entry: 3 });
+		expect(graph.nodes[2].location).toBe("Junction");
 	});
 });
