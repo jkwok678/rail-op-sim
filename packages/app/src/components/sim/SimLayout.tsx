@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
+import { useOperateSession } from "#/hooks/useOperateSession";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { AddPalette } from "./AddPalette";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { NameElementDialog } from "./NameElementDialog";
+import { OperatePanel } from "./operate/OperatePanel";
 import { SectionEditPanel } from "./SectionEditPanel";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SimCanvas } from "./SimCanvas";
@@ -16,7 +18,7 @@ import { TimetableEditor } from "./timetable/TimetableEditor";
 
 /**
  * Full-screen simulation layout — the PixiJS canvas fills the viewport, less
- * the timetable editor docked beside it in timetable mode.
+ * the timetable editor or the operate panel docked beside it in those modes.
  *
  * The railway tools are mounted only in railway mode: in timetable mode the
  * map is a read-only backdrop, and a toolbar that can't be used shouldn't be
@@ -24,6 +26,7 @@ import { TimetableEditor } from "./timetable/TimetableEditor";
  */
 export function SimLayout() {
 	useEditorHotkeys();
+	useOperateSession();
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const mode = useModeStore((s) => s.mode);
@@ -68,6 +71,7 @@ export function SimLayout() {
 					<TrackInfoTooltip />
 				</div>
 				{mode === "timetable" ? <TimetableEditor /> : null}
+				{mode === "operate" ? <OperatePanel /> : null}
 			</div>
 			<StatusBar />
 		</div>

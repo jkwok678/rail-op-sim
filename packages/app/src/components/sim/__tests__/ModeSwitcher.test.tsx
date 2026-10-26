@@ -5,6 +5,7 @@ import { ModeSwitcher } from "#/components/sim/ModeSwitcher";
 import { TooltipProvider } from "#/components/ui/tooltip";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 class ResizeObserverStub {
 	observe() {}
@@ -70,5 +71,31 @@ describe("ModeSwitcher", () => {
 		fireEvent.focus(screen.getByRole("radio", { name: /Railway/ }));
 		const tip = await screen.findByRole("tooltip");
 		expect(tip.textContent).toContain("Railway mode");
+	});
+
+	it("keeps Operate disabled until there is a timetable to run", () => {
+		useEditorStore.setState({ trackStatus: complete });
+		useTimetableStore.setState({
+			timetable: { version: 1, startTime: 0, services: [] },
+			issues: [],
+		});
+		renderSwitcher();
+		const operate = screen.getByRole("radio", { name: /Operate/ });
+		expect((operate as HTMLButtonElement).disabled).toBe(true);
+	});
+
+	it("enables Operate once the timetable has services and no errors", () => {
+		useEditorStore.setState({ trackStatus: complete });
+		useTimetableStore.setState({
+			timetable: {
+				version: 1,
+				startTime: 0,
+				services: [{ ref: "1A01", actions: [{ kind: "finishRemainHere" }] }],
+			},
+			issues: [],
+		});
+		renderSwitcher();
+		const operate = screen.getByRole("radio", { name: /Operate/ });
+		expect((operate as HTMLButtonElement).disabled).toBe(false);
 	});
 });

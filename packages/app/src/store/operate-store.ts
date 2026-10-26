@@ -12,13 +12,16 @@ import { create } from "zustand";
 /** Oldest lines are dropped beyond this, so a long session stays light. */
 export const LOG_LIMIT = 2000;
 
+/** A log line with a sequence number, so a list can key it stably. */
+export type NumberedLogLine = LogLine & { seq: number };
+
 export type SessionStatus = "idle" | "loading" | "ready" | "error";
 
 export interface OperateState {
 	status: SessionStatus;
 	error: string | null;
 	view: SimView | null;
-	log: LogLine[];
+	log: NumberedLogLine[];
 	routeKind: RouteKind;
 	/** Right-click cancels the route under the cursor while armed. */
 	cancelArmed: boolean;
@@ -56,7 +59,11 @@ export const useOperateStore = create<OperateState>((set) => ({
 	setStatus: (status, error = null) => set({ status, error }),
 	setView: (view) => set({ view }),
 	appendLog: (lines) =>
-		set((s) => ({ log: [...s.log, ...lines].slice(-LOG_LIMIT) })),
+		set((s) => {
+			const first = (s.log[s.log.length - 1]?.seq ?? 0) + 1;
+			const numbered = lines.map((line, i) => ({ ...line, seq: first + i }));
+			return { log: [...s.log, ...numbered].slice(-LOG_LIMIT) };
+		}),
 	setRouteKind: (routeKind) =>
 		set({ routeKind, routeStart: null, cancelArmed: false }),
 	setCancelArmed: (cancelArmed) => set({ cancelArmed, routeStart: null }),

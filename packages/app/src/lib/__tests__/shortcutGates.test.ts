@@ -10,6 +10,7 @@ const state = (
 	canRedo: true,
 	railwayConnected: true,
 	timetableBlocked: false,
+	operateBlocked: false,
 	editDialogOpen: false,
 	shortcutsOpen: false,
 	timetableCanStep: false,
@@ -113,5 +114,45 @@ describe("liveShortcuts", () => {
 		expect(
 			liveShortcuts(state({ ...ready, shortcutsOpen: true })).moveActionDown,
 		).toBe(false);
+	});
+});
+
+describe("liveShortcuts — operate mode", () => {
+	const operateKeys = [
+		"operateRunPause",
+		"operateSlower",
+		"operateFaster",
+		"routeAuto",
+		"routePreferred",
+		"routeUnrestricted",
+		"routeCancel",
+		"operateLog",
+	] as const;
+
+	it("arms the signalling keys only in operate mode", () => {
+		const operating = liveShortcuts(state({ mode: "operate" }));
+		const editing = liveShortcuts(state());
+		for (const id of operateKeys) {
+			expect(operating[id], id).toBe(true);
+			expect(editing[id], id).toBe(false);
+		}
+	});
+
+	it("leaves the railway tools and undo dead while operating", () => {
+		const live = liveShortcuts(state({ mode: "operate" }));
+		expect(live.toolAdd).toBe(false);
+		expect(live.undo).toBe(false);
+	});
+
+	it("gates the operate mode key on a runnable timetable", () => {
+		expect(liveShortcuts(state({ operateBlocked: true })).modeOperate).toBe(
+			false,
+		);
+		expect(liveShortcuts(state()).modeOperate).toBe(true);
+	});
+
+	it("keeps operate keys quiet behind an overlay", () => {
+		const live = liveShortcuts(state({ mode: "operate", shortcutsOpen: true }));
+		expect(live.operateRunPause).toBe(false);
 	});
 });

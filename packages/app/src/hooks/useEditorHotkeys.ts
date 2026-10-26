@@ -2,12 +2,24 @@ import { type UseHotkeyDefinition, useHotkeys } from "@tanstack/react-hotkeys";
 import { PlacementController } from "#/engine/PlacementController";
 import { loadDocument, saveDocument } from "#/lib/documentActions";
 import { resolveEscape } from "#/lib/escape";
+import {
+	changeSpeed,
+	chooseRouteKind,
+	runOrPause,
+	toggleLog,
+	toggleRouteCancel,
+} from "#/lib/operateActions";
 import { liveShortcuts } from "#/lib/shortcutGates";
 import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { moveActionTo, nextIssueTarget, stepService } from "#/lib/timetableNav";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
-import { timetableBlockedReason, useModeStore } from "#/store/mode-store";
+import {
+	operateBlockedReason,
+	timetableBlockedReason,
+	useModeStore,
+} from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 /**
@@ -33,6 +45,8 @@ export function useEditorHotkeys(): void {
 	const selectedServiceRef = useTimetableStore((s) => s.selectedServiceRef);
 	const selectedActionIndex = useTimetableStore((s) => s.selectedActionIndex);
 	const issues = useTimetableStore((s) => s.issues);
+	const timetable = useTimetableStore((s) => s.timetable);
+	const trackStatus = useEditorStore((s) => s.trackStatus);
 	const timetablePicking = useTimetableStore((s) => s.pendingCellPick !== null);
 	const selectedActionCount =
 		services.find((service) => service.ref === selectedServiceRef)?.actions
@@ -45,9 +59,9 @@ export function useEditorHotkeys(): void {
 		canUndo: useEditorStore((s) => s.canUndo),
 		canRedo: useEditorStore((s) => s.canRedo),
 		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
-		timetableBlocked: useEditorStore(
-			(s) => timetableBlockedReason(s.trackStatus) !== null,
-		),
+		timetableBlocked: timetableBlockedReason(trackStatus) !== null,
+		operateBlocked:
+			operateBlockedReason(trackStatus, timetable, issues) !== null,
 		editDialogOpen: useEditorStore((s) =>
 			Boolean(s.pendingText || s.pendingNameTarget),
 		),
@@ -68,11 +82,20 @@ export function useEditorHotkeys(): void {
 	const runEscape = (): void => {
 		const state = useEditorStore.getState();
 		const timetable = useTimetableStore.getState();
+		const operate = useOperateStore.getState();
 		const action = resolveEscape({
 			...state,
 			timetableCellPick: timetable.pendingCellPick,
+			operateRouteStart: operate.routeStart,
+			operateCancelArmed: operate.cancelArmed,
 		});
 		switch (action.type) {
+			case "abandonRoute":
+				operate.setRouteStart(null);
+				break;
+			case "disarmRouteCancel":
+				operate.setCancelArmed(false);
+				break;
 			case "cancelCellPick":
 				timetable.cancelCellPick();
 				break;
@@ -168,6 +191,16 @@ export function useEditorHotkeys(): void {
 
 		modeRailway: () => useModeStore.getState().setMode("railway"),
 		modeTimetable: () => useModeStore.getState().setMode("timetable"),
+		modeOperate: () => useModeStore.getState().setMode("operate"),
+
+		operateRunPause: runOrPause,
+		operateSlower: () => changeSpeed(-1),
+		operateFaster: () => changeSpeed(1),
+		routeAuto: () => chooseRouteKind("auto"),
+		routePreferred: () => chooseRouteKind("preferred"),
+		routeUnrestricted: () => chooseRouteKind("unrestricted"),
+		routeCancel: toggleRouteCancel,
+		operateLog: toggleLog,
 
 		prevService: () => stepSelectedService(-1),
 		nextService: () => stepSelectedService(1),

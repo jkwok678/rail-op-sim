@@ -12,6 +12,8 @@ import type { AddKind, PendingText, Tool } from "#/store/editor-store";
 export type EscapeAction =
 	| { type: "none" }
 	| { type: "cancelCellPick" }
+	| { type: "abandonRoute" }
+	| { type: "disarmRouteCancel" }
 	| { type: "cancelSection" }
 	| { type: "cancelDirection" }
 	| { type: "paletteBack" }
@@ -28,6 +30,10 @@ export interface EscapeContext {
 	directionStart: { gx: number; gy: number } | null;
 	/** The timetable editor is waiting for a click on the canvas. */
 	timetableCellPick: unknown | null;
+	/** Operate mode: the first click of a route is waiting for its end. */
+	operateRouteStart?: unknown | null;
+	/** Operate mode: right-click cancels routes. */
+	operateCancelArmed?: boolean;
 }
 
 /**
@@ -45,6 +51,8 @@ export function resolveEscape(ctx: EscapeContext): EscapeAction {
 	// waiting for one specific click, and Escape is how the user says never
 	// mind without having to click somewhere harmless.
 	if (ctx.timetableCellPick) return { type: "cancelCellPick" };
+	if (ctx.operateRouteStart) return { type: "abandonRoute" };
+	if (ctx.operateCancelArmed) return { type: "disarmRouteCancel" };
 	if (ctx.sectionStart) return { type: "cancelSection" };
 	if (ctx.directionStart) return { type: "cancelDirection" };
 	// Leaving a mode is deliberate — the switcher or its key — so Escape never

@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
-import { timetableBlockedReason, useModeStore } from "#/store/mode-store";
+import {
+	blockedReason,
+	timetableBlockedReason,
+	useModeStore,
+} from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 const mode = () => useModeStore.getState();
@@ -111,5 +116,62 @@ describe("setMode", () => {
 		expect(
 			useTimetableStore.getState().timetable.services.map((s) => s.ref),
 		).toContain(ref);
+	});
+});
+
+describe("operate mode", () => {
+	const service = {
+		ref: "1A01",
+		actions: [{ kind: "finishRemainHere" as const }],
+	};
+
+	beforeEach(() => {
+		useTimetableStore.setState({
+			timetable: { version: 1, startTime: 0, services: [service] },
+			issues: [],
+		});
+		useOperateStore.getState().reset();
+		useModeStore.setState({ confirmLeaveOperate: () => true });
+	});
+
+	it("needs services in the timetable", () => {
+		useTimetableStore.setState({
+			timetable: { version: 1, startTime: 0, services: [] },
+		});
+		expect(blockedReason("operate")).toBe("Write a timetable first");
+		expect(mode().setMode("operate")).toBe(false);
+	});
+
+	it("needs a timetable without errors", () => {
+		useTimetableStore.setState({
+			issues: [{ severity: "error", code: "x", message: "bad" }],
+		});
+		expect(blockedReason("operate")).toBe("Fix the timetable's errors first");
+	});
+
+	it("needs a complete railway first of all", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		expect(blockedReason("operate")).toMatch(/Finish the railway/);
+	});
+
+	it("enters when everything is ready", () => {
+		expect(mode().setMode("operate")).toBe(true);
+		expect(mode().mode).toBe("operate");
+	});
+
+	it("asks before throwing away a session that has run", () => {
+		mode().setMode("operate");
+		useOperateStore.setState({ view: { run: "running" } as never });
+		useModeStore.setState({ confirmLeaveOperate: () => false });
+		expect(mode().setMode("railway")).toBe(false);
+		useModeStore.setState({ confirmLeaveOperate: () => true });
+		expect(mode().setMode("railway")).toBe(true);
+	});
+
+	it("leaves a session that never started without asking", () => {
+		mode().setMode("operate");
+		useOperateStore.setState({ view: { run: "prestart" } as never });
+		useModeStore.setState({ confirmLeaveOperate: () => false });
+		expect(mode().setMode("timetable")).toBe(true);
 	});
 });

@@ -1,4 +1,4 @@
-import { Clock, Path } from "@phosphor-icons/react";
+import { Clock, Path, Train } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { KbdGroup } from "#/components/ui/kbd";
 import {
@@ -11,9 +11,11 @@ import type { ShortcutId } from "#/lib/shortcuts";
 import { useEditorStore } from "#/store/editor-store";
 import {
 	type AppMode,
+	operateBlockedReason,
 	timetableBlockedReason,
 	useModeStore,
 } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 
 const MODES: {
 	mode: AppMode;
@@ -28,21 +30,29 @@ const MODES: {
 		Icon: Clock,
 		shortcut: "modeTimetable",
 	},
+	{ mode: "operate", label: "Operate", Icon: Train, shortcut: "modeOperate" },
 ];
 
 /**
  * The segmented control at the top of the canvas that says which document is
  * being edited, and switches it.
  *
- * Timetable is disabled until the railway is complete, with the reason in the
- * tooltip. A disabled `<button>` swallows pointer events, so it is wrapped in a
+ * Timetable is disabled until the railway is complete, and Operate until there
+ * is also a timetable without errors, with the reason in the tooltip. A disabled `<button>` swallows pointer events, so it is wrapped in a
  * focusable span while disabled to keep that tooltip firing — the same
  * arrangement as the direction tool in the toolbar.
  */
 export function ModeSwitcher() {
 	const mode = useModeStore((s) => s.mode);
 	const setMode = useModeStore((s) => s.setMode);
-	const blocked = useEditorStore((s) => timetableBlockedReason(s.trackStatus));
+	const trackStatus = useEditorStore((s) => s.trackStatus);
+	const timetable = useTimetableStore((s) => s.timetable);
+	const issues = useTimetableStore((s) => s.issues);
+	const blocked: Record<AppMode, string | null> = {
+		railway: null,
+		timetable: timetableBlockedReason(trackStatus),
+		operate: operateBlockedReason(trackStatus, timetable, issues),
+	};
 
 	return (
 		<div
@@ -52,7 +62,7 @@ export function ModeSwitcher() {
 		>
 			{MODES.map(({ mode: m, label, Icon, shortcut }) => {
 				const active = mode === m;
-				const reason = m === "timetable" && !active ? blocked : null;
+				const reason = active ? null : blocked[m];
 				const button = (
 					<Button
 						role="radio"

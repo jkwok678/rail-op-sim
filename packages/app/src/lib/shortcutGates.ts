@@ -12,6 +12,8 @@ export interface ShortcutGateState {
 	railwayConnected: boolean;
 	/** The railway is not yet complete enough to timetable. */
 	timetableBlocked: boolean;
+	/** The railway or timetable is not ready to operate. */
+	operateBlocked: boolean;
 	/** The text or name dialog is open, with the user typing in it. */
 	editDialogOpen: boolean;
 	/** The shortcuts reference is open. */
@@ -53,6 +55,8 @@ export function liveShortcuts(
 	// how that gesture is cancelled.
 	const timetableLive =
 		!overlayOpen && state.mode === "timetable" && !state.timetablePicking;
+	// The operate keys work the signalling panel, so only while it is on screen.
+	const operateLive = !overlayOpen && state.mode === "operate";
 
 	/** Where a shortcut differs from the default of "not behind an overlay". */
 	const exceptions: Partial<Record<ShortcutId, boolean>> = {
@@ -66,6 +70,15 @@ export function liveShortcuts(
 		// Mirrors the switcher: the timetable needs a railway that is
 		// operationally complete, not merely joined.
 		modeTimetable: !overlayOpen && !state.timetableBlocked,
+		modeOperate: !overlayOpen && !state.operateBlocked,
+		operateRunPause: operateLive,
+		operateSlower: operateLive,
+		operateFaster: operateLive,
+		routeAuto: operateLive,
+		routePreferred: operateLive,
+		routeUnrestricted: operateLive,
+		routeCancel: operateLive,
+		operateLog: operateLive,
 		prevService: timetableLive && state.timetableCanStep,
 		nextService: timetableLive && state.timetableCanStep,
 		nextIssue: timetableLive && state.timetableCanNextIssue,

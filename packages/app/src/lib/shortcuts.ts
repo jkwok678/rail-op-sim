@@ -27,6 +27,15 @@ export type ShortcutId =
 	| "toggleTrackInfo"
 	| "modeRailway"
 	| "modeTimetable"
+	| "modeOperate"
+	| "operateRunPause"
+	| "operateSlower"
+	| "operateFaster"
+	| "routeAuto"
+	| "routePreferred"
+	| "routeUnrestricted"
+	| "routeCancel"
+	| "operateLog"
 	| "prevService"
 	| "nextService"
 	| "nextIssue"
@@ -46,6 +55,7 @@ export type ShortcutId =
 /** Heading a shortcut is listed under in the reference overlay. */
 export type ShortcutGroup =
 	| "Mode"
+	| "Operate"
 	| "Timetable"
 	| "Tools"
 	| "View"
@@ -155,6 +165,63 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		label: "Timetable mode",
 		group: "Mode",
 	},
+	modeOperate: {
+		id: "modeOperate",
+		hotkey: "O",
+		label: "Operate mode",
+		group: "Mode",
+	},
+
+	// Operate. Route kinds by initial — Automatic, Signal-to-signal (preferred)
+	// and Unrestricted — since the tools own the digits RailOS used for them.
+	operateRunPause: {
+		id: "operateRunPause",
+		hotkey: "P",
+		label: "Run / pause the clock",
+		group: "Operate",
+	},
+	operateSlower: {
+		id: "operateSlower",
+		hotkey: ",",
+		label: "Slow the clock down",
+		group: "Operate",
+	},
+	operateFaster: {
+		id: "operateFaster",
+		hotkey: ".",
+		label: "Speed the clock up",
+		group: "Operate",
+	},
+	routeAuto: {
+		id: "routeAuto",
+		hotkey: "A",
+		label: "Automatic signals route",
+		group: "Operate",
+	},
+	routePreferred: {
+		id: "routePreferred",
+		hotkey: "S",
+		label: "Preferred route",
+		group: "Operate",
+	},
+	routeUnrestricted: {
+		id: "routeUnrestricted",
+		hotkey: "U",
+		label: "Unrestricted route",
+		group: "Operate",
+	},
+	routeCancel: {
+		id: "routeCancel",
+		hotkey: "C",
+		label: "Cancel routes (right-click one)",
+		group: "Operate",
+	},
+	operateLog: {
+		id: "operateLog",
+		hotkey: "J",
+		label: "Show performance log",
+		group: "Operate",
+	},
 
 	// Timetable lists. Brackets step through services the way the left column
 	// does. N jumps to the next problem in the issue list under the service on
@@ -260,6 +327,15 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleTrackInfo",
 	"modeRailway",
 	"modeTimetable",
+	"modeOperate",
+	"operateRunPause",
+	"operateSlower",
+	"operateFaster",
+	"routeAuto",
+	"routePreferred",
+	"routeUnrestricted",
+	"routeCancel",
+	"operateLog",
 	"prevService",
 	"nextService",
 	"nextIssue",
@@ -279,6 +355,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 /** Headings for the reference overlay, in the order it shows them. */
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 	"Mode",
+	"Operate",
 	"Timetable",
 	"Tools",
 	"Edit",
