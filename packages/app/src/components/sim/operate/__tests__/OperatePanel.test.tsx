@@ -33,6 +33,12 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("OperatePanel", () => {
+	it("renders while the engine is still loading", () => {
+		render(<OperatePanel />);
+		expect(screen.getByText("Loading")).toBeTruthy();
+		expect(screen.getByText("No trains on the railway yet.")).toBeTruthy();
+	});
+
 	it("shows the clock and starts it", () => {
 		useOperateStore.setState({ view: view() });
 		render(<OperatePanel />);

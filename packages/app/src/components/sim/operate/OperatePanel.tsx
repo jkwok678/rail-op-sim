@@ -174,8 +174,11 @@ function showTrain(train: TrainView): void {
 	PlacementController.instance?.viewport.centreOn(x, y);
 }
 
+/** One shared empty list, so the selector is stable before the first view. */
+const NO_TRAINS: TrainView[] = [];
+
 function TrainList() {
-	const trains = useOperateStore((s) => s.view?.trains ?? []);
+	const trains = useOperateStore((s) => s.view?.trains ?? NO_TRAINS);
 	return (
 		<div className="min-h-0 flex-1 overflow-y-auto">
 			{trains.length === 0 ? (

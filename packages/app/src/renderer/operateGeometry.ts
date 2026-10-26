@@ -55,8 +55,16 @@ export function spanPoints(seg: ViewSeg): Point[] {
 
 /** A train's whole body, rear to front, as one polyline. */
 export function trainPoints(train: TrainView): Point[] {
+	return joinedPoints(train.segs);
+}
+
+/**
+ * Consecutive segments as one polyline, so a stroke along them has no seams
+ * where a cap would overlap the next segment's.
+ */
+export function joinedPoints(segs: readonly ViewSeg[]): Point[] {
 	const points: Point[] = [];
-	for (const seg of train.segs) {
+	for (const seg of segs) {
 		for (const p of spanPoints(seg)) {
 			const last = points[points.length - 1];
 			if (

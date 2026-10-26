@@ -1,7 +1,7 @@
 import type { RouteKind, SimView } from "@rail-op-sim/shared";
 import { Container, Graphics } from "pixi.js";
 import { CELL_SIZE } from "#/lib/grid";
-import { type Point, spanPoints } from "#/renderer/operateGeometry";
+import { joinedPoints, type Point } from "#/renderer/operateGeometry";
 
 /** RailOS's route colours: blue automatic, green preferred, red unrestricted. */
 const ROUTE_COLORS: Record<RouteKind, number> = {
@@ -42,7 +42,9 @@ export function createRouteLayer(): RouteLayer {
 				routes.push({ id: "pending", ...view.pendingRoute });
 			}
 			for (const route of routes) {
-				for (const seg of route.segs) strokePath(g, spanPoints(seg));
+				const points = joinedPoints(route.segs);
+				if (points.length < 2) continue;
+				strokePath(g, points);
 				g.stroke({
 					width: ROUTE_WIDTH,
 					color: ROUTE_COLORS[route.kind],
