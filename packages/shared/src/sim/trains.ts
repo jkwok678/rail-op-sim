@@ -32,6 +32,8 @@ const MAX_ACCEL = 1.0;
 const G = 9.81;
 /** Closer than this to its authority, a train has arrived. */
 const SNAP_M = 0.05;
+/** The slowest a train approaches its authority at; it can always stop from here. */
+const CREEP_SPEED = 1;
 
 export type MoveEvent =
 	| { type: "entered"; train: Train; seg: Seg; from: Seg }
@@ -202,7 +204,7 @@ function nextSpeed(train: Train, ahead: Ahead, dt: number): number {
 			? Number.POSITIVE_INFINITY
 			: Math.max(
 					Math.sqrt(2 * bp * Math.max(0, room)),
-					Math.min(1, ahead.authority / dt),
+					Math.min(CREEP_SPEED, ahead.authority / dt),
 				);
 	const target = Math.min(ahead.limit, curve);
 	const v = train.speed;
@@ -236,6 +238,7 @@ export function moveTrain(
 	train.speed = nextSpeed(train, ahead, dt);
 	let move = train.speed * dt;
 	const canStop =
+		train.speed <= CREEP_SPEED ||
 		train.speed * train.speed <= 2 * train.brakeRate * ahead.authority + 0.5;
 	if (
 		move >= ahead.authority - 1e-6 &&

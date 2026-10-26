@@ -86,6 +86,20 @@ describe("braking", () => {
 		expect(train.frontM).toBeCloseTo(100, 3);
 	});
 
+	it("creeps up to a red signal without passing it, however weak its brakes", () => {
+		// A heavy freight: 0.2 m/s² of brake, so its last metres are a crawl.
+		const engine = running(line(`X-${"-".repeat(6)}>-X`));
+		const train = addTrain(engine, cell(1), cell(2), {
+			massTonnes: 1500,
+			brakeForceTonnes: 30,
+			startSpeedKmh: 30,
+		});
+		engine.advance(600);
+		expect(train.status).toBe("waiting");
+		expect(train.wait).toBe("signal");
+		expect(engine.state.counters.spads).toBe(0);
+	});
+
 	it("stops at the end of buffers", () => {
 		const engine = running(line("X------]"));
 		const train = addTrain(engine, cell(1), cell(2));
