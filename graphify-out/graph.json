@@ -199,6 +199,32 @@
       "norm_label": "map_"
     },
     {
+      "label": "MessageCallback",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/types.ts",
+      "source_location": "L32",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_types_messagecallback",
+      "community": 12,
+      "community_name": "Map_",
+      "norm_label": "messagecallback"
+    },
+    {
+      "label": "TextSelectionPrompt",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/types.ts",
+      "source_location": "L26",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_types_textselectionprompt",
+      "community": 12,
+      "community_name": "Map_",
+      "norm_label": "textselectionprompt"
+    },
+    {
       "label": "ColorMap",
       "file_type": "code",
       "source_file": "packages/app/src/lib/svgColors.ts",
@@ -459,19 +485,6 @@
       "norm_label": "danglinglink"
     },
     {
-      "label": "LinkedTrackReport",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
-      "source_location": "L238",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_connectivity_linkedtrackreport",
-      "community": 2,
-      "community_name": "Track",
-      "norm_label": "linkedtrackreport"
-    },
-    {
       "label": "PathNode",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
@@ -654,6 +667,19 @@
       "norm_label": "trainspec"
     },
     {
+      "label": "Element",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L13",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "element"
+    },
+    {
       "label": "Text",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/element.ts",
@@ -667,6 +693,84 @@
       "norm_label": "text"
     },
     {
+      "label": "TestElement",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_tests_element_test_testelement",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "testelement"
+    },
+    {
+      "label": "FontInfo",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/types.ts",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_types_fontinfo",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "fontinfo"
+    },
+    {
+      "label": "Point",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/types.ts",
+      "source_location": "L17",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_types_point",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "point"
+    },
+    {
+      "label": "MapFileFormat",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/mapFile.ts",
+      "source_location": "L24",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_lib_mapfile_mapfileformat",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "mapfileformat"
+    },
+    {
+      "label": "DirectionMode",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L19",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_store_editor_store_directionmode",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "directionmode"
+    },
+    {
+      "label": "EditorState",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L125",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_store_editor_store_editorstate",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "editorstate"
+    },
+    {
       "label": "HoveredTrackInfo",
       "file_type": "code",
       "source_file": "packages/app/src/store/editor-store.ts",
@@ -676,7 +780,7 @@
       "_origin": "ast",
       "id": "packages_app_src_store_editor_store_hoveredtrackinfo",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "hoveredtrackinfo"
     },
     {
@@ -727,19 +831,6 @@
       "_callable_class": true,
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_modeswitcher_test_resizeobserverstub",
-      "community": 220,
-      "community_name": "Toolbar.tsx",
-      "norm_label": "resizeobserverstub"
-    },
-    {
-      "label": "ResizeObserverStub",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
-      "source_location": "L11",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub",
       "community": 220,
       "community_name": "Toolbar.tsx",
       "norm_label": "resizeobserverstub"
@@ -834,6 +925,19 @@
       "community": 222,
       "community_name": "serialization.ts",
       "norm_label": "serializedtimetable"
+    },
+    {
+      "label": "TrackStatus",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L97",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_store_editor_store_trackstatus",
+      "community": 224,
+      "community_name": "mode-store.ts",
+      "norm_label": "trackstatus"
     },
     {
       "label": "ModeState",
@@ -1174,32 +1278,6 @@
       "norm_label": "tracklayer"
     },
     {
-      "label": "Element",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L13",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element",
-      "community": 228,
-      "community_name": "Element",
-      "norm_label": "element"
-    },
-    {
-      "label": "TestElement",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
-      "source_location": "L14",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_tests_element_test_testelement",
-      "community": 228,
-      "community_name": "Element",
-      "norm_label": "testelement"
-    },
-    {
       "label": "Concourse",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/element.ts",
@@ -1287,7 +1365,7 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity_connectivitypill",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "connectivitypill"
     },
     {
@@ -1300,60 +1378,8 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity_faultcount",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "faultcount"
-    },
-    {
-      "label": "MapFileFormat",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/mapFile.ts",
-      "source_location": "L24",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_lib_mapfile_mapfileformat",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "mapfileformat"
-    },
-    {
-      "label": "DirectionMode",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L19",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_store_editor_store_directionmode",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "directionmode"
-    },
-    {
-      "label": "EditorState",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L125",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_store_editor_store_editorstate",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "editorstate"
-    },
-    {
-      "label": "TrackStatus",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L97",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_store_editor_store_trackstatus",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "trackstatus"
     },
     {
       "label": "RouteLayer",
@@ -2084,6 +2110,19 @@
       "norm_label": "lines"
     },
     {
+      "label": "ResizeObserverStub",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
+      "source_location": "L11",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub",
+      "community": 273,
+      "community_name": "ResizeObserverStub",
+      "norm_label": "resizeobserverstub"
+    },
+    {
       "label": "TextLayer",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/TextLayer.ts",
@@ -2214,56 +2253,17 @@
       "norm_label": "linkedtrackpair"
     },
     {
-      "label": "FontInfo",
+      "label": "LinkedTrackReport",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/types.ts",
-      "source_location": "L5",
+      "source_file": "packages/shared/src/railway/map/map-connectivity.ts",
+      "source_location": "L238",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_types_fontinfo",
+      "id": "packages_shared_src_railway_map_map_connectivity_linkedtrackreport",
       "community": 36,
       "community_name": "map.ts",
-      "norm_label": "fontinfo"
-    },
-    {
-      "label": "MessageCallback",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/types.ts",
-      "source_location": "L32",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_types_messagecallback",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "messagecallback"
-    },
-    {
-      "label": "Point",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/types.ts",
-      "source_location": "L17",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_types_point",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "point"
-    },
-    {
-      "label": "TextSelectionPrompt",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/types.ts",
-      "source_location": "L26",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_types_textselectionprompt",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "textselectionprompt"
+      "norm_label": "linkedtrackreport"
     },
     {
       "label": "PathOptions",
@@ -2698,7 +2698,7 @@
       "label": "ElementLayer",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L108",
+      "source_location": "L110",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
@@ -3534,6 +3534,18 @@
       "norm_label": ".connecttwolinkedtracks()"
     },
     {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L111",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_constructor",
+      "community": 12,
+      "community_name": "Map_",
+      "norm_label": ".constructor()"
+    },
+    {
       "label": ".createAddConcourse()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -3544,18 +3556,6 @@
       "community": 12,
       "community_name": "Map_",
       "norm_label": ".createaddconcourse()"
-    },
-    {
-      "label": ".createAddLinkText()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L513",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_createaddlinktext",
-      "community": 12,
-      "community_name": "Map_",
-      "norm_label": ".createaddlinktext()"
     },
     {
       "label": ".createAddNamedLocation()",
@@ -3580,18 +3580,6 @@
       "community": 12,
       "community_name": "Map_",
       "norm_label": ".createaddparapet()"
-    },
-    {
-      "label": ".createAddText()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L502",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_createaddtext",
-      "community": 12,
-      "community_name": "Map_",
-      "norm_label": ".createaddtext()"
     },
     {
       "label": ".deleteElement()",
@@ -3702,6 +3690,18 @@
       "norm_label": ".getnamedlocationat()"
     },
     {
+      "label": ".getOnMessage()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L127",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_getonmessage",
+      "community": 12,
+      "community_name": "Map_",
+      "norm_label": ".getonmessage()"
+    },
+    {
       "label": ".getOrCreateKindArray()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -3724,6 +3724,18 @@
       "community": 12,
       "community_name": "Map_",
       "norm_label": ".getparapetat()"
+    },
+    {
+      "label": ".getTextSelectionPrompt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L123",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_gettextselectionprompt",
+      "community": 12,
+      "community_name": "Map_",
+      "norm_label": ".gettextselectionprompt()"
     },
     {
       "label": ".getTotalTrack()",
@@ -3832,18 +3844,6 @@
       "community": 12,
       "community_name": "Map_",
       "norm_label": ".israilwaycomplete()"
-    },
-    {
-      "label": ".linkLocalText()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L814",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_linklocaltext",
-      "community": 12,
-      "community_name": "Map_",
-      "norm_label": ".linklocaltext()"
     },
     {
       "label": ".linkNewElementToText()",
@@ -5250,6 +5250,18 @@
       "norm_label": ".constructor()"
     },
     {
+      "label": "applyFigures()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L393",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_applyfigures",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": "applyfigures()"
+    },
+    {
       "label": ".findAllLinkedTracks()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -5308,18 +5320,6 @@
       "community": 2,
       "community_name": "Track",
       "norm_label": ".getlinkedtrack2()"
-    },
-    {
-      "label": ".getLinkedTrackReport()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L874",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_getlinkedtrackreport",
-      "community": 2,
-      "community_name": "Track",
-      "norm_label": ".getlinkedtrackreport()"
     },
     {
       "label": ".getTrackList()",
@@ -5646,6 +5646,18 @@
       "norm_label": ".removepreferreddirection()"
     },
     {
+      "label": ".restoreDefaults()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L154",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_restoredefaults",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": ".restoredefaults()"
+    },
+    {
       "label": ".secondarySpeedLengthToString()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/track/track.ts",
@@ -5716,6 +5728,54 @@
       "community": 2,
       "community_name": "Track",
       "norm_label": ".setplatform2()"
+    },
+    {
+      "label": ".setTrackMainLength()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L128",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_settrackmainlength",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": ".settrackmainlength()"
+    },
+    {
+      "label": ".setTrackMainSpeed()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L121",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_settrackmainspeed",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": ".settrackmainspeed()"
+    },
+    {
+      "label": ".setTrackSecondaryLength()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L144",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_settracksecondarylength",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": ".settracksecondarylength()"
+    },
+    {
+      "label": ".setTrackSecondarySpeed()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L135",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_settracksecondaryspeed",
+      "community": 2,
+      "community_name": "Track",
+      "norm_label": ".settracksecondaryspeed()"
     },
     {
       "label": ".subtypeCode()",
@@ -6534,18 +6594,6 @@
       "norm_label": "sync()"
     },
     {
-      "label": "applyFigures()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L393",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_applyfigures",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": "applyfigures()"
-    },
-    {
       "label": "recordField()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/effect-journal.ts",
@@ -6556,6 +6604,78 @@
       "community": 217,
       "community_name": "Text",
       "norm_label": "recordfield()"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L17",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element_constructor",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".constructor()"
+    },
+    {
+      "label": ".getLocationX()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L32",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element_getlocationx",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".getlocationx()"
+    },
+    {
+      "label": ".getLocationY()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L43",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element_getlocationy",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".getlocationy()"
+    },
+    {
+      "label": ".setLocationX()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L36",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element_setlocationx",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".setlocationx()"
+    },
+    {
+      "label": ".setLocationY()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L47",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_element_setlocationy",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".setlocationy()"
+    },
+    {
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L81",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_text_constructor",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".constructor()"
     },
     {
       "label": ".getEditableX()",
@@ -6654,18 +6774,6 @@
       "norm_label": ".setreadabletext()"
     },
     {
-      "label": ".toSaveString()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L156",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_element_text_tosavestring",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".tosavestring()"
-    },
-    {
       "label": ".changeDeleteText()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -6688,6 +6796,42 @@
       "community": 217,
       "community_name": "Text",
       "norm_label": ".checktextexists()"
+    },
+    {
+      "label": ".createAddLinkText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L513",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_createaddlinktext",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".createaddlinktext()"
+    },
+    {
+      "label": ".createAddText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L502",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_createaddtext",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".createaddtext()"
+    },
+    {
+      "label": ".getElementExcludingTrackAt()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L229",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_getelementexcludingtrackat",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".getelementexcludingtrackat()"
     },
     {
       "label": ".getTextAt()",
@@ -6726,6 +6870,18 @@
       "norm_label": ".gettexttomove()"
     },
     {
+      "label": ".linkLocalText()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L814",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_linklocaltext",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": ".linklocaltext()"
+    },
+    {
       "label": ".setTextList()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -6750,88 +6906,28 @@
       "norm_label": ".settexttomove()"
     },
     {
-      "label": ".textListToSaveString()",
+      "label": ".toSaveString()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L699",
+      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
+      "source_location": "L18",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_textlisttosavestring",
+      "id": "packages_shared_src_railway_tests_element_test_testelement_tosavestring",
       "community": 217,
       "community_name": "Text",
-      "norm_label": ".textlisttosavestring()"
+      "norm_label": ".tosavestring()"
     },
     {
-      "label": ".tracksToSaveStrings()",
+      "label": ".toString()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L781",
+      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
+      "source_location": "L15",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_trackstosavestrings",
+      "id": "packages_shared_src_railway_tests_element_test_testelement_tostring",
       "community": 217,
       "community_name": "Text",
-      "norm_label": ".trackstosavestrings()"
-    },
-    {
-      "label": ".restoreDefaults()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L154",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_restoredefaults",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".restoredefaults()"
-    },
-    {
-      "label": ".setTrackMainLength()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L128",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_settrackmainlength",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".settrackmainlength()"
-    },
-    {
-      "label": ".setTrackMainSpeed()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L121",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_settrackmainspeed",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".settrackmainspeed()"
-    },
-    {
-      "label": ".setTrackSecondaryLength()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L144",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_settracksecondarylength",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".settracksecondarylength()"
-    },
-    {
-      "label": ".setTrackSecondarySpeed()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L135",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_settracksecondaryspeed",
-      "community": 217,
-      "community_name": "Text",
-      "norm_label": ".settracksecondaryspeed()"
+      "norm_label": ".tostring()"
     },
     {
       "label": "AddPalette()",
@@ -6842,7 +6938,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_addpalette_addpalette",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "addpalette()"
     },
     {
@@ -6854,8 +6950,20 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_sectioneditpanel_sectioneditpanel",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "sectioneditpanel()"
+    },
+    {
+      "label": "SettingsMenu()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
+      "source_location": "L20",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_settingsmenu_settingsmenu",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "settingsmenu()"
     },
     {
       "label": "SimLayout()",
@@ -6866,7 +6974,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_simlayout_simlayout",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "simlayout()"
     },
     {
@@ -6878,7 +6986,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_statusbar_statusbar",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "statusbar()"
     },
     {
@@ -6890,7 +6998,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_addpalette_test_showsignals",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "showsignals()"
     },
     {
@@ -6902,7 +7010,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_statusbar_test_addeventlistener",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "addeventlistener()"
     },
     {
@@ -6914,7 +7022,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_statusbar_test_removeeventlistener",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "removeeventlistener()"
     },
     {
@@ -6926,7 +7034,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_trackinfotooltip_test_show",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "show()"
     },
     {
@@ -6938,7 +7046,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_textinputdialog_textinputdialog",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "textinputdialog()"
     },
     {
@@ -6950,7 +7058,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_timetable_timetableeditor_timetableeditor",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "timetableeditor()"
     },
     {
@@ -6962,7 +7070,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_trackinfotooltip_trackinfotooltip",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "trackinfotooltip()"
     },
     {
@@ -6974,7 +7082,7 @@
       "_origin": "ast",
       "id": "packages_app_src_hooks_useoperatesession_useoperatesession",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "useoperatesession()"
     },
     {
@@ -6986,7 +7094,7 @@
       "_origin": "ast",
       "id": "packages_app_src_routes_index_home",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "home()"
     },
     {
@@ -6998,7 +7106,7 @@
       "_origin": "ast",
       "id": "packages_app_src_store_sim_bridge_closesimsession",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "closesimsession()"
     },
     {
@@ -7010,7 +7118,7 @@
       "_origin": "ast",
       "id": "packages_app_src_store_sim_bridge_opensimsession",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "opensimsession()"
     },
     {
@@ -7022,8 +7130,20 @@
       "_origin": "ast",
       "id": "packages_app_src_store_sim_bridge_simbridge_dispose",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": ".dispose()"
+    },
+    {
+      "label": "reset()",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/__tests__/editor-store.test.ts",
+      "source_location": "L5",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_store_tests_editor_store_test_reset",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "reset()"
     },
     {
       "label": "ActionForm()",
@@ -7206,42 +7326,6 @@
       "norm_label": "rendertoolbar()"
     },
     {
-      "label": ".disconnect()",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
-      "source_location": "L14",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_disconnect",
-      "community": 220,
-      "community_name": "Toolbar.tsx",
-      "norm_label": ".disconnect()"
-    },
-    {
-      "label": ".observe()",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
-      "source_location": "L12",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_observe",
-      "community": 220,
-      "community_name": "Toolbar.tsx",
-      "norm_label": ".observe()"
-    },
-    {
-      "label": ".unobserve()",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
-      "source_location": "L13",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_unobserve",
-      "community": 220,
-      "community_name": "Toolbar.tsx",
-      "norm_label": ".unobserve()"
-    },
-    {
       "label": "Tip()",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/Toolbar.tsx",
@@ -7336,6 +7420,18 @@
       "community": 220,
       "community_name": "Toolbar.tsx",
       "norm_label": "rootdocument()"
+    },
+    {
+      "label": "useBlockedReasons()",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/mode-store.ts",
+      "source_location": "L142",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_store_mode_store_useblockedreasons",
+      "community": 220,
+      "community_name": "Toolbar.tsx",
+      "norm_label": "useblockedreasons()"
     },
     {
       "label": ".destroy()",
@@ -7816,18 +7912,6 @@
       "community": 224,
       "community_name": "mode-store.ts",
       "norm_label": "timetableblockedreason()"
-    },
-    {
-      "label": "useBlockedReasons()",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/mode-store.ts",
-      "source_location": "L142",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_store_mode_store_useblockedreasons",
-      "community": 224,
-      "community_name": "mode-store.ts",
-      "norm_label": "useblockedreasons()"
     },
     {
       "label": "mode()",
@@ -8358,100 +8442,172 @@
       "norm_label": "timetable()"
     },
     {
-      "label": ".constructor()",
+      "label": "pairPortals()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L17",
+      "source_file": ".claude/skills/railway-author/scripts/authoring.ts",
+      "source_location": "L258",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element_constructor",
+      "id": "claude_skills_railway_author_scripts_authoring_pairportals",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".constructor()"
+      "community_name": "buildMap",
+      "norm_label": "pairportals()"
     },
     {
-      "label": ".getLocationX()",
+      "label": "buildMap()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L32",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L431",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element_getlocationx",
+      "id": "claude_skills_railway_author_scripts_import_railos_buildmap",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".getlocationx()"
+      "community_name": "buildMap",
+      "norm_label": "buildmap()"
     },
     {
-      "label": ".getLocationY()",
+      "label": "cellOf()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L43",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L319",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element_getlocationy",
+      "id": "claude_skills_railway_author_scripts_import_railos_cellof",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".getlocationy()"
+      "community_name": "buildMap",
+      "norm_label": "cellof()"
     },
     {
-      "label": ".setLocationX()",
+      "label": "linkOf()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L36",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L129",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element_setlocationx",
+      "id": "claude_skills_railway_author_scripts_import_railos_linkof",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".setlocationx()"
+      "community_name": "buildMap",
+      "norm_label": "linkof()"
     },
     {
-      "label": ".setLocationY()",
+      "label": "linksOf()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L47",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L137",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_element_element_setlocationy",
+      "id": "claude_skills_railway_author_scripts_import_railos_linksof",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".setlocationy()"
+      "community_name": "buildMap",
+      "norm_label": "linksof()"
     },
     {
-      "label": ".getElementExcludingTrackAt()",
+      "label": "nameEverything()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L229",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L504",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_getelementexcludingtrackat",
+      "id": "claude_skills_railway_author_scripts_import_railos_nameeverything",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".getelementexcludingtrackat()"
+      "community_name": "buildMap",
+      "norm_label": "nameeverything()"
     },
     {
-      "label": ".toSaveString()",
+      "label": "pairKey()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
-      "source_location": "L18",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L168",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_tests_element_test_testelement_tosavestring",
+      "id": "claude_skills_railway_author_scripts_import_railos_pairkey",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".tosavestring()"
+      "community_name": "buildMap",
+      "norm_label": "pairkey()"
     },
     {
-      "label": ".toString()",
+      "label": "pieceOf()",
       "file_type": "code",
-      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
-      "source_location": "L15",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L104",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_tests_element_test_testelement_tostring",
+      "id": "claude_skills_railway_author_scripts_import_railos_pieceof",
       "community": 228,
-      "community_name": "Element",
-      "norm_label": ".tostring()"
+      "community_name": "buildMap",
+      "norm_label": "pieceof()"
+    },
+    {
+      "label": "placeInactive()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L474",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_placeinactive",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": "placeinactive()"
+    },
+    {
+      "label": "readRly()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L241",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_readrly",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": "readrly()"
+    },
+    {
+      "label": "switchSubtype()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L175",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_switchsubtype",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": "switchsubtype()"
+    },
+    {
+      "label": "trackDataFor()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L322",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_trackdatafor",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": "trackdatafor()"
+    },
+    {
+      "label": "where()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L320",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_where",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": "where()"
+    },
+    {
+      "label": ".hasPlatform()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L377",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_hasplatform",
+      "community": 228,
+      "community_name": "buildMap",
+      "norm_label": ".hasplatform()"
     },
     {
       "label": ".constructor()",
@@ -8670,6 +8826,18 @@
       "norm_label": ".getreadabletext()"
     },
     {
+      "label": ".toSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L156",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element_text_tosavestring",
+      "community": 230,
+      "community_name": "NamedElement",
+      "norm_label": ".tosavestring()"
+    },
+    {
       "label": ".toString()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/element.ts",
@@ -8728,6 +8896,30 @@
       "community": 230,
       "community_name": "NamedElement",
       "norm_label": ".getparapetlist()"
+    },
+    {
+      "label": ".textListToSaveString()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L699",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_textlisttosavestring",
+      "community": 230,
+      "community_name": "NamedElement",
+      "norm_label": ".textlisttosavestring()"
+    },
+    {
+      "label": ".tracksToSaveStrings()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/map/map.ts",
+      "source_location": "L781",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_map_map_map_trackstosavestrings",
+      "community": 230,
+      "community_name": "NamedElement",
+      "norm_label": ".trackstosavestrings()"
     },
     {
       "label": ".toSaveString()",
@@ -8814,18 +9006,6 @@
       "norm_label": "warn()"
     },
     {
-      "label": "SettingsMenu()",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
-      "source_location": "L20",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_settingsmenu_settingsmenu",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "settingsmenu()"
-    },
-    {
       "label": "describeConnectivity()",
       "file_type": "code",
       "source_file": "packages/app/src/lib/connectivity.ts",
@@ -8834,7 +9014,7 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity_describeconnectivity",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "describeconnectivity()"
     },
     {
@@ -8846,7 +9026,7 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity_plural",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "plural()"
     },
     {
@@ -8858,20 +9038,8 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_tests_connectivity_test_status",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "status()"
-    },
-    {
-      "label": "reset()",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/__tests__/editor-store.test.ts",
-      "source_location": "L5",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_store_tests_editor_store_test_reset",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "reset()"
     },
     {
       "label": "createRouteLayer()",
@@ -11406,6 +11574,42 @@
       "norm_label": "usetheme()"
     },
     {
+      "label": ".disconnect()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_disconnect",
+      "community": 273,
+      "community_name": "ResizeObserverStub",
+      "norm_label": ".disconnect()"
+    },
+    {
+      "label": ".observe()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
+      "source_location": "L12",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_observe",
+      "community": 273,
+      "community_name": "ResizeObserverStub",
+      "norm_label": ".observe()"
+    },
+    {
+      "label": ".unobserve()",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/__tests__/Toolbar.test.tsx",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_tests_toolbar_test_resizeobserverstub_unobserve",
+      "community": 273,
+      "community_name": "ResizeObserverStub",
+      "norm_label": ".unobserve()"
+    },
+    {
       "label": "makeTrack()",
       "file_type": "code",
       "source_file": "packages/app/src/lib/__tests__/trackInfo.test.ts",
@@ -11646,30 +11850,6 @@
       "norm_label": ".sync()"
     },
     {
-      "label": "pairPortals()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/authoring.ts",
-      "source_location": "L258",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_authoring_pairportals",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "pairportals()"
-    },
-    {
-      "label": "buildMap()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L431",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_buildmap",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "buildmap()"
-    },
-    {
       "label": "cellFromId()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11680,66 +11860,6 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "cellfromid()"
-    },
-    {
-      "label": "cellOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L319",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_cellof",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "cellof()"
-    },
-    {
-      "label": "linkOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L129",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_linkof",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "linkof()"
-    },
-    {
-      "label": "linksOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L137",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_linksof",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "linksof()"
-    },
-    {
-      "label": "nameEverything()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L504",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_nameeverything",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "nameeverything()"
-    },
-    {
-      "label": "pairKey()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L168",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_pairkey",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "pairkey()"
     },
     {
       "label": "parseAction()",
@@ -11764,42 +11884,6 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "parseservice()"
-    },
-    {
-      "label": "pieceOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L104",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_pieceof",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "pieceof()"
-    },
-    {
-      "label": "placeInactive()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L474",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_placeinactive",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "placeinactive()"
-    },
-    {
-      "label": "readRly()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L241",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_readrly",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "readrly()"
     },
     {
       "label": "readTtb()",
@@ -11850,18 +11934,6 @@
       "norm_label": "subtypebylinks()"
     },
     {
-      "label": "switchSubtype()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L175",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_switchsubtype",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "switchsubtype()"
-    },
-    {
       "label": "timeOf()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11874,18 +11946,6 @@
       "norm_label": "timeof()"
     },
     {
-      "label": "trackDataFor()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L322",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_trackdatafor",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "trackdatafor()"
-    },
-    {
       "label": "trainSpec()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11896,30 +11956,6 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "trainspec()"
-    },
-    {
-      "label": "where()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L320",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_where",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": "where()"
-    },
-    {
-      "label": ".hasPlatform()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L377",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_hasplatform",
-      "community": 33,
-      "community_name": "import-railos.ts",
-      "norm_label": ".hasplatform()"
     },
     {
       "label": "exitFields()",
@@ -12294,30 +12330,6 @@
       "norm_label": "maketracksprite()"
     },
     {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L81",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_element_text_constructor",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": ".constructor()"
-    },
-    {
-      "label": ".constructor()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L111",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_constructor",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": ".constructor()"
-    },
-    {
       "label": ".getLinkedTrackPairs()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -12330,28 +12342,16 @@
       "norm_label": ".getlinkedtrackpairs()"
     },
     {
-      "label": ".getOnMessage()",
+      "label": ".getLinkedTrackReport()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L127",
+      "source_location": "L874",
       "_callable": true,
       "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_getonmessage",
+      "id": "packages_shared_src_railway_map_map_map_getlinkedtrackreport",
       "community": 36,
       "community_name": "map.ts",
-      "norm_label": ".getonmessage()"
-    },
-    {
-      "label": ".getTextSelectionPrompt()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/map/map.ts",
-      "source_location": "L123",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_map_map_map_gettextselectionprompt",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": ".gettextselectionprompt()"
+      "norm_label": ".getlinkedtrackreport()"
     },
     {
       "label": "mapDebug()",
@@ -14145,7 +14145,7 @@
       "label": "createElementLayer()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L126",
+      "source_location": "L134",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_createelementlayer",
@@ -14157,7 +14157,7 @@
       "label": ".clear()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L117",
+      "source_location": "L125",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_elementlayer_clear",
@@ -14169,7 +14169,7 @@
       "label": ".destroy()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L118",
+      "source_location": "L126",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_elementlayer_destroy",
@@ -14181,7 +14181,7 @@
       "label": ".removeCell()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L115",
+      "source_location": "L123",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_elementlayer_removecell",
@@ -14193,7 +14193,7 @@
       "label": ".sync()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L111",
+      "source_location": "L119",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_elementlayer_sync",
@@ -14205,7 +14205,7 @@
       "label": ".upsertElement()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L113",
+      "source_location": "L121",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_elementlayer_elementlayer_upsertelement",
@@ -16572,6 +16572,72 @@
       "norm_label": "seconds_per_day"
     },
     {
+      "label": "element.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/element.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_element",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "element.ts"
+    },
+    {
+      "label": "element.test.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_tests_element_test",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "element.test.ts"
+    },
+    {
+      "label": "testFont",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_tests_element_test_testfont",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "testfont"
+    },
+    {
+      "label": "railway/types.ts",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/types.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_types",
+      "community": 217,
+      "community_name": "Text",
+      "norm_label": "railway/types.ts"
+    },
+    {
+      "label": "SettingsMenu.tsx",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_settingsmenu",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "settingsmenu.tsx"
+    },
+    {
+      "label": "SAVE_FORMATS",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_settingsmenu_save_formats",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "save_formats"
+    },
+    {
       "label": "SimLayout.tsx",
       "file_type": "code",
       "source_file": "packages/app/src/components/sim/SimLayout.tsx",
@@ -16579,7 +16645,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_simlayout",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "simlayout.tsx"
     },
     {
@@ -16590,8 +16656,19 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_addpalette_test",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "addpalette.test.tsx"
+    },
+    {
+      "label": "SettingsMenu.test.tsx",
+      "file_type": "code",
+      "source_file": "packages/app/src/components/sim/__tests__/SettingsMenu.test.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_app_src_components_sim_tests_settingsmenu_test",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "settingsmenu.test.tsx"
     },
     {
       "label": "StatusBar.test.tsx",
@@ -16601,7 +16678,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_statusbar_test",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "statusbar.test.tsx"
     },
     {
@@ -16612,7 +16689,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_trackinfotooltip_test",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "trackinfotooltip.test.tsx"
     },
     {
@@ -16623,7 +16700,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_tests_trackinfotooltip_test_base",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "base"
     },
     {
@@ -16634,7 +16711,7 @@
       "_origin": "ast",
       "id": "packages_app_src_components_sim_trackinfotooltip",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "trackinfotooltip.tsx"
     },
     {
@@ -16645,7 +16722,7 @@
       "_origin": "ast",
       "id": "packages_app_src_hooks_useoperatesession",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "useoperatesession.ts"
     },
     {
@@ -16656,8 +16733,19 @@
       "_origin": "ast",
       "id": "packages_app_src_routes_index",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "index.tsx"
+    },
+    {
+      "label": "editor-store.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/editor-store.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_app_src_store_editor_store",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "editor-store.ts"
     },
     {
       "label": "useEditorStore",
@@ -16667,8 +16755,19 @@
       "_origin": "ast",
       "id": "packages_app_src_store_editor_store_useeditorstore",
       "community": 218,
-      "community_name": "useEditorStore",
+      "community_name": "editor-store.ts",
       "norm_label": "useeditorstore"
+    },
+    {
+      "label": "editor-store.test.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/store/__tests__/editor-store.test.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_app_src_store_tests_editor_store_test",
+      "community": 218,
+      "community_name": "editor-store.ts",
+      "norm_label": "editor-store.test.ts"
     },
     {
       "label": "actionKinds.ts",
@@ -18751,39 +18850,6 @@
       "norm_label": "workflow"
     },
     {
-      "label": "SettingsMenu.tsx",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_settingsmenu",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "settingsmenu.tsx"
-    },
-    {
-      "label": "SAVE_FORMATS",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/SettingsMenu.tsx",
-      "source_location": "L10",
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_settingsmenu_save_formats",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "save_formats"
-    },
-    {
-      "label": "SettingsMenu.test.tsx",
-      "file_type": "code",
-      "source_file": "packages/app/src/components/sim/__tests__/SettingsMenu.test.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_app_src_components_sim_tests_settingsmenu_test",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "settingsmenu.test.tsx"
-    },
-    {
       "label": "connectivity.ts",
       "file_type": "code",
       "source_file": "packages/app/src/lib/connectivity.ts",
@@ -18791,7 +18857,7 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "connectivity.ts"
     },
     {
@@ -18802,7 +18868,7 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_connectivity_faults",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "faults"
     },
     {
@@ -18813,30 +18879,8 @@
       "_origin": "ast",
       "id": "packages_app_src_lib_tests_connectivity_test",
       "community": 237,
-      "community_name": "editor-store.ts",
+      "community_name": "connectivity.ts",
       "norm_label": "connectivity.test.ts"
-    },
-    {
-      "label": "editor-store.ts",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/editor-store.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_app_src_store_editor_store",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "editor-store.ts"
-    },
-    {
-      "label": "editor-store.test.ts",
-      "file_type": "code",
-      "source_file": "packages/app/src/store/__tests__/editor-store.test.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_app_src_store_tests_editor_store_test",
-      "community": 237,
-      "community_name": "editor-store.ts",
-      "norm_label": "editor-store.test.ts"
     },
     {
       "label": "RouteLayer.ts",
@@ -21494,17 +21538,6 @@
       "norm_label": "linkhighlightlayer.ts"
     },
     {
-      "label": "element.ts",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/element.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_element",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "element.ts"
-    },
-    {
       "label": "map.ts",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/map/map.ts",
@@ -21560,28 +21593,6 @@
       "norm_label": "neighbor_offsets"
     },
     {
-      "label": "element.test.ts",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_tests_element_test",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "element.test.ts"
-    },
-    {
-      "label": "testFont",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/__tests__/element.test.ts",
-      "source_location": "L23",
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_tests_element_test_testfont",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "testfont"
-    },
-    {
       "label": "map-text-linking.test.ts",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/__tests__/map-text-linking.test.ts",
@@ -21602,17 +21613,6 @@
       "community": 36,
       "community_name": "map.ts",
       "norm_label": "testfont"
-    },
-    {
-      "label": "railway/types.ts",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/types.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_types",
-      "community": 36,
-      "community_name": "map.ts",
-      "norm_label": "railway/types.ts"
     },
     {
       "label": "map-connectivity.ts",
@@ -35156,7 +35156,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L134",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_createelementlayer",
@@ -35167,7 +35167,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L139",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_createelementlayer",
@@ -35179,7 +35179,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L163",
+      "source_location": "L175",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_createelementlayer",
@@ -69884,7 +69884,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L111",
+      "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer_sync",
@@ -80772,7 +80772,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L108",
+      "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer",
@@ -80783,7 +80783,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L126",
+      "source_location": "L134",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer",
@@ -90107,7 +90107,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L111",
+      "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer",
@@ -90118,7 +90118,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L113",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer",
@@ -90129,7 +90129,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L115",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer",
@@ -90140,7 +90140,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L117",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer",
@@ -90151,7 +90151,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L118",
+      "source_location": "L126",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_elementlayer",
@@ -93516,7 +93516,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "packages/app/src/renderer/layers/ElementLayer.ts",
-      "source_location": "L150",
+      "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_app_src_renderer_layers_elementlayer_createelementlayer",
@@ -97041,5 +97041,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "52b851484a359220f4d1bb2e7df4a6195c923bf2"
+  "built_at_commit": "ae2c87b892b747a5534305ebe78311d3c4cec6b2"
 }

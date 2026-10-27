@@ -1,16 +1,16 @@
 # Graph Report - rail-op-sim  (2026-10-27)
 
 ## Corpus Check
-- 228 files · ~183,872 words
+- 228 files · ~183,970 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2410 nodes · 5821 edges · 273 communities (149 shown, 124 thin omitted)
+- 2410 nodes · 5821 edges · 274 communities (150 shown, 124 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 407 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `52b85148`
+- Built from commit: `ae2c87b8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -190,7 +190,7 @@
 - timetable/__tests__/fixtures.ts
 - createDirectionLayer
 - Text
-- useEditorStore
+- editor-store.ts
 - actionKinds.ts
 - Toolbar.tsx
 - LinkHighlightLayer
@@ -200,7 +200,7 @@
 - engine.ts
 - PlacementController.ts
 - authoring.ts
-- Element
+- buildMap
 - compilerOptions
 - NamedElement
 - The railway document
@@ -209,7 +209,7 @@
 - Every issue the validator reports
 - node-env.d.ts
 - Authoring railways and timetables
-- editor-store.ts
+- connectivity.ts
 - operateGeometry.ts
 - run.sh
 - app/package.json
@@ -244,6 +244,7 @@
 - Lines
 - useTheme
 - convert-railos.sh
+- ResizeObserverStub
 
 ## God Nodes (most connected - your core abstractions)
 1. `Map_` - 146 edges
@@ -272,7 +273,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (273 total, 124 thin omitted)
+## Communities (274 total, 124 thin omitted)
 
 ### Community 0 - "TimetableEditor.tsx"
 Cohesion: 0.10
@@ -284,7 +285,7 @@ Nodes (24): Track (unified track class), Link grid layout (0-8 indices), KIND_ME
 
 ### Community 2 - "Track"
 Cohesion: 0.06
-Nodes (7): DanglingLink, LinkedTrackReport, PathNode, PreferredDirectionRemovalResult, PreferredDirectionResult, Track, locationOf()
+Nodes (7): applyFigures(), DanglingLink, PathNode, PreferredDirectionRemovalResult, PreferredDirectionResult, Track, locationOf()
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.06
@@ -320,7 +321,7 @@ Nodes (21): ALL_TRACK_SUBTYPES, ELEMENT_KEYS, GRAPHICS_DIR, TRACK_ENUMS, BridgeU
 
 ### Community 12 - "Map_"
 Cohesion: 0.06
-Nodes (3): record(), coordKey(), Map_
+Nodes (5): record(), coordKey(), Map_, MessageCallback, TextSelectionPrompt
 
 ### Community 13 - "textureCache.ts"
 Cohesion: 0.10
@@ -399,8 +400,8 @@ Cohesion: 0.15
 Nodes (12): compilerOptions, module, moduleResolution, noEmit, noUnusedLocals, noUnusedParameters, skipLibCheck, strict (+4 more)
 
 ### Community 33 - "import-railos.ts"
-Cohesion: 0.07
-Nodes (44): pairPortals(), ActiveElement, buildMap(), cellFromId(), cellOf(), COMMANDS, errors, InactiveElement (+36 more)
+Cohesion: 0.08
+Nodes (31): ActiveElement, cellFromId(), COMMANDS, errors, InactiveElement, issues, LINKS, map (+23 more)
 
 ### Community 34 - "ActionForm.tsx"
 Cohesion: 0.23
@@ -411,8 +412,8 @@ Cohesion: 0.11
 Nodes (30): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET (+22 more)
 
 ### Community 36 - "map.ts"
-Cohesion: 0.12
-Nodes (21): LinkedTrackPair, MAP_DEBUG, mapDebug(), addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform(), changeDeleteText() (+13 more)
+Cohesion: 0.17
+Nodes (17): LinkedTrackPair, LinkedTrackReport, MAP_DEBUG, mapDebug(), addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform() (+9 more)
 
 ### Community 37 - "map-connectivity.ts"
 Cohesion: 0.12
@@ -551,20 +552,20 @@ Cohesion: 0.43
 Nodes (5): createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync()
 
 ### Community 217 - "Text"
-Cohesion: 0.12
-Nodes (3): applyFigures(), recordField(), Text
+Cohesion: 0.09
+Nodes (7): recordField(), Element, Text, TestElement, testFont, FontInfo, Point
 
-### Community 218 - "useEditorStore"
-Cohesion: 0.14
-Nodes (13): AddPalette(), SectionEditPanel(), SimLayout(), StatusBar(), BASE, TextInputDialog(), TimetableEditor(), TrackInfoTooltip() (+5 more)
+### Community 218 - "editor-store.ts"
+Cohesion: 0.11
+Nodes (18): AddPalette(), SectionEditPanel(), SAVE_FORMATS, SettingsMenu(), SimLayout(), StatusBar(), BASE, TextInputDialog() (+10 more)
 
 ### Community 219 - "actionKinds.ts"
 Cohesion: 0.11
 Nodes (21): ActionForm(), ACTION_KIND_GROUPS, ACTION_KIND_OPTIONS, actionKindLabel(), ActionKindOption, ActionSeed, createAction(), describeAction() (+13 more)
 
 ### Community 220 - "Toolbar.tsx"
-Cohesion: 0.10
-Nodes (15): MODES, ModeSwitcher(), ModeTip(), complete, ResizeObserverStub, ResizeObserverStub, HISTORY_ACTIONS, Tip() (+7 more)
+Cohesion: 0.12
+Nodes (15): MODES, ModeSwitcher(), ModeTip(), complete, ResizeObserverStub, HISTORY_ACTIONS, Tip(), Toolbar() (+7 more)
 
 ### Community 221 - "LinkHighlightLayer"
 Cohesion: 0.13
@@ -579,8 +580,8 @@ Cohesion: 0.18
 Nodes (11): scripts, build, check, coverage, dev, format, generate-routes, lint (+3 more)
 
 ### Community 224 - "mode-store.ts"
-Cohesion: 0.23
-Nodes (13): SaveLoadControls(), THEME_SWITCH, loadDocument(), saveDocument(), loadMap(), saveMap(), blockedReason(), ModeState (+5 more)
+Cohesion: 0.22
+Nodes (13): SaveLoadControls(), THEME_SWITCH, loadDocument(), saveDocument(), loadMap(), saveMap(), TrackStatus, blockedReason() (+5 more)
 
 ### Community 225 - "engine.ts"
 Cohesion: 0.11
@@ -594,12 +595,16 @@ Nodes (11): DEFAULT_OPTIONS, ELEMENT_LABELS, themeKey(), usePixiApp(), Subsystem
 Cohesion: 0.16
 Nodes (23): map, services, train, APP_IMAGE_SIZE, at(), bridgeUnderpass(), buffer(), crossover() (+15 more)
 
+### Community 228 - "buildMap"
+Cohesion: 0.23
+Nodes (13): pairPortals(), buildMap(), cellOf(), linkOf(), linksOf(), nameEverything(), pairKey(), pieceOf() (+5 more)
+
 ### Community 229 - "compilerOptions"
 Cohesion: 0.12
 Nodes (15): compilerOptions, forceConsistentCasingInFileNames, lib, module, moduleResolution, noEmit, skipLibCheck, strict (+7 more)
 
 ### Community 230 - "NamedElement"
-Cohesion: 0.10
+Cohesion: 0.09
 Nodes (6): Concourse, NamedElement, NamedLocation, Parapet, ConnectivityReport, TestNamedElement
 
 ### Community 231 - "The railway document"
@@ -622,9 +627,9 @@ Nodes (8): A service's identity, A service's shape, Against the railway, Every i
 Cohesion: 0.33
 Nodes (5): Authoring railways and timetables, Notes, Reference, The rules that break documents, Workflow
 
-### Community 237 - "editor-store.ts"
-Cohesion: 0.16
-Nodes (11): SAVE_FORMATS, SettingsMenu(), ConnectivityPill, describeConnectivity(), FaultCount, FAULTS, plural(), MapFileFormat (+3 more)
+### Community 237 - "connectivity.ts"
+Cohesion: 0.32
+Nodes (5): ConnectivityPill, describeConnectivity(), FaultCount, FAULTS, plural()
 
 ### Community 238 - "operateGeometry.ts"
 Cohesion: 0.11
@@ -702,17 +707,17 @@ Nodes (3): applyTheme(), getInitial(), useTheme()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Map_` to `check-documents.ts`, `Track`, `enums.ts`, `map-serialization.ts`, `mapFile.ts`, `validate.ts`, `TextLayer`, `import-railos.ts`, `gridToWorld`, `map.ts`, `map-connectivity.ts`, `sim-bridge.ts`, `railway/index.ts`, `ElementLayer.ts`, `timetable/__tests__/fixtures.ts`, `Text`, `LinkHighlightLayer`, `engine.ts`, `PlacementController.ts`, `authoring.ts`, `Element`, `NamedElement`, `sim/__tests__/fixtures.ts`, `timetable-store.ts`, `effect-journal.test.ts`, `graph.ts`, `locations.test.ts`?**
+- **Why does `Map_` connect `Map_` to `check-documents.ts`, `Track`, `enums.ts`, `map-serialization.ts`, `mapFile.ts`, `validate.ts`, `TextLayer`, `import-railos.ts`, `gridToWorld`, `map.ts`, `map-connectivity.ts`, `sim-bridge.ts`, `railway/index.ts`, `ElementLayer.ts`, `timetable/__tests__/fixtures.ts`, `Text`, `LinkHighlightLayer`, `engine.ts`, `PlacementController.ts`, `authoring.ts`, `NamedElement`, `sim/__tests__/fixtures.ts`, `timetable-store.ts`, `effect-journal.test.ts`, `graph.ts`, `locations.test.ts`?**
   _High betweenness centrality (0.073) - this node is a cross-community bridge._
-- **Why does `Track` connect `Track` to `import-railos.ts`, `PlacementController.ts`, `authoring.ts`, `ElementLayer.ts`, `map.ts`, `map-connectivity.ts`, `NamedElement`, `graph.ts`, `enums.ts`, `Map_`, `map-serialization.ts`, `Text`, `railway/index.ts`, `locations.test.ts`, `LinkHighlightLayer`, `createTrackData`?**
+- **Why does `Track` connect `Track` to `import-railos.ts`, `PlacementController.ts`, `authoring.ts`, `ElementLayer.ts`, `map.ts`, `map-connectivity.ts`, `NamedElement`, `buildMap`, `enums.ts`, `Map_`, `map-serialization.ts`, `graph.ts`, `railway/index.ts`, `locations.test.ts`, `LinkHighlightLayer`, `createTrackData`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `PlacementController` connect `PlacementController` to `TimetableEditor.tsx`, `mode-store.ts`, `PlacementController.ts`, `ElementLayer.ts`, `Text`, `ViewportController`, `useEditorHotkeys.ts`, `map-serialization.ts`, `OperatePanel.tsx`, `mapFile.ts`, `SectionEditPanel.tsx`, `useEditorStore`, `Toolbar.tsx`, `LinkHighlightLayer`, `TextLayer`?**
+- **Why does `PlacementController` connect `PlacementController` to `TimetableEditor.tsx`, `mode-store.ts`, `PlacementController.ts`, `ElementLayer.ts`, `Text`, `ViewportController`, `useEditorHotkeys.ts`, `map-serialization.ts`, `OperatePanel.tsx`, `mapFile.ts`, `SectionEditPanel.tsx`, `editor-store.ts`, `Toolbar.tsx`, `LinkHighlightLayer`, `TextLayer`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `map`, `train`, `services` to the rest of the system?**
   _500 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `TimetableEditor.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.10204081632653061 - nodes in this community are weakly interconnected._
 - **Should `Track` be split into smaller, more focused modules?**
-  _Cohesion score 0.05952380952380952 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05878084179970972 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._

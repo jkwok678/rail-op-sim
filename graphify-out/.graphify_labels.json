@@ -217,7 +217,7 @@
   "215": "timetable/__tests__/fixtures.ts",
   "216": "createDirectionLayer",
   "217": "Text",
-  "218": "useEditorStore",
+  "218": "editor-store.ts",
   "219": "actionKinds.ts",
   "220": "Toolbar.tsx",
   "221": "LinkHighlightLayer",
@@ -227,7 +227,7 @@
   "225": "engine.ts",
   "226": "PlacementController.ts",
   "227": "authoring.ts",
-  "228": "Element",
+  "228": "buildMap",
   "229": "compilerOptions",
   "230": "NamedElement",
   "231": "The railway document",
@@ -236,7 +236,7 @@
   "234": "Every issue the validator reports",
   "235": "node-env.d.ts",
   "236": "Authoring railways and timetables",
-  "237": "editor-store.ts",
+  "237": "connectivity.ts",
   "238": "operateGeometry.ts",
   "239": "run.sh",
   "240": "app/package.json",
@@ -271,5 +271,6 @@
   "269": "EditHistory.ts",
   "270": "Lines",
   "271": "useTheme",
-  "272": "convert-railos.sh"
+  "272": "convert-railos.sh",
+  "273": "ResizeObserverStub"
 }
