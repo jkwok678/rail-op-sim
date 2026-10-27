@@ -125,11 +125,12 @@ export function usePixiApp(): UsePixiAppReturn {
 			// Track colour overlay (empty container; tints are applied to track sprites)
 			const trackColorLayer = createTrackColorLayer(trackLayer);
 
-			// Scene-graph order: ground → colour → tracks
-			world.addChild(trackColorLayer.container);
-			world.addChild(trackLayer.container);
-
 			const elementLayer = createElementLayer(textures);
+
+			// Scene-graph order: ground → colour → element underlay → tracks → elements
+			world.addChild(trackColorLayer.container);
+			world.addChild(elementLayer.underlay);
+			world.addChild(trackLayer.container);
 			world.addChild(elementLayer.container);
 
 			const textLayer = createTextLayer();

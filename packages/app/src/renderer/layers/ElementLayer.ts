@@ -99,6 +99,8 @@ interface SpriteEntry {
 	sprite: Sprite;
 	/** Key for change detection (e.g. "NAMEDLOCATION_SET"). */
 	lookupKey: string;
+	/** The container the sprite sits in — {@link ElementLayer.underlay} or the main one. */
+	parent: Container;
 }
 
 // ============================================================================
@@ -107,6 +109,12 @@ interface SpriteEntry {
 
 export interface ElementLayer {
 	container: Container;
+	/**
+	 * Goes below TrackLayer. Holds named locations that ride on a track: their
+	 * sprite fills the cell, so drawn above it would hide the track, while
+	 * RailOS paints the location behind the line.
+	 */
+	underlay: Container;
 	/** Full reconcile against the map. */
 	sync(map: Map_): void;
 	/** Add or update a single element cell. */
@@ -121,11 +129,13 @@ export interface ElementLayer {
 /**
  * Renders non-track elements (NamedLocation, Concourse, Parapet), platform
  * overlays, bridge/underpass Set/Unset variants, and level crossing icons.
- * Lives above TrackLayer in the scene graph.
+ * Lives above TrackLayer in the scene graph, apart from its underlay.
  */
 export function createElementLayer(textures: TextureCache): ElementLayer {
 	const container = new Container();
 	container.label = "element-layer";
+	const underlay = new Container();
+	underlay.label = "element-underlay";
 
 	const spriteEntries = new Map<string, SpriteEntry>();
 
@@ -135,7 +145,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 			"trackLayer",
 			`elementLayer removeSprite at (${key}) — lookupKey=${entry.lookupKey}`,
 		);
-		container.removeChild(entry.sprite);
+		entry.parent.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		spriteEntries.delete(key);
 	};
@@ -146,6 +156,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		lookupKey: string,
 		gx: number,
 		gy: number,
+		parent: Container = container,
 	) => {
 		const texture = textures.get(lookupKey);
 		if (!texture) {
@@ -157,13 +168,14 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		}
 		const existing = spriteEntries.get(compositeKey);
 		if (existing) {
-			if (existing.lookupKey === lookupKey) return; // unchanged
+			if (existing.lookupKey === lookupKey && existing.parent === parent)
+				return; // unchanged
 			removeSpriteEntry(compositeKey, existing);
 		}
 		const sprite = makeElementSprite(texture, gx, gy);
 		sprite.label = `element-${compositeKey}`;
-		container.addChild(sprite);
-		spriteEntries.set(compositeKey, { sprite, lookupKey });
+		parent.addChild(sprite);
+		spriteEntries.set(compositeKey, { sprite, lookupKey, parent });
 		debugLog(
 			"trackLayer",
 			`elementLayer upsertSprite at (${compositeKey}) — lookupKey=${lookupKey}`,
@@ -172,6 +184,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 
 	return {
 		container,
+		underlay,
 
 		sync(map) {
 			const seenSpriteKeys = new Set<string>();
@@ -184,7 +197,8 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				const isNamed = nl.getNamed();
 				const lookupKey = isNamed ? "NAMEDLOCATION_SET" : "NAMEDLOCATION_UNSET";
 				seenSpriteKeys.add(key);
-				upsertSprite(key, lookupKey, gx, gy);
+				const parent = map.getTrackAt(gx, gy) ? underlay : container;
+				upsertSprite(key, lookupKey, gx, gy, parent);
 			}
 
 			// ── 2. Concourses ──
@@ -291,6 +305,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 
 		destroy() {
 			this.clear();
+			underlay.destroy({ children: true });
 			container.destroy({ children: true });
 		},
 	};
