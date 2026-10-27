@@ -415,6 +415,19 @@ const PLATFORM_SIDE: Record<number, Platform> = {
 	79: Platform.RIGHT,
 };
 
+/**
+ * Our PARAPETn for RailOS tags 97–124, matched by graphic. The numbering is
+ * not tag − 96: the two sets order their blocks of five differently.
+ */
+const PARAPET_NUMBER: readonly number[] = [
+	1, 2, 3, 4, 5, // 97–101
+	11, 12, 13, 14, 15, // 102–106
+	21, 22, 23, 24, // 107–110
+	6, 7, 8, 9, 10, // 111–115
+	16, 17, 18, 19, 20, // 116–120
+	25, 26, 27, 28, // 121–124
+];
+
 function buildMap(rly: ReturnType<typeof readRly>): Map_ {
 	const map = newRailway();
 	const byTv = new Map<number, Track>();
@@ -471,7 +484,7 @@ function placeInactive(map: Map_, inactive: InactiveElement[]): void {
 		} else if (piece === "concourse") {
 			map.createAddConcourse(x, y);
 		} else if (piece === "parapet") {
-			map.createAddParapet(`PARAPET${el.tag - 96}` as ParapetType, x, y);
+			map.createAddParapet(`PARAPET${PARAPET_NUMBER[el.tag - 97]}` as ParapetType, x, y);
 		} else if (piece === "named") {
 			map.createAddNamedLocation(x, y);
 			if (!map.getNamedLocationAt(x, y)) {
