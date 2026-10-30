@@ -2,3 +2,6 @@ packages:
   - "packages/*"
 # reenable once app is stable
 minimumReleaseAge: 10080
+allowBuilds:
+  esbuild: true
+  lightningcss: true

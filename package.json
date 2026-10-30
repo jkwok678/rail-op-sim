@@ -1,7 +1,7 @@
 {
   "name": "rail-op-sim-monorepo",
   "private": true,
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@12.16.1",
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
@@ -19,11 +19,5 @@
     "pngjs": "^7.0.0",
     "railway": "^3.16.0",
     "typescript": "^7.0.2"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
   }
 }
