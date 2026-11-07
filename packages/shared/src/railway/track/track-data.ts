@@ -648,11 +648,12 @@ function switchMainRailIndex(
 }
 
 /**
- * Names of the signal subtypes, by the end of the cell their lamp sits at. A
- * signal faces oncoming trains, so it protects travel *away* from its lamp:
- * the exit link is the opposite one (`8 - lamp`).
+ * Signal subtypes are named for the direction of travel they govern, as in
+ * RailOS: the art stands on the driver's left (UK practice) with its arm
+ * pointing the way the train runs. SIGNALLEFT, drawn below a horizontal track
+ * with its head to the left, is for trains running left, out through link 3.
  */
-const SIGNAL_LAMP_LINK: Record<SubtypeKey, number> = {
+const SIGNAL_EXIT_LINK: Record<SubtypeKey, number> = {
 	SIGNALLEFT: 3,
 	SIGNALRIGHT: 5,
 	SIGNALUP: 1,
@@ -668,8 +669,7 @@ const SIGNAL_LAMP_LINK: Record<SubtypeKey, number> = {
  * link has passed the signal facing it. Null for a non-signal subtype.
  */
 export function signalFacingExit(subtype: SubtypeKey): number | null {
-	const lamp = SIGNAL_LAMP_LINK[subtype];
-	return lamp === undefined ? null : 8 - lamp;
+	return SIGNAL_EXIT_LINK[subtype] ?? null;
 }
 
 // ============================================================================

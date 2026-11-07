@@ -49,13 +49,15 @@ describe("getRails", () => {
 });
 
 describe("signalFacingExit", () => {
-	it("protects travel away from the lamp", () => {
-		expect(signalFacingExit("SIGNALLEFT" as never)).toBe(5);
-		expect(signalFacingExit("SIGNALRIGHT" as never)).toBe(3);
-		expect(signalFacingExit("SIGNALUP" as never)).toBe(7);
-		expect(signalFacingExit("SIGNALDOWN" as never)).toBe(1);
-		expect(signalFacingExit("SIGNALLEFTUP" as never)).toBe(8);
-		expect(signalFacingExit("SIGNALRIGHTDOWN" as never)).toBe(0);
+	it("protects travel toward the end the subtype is named for", () => {
+		expect(signalFacingExit("SIGNALLEFT" as never)).toBe(3);
+		expect(signalFacingExit("SIGNALRIGHT" as never)).toBe(5);
+		expect(signalFacingExit("SIGNALUP" as never)).toBe(1);
+		expect(signalFacingExit("SIGNALDOWN" as never)).toBe(7);
+		expect(signalFacingExit("SIGNALLEFTUP" as never)).toBe(0);
+		expect(signalFacingExit("SIGNALRIGHTDOWN" as never)).toBe(8);
+		expect(signalFacingExit("SIGNALRIGHTUP" as never)).toBe(2);
+		expect(signalFacingExit("SIGNALLEFTDOWN" as never)).toBe(6);
 	});
 
 	it("returns null for a non-signal", () => {

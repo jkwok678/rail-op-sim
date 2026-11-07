@@ -96,10 +96,10 @@ function placeToken(
 			place(map, gx, 0, "straight", "STRAIGHTH", true);
 			return;
 		case ">":
-			place(map, gx, 0, "signal", "SIGNALLEFT");
+			place(map, gx, 0, "signal", "SIGNALRIGHT");
 			return;
 		case "<":
-			place(map, gx, 0, "signal", "SIGNALRIGHT");
+			place(map, gx, 0, "signal", "SIGNALLEFT");
 			return;
 		case "]":
 			if (!last) throw new Error("buffers must end the line");
