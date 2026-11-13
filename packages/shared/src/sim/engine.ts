@@ -19,6 +19,7 @@ import {
 	checkRouteStart,
 	commitPendingRoute,
 	releaseBehind,
+	setAllAutoRoutes,
 	setRoute,
 	togglePoints,
 } from "./routes";
@@ -222,6 +223,8 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				return checkRouteStart(graph, state, cmd.at, cmd.kind);
 			case "setRoute":
 				return setRoute(graph, state, cmd.from, cmd.to, cmd.kind);
+			case "setAllAutoRoutes":
+				return setAllAutoRoutes(graph, state);
 			case "cancelRoute":
 				return cancelRoute(graph, state, cmd.at, (route) =>
 					state.trains.some((t) => approaching(graph, state, t, route)),

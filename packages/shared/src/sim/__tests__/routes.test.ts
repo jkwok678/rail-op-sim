@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { nodeAt } from "../graph";
-import { cell, engineFor, line, passingLoop } from "./fixtures";
+import {
+	addTrain,
+	cell,
+	engineFor,
+	line,
+	linkedLine,
+	passingLoop,
+} from "./fixtures";
 
 /** Signals at 2 and 5 face right; exits at both ends. */
 const twoSignals = () => line("X->-->-X");
@@ -215,5 +222,124 @@ describe("route timing and cancelling", () => {
 			kind: "preferred",
 		});
 		expect(result.ok).toBe(false);
+	});
+});
+
+describe("setting every automatic route", () => {
+	const setAll = (engine: ReturnType<typeof engineFor>) =>
+		engine.handle({ type: "setAllAutoRoutes" });
+	const allNodes = (engine: ReturnType<typeof engineFor>) =>
+		engine.state.routes.map((r) =>
+			r.segs.map((s) => {
+				const { gx, gy } = engine.graph.nodes[s.node].cell;
+				return `${gx},${gy}`;
+			}),
+		);
+
+	it("sets every plain section, each stopping short of the next signal", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		expect(setAll(engine)).toEqual({
+			ok: true,
+			message: "Set 3 automatic routes.",
+		});
+		expect(engine.state.routes.every((r) => r.kind === "auto")).toBe(true);
+		expect(engine.state.routes.map((_, i) => segNodes(engine, i))).toEqual([
+			[0, 1],
+			[2, 3, 4],
+			[5, 6, 7],
+		]);
+		expect(engine.state.pending).toBeNull();
+	});
+
+	it("clears the signals at once", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		setAll(engine);
+		const signal = nodeAt(engine.graph, cell(2));
+		expect(engine.state.aspects[signal as number]).toBeGreaterThan(0);
+	});
+
+	it("leaves a section into buffers alone", () => {
+		const engine = engineFor(line("X->-]", {}, { oneWay: true }));
+		setAll(engine);
+		expect(engine.state.routes.map((_, i) => segNodes(engine, i))).toEqual([
+			[0, 1],
+		]);
+	});
+
+	it("leaves track preferred both ways alone", () => {
+		const engine = engineFor(twoSignals());
+		expect(setAll(engine).ok).toBe(false);
+		expect(engine.state.routes).toHaveLength(0);
+	});
+
+	it("leaves a section through points alone", () => {
+		const engine = engineFor(passingLoop());
+		expect(setAll(engine).ok).toBe(false);
+	});
+
+	it("skips a section a route or a train already holds", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(5),
+			kind: "preferred",
+		});
+		addTrain(engine, cell(6), cell(7));
+		expect(setAll(engine)).toEqual({
+			ok: true,
+			message: "Set 1 automatic route.",
+		});
+		expect(engine.state.routes.map((r) => r.kind)).toEqual([
+			"preferred",
+			"auto",
+		]);
+		expect(segNodes(engine, 1)).toEqual([0, 1]);
+	});
+
+	it("says when there is nothing left to set", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		setAll(engine);
+		expect(setAll(engine)).toEqual({
+			ok: false,
+			message: "No automatic routes left to set.",
+		});
+	});
+
+	it("will not set them while paused", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		engine.handle({ type: "run" });
+		engine.handle({ type: "pause" });
+		expect(setAll(engine).ok).toBe(false);
+		expect(engine.state.routes).toHaveLength(0);
+	});
+
+	it("carries a section on through paired linked tracks", () => {
+		const engine = engineFor(linkedLine());
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,0", "3,0", "4,0", "0,3", "1,3"],
+			["2,3", "3,3", "4,3"],
+		]);
+	});
+
+	it("never ends a section on an unpaired linked track", () => {
+		const engine = engineFor(linkedLine({ paired: false }));
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,3", "3,3", "4,3"],
+		]);
+	});
+
+	it("leaves a section alone while a train stands beyond the hop", () => {
+		const engine = engineFor(linkedLine());
+		addTrain(engine, cell(0, 3), cell(1, 3));
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,3", "3,3", "4,3"],
+		]);
 	});
 });

@@ -159,10 +159,14 @@ export type SimCommand =
 	| { type: "setSpeed"; speed: number }
 	| { type: "checkRouteStart"; at: Cell; kind: RouteKind }
 	| { type: "setRoute"; from: Cell; to: Cell; kind: RouteKind }
+	| { type: "setAllAutoRoutes" }
 	| { type: "cancelRoute"; at: Cell }
 	| { type: "togglePoints"; at: Cell };
 
-export type CommandResult = { ok: true } | { ok: false; message: string };
+/** A success may say what it did; a refusal always says why. */
+export type CommandResult =
+	| { ok: true; message?: string }
+	| { ok: false; message: string };
 
 /** A segment as a renderer draws it: a cell, its links, and a span of it. */
 export interface ViewSeg {

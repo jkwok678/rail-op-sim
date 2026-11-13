@@ -300,6 +300,100 @@ export function commitPendingRoute(graph: RailGraph, state: SimState): void {
 }
 
 /**
+ * Set an automatic signals route on every plain section of line that does not
+ * have one: from each signal, or each exit leading in, along preferred
+ * directions to just short of the next signal, or onto an exit.
+ *
+ * Only sections the signaller has no choice about are set — a section through
+ * points or a crossing, into buffers, onto an unpaired linked track, or on
+ * track preferred both ways (where an automatic route would lock out the other
+ * direction) is left for setting by hand. Paired linked tracks are plain line:
+ * a section carries on through the hop to the partner. Nothing moves, so the
+ * routes set at once.
+ */
+export function setAllAutoRoutes(
+	graph: RailGraph,
+	state: SimState,
+): CommandResult {
+	if (state.run === "paused")
+		return failed("Routes cannot be set while paused.");
+	const taken = new Set<number>([
+		...trainKeys(graph, state.trains).keys(),
+		...routeKeys(graph, state).keys(),
+	]);
+	const free = (seg: Seg): boolean => !taken.has(occKeyOf(graph, seg));
+	let set = 0;
+	for (const node of graph.nodes) {
+		const starts = startSegs(node, "auto");
+		if (typeof starts === "string") continue;
+		const segs = plainAutoRoute(graph, starts[0], free);
+		if (!segs) continue;
+		for (const seg of segs) taken.add(occKeyOf(graph, seg));
+		state.routes.push({ id: `R${state.nextRouteId++}`, kind: "auto", segs });
+		set++;
+	}
+	if (set === 0) return failed("No automatic routes left to set.");
+	return {
+		ok: true,
+		message: `Set ${set} automatic route${set === 1 ? "" : "s"}.`,
+	};
+}
+
+/** Points and crossings: places a route needs the signaller to choose. */
+const needsChoosing = (node: GraphNode): boolean =>
+	node.kind === "switch" || node.kind === "crossover";
+
+/** Whether `seg` runs on track preferred the other way too. */
+const twoWay = (node: GraphNode, seg: Seg): boolean =>
+	prefers(node, { entry: seg.exit, exit: seg.entry });
+
+/** Whether `seg` is somewhere an automatic route may run through. */
+function plainSeg(
+	graph: RailGraph,
+	seg: Seg,
+	free: (s: Seg) => boolean,
+): boolean {
+	const node = graph.nodes[seg.node];
+	return (
+		!needsChoosing(node) &&
+		prefers(node, seg) &&
+		!twoWay(node, seg) &&
+		free(seg)
+	);
+}
+
+/**
+ * The plain section from `start` to just short of the next signal, or onto an
+ * exit, or null when it is not plain all the way.
+ */
+function plainAutoRoute(
+	graph: RailGraph,
+	start: Seg,
+	free: (seg: Seg) => boolean,
+): Seg[] | null {
+	if (!plainSeg(graph, start, free)) return null;
+	const segs = [start];
+	const seen = new Set<NodeId>([start.node]);
+	for (let current = start; segs.length < SEARCH_LIMIT; ) {
+		if (leavesMap(graph, current)) return segs;
+		if (endsAtBuffers(graph, current)) return null;
+		const step = stepFrom(graph, current.node, current.exit);
+		if (!step) return null;
+		const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
+			prefers(graph.nodes[step.node], p),
+		);
+		if (ways.length !== 1) return null;
+		const next = { node: step.node, entry: ways[0].entry, exit: ways[0].exit };
+		if (isFacingSignal(graph, next)) return segs;
+		if (seen.has(next.node) || !plainSeg(graph, next, free)) return null;
+		seen.add(next.node);
+		segs.push(next);
+		current = next;
+	}
+	return null;
+}
+
+/**
  * Cancel the route through `at`, whole. Refused while a train is on it or
  * running towards its entry close enough that it could not stop.
  */

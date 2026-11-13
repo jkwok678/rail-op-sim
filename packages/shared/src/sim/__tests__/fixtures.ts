@@ -58,9 +58,13 @@ export type Token = "X" | "-" | "P" | ">" | "<" | "]" | "[";
 
 /**
  * A straight railway from tokens, with preferred directions set both ways
- * end to end. Cells start at `gx = 0`.
+ * end to end — or, `oneWay`, left to right only. Cells start at `gx = 0`.
  */
-export function line(tokens: string, names: Record<number, string> = {}): Map_ {
+export function line(
+	tokens: string,
+	names: Record<number, string> = {},
+	{ oneWay = false }: { oneWay?: boolean } = {},
+): Map_ {
 	const map = new Map_();
 	const last = tokens.length - 1;
 	[...tokens].forEach((token, gx) => {
@@ -73,7 +77,46 @@ export function line(tokens: string, names: Record<number, string> = {}): Map_ {
 	const right = map.getTrackAt(last * CELL, 0);
 	if (!left || !right) throw new Error("line fixture has no ends");
 	setPreferredDirectionsAlongPath(map, left, right);
-	setPreferredDirectionsAlongPath(map, right, left);
+	if (!oneWay) setPreferredDirectionsAlongPath(map, right, left);
+	return map;
+}
+
+/**
+ * Two one-way lines joined by a pair of linked tracks, run left to right:
+ *
+ * ```
+ *  row 0:  X(0) -(1) >(2) -(3) LR(4)          ← mouth on the right
+ *  row 3:  LL(0) -(1) >(2) -(3) X(4)          ← mouth on the left
+ * ```
+ *
+ * `paired: false` leaves the portals unconnected.
+ */
+export function linkedLine({ paired = true } = {}): Map_ {
+	const map = new Map_();
+	place(map, 0, 0, "exit", "EXITLEFT");
+	place(map, 1, 0, "straight", "STRAIGHTH");
+	place(map, 2, 0, "signal", "SIGNALRIGHT");
+	place(map, 3, 0, "straight", "STRAIGHTH");
+	place(map, 4, 0, "linked", "LINKRIGHT");
+	place(map, 0, 3, "linked", "LINKLEFT");
+	place(map, 1, 3, "straight", "STRAIGHTH");
+	place(map, 2, 3, "signal", "SIGNALRIGHT");
+	place(map, 3, 3, "straight", "STRAIGHTH");
+	place(map, 4, 3, "exit", "EXITRIGHT");
+	map.makeTrackList();
+	const at = (gx: number, gy: number) => {
+		const track = map.getTrackAt(gx * CELL, gy * CELL);
+		if (!track) throw new Error(`no track at (${gx}, ${gy})`);
+		return track;
+	};
+	if (paired) {
+		map.connectTwoLinkedTracks(4 * CELL, 0);
+		map.connectTwoLinkedTracks(0, 3 * CELL);
+		setPreferredDirectionsAlongPath(map, at(0, 0), at(4, 3));
+	} else {
+		setPreferredDirectionsAlongPath(map, at(0, 0), at(4, 0));
+		setPreferredDirectionsAlongPath(map, at(0, 3), at(4, 3));
+	}
 	return map;
 }
 
