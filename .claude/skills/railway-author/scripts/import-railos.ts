@@ -344,6 +344,9 @@ function trackDataFor(el: ActiveElement, prefs: RlyPrefDir[]): TrackData | null 
 					})
 				: undefined;
 			if (directed) return createTrackData("directed", directed);
+			warnings.push(
+				`${where(el.h, el.v)}: one-way arrow has ${pairs.length} preferred directions; imported as two-way straight track.`,
+			);
 			const straight = subtypeByLinks("straight", links);
 			return straight ? createTrackData("straight", straight) : null;
 		}

@@ -2,18 +2,17 @@
  * Check a saved railway and/or timetable the way the editor would.
  *
  *   run.sh .claude/skills/railway-author/scripts/check-documents.ts \
- *     [railway.json] [timetable.json]
+ *     [railway.json|yaml] [timetable.json|yaml]
  *
  * Exits non-zero when the railway is incomplete or the timetable has errors,
  * so it can gate a generated document before anyone loads it.
  */
 
-import { readFileSync } from "node:fs";
-
 import {
 	loadRailway,
 	loadTimetable,
 	railwayProblems,
+	readDocument,
 	reportRailway,
 	reportTimetable,
 } from "./authoring";
@@ -24,7 +23,7 @@ import type { Map_ } from "../../../../packages/shared/src/railway/map/map";
 const paths = process.argv.slice(2);
 if (paths.length === 0) {
 	console.error(
-		"usage: check-documents.ts [railway.json] [timetable.json] — either or both, in any order",
+		"usage: check-documents.ts [railway] [timetable] — JSON or YAML, either or both, in any order",
 	);
 	process.exitCode = 2;
 }
@@ -60,9 +59,6 @@ if (failed) process.exitCode = 1;
 
 /** A timetable document has `services`; a map has `tracks`. */
 function isTimetablePath(path: string): boolean {
-	const parsed = JSON.parse(readFileSync(path, "utf8")) as Record<
-		string,
-		unknown
-	>;
+	const parsed = readDocument(path) as Record<string, unknown>;
 	return Array.isArray(parsed.services);
 }

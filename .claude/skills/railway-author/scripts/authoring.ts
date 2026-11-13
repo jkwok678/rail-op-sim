@@ -16,6 +16,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
+import { parse as parseYaml } from "../../../../packages/app/node_modules/yaml/dist/index.js";
 import { Text } from "../../../../packages/shared/src/railway/element";
 import type {
 	BridgeUnderpassType,
@@ -472,9 +473,29 @@ export function timetable(options: {
 // Reading and writing files
 // ============================================================================
 
-/** Read a saved railway back into a `Map_`. JSON only; the app also reads YAML. */
+/**
+ * Parse a saved document as JSON or YAML, chosen the way the editor's
+ * `inferDocumentFormat` chooses: by extension, else by the first character.
+ */
+export function readDocument(path: string): unknown {
+	const text = readFileSync(path, "utf8");
+	const lower = path.toLowerCase();
+	const yaml =
+		lower.endsWith(".yaml") ||
+		lower.endsWith(".yml") ||
+		(!lower.endsWith(".json") && !/^\s*[[{]/.test(text));
+	try {
+		return yaml ? parseYaml(text) : JSON.parse(text);
+	} catch (err) {
+		throw new Error(
+			`${path}: not valid ${yaml ? "YAML" : "JSON"} (${(err as Error).message})`,
+		);
+	}
+}
+
+/** Read a saved railway (JSON or YAML) back into a `Map_`. */
 export function loadRailway(path: string): Map_ {
-	const data = JSON.parse(readFileSync(path, "utf8")) as {
+	const data = readDocument(path) as {
 		version?: number;
 		imageSize?: number;
 	};
@@ -493,9 +514,9 @@ export function loadRailway(path: string): Map_ {
 	return map;
 }
 
-/** Read a saved timetable, with `parseTimetable`'s strictness. */
+/** Read a saved timetable (JSON or YAML), with `parseTimetable`'s strictness. */
 export function loadTimetable(path: string): Timetable {
-	return parseTimetable(JSON.parse(readFileSync(path, "utf8")));
+	return parseTimetable(readDocument(path));
 }
 
 /**

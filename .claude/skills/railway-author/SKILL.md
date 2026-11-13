@@ -44,7 +44,7 @@ of that, and `writeDocuments` refuses to save anything the validator rejects.
    .claude/skills/railway-author/scripts/run.sh \
      .claude/skills/railway-author/scripts/check-documents.ts railway.json timetable.json
    ```
-   Either argument alone is fine; without a railway only the timetable's
+   JSON or YAML; either argument alone is fine; without a railway only the timetable's
    structural half is checked. Exits non-zero when something is wrong.
 6. **Import a RailOS railway and timetable** (`.rly` + `.ttb`) as YAML with
    `scripts/import-railos.ts <in.rly> <in.ttb> <railway.yaml> <timetable.yaml>`,
