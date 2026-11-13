@@ -2,14 +2,22 @@ import { describe, expect, it } from "vitest";
 import { CELL_SIZE } from "#/lib/grid";
 import {
 	edgePoint,
+	joinedPaths,
 	pointAlong,
+	segPath,
 	signalLamp,
 	spanPoints,
 	trainColor,
-	trainPoints,
+	trainPaths,
 } from "#/renderer/operateGeometry";
 
 const half = CELL_SIZE / 2;
+
+/** Points equal to rounding, so -0 and +0 match. */
+const near = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+	expect(a.x).toBeCloseTo(b.x);
+	expect(a.y).toBeCloseTo(b.y);
+};
 const seg = (gx: number, from = 0, to = 1) => ({
 	gx,
 	gy: 0,
@@ -39,7 +47,7 @@ describe("operate geometry", () => {
 	});
 
 	it("joins a train's spans into one line without repeats", () => {
-		const points = trainPoints({
+		const paths = trainPaths({
 			id: 1,
 			headcode: "1A01",
 			description: "",
@@ -49,10 +57,41 @@ describe("operate geometry", () => {
 			segs: [seg(0), seg(1)],
 			next: "",
 		});
-		expect(points).toHaveLength(5);
-		expect(points[4]).toEqual({ x: CELL_SIZE + half, y: 0 });
+		expect(paths).toHaveLength(1);
+		expect(paths[0]).toHaveLength(5);
+		expect(paths[0][4]).toEqual({ x: CELL_SIZE + half, y: 0 });
 	});
 
+	it("follows a tight curve round the corner, not through the middle", () => {
+		// In from the left, out at the bottom: the rail bows toward the corner.
+		const curve = { gx: 0, gy: 0, entry: 3, exit: 7, from: 0, to: 1 };
+		const path = segPath(curve);
+		near(path[0], edgePoint(0, 0, 3));
+		near(path[path.length - 1], edgePoint(0, 0, 7));
+		const mid = pointAlong(curve, 0.5);
+		// A quarter of the way to the corner — where the tight-curve art runs.
+		near(mid, { x: -half / 4, y: half / 4 });
+		// A partial span starts and ends on the curve too.
+		const span = spanPoints({ ...curve, from: 0.5, to: 1 });
+		expect(span[0].x).toBeCloseTo(mid.x);
+		expect(span[0].y).toBeCloseTo(mid.y);
+	});
+
+	it("keeps straight and gentle curves through the middle", () => {
+		expect(segPath(seg(0))).toHaveLength(3);
+		const diagonalTurn = { gx: 0, gy: 0, entry: 3, exit: 8, from: 0, to: 1 };
+		near(segPath(diagonalTurn)[1], { x: 0, y: 0 });
+	});
+
+	it("breaks the line at a hop between linked tracks", () => {
+		// Out at the right of (0,0), in at the left of the partner at (9,4).
+		const here = { gx: 0, gy: 0, entry: 3, exit: 5, from: 0, to: 1 };
+		const there = { gx: 9, gy: 4, entry: 3, exit: 5, from: 0, to: 1 };
+		const paths = joinedPaths([here, there]);
+		expect(paths).toHaveLength(2);
+		near(paths[0][paths[0].length - 1], edgePoint(0, 0, 5));
+		near(paths[1][0], edgePoint(9, 4, 3));
+	});
 	it("shows only the lamps a signal has", () => {
 		expect(signalLamp(0, 4)).toBe("red");
 		expect(signalLamp(2, 4)).toBe("doubleYellow");

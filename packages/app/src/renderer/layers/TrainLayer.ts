@@ -1,7 +1,7 @@
 import type { SimView, TrainView } from "@rail-op-sim/shared";
 import { Container, Graphics, Text } from "pixi.js";
 import { CELL_SIZE } from "#/lib/grid";
-import { trainColor, trainPoints } from "#/renderer/operateGeometry";
+import { trainColor, trainPaths } from "#/renderer/operateGeometry";
 
 const BODY_WIDTH = CELL_SIZE * 0.42;
 
@@ -45,18 +45,23 @@ export function createTrainLayer(): TrainLayer {
 			bodies.clear();
 			const seen = new Set<number>();
 			for (const train of view?.trains ?? []) {
-				const points = trainPoints(train);
-				if (points.length < 2) continue;
+				// A train part way through a linked-track hop is two pieces, one
+				// at each end, never a line across the map between them.
+				const pieces = trainPaths(train).filter((p) => p.length >= 2);
+				if (pieces.length === 0) continue;
 				seen.add(train.id);
-				bodies.moveTo(points[0].x, points[0].y);
-				for (const p of points.slice(1)) bodies.lineTo(p.x, p.y);
-				bodies.stroke({
-					width: BODY_WIDTH,
-					color: trainColor(train),
-					cap: "round",
-					join: "round",
-				});
-				const front = points[points.length - 1];
+				for (const points of pieces) {
+					bodies.moveTo(points[0].x, points[0].y);
+					for (const p of points.slice(1)) bodies.lineTo(p.x, p.y);
+					bodies.stroke({
+						width: BODY_WIDTH,
+						color: trainColor(train),
+						cap: "round",
+						join: "round",
+					});
+				}
+				const head = pieces[pieces.length - 1];
+				const front = head[head.length - 1];
 				bodies
 					.circle(front.x, front.y, BODY_WIDTH * 0.35)
 					.fill({ color: 0xdc2626 });

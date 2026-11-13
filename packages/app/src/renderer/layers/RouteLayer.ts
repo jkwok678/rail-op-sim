@@ -1,7 +1,7 @@
 import type { RouteKind, SimView } from "@rail-op-sim/shared";
 import { Container, Graphics } from "pixi.js";
 import { CELL_SIZE } from "#/lib/grid";
-import { joinedPoints, type Point } from "#/renderer/operateGeometry";
+import { joinedPaths, type Point } from "#/renderer/operateGeometry";
 
 /** RailOS's route colours: blue automatic, green preferred, red unrestricted. */
 const ROUTE_COLORS: Record<RouteKind, number> = {
@@ -42,16 +42,19 @@ export function createRouteLayer(): RouteLayer {
 				routes.push({ id: "pending", ...view.pendingRoute });
 			}
 			for (const route of routes) {
-				const points = joinedPoints(route.segs);
-				if (points.length < 2) continue;
-				strokePath(g, points);
-				g.stroke({
-					width: ROUTE_WIDTH,
-					color: ROUTE_COLORS[route.kind],
-					alpha: ROUTE_ALPHA,
-					cap: "round",
-					join: "round",
-				});
+				// One piece per side of any linked-track hop; flat ends so the
+				// band stops on the cell edge rather than spilling past it.
+				for (const points of joinedPaths(route.segs)) {
+					if (points.length < 2) continue;
+					strokePath(g, points);
+					g.stroke({
+						width: ROUTE_WIDTH,
+						color: ROUTE_COLORS[route.kind],
+						alpha: ROUTE_ALPHA,
+						cap: "butt",
+						join: "round",
+					});
+				}
 			}
 		},
 	};

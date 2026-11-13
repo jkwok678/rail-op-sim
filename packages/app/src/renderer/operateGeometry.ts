@@ -35,48 +35,113 @@ const lerp = (a: Point, b: Point, t: number): Point => ({
 	y: a.y + (b.y - a.y) * t,
 });
 
-/** The point `t` (0–1) of the way along a segment. */
-export function pointAlong(seg: ViewSeg, t: number): Point {
+const dist = (a: Point, b: Point): number => Math.hypot(b.x - a.x, b.y - a.y);
+
+const samePoint = (a: Point, b: Point): boolean => dist(a, b) < 1e-6;
+
+/** Points a tight curve is drawn with: plenty for a smooth band. */
+const CURVE_STEPS = 8;
+
+const isOrthogonal = (link: number): boolean =>
+	link === 1 || link === 3 || link === 5 || link === 7;
+
+/** Up/down against left/right: a 90° turn within the cell. */
+const isQuarterTurn = (entry: number, exit: number): boolean =>
+	isOrthogonal(entry) &&
+	isOrthogonal(exit) &&
+	(entry === 1 || entry === 7) !== (exit === 1 || exit === 7);
+
+/**
+ * The centre line of a segment as the track art draws it, entry edge to exit
+ * edge. Most rails pass through the middle of the cell; a quarter turn (tight
+ * curves, the branch of tight points) cuts the corner instead, so it is drawn
+ * as a curve with the middle as its control point.
+ */
+export function segPath(seg: ViewSeg): Point[] {
 	const entry = edgePoint(seg.gx, seg.gy, seg.entry);
 	const centre = gridToWorld(seg.gx, seg.gy);
 	const exit = edgePoint(seg.gx, seg.gy, seg.exit);
-	return t <= 0.5
-		? lerp(entry, centre, t * 2)
-		: lerp(centre, exit, (t - 0.5) * 2);
-}
-
-/** The polyline covering the span `from`–`to` of a segment. */
-export function spanPoints(seg: ViewSeg): Point[] {
-	const points = [pointAlong(seg, seg.from)];
-	if (seg.from < 0.5 && seg.to > 0.5) points.push(gridToWorld(seg.gx, seg.gy));
-	points.push(pointAlong(seg, seg.to));
+	if (!isQuarterTurn(seg.entry, seg.exit)) return [entry, centre, exit];
+	const points: Point[] = [];
+	for (let i = 0; i <= CURVE_STEPS; i++) {
+		const t = i / CURVE_STEPS;
+		points.push(lerp(lerp(entry, centre, t), lerp(centre, exit, t), t));
+	}
 	return points;
 }
 
-/** A train's whole body, rear to front, as one polyline. */
-export function trainPoints(train: TrainView): Point[] {
-	return joinedPoints(train.segs);
+/** The point `d` along a polyline whose cumulative lengths are `lengths`. */
+function atDistance(points: Point[], lengths: number[], d: number): Point {
+	for (let i = 1; i < points.length; i++) {
+		if (d <= lengths[i] || i === points.length - 1) {
+			const span = lengths[i] - lengths[i - 1];
+			const t = span > 0 ? (d - lengths[i - 1]) / span : 0;
+			return lerp(points[i - 1], points[i], Math.min(1, Math.max(0, t)));
+		}
+	}
+	return points[0];
+}
+
+function cumulative(points: Point[]): number[] {
+	const lengths = [0];
+	for (let i = 1; i < points.length; i++) {
+		lengths.push(lengths[i - 1] + dist(points[i - 1], points[i]));
+	}
+	return lengths;
+}
+
+/** The point `t` (0–1) of the way along a segment, measured along its rail. */
+export function pointAlong(seg: ViewSeg, t: number): Point {
+	const points = segPath(seg);
+	const lengths = cumulative(points);
+	return atDistance(points, lengths, t * lengths[lengths.length - 1]);
+}
+
+/** The polyline covering the span `from`–`to` of a segment, along its rail. */
+export function spanPoints(seg: ViewSeg): Point[] {
+	const points = segPath(seg);
+	const lengths = cumulative(points);
+	const total = lengths[lengths.length - 1];
+	const start = seg.from * total;
+	const end = seg.to * total;
+	const out = [atDistance(points, lengths, start)];
+	for (let i = 1; i < points.length - 1; i++) {
+		if (lengths[i] > start + 1e-6 && lengths[i] < end - 1e-6) {
+			out.push(points[i]);
+		}
+	}
+	out.push(atDistance(points, lengths, end));
+	return out;
+}
+
+/** A train's body, rear to front, one polyline per piece (see {@link joinedPaths}). */
+export function trainPaths(train: TrainView): Point[][] {
+	return joinedPaths(train.segs);
 }
 
 /**
- * Consecutive segments as one polyline, so a stroke along them has no seams
- * where a cap would overlap the next segment's.
+ * Consecutive segments as polylines, so a stroke along them has no seams where
+ * a cap would overlap the next segment's. A new polyline starts wherever one
+ * segment does not begin where the last one ended — a hop between linked
+ * tracks — so nothing is drawn across the map between the two.
  */
-export function joinedPoints(segs: readonly ViewSeg[]): Point[] {
-	const points: Point[] = [];
+export function joinedPaths(segs: readonly ViewSeg[]): Point[][] {
+	const paths: Point[][] = [];
+	let current: Point[] = [];
 	for (const seg of segs) {
-		for (const p of spanPoints(seg)) {
-			const last = points[points.length - 1];
-			if (
-				!last ||
-				Math.abs(last.x - p.x) > 1e-6 ||
-				Math.abs(last.y - p.y) > 1e-6
-			) {
-				points.push(p);
-			}
+		const span = spanPoints(seg);
+		const last = current[current.length - 1];
+		if (last && !samePoint(last, span[0])) {
+			paths.push(current);
+			current = [];
+		}
+		for (const p of span) {
+			const prev = current[current.length - 1];
+			if (!prev || !samePoint(prev, p)) current.push(p);
 		}
 	}
-	return points;
+	if (current.length > 0) paths.push(current);
+	return paths;
 }
 
 export type Lamp = "red" | "yellow" | "doubleYellow" | "green" | "white";
