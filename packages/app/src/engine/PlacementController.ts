@@ -448,10 +448,6 @@ export class PlacementController {
 			)
 				return;
 
-			debugLog(
-				"placement",
-				`store change — tool=${state.tool} kind=${state.selectedKind ?? "null"} subtype=${state.selectedSubtype ?? "null"}`,
-			);
 			this.applyCursor();
 			this.refreshGhostSprite();
 		});
@@ -481,7 +477,6 @@ export class PlacementController {
 
 	private onPointerDown = (e: PointerEvent): void => {
 		if (e.button !== 0 && e.button !== 2) return;
-		debugLog("placement", `pointerdown at (${e.clientX}, ${e.clientY})`);
 		this.downPos = { x: e.clientX, y: e.clientY };
 		this.downRect = this.app.canvas.getBoundingClientRect();
 		this.downWasPanning = this.viewport.isPanning;
@@ -590,10 +585,6 @@ export class PlacementController {
 		this.textDrag = null;
 
 		const { tool, selectedKind, selectedSubtype } = useEditorStore.getState();
-		debugLog(
-			"placement",
-			`pointerup — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"} downWasPanning=${this.downWasPanning} isPanning=${this.viewport.isPanning}`,
-		);
 
 		if (this.downWasPanning || this.viewport.isPanning) {
 			debugLog("placement", "pointerup ignored — was panning");
@@ -1731,12 +1722,6 @@ export class PlacementController {
 		const wx = (sx - this.world.position.x) / this.world.scale.x;
 		const wy = (sy - this.world.position.y) / this.world.scale.y;
 		const result = worldToGrid(wx, wy);
-		if (!result) {
-			debugLog(
-				"placement",
-				`screenToGrid(${clientX},${clientY}) → null — rect=(${rect.left},${rect.top},${rect.width}x${rect.height}) worldPos=(${this.world.position.x.toFixed(1)},${this.world.position.y.toFixed(1)}) worldScale=(${this.world.scale.x.toFixed(3)},${this.world.scale.y.toFixed(3)})`,
-			);
-		}
 		return result;
 	}
 
@@ -1750,10 +1735,6 @@ export class PlacementController {
 		else if (tool === "section") cursor = "pointer";
 		else if (tool === "direction") cursor = "pointer";
 		canvas.style.cursor = cursor;
-		debugLog(
-			"placement",
-			`cursor → "${cursor}" (tool=${tool} subtype=${selectedSubtype ?? "null"})`,
-		);
 	}
 
 	/** Rebuild the ghost sprite to match the current subtype and aspect, or hide it. */
@@ -1762,10 +1743,6 @@ export class PlacementController {
 			useEditorStore.getState();
 
 		if (tool !== "add" || !selectedSubtype) {
-			debugLog(
-				"placement",
-				`refreshGhost — hiding (tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"})`,
-			);
 			this.clearGhostSprite();
 			this.ghost.visible = false;
 			return;
@@ -1777,10 +1754,6 @@ export class PlacementController {
 			aspect === this.ghostAspect &&
 			this.ghostSprite
 		) {
-			debugLog(
-				"placement",
-				`refreshGhost — unchanged (subtype=${selectedSubtype} aspect=${aspect})`,
-			);
 			return;
 		}
 
@@ -1793,10 +1766,6 @@ export class PlacementController {
 			return;
 		}
 
-		debugLog(
-			"placement",
-			`refreshGhost — building sprite for "${selectedSubtype}" aspect=${aspect}`,
-		);
 		this.clearGhostSprite();
 		const sprite = makeTrackSprite(texture, 0, 0);
 		this.ghost.addChild(sprite);

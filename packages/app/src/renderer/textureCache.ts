@@ -145,10 +145,6 @@ export function createTextureCache(
 			const texture = bake(key);
 			if (texture) {
 				baked.set(bakedKey, texture);
-				debugLog(
-					"textureCache",
-					`get("${key}") → baked (theme=${currentTheme})`,
-				);
 			} else {
 				debugLog("textureCache", `get("${key}") → bake returned null`);
 			}
@@ -165,7 +161,6 @@ export function createTextureCache(
 			const texture = bake(key, flatColorMap(color));
 			if (texture) {
 				baked.set(bakedKey, texture);
-				debugLog("textureCache", `getColored("${key}", ${color}) → baked`);
 			} else {
 				debugLog(
 					"textureCache",

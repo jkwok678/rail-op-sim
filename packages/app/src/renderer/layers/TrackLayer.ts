@@ -77,10 +77,6 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 	let colorModeActive = false;
 
 	const removeEntry = (key: string, entry: Entry) => {
-		debugLog(
-			"trackLayer",
-			`remove sprite at (${key}) — lookupKey=${entry.lookupKey}`,
-		);
 		container.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		entries.delete(key);
@@ -102,7 +98,6 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			return;
 		}
 		const lk = entryKey(subtype, aspect);
-		debugLog("trackLayer", `addSprite at (${key}) — lookupKey=${lk}`);
 		const sprite = makeTrackSprite(texture, gx, gy);
 		sprite.label = `track-${key}`;
 		container.addChild(sprite);

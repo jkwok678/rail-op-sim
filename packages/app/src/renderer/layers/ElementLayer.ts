@@ -141,10 +141,6 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 
 	/** Remove a sprite entry and its display object. */
 	const removeSpriteEntry = (key: string, entry: SpriteEntry) => {
-		debugLog(
-			"trackLayer",
-			`elementLayer removeSprite at (${key}) — lookupKey=${entry.lookupKey}`,
-		);
 		entry.parent.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		spriteEntries.delete(key);
@@ -176,10 +172,6 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		sprite.label = `element-${compositeKey}`;
 		parent.addChild(sprite);
 		spriteEntries.set(compositeKey, { sprite, lookupKey, parent });
-		debugLog(
-			"trackLayer",
-			`elementLayer upsertSprite at (${compositeKey}) — lookupKey=${lookupKey}`,
-		);
 	};
 
 	return {

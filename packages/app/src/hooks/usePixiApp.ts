@@ -49,8 +49,6 @@ export function usePixiApp(): UsePixiAppReturn {
 		if (!container) return;
 
 		const init = async () => {
-			debugLog("pixi", "init started — dynamic imports…");
-
 			const [
 				{ createPixiApp },
 				{ createGroundLayer },
@@ -86,13 +84,11 @@ export function usePixiApp(): UsePixiAppReturn {
 			const width = container.clientWidth || 800;
 			const height = container.clientHeight || 600;
 
-			debugLog("pixi", `creating app — ${width}x${height}`);
 			const app = await createPixiApp({ width, height });
 			if (destroyed) {
 				app.destroy(true);
 				return;
 			}
-			debugLog("pixi", "app created");
 
 			// Scene graph: stage → world → { ground, tracks, ghost }
 			const world = new Container();
@@ -189,17 +185,11 @@ export function usePixiApp(): UsePixiAppReturn {
 			});
 			world.addChild(placement.ghost);
 			placement.attach();
-			debugLog("pixi", "placement controller attached");
 
 			// Preload all track art, then backfill anything placed meanwhile.
 			const allSubtypes = Object.keys(SVG_MAP);
-			debugLog(
-				"pixi",
-				`starting texture preload — ${allSubtypes.length} subtypes`,
-			);
 			textures.preload(allSubtypes).then(() => {
 				if (destroyed) return;
-				debugLog("pixi", "texture preload complete — syncing layers");
 				trackColorLayer.sync(placement.map);
 				trackLayer.sync(placement.map);
 				elementLayer.sync(placement.map);
@@ -212,7 +202,6 @@ export function usePixiApp(): UsePixiAppReturn {
 			// Theme: rebuild grid colours and re-bake track/ghost textures.
 			themeObserver = new MutationObserver(() => {
 				if (!textures) return;
-				debugLog("pixi", `theme change → ${themeKey()}`);
 				gridColor = cssVar("--sea-ink");
 				axisColor = cssVar("--lagoon");
 				textures.setTheme(themeKey(), buildThemeColorMap());
