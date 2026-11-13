@@ -685,18 +685,35 @@ function parseService(entry: string): Service {
 	};
 }
 
+function uniqueRef(ref: string, seen: Set<string>): string {
+	if (!seen.has(ref)) return ref;
+	for (let n = 2; ; n++) {
+		const prefix = `${n}-`;
+		const candidate = `${prefix}${ref.slice(-(8 - prefix.length))}`;
+		if (!seen.has(candidate)) return candidate;
+	}
+}
+
 function readTtb(path: string): Timetable {
 	const entries = readFileSync(path, "latin1").split("\0");
 	let i = entries.findIndex((e) => timeOf(stripSpaces(e)) !== null);
 	if (i < 0) throw new Error("no start time");
 	const startTime = timeOf(stripSpaces(entries[i])) as SimTime;
 	const services: Service[] = [];
+	const seenRefs = new Set<string>();
 	for (i++; i < entries.length; i++) {
 		const entry = stripSpaces(entries[i]);
 		if (entry === "" || /^,*$/.test(entry)) break;
 		if (entry.startsWith("*")) continue;
 		try {
-			services.push(parseService(entry));
+			const service = parseService(entry);
+			const ref = uniqueRef(service.ref, seenRefs);
+			if (ref !== service.ref) {
+				warnings.push(`duplicate service ref "${service.ref}" renamed to "${ref}".`);
+				service.ref = ref;
+			}
+			seenRefs.add(ref);
+			services.push(service);
 		} catch (error) {
 			warnings.push(`timetable entry "${entry.slice(0, 40)}…": ${(error as Error).message}; skipped.`);
 		}

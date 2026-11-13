@@ -12575,7 +12575,7 @@ services:
             gy: -7
           - gx: 8
             gy: -5
-  - ref: 5V60
+  - ref: 2-5V60
     description: "[LO] Chingford Country End Sidings to Ilford EMUD"
     train:
       startSpeedKmh: 24
@@ -21361,7 +21361,7 @@ services:
       intervalMinutes: 60
       headcodeIncrement: 4
       count: 3
-  - ref: 2H56
+  - ref: 2-2H56
     description: "[GA] London Liverpool Street to Cambridge"
     train:
       startSpeedKmh: 48

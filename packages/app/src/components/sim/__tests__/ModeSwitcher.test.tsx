@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ModeSwitcher } from "#/components/sim/ModeSwitcher";
 import { TooltipProvider } from "#/components/ui/tooltip";
@@ -97,5 +103,62 @@ describe("ModeSwitcher", () => {
 		renderSwitcher();
 		const operate = screen.getByRole("radio", { name: /Operate/ });
 		expect((operate as HTMLButtonElement).disabled).toBe(false);
+	});
+
+	it("enables Operate when a bad timetable is replaced with a valid one", () => {
+		useEditorStore.setState({ trackStatus: complete });
+		useTimetableStore.getState().replaceTimetable(
+			{
+				version: 1,
+				startTime: 0,
+				services: [
+					{ ref: "1A01", actions: [{ kind: "finishRemainHere" }] },
+					{ ref: "1A01", actions: [{ kind: "finishRemainHere" }] },
+				],
+			},
+			null,
+		);
+		renderSwitcher();
+		expect(
+			(screen.getByRole("radio", { name: /Operate/ }) as HTMLButtonElement)
+				.disabled,
+		).toBe(true);
+
+		act(() => {
+			useTimetableStore.getState().replaceTimetable(
+				{
+					version: 1,
+					startTime: 0,
+					services: [
+						{
+							ref: "1A01",
+							train: {
+								startSpeedKmh: 40,
+								maxSpeedKmh: 100,
+								massTonnes: 100,
+								brakeForceTonnes: 60,
+								powerKw: 1000,
+							},
+							actions: [
+								{
+									kind: "startNew",
+									time: 0,
+									rear: { gx: 0, gy: 0 },
+									front: { gx: 1, gy: 0 },
+								},
+								{ kind: "finishRemainHere" },
+							],
+						},
+					],
+				},
+				null,
+			);
+		});
+		const operate = screen.getByRole("radio", {
+			name: /Operate/,
+		}) as HTMLButtonElement;
+		expect(operate.disabled).toBe(false);
+		fireEvent.click(operate);
+		expect(useModeStore.getState().mode).toBe("operate");
 	});
 });
