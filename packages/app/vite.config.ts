@@ -8,6 +8,10 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+	// zod is only imported by the engine worker, which the dependency scan
+	// at startup does not crawl. Found late, it is re-optimised mid-session and
+	// the worker's import of the old bundle 504s, so operate mode never loads.
+	optimizeDeps: { include: ["zod"] },
 	plugins: [
 		devtools(),
 		tailwindcss(),
