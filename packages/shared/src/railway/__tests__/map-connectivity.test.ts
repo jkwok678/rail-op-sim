@@ -1825,4 +1825,22 @@ describe("revalidatePreferredDirections", () => {
 		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 		expect(b.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
 	});
+
+	it("lets a two-way stretch end against a one-way neighbour", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightH(map, 0);
+		straightH(map, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+		const twoWay = map.getTrackAt(0, 0)!;
+		const oneWay = map.getTrackAt(16, 0)!;
+		// Westbound starts at the boundary; eastbound crosses it and carries on.
+		twoWay.addPreferredDirection(3, 5);
+		twoWay.addPreferredDirection(5, 3);
+		oneWay.addPreferredDirection(3, 5);
+
+		expect(getConnectivityReport(map).brokenRoutes).toEqual([]);
+		expect(revalidatePreferredDirections(map)).toBe(0);
+		expect(twoWay.getPreferredDirections()).toHaveLength(2);
+	});
 });

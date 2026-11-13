@@ -773,7 +773,9 @@ export function expectedEntryOnNeighbor(
  * when the pair is locally legal and continues (or is allowed to stop).
  *
  * Incomplete routes — a neighbour with no preferred directions of its own —
- * are not issues. A portal mouth, though, must continue on the partner:
+ * are not issues, nor is one direction of a two-way cell ending against a
+ * one-way neighbour while the other direction crosses (RailOS lays out
+ * reversible stretches that way). A portal mouth, though, must continue on the partner:
  * that is the only way a route crosses the hop.
  */
 export function preferredDirectionIssue(
@@ -815,16 +817,26 @@ export function preferredDirectionIssue(
 		if (!neighbor) return "no-neighbor";
 		const recip = expectedEntryOnNeighbor(track, link, neighbor);
 		if (recip === null || !neighbor.getLinkAt(recip)) return "no-reciprocal";
-		if (
-			neighbor.hasPreferredDirection() &&
-			!neighbor
+		if (!neighbor.hasPreferredDirection()) continue;
+		// Does the neighbour carry travel across this link in the given sense?
+		const carries = (leaving: boolean): boolean =>
+			neighbor
 				.getPreferredDirections()
-				.some((p) =>
-					link === pair.exit ? p.entry === recip : p.exit === recip,
-				)
-		) {
-			return "no-continuation";
-		}
+				.some((p) => (leaving ? p.entry === recip : p.exit === recip));
+		if (carries(link === pair.exit)) continue;
+		// A two-way stretch may end where the line turns one-way: the pair
+		// against the one-way flow stops here, as long as another pair on this
+		// cell crosses the same link and carries on. Without one, nothing
+		// crosses the boundary and the neighbours contradict each other.
+		const crossed = track
+			.getPreferredDirections()
+			.some(
+				(q) =>
+					(q.entry !== pair.entry || q.exit !== pair.exit) &&
+					((q.exit === link && carries(true)) ||
+						(q.entry === link && carries(false))),
+			);
+		if (!crossed) return "no-continuation";
 	}
 	return null;
 }
