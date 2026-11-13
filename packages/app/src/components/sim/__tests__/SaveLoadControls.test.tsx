@@ -2,13 +2,18 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SaveLoadControls } from "#/components/sim/SaveLoadControls";
-import { loadDocument, saveDocument } from "#/lib/documentActions";
+import {
+	loadDocument,
+	loadTimetableDocument,
+	saveDocument,
+} from "#/lib/documentActions";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 
 vi.mock("#/lib/documentActions", () => ({
 	saveDocument: vi.fn(),
 	loadDocument: vi.fn(async () => {}),
+	loadTimetableDocument: vi.fn(async () => {}),
 }));
 
 describe("SaveLoadControls", () => {
@@ -44,5 +49,33 @@ describe("SaveLoadControls", () => {
 		fireEvent.click(screen.getByRole("button", { name: /^Load/ }));
 		expect(saveDocument).toHaveBeenCalledOnce();
 		expect(loadDocument).toHaveBeenCalledOnce();
+	});
+
+	it("offers timetable upload on the railway screen only", () => {
+		render(<SaveLoadControls />);
+		fireEvent.click(
+			screen.getByRole("button", {
+				name: "Upload timetable from JSON or YAML",
+			}),
+		);
+		expect(loadTimetableDocument).toHaveBeenCalledOnce();
+		cleanup();
+
+		useModeStore.setState({ mode: "timetable" });
+		render(<SaveLoadControls />);
+		expect(
+			screen.queryByRole("button", {
+				name: "Upload timetable from JSON or YAML",
+			}),
+		).toBeNull();
+		cleanup();
+
+		useModeStore.setState({ mode: "operate" });
+		render(<SaveLoadControls />);
+		expect(
+			screen.queryByRole("button", {
+				name: "Upload timetable from JSON or YAML",
+			}),
+		).toBeNull();
 	});
 });

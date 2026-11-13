@@ -3,6 +3,7 @@ import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
 import { useOperateSession } from "#/hooks/useOperateSession";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
+import { useTimetableStore } from "#/store/timetable-store";
 import { AddPalette } from "./AddPalette";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { NameElementDialog } from "./NameElementDialog";
@@ -30,6 +31,7 @@ export function SimLayout() {
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const pendingText = useEditorStore((s) => s.pendingText);
 	const mode = useModeStore((s) => s.mode);
+	const loadError = useTimetableStore((s) => s.loadError);
 
 	const [nameDialogOpen, setNameDialogOpen] = useState(false);
 	const [textDialogOpen, setTextDialogOpen] = useState(false);
@@ -57,6 +59,23 @@ export function SimLayout() {
 							<Toolbar />
 							<AddPalette />
 							<SectionEditPanel />
+							{loadError ? (
+								<div
+									role="alert"
+									className="absolute bottom-4 left-1/2 z-10 flex max-w-md -translate-x-1/2 items-start gap-2 rounded-xl border border-destructive/30 bg-background/95 px-3 py-1.5 text-xs text-destructive shadow-sm backdrop-blur-sm"
+								>
+									<span className="flex-1">{loadError}</span>
+									<button
+										type="button"
+										className="underline"
+										onClick={() =>
+											useTimetableStore.getState().setLoadError(null)
+										}
+									>
+										Dismiss
+									</button>
+								</div>
+							) : null}
 						</>
 					) : null}
 					<NameElementDialog

@@ -1,14 +1,18 @@
-import { FloppyDisk, FolderOpen } from "@phosphor-icons/react";
+import { FloppyDisk, FolderOpen, UploadSimple } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { useShortcutDisplay } from "#/hooks/useShortcutDisplay";
-import { loadDocument, saveDocument } from "#/lib/documentActions";
+import {
+	loadDocument,
+	loadTimetableDocument,
+	saveDocument,
+} from "#/lib/documentActions";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 
 /**
- * Footer Save/Load buttons, acting on the current mode's document. The work
- * itself lives in `lib/documentActions` so these buttons and their hotkeys run
- * the same code.
+ * Footer Save/Load buttons, acting on the current mode's document (plus an
+ * upload-timetable button in railway mode). The work itself lives in
+ * `lib/documentActions` so these buttons and their hotkeys run the same code.
  */
 export function SaveLoadControls() {
 	const saveKey = useShortcutDisplay("save");
@@ -19,6 +23,7 @@ export function SaveLoadControls() {
 	const formatLabel = saveFormat === "yaml" ? "YAML" : "JSON";
 	const saveLabel = `Save ${noun} as ${formatLabel}`;
 	const loadLabel = `Load ${noun} from JSON or YAML`;
+	const uploadTimetableLabel = "Upload timetable from JSON or YAML";
 
 	return (
 		<>
@@ -40,6 +45,17 @@ export function SaveLoadControls() {
 			>
 				<FolderOpen />
 			</Button>
+			{mode === "railway" ? (
+				<Button
+					variant="ghost"
+					size="icon-xs"
+					onClick={() => void loadTimetableDocument()}
+					aria-label={uploadTimetableLabel}
+					title={uploadTimetableLabel}
+				>
+					<UploadSimple />
+				</Button>
+			) : null}
 		</>
 	);
 }

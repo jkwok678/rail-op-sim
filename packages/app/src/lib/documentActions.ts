@@ -15,12 +15,16 @@ export function saveDocument(): void {
 	else saveMap();
 }
 
+export async function loadTimetableDocument(): Promise<void> {
+	// The editor (and railway mode) shows a rejected file's reason until it is
+	// dismissed; a successful load (or a cancelled picker) clears any earlier one.
+	const error = await loadTimetable();
+	useTimetableStore.getState().setLoadError(error);
+}
+
 export async function loadDocument(): Promise<void> {
 	if (useModeStore.getState().mode === "timetable") {
-		// The editor shows a rejected file's reason until it is dismissed; a
-		// successful load (or a cancelled picker) clears any earlier one.
-		const error = await loadTimetable();
-		useTimetableStore.getState().setLoadError(error);
+		await loadTimetableDocument();
 	} else {
 		await loadMap();
 	}
