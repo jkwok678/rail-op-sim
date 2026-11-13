@@ -1,11 +1,11 @@
 # Graph Report - rail-op-sim  (2026-11-13)
 
 ## Corpus Check
-- 233 files · ~301,611 words
+- 233 files · ~301,306 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2485 nodes · 5960 edges · 278 communities (155 shown, 123 thin omitted)
+- 2483 nodes · 5954 edges · 274 communities (148 shown, 126 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 409 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
@@ -26,7 +26,7 @@
 - graphics
 - ViewportController
 - includes
-- enums.ts
+- AddPalette.tsx
 - Map_
 - textureCache.ts
 - PlacementController
@@ -49,10 +49,10 @@
 - Rail Ops Sim — Updated Plan (Railway Builder Focus)
 - compilerOptions
 - import-railos.ts
-- railway/index.ts
+- timetable/types.ts
 - gestureOverlay.ts
+- Platform
 - map.ts
-- map-connectivity.ts
 - shared/package.json
 - Knowledge Graph Project Rules
 - Multiplayer Readiness (Built In From Day 1)
@@ -61,7 +61,7 @@
 - Transport Protocol (Engine ↔ Host)
 - sim-bridge.ts
 - app/tsconfig.json
-- timetable-store.ts
+- mode-store.ts
 - railway/errors.ts
 - Link state SVGs (set/unset variants)
 - React-UI Rendering Separation
@@ -74,7 +74,7 @@
 - manifest.json
 - shortcuts.ts
 - GroundLayer.ts
-- track/index.ts
+- railway/index.ts
 - errors.ts
 - root tsconfig.json
 - file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts
@@ -187,22 +187,22 @@
 - button.tsx
 - 34 Milestone Implementation Plan
 - useEditorStore
-- parseSimTime
-- cn
+- timetable/__tests__/fixtures.ts
+- TimetableEditor.tsx
 - Text
 - NamedLocation in rail-op-sim — Implementation Plan (v2)
-- TimetableEditor.tsx
-- mode-store.ts
-- LinkHighlightLayer
+- actionKinds.ts
+- ResizeObserverStub
+- NamedLocation
 - serialization.ts
 - scripts
-- operateGeometry.ts
-- engine.ts
-- ZoomSlider.tsx
-- authoring.ts
-- documentActions.ts
-- compilerOptions
 - map-serialization.ts
+- engine.ts
+- createEngine
+- authoring.ts
+- timetableActions.ts
+- compilerOptions
+- Element
 - The railway document
 - The timetable document
 - Railway configuration
@@ -210,7 +210,7 @@
 - node-env.d.ts
 - Authoring railways and timetables
 - usePixiApp.ts
-- grid.ts
+- operateGeometry.ts
 - run.sh
 - app/package.json
 - merge-coverage.mjs
@@ -219,14 +219,14 @@
 - sim/__tests__/fixtures.ts
 - useEditorHotkeys.ts
 - trains.ts
-- timetable/__tests__/fixtures.ts
-- createTrackColorLayer
+- locations.test.ts
+- ElementLayer.ts
 - @phosphor-icons/react
 - log.ts
 - Track Speed & Length Editing — Requirements
-- AddPalette.tsx
-- shortcutGates.ts
-- operateInput.ts
+- check-documents.ts
+- recordField
+- Cell
 - createDirectionLayer
 - radix-ui
 - @rail-op-sim/shared
@@ -235,60 +235,57 @@
 - @tanstack/react-router-ssr-query
 - tailwindcss
 - @tanstack/react-devtools
-- gridToWorld
+- TrackLayer.ts
 - @tanstack/router-plugin
 - tw-animate-css
 - zustand
-- graph.ts
-- ViewportController.ts
-- Toolbar.tsx
+- buildMap
+- Parapet
+- time.ts
+- Lines
 - convert-railos.sh
-- .serializeFieldGroups
 - connectivity.ts
-- TextLayer
-- operateLayers.test.ts
-- useTheme
 
 ## God Nodes (most connected - your core abstractions)
 1. `Map_` - 147 edges
 2. `Track` - 98 edges
 3. `PlacementController` - 69 edges
 4. `Text` - 51 edges
-5. `debugLog()` - 49 edges
-6. `useEditorStore` - 48 edges
+5. `useEditorStore` - 48 edges
+6. `debugLog()` - 46 edges
 7. `Implementation Milestones` - 35 edges
 8. `ViewportController` - 32 edges
 9. `parseSimTime()` - 31 edges
 10. `createEngine()` - 31 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `pairPortals()` --calls--> `cellToLocation()`  [EXTRACTED]
+- `place()` --calls--> `cellToLocation()`  [EXTRACTED]
   .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/timetable/locations.ts
 - `direct()` --calls--> `setPreferredDirectionsAlongPath()`  [EXTRACTED]
   .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/map/map-connectivity.ts
+- `direct()` --calls--> `trackAtCell()`  [EXTRACTED]
+  .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/timetable/locations.ts
 - `railwayProblems()` --calls--> `getConnectivityReport()`  [EXTRACTED]
   .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/map/map-connectivity.ts
 - `reportRailway()` --calls--> `getConnectivityReport()`  [EXTRACTED]
   .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/map/map-connectivity.ts
-- `reportRailway()` --calls--> `getLocationNames()`  [EXTRACTED]
-  .claude/skills/railway-author/scripts/authoring.ts → packages/shared/src/railway/timetable/locations.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (278 total, 123 thin omitted)
+## Communities (274 total, 126 thin omitted)
 
 ### Community 0 - "TextInputDialog.tsx"
-Cohesion: 0.16
-Nodes (15): getElementAt(), KIND_TITLES, NameElementDialog(), NameElementDialogProps, FONT_FAMILIES, TextInputDialogProps, Button(), buttonVariants (+7 more)
+Cohesion: 0.13
+Nodes (25): KIND_TITLES, NameElementDialogProps, SAVE_FORMATS, FONT_FAMILIES, TextInputDialogProps, Button(), buttonVariants, Dialog() (+17 more)
 
 ### Community 1 - "track-data.ts"
 Cohesion: 0.16
 Nodes (24): Track (unified track class), Link grid layout (0-8 indices), KIND_META, track.test.ts, track-data.ts, track.ts, track/track-data.ts, KIND_META (per-kind flags) (+16 more)
 
 ### Community 2 - "Track"
-Cohesion: 0.07
-Nodes (4): applyFigures(), pairKey(), recordField(), Track
+Cohesion: 0.08
+Nodes (4): buildHoveredTrackInfo(), getTrackColorState(), Track, pathsOf()
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.06
@@ -310,45 +307,49 @@ Nodes (11): Architecture Overview, Context, Data Model (Core Types), Key Depende
 Cohesion: 0.13
 Nodes (28): graphics, switch1.svg, switch10.svg, switch11.svg, switch12.svg, switch13.svg, switch14.svg, switch15.svg (+20 more)
 
+### Community 9 - "ViewportController"
+Cohesion: 0.07
+Nodes (23): PanControls(), PanControlsProps, SimCanvas(), ZoomSlider(), ZoomSliderProps, PAN_BUTTON_STEP, PAN_KEY_SPEED, ViewportController (+15 more)
+
 ### Community 10 - "includes"
 Cohesion: 0.06
 Nodes (30): source, assist, actions, files, ignoreUnknown, includes, formatter, enabled (+22 more)
 
-### Community 11 - "enums.ts"
-Cohesion: 0.22
-Nodes (22): ALL_TRACK_SUBTYPES, ELEMENT_KEYS, GRAPHICS_DIR, TRACK_ENUMS, BridgeUnderpassType, BufferType, CrossoverType, CurvedType (+14 more)
+### Community 11 - "AddPalette.tsx"
+Cohesion: 0.13
+Nodes (34): ALL_LABELS, ASPECT_OPTIONS, CATEGORY_KINDS, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE, SUBTYPE_VALUES (+26 more)
 
 ### Community 12 - "Map_"
-Cohesion: 0.06
-Nodes (7): record(), NamedLocation, coordKey(), Map_, mapDebug(), MessageCallback, TextSelectionPrompt
+Cohesion: 0.07
+Nodes (4): coordKey(), Map_, MessageCallback, TextSelectionPrompt
 
 ### Community 13 - "textureCache.ts"
-Cohesion: 0.13
-Nodes (17): AspectPreview(), DOM_COLOR_MAP, InlineSvg(), DOM_COLOR_MAP, TrackPreview(), buildDomColorMap(), recolorSvg(), ASPECT_SVG_MAP (+9 more)
+Cohesion: 0.12
+Nodes (19): AspectPreview(), DOM_COLOR_MAP, InlineSvg(), DOM_COLOR_MAP, TrackPreview(), buildDomColorMap(), escapeRegExp(), recolorSvg() (+11 more)
 
 ### Community 14 - "PlacementController"
-Cohesion: 0.05
-Nodes (18): RefreshFlags, PlacementController, PlacementControllerOptions, platformSubtypeToSide(), debugLog(), createElementLayer(), ElementLayer, makeElementSprite() (+10 more)
+Cohesion: 0.06
+Nodes (12): RefreshFlags, PlacementController, PlacementControllerOptions, platformSubtypeToSide(), debugLog(), Coord, DirectionLayer, ElementLayer (+4 more)
 
 ### Community 15 - "ActionForm.tsx"
 Cohesion: 0.28
 Nodes (12): exitFields(), FieldKit, fromRefFields(), joinFields(), nextRefFields(), otherRefField(), Renderer, RENDERERS (+4 more)
 
 ### Community 16 - "track-data.ts"
-Cohesion: 0.06
-Nodes (33): BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES, CROSSOVER_LINKS, CURVED_CODES (+25 more)
+Cohesion: 0.05
+Nodes (40): CATEGORIES, ALL_KINDS, BRIDGE_UNDERPASS_CODES, BRIDGE_UNDERPASS_LINKS, BUFFER_CODES, BUFFER_LINKS, CODE_TABLES, CROSSOVER_CODES (+32 more)
 
 ### Community 18 - "dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics"
 Cohesion: 0.10
 Nodes (20): dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg, file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg (+12 more)
 
 ### Community 19 - "mapFile.ts"
-Cohesion: 0.12
-Nodes (30): decodeDocument(), DocumentFileFormat, downloadDocument(), encodeDocument(), inferDocumentFormat(), LoadedDocument, pickAndReadDocument(), assertSerializedMap() (+22 more)
+Cohesion: 0.11
+Nodes (31): decodeDocument(), DocumentFileFormat, downloadDocument(), encodeDocument(), inferDocumentFormat(), LoadedDocument, pickAndReadDocument(), assertSerializedMap() (+23 more)
 
 ### Community 20 - "validate.ts"
-Cohesion: 0.22
-Nodes (21): ServiceDetail(), isRailwayComplete(), linkIndexForOffset(), actionTime(), createsTrain(), isStartAction(), checkOrder(), checkStartPosition() (+13 more)
+Cohesion: 0.19
+Nodes (25): ServiceDetail(), summariseService(), isRailwayComplete(), linkIndexForOffset(), formatSimTime(), actionTime(), createsTrain(), isFinishAction() (+17 more)
 
 ### Community 21 - "Technology Evaluation"
 Cohesion: 0.20
@@ -399,24 +400,24 @@ Cohesion: 0.15
 Nodes (12): compilerOptions, module, moduleResolution, noEmit, noUnusedLocals, noUnusedParameters, skipLibCheck, strict (+4 more)
 
 ### Community 33 - "import-railos.ts"
-Cohesion: 0.06
-Nodes (47): pairPortals(), ActiveElement, buildMap(), cellFromId(), cellOf(), COMMANDS, errors, InactiveElement (+39 more)
+Cohesion: 0.07
+Nodes (37): ActiveElement, cellFromId(), COMMANDS, errors, InactiveElement, issues, linkOf(), LINKS (+29 more)
 
-### Community 34 - "railway/index.ts"
-Cohesion: 0.17
-Nodes (21): SectionEditPanel(), ActionBase, ActionOf, FINISH_KINDS, FinishAction, INTERMEDIATE_KINDS, IntermediateAction, isFinishAction() (+13 more)
+### Community 34 - "timetable/types.ts"
+Cohesion: 0.18
+Nodes (10): ActionBase, FinishAction, IntermediateAction, isIntermediateAction(), MAX_SERVICE_REF_LENGTH, Repeat, SHUTTLE_KINDS, StartAction (+2 more)
 
 ### Community 35 - "gestureOverlay.ts"
-Cohesion: 0.15
-Nodes (17): CellOutlineOptions, GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET, GESTURE_OUTLINE_WIDTH, GESTURE_PREVIEW_COLOR, GESTURE_PREVIEW_ERASE_COLOR, GESTURE_START_COLOR (+9 more)
+Cohesion: 0.09
+Nodes (30): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), EndpointOutlines, GESTURE_END_COLOR, GESTURE_INVALID_COLOR (+22 more)
 
-### Community 36 - "map.ts"
+### Community 36 - "Platform"
 Cohesion: 0.17
-Nodes (16): LinkedTrackPair, LinkedTrackReport, MAP_DEBUG, addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform(), changeDeleteText() (+8 more)
+Nodes (15): Platform, addLevelCrossing(), addPlatform(), removeLevelCrossing(), removePlatform(), changeDeleteText(), collectNeighbourTexts(), deleteTextFromAllElements() (+7 more)
 
-### Community 37 - "map-connectivity.ts"
-Cohesion: 0.11
-Nodes (26): checkAllTracksConnected(), collectPreferredDirectionIssues(), collectUndirectedTracks(), collectUnnamedElements(), DanglingLink, elementNeedsName(), endpointOtherLink(), expectedEntryOnNeighbor() (+18 more)
+### Community 37 - "map.ts"
+Cohesion: 0.08
+Nodes (33): Concourse, NamedElement, checkAllTracksConnected(), collectPreferredDirectionIssues(), collectUndirectedTracks(), collectUnnamedElements(), ConnectivityReport, DanglingLink (+25 more)
 
 ### Community 38 - "shared/package.json"
 Cohesion: 0.11
@@ -440,15 +441,15 @@ Nodes (3): Adapter Implementations, How the engine boots (host-agnostic), Transp
 
 ### Community 44 - "sim-bridge.ts"
 Cohesion: 0.09
-Nodes (27): HostClock, startEngineHost(), fakeClock(), setUp(), emptyTimetable, lineMap(), scope, SimBridge (+19 more)
+Nodes (25): HostClock, startEngineHost(), fakeClock(), setUp(), emptyTimetable, lineMap(), scope, SimBridge (+17 more)
 
 ### Community 45 - "app/tsconfig.json"
 Cohesion: 0.15
 Nodes (12): compilerOptions, jsx, paths, types, extends, include, ../../tsconfig.json, @rail-op-sim/shared (+4 more)
 
-### Community 46 - "timetable-store.ts"
-Cohesion: 0.15
-Nodes (17): Header(), completeRailway, Harness(), problems, reset(), twoServices(), mockLoadTimetable, pick (+9 more)
+### Community 46 - "mode-store.ts"
+Cohesion: 0.11
+Nodes (29): ModeSwitcher(), SimLayout(), complete, seed(), timetable(), completeRailway, Harness(), problems (+21 more)
 
 ### Community 47 - "railway/errors.ts"
 Cohesion: 0.52
@@ -475,8 +476,8 @@ Cohesion: 0.53
 Nodes (5): encodeRow(), mergeRuns(), pngFiles, pngToSvg(), rgbToHex()
 
 ### Community 53 - "timetable.ts"
-Cohesion: 0.12
-Nodes (37): actionLocation(), ACTION_WORDS, actionsOf(), becomeService(), Command, departFromStop(), describeAction(), dispatch() (+29 more)
+Cohesion: 0.14
+Nodes (34): actionLocation(), ACTION_WORDS, actionsOf(), becomeService(), Command, departFromStop(), describeAction(), dispatch() (+26 more)
 
 ### Community 54 - "tooltip.tsx"
 Cohesion: 0.40
@@ -491,16 +492,16 @@ Cohesion: 0.25
 Nodes (7): background_color, display, icons, name, short_name, start_url, theme_color
 
 ### Community 57 - "shortcuts.ts"
-Cohesion: 0.21
-Nodes (14): ShortcutsDialog(), useMounted(), useShortcutDisplay(), isPlatformDependent(), PLATFORM_MODIFIERS, Shortcut, SHORTCUT_GROUPS, SHORTCUT_ORDER (+6 more)
+Cohesion: 0.10
+Nodes (25): MODES, ModeTip(), ShortcutsDialog(), ResizeObserverStub, HISTORY_ACTIONS, Tip(), TOOLS, Tooltip() (+17 more)
 
 ### Community 58 - "GroundLayer.ts"
 Cohesion: 0.32
 Nodes (7): createGroundLayer(), redraw(), DEFAULTS, GroundLayer, GroundLayerOptions, niceSpacing(), resolve()
 
-### Community 59 - "track/index.ts"
-Cohesion: 0.14
-Nodes (23): COLOR_LEGEND, Entry, DEFAULT_MAIN_LENGTH, DEFAULT_MAIN_SPEED, DEFAULT_SECONDARY_LENGTH, DEFAULT_SECONDARY_SPEED, TRACK_COLOR_ALPHA, TRACK_COLOR_BOTH (+15 more)
+### Community 59 - "railway/index.ts"
+Cohesion: 0.11
+Nodes (37): COLOR_LEGEND, SectionEditPanel(), SignalAspectValue, DEFAULT_MAIN_LENGTH, DEFAULT_MAIN_SPEED, DEFAULT_SECONDARY_LENGTH, DEFAULT_SECONDARY_SPEED, TRACK_COLOR_ALPHA (+29 more)
 
 ### Community 60 - "errors.ts"
 Cohesion: 0.26
@@ -535,72 +536,64 @@ Cohesion: 0.40
 Nodes (4): extends, include, src/**/*, ../../tsconfig.json
 
 ### Community 68 - "PlacementController.ts"
-Cohesion: 0.11
-Nodes (19): ELEMENT_LABELS, runEscape(), allEnabled, enabled, Subsystem, EscapeAction, EscapeContext, resolveEscape() (+11 more)
+Cohesion: 0.13
+Nodes (17): ELEMENT_LABELS, EscapeAction, EscapeContext, MapFileFormat, liveShortcuts(), ShortcutGateState, base, AddKind (+9 more)
 
 ### Community 214 - "useEditorStore"
 Cohesion: 0.13
-Nodes (15): AddPalette(), ModeSwitcher(), SAVE_FORMATS, SettingsMenu(), SimLayout(), StatusBar(), BASE, TextInputDialog() (+7 more)
+Nodes (11): AddPalette(), getElementAt(), NameElementDialog(), SettingsMenu(), StatusBar(), BASE, TextInputDialog(), TimetableEditor() (+3 more)
 
-### Community 215 - "parseSimTime"
-Cohesion: 0.12
-Nodes (23): TimeField(), seed(), timetable(), timetable(), TRAIN, twoServiceTimetable(), finishRemainHere, oneService() (+15 more)
+### Community 215 - "timetable/__tests__/fixtures.ts"
+Cohesion: 0.14
+Nodes (23): twoServices(), TimetableState, CELL, completeRailwayFixture(), FONT, nameTrack(), nameTracks(), railwayFixture() (+15 more)
 
-### Community 216 - "cn"
-Cohesion: 0.17
-Nodes (17): CellField(), ChoiceField(), NumberField(), TextField(), Input(), Select(), SelectContent(), SelectGroup() (+9 more)
+### Community 216 - "TimetableEditor.tsx"
+Cohesion: 0.16
+Nodes (15): actionKindLabel(), describeAction(), CellField(), ChoiceField(), NumberField(), TextField(), TimeField(), ActionRow() (+7 more)
+
+### Community 217 - "Text"
+Cohesion: 0.11
+Nodes (4): createTextLayer(), removeAll(), TextLayer, Text
 
 ### Community 218 - "NamedLocation in rail-op-sim — Implementation Plan (v2)"
 Cohesion: 0.11
 Nodes (17): 0. Phasing (per your framing), 1. Key finding: the adjacency spread is already implemented, 2. Phase 0 (prerequisite): coordinate-unit mismatch — MUST FIX, 3. Phase 2: the "Name" tool, 3a. Store — new tool + pending target, 3b. Click dispatch, 3c. Dialog — set / change / delete, 3d. Toolbar button (+9 more)
 
-### Community 219 - "TimetableEditor.tsx"
+### Community 219 - "actionKinds.ts"
 Cohesion: 0.11
-Nodes (29): ActionForm(), ActionFormProps, ACTION_KIND_GROUPS, ACTION_KIND_OPTIONS, actionKindLabel(), ActionKindOption, ActionSeed, createAction() (+21 more)
-
-### Community 220 - "mode-store.ts"
-Cohesion: 0.17
-Nodes (10): complete, ResizeObserverStub, TrackStatus, blockedReason(), ModeState, operateBlockedReason(), sessionStarted(), timetableBlockedReason() (+2 more)
-
-### Community 221 - "LinkHighlightLayer"
-Cohesion: 0.18
-Nodes (3): Coord, DirectionLayer, LinkHighlightLayer
+Nodes (24): ActionForm(), ActionFormProps, ACTION_KIND_GROUPS, ACTION_KIND_OPTIONS, ActionKindOption, ActionSeed, createAction(), DESCRIBERS (+16 more)
 
 ### Community 222 - "serialization.ts"
-Cohesion: 0.15
-Nodes (22): ACTION_READERS, ActionFields, asBoolean(), asCell(), asNumber(), asRecord(), asString(), asTime() (+14 more)
+Cohesion: 0.18
+Nodes (19): ACTION_READERS, ActionFields, asBoolean(), asCell(), asNumber(), asRecord(), asString(), asTime() (+11 more)
 
 ### Community 223 - "scripts"
 Cohesion: 0.18
 Nodes (11): scripts, build, check, coverage, dev, format, generate-routes, lint (+3 more)
 
-### Community 224 - "operateGeometry.ts"
-Cohesion: 0.21
-Nodes (17): atDistance(), cumulative(), dist(), edgePoint(), isOrthogonal(), isQuarterTurn(), joinedPaths(), lerp() (+9 more)
+### Community 224 - "map-serialization.ts"
+Cohesion: 0.22
+Nodes (10): sample, deserializeMap(), SERIALIZED_MAP_VERSION, SerializedMap, SerializedNamedElement, SerializedParapet, SerializedText, SerializedTrack (+2 more)
 
 ### Community 225 - "engine.ts"
-Cohesion: 0.12
-Nodes (32): OperateState, afterPause(), afterRun(), isSpeed(), SIM_DT, SPEEDS, stepSpeed(), emptyCounters() (+24 more)
+Cohesion: 0.11
+Nodes (36): OperateState, afterPause(), afterRun(), isSpeed(), SIM_DT, SPEEDS, stepSpeed(), emptyCounters() (+28 more)
 
-### Community 226 - "ZoomSlider.tsx"
-Cohesion: 0.24
-Nodes (12): ZoomSlider(), DEFAULT_MAX_ZOOM, DEFAULT_MIN_ZOOM, DEFAULT_ZOOM, ZOOM_BUTTON_STEP, ZOOM_SLIDER_STEP, FIT_EXTENT, FIT_PADDING (+4 more)
+### Community 226 - "createEngine"
+Cohesion: 0.32
+Nodes (17): createEngine(), fail(), nodeAt(), occKeyOf(), routeKeys(), trainKeys(), blockedReason(), cancelRoute() (+9 more)
 
 ### Community 227 - "authoring.ts"
-Cohesion: 0.10
-Nodes (43): map, services, train, APP_IMAGE_SIZE, at(), bridgeUnderpass(), buffer(), c() (+35 more)
+Cohesion: 0.16
+Nodes (23): map, services, train, APP_IMAGE_SIZE, at(), bridgeUnderpass(), buffer(), crossover() (+15 more)
 
-### Community 228 - "documentActions.ts"
-Cohesion: 0.47
-Nodes (7): SaveLoadControls(), loadDocument(), loadTimetableDocument(), saveDocument(), loadMap(), saveMap(), saveTimetable()
+### Community 228 - "timetableActions.ts"
+Cohesion: 0.25
+Nodes (12): SaveLoadControls(), loadDocument(), loadTimetableDocument(), saveDocument(), loadMap(), saveMap(), mockLoadTimetable, pick (+4 more)
 
 ### Community 229 - "compilerOptions"
 Cohesion: 0.12
 Nodes (15): compilerOptions, forceConsistentCasingInFileNames, lib, module, moduleResolution, noEmit, skipLibCheck, strict (+7 more)
-
-### Community 230 - "map-serialization.ts"
-Cohesion: 0.08
-Nodes (16): Concourse, Element, NamedElement, Parapet, ParapetType, ConnectivityReport, deserializeMap(), SERIALIZED_MAP_VERSION (+8 more)
 
 ### Community 231 - "The railway document"
 Cohesion: 0.18
@@ -623,40 +616,44 @@ Cohesion: 0.33
 Nodes (5): Authoring railways and timetables, Notes, Reference, The rules that break documents, Workflow
 
 ### Community 237 - "usePixiApp.ts"
-Cohesion: 0.18
-Nodes (11): DEFAULT_OPTIONS, themeKey(), usePixiApp(), UsePixiAppReturn, buildThemeColorMap(), ColorMap, escapeRegExp(), normalizeCssColor() (+3 more)
+Cohesion: 0.15
+Nodes (11): DEFAULT_OPTIONS, themeKey(), usePixiApp(), allEnabled, enabled, Subsystem, buildThemeColorMap(), normalizeCssColor() (+3 more)
 
-### Community 238 - "grid.ts"
-Cohesion: 0.14
-Nodes (13): CELL_SIZE, worldToGrid(), createRouteLayer(), ROUTE_COLORS, RouteLayer, createSignalStateLayer(), LAMP_COLORS, SignalStateLayer (+5 more)
+### Community 238 - "operateGeometry.ts"
+Cohesion: 0.10
+Nodes (30): CELL_SIZE, worldToGrid(), createRouteLayer(), ROUTE_COLORS, RouteLayer, createSignalStateLayer(), LAMP_COLORS, SignalStateLayer (+22 more)
 
 ### Community 240 - "app/package.json"
 Cohesion: 0.40
 Nodes (4): imports, name, private, type
 
 ### Community 242 - "routes.ts"
-Cohesion: 0.16
-Nodes (34): createEngine(), fail(), nodeAt(), occKeyOf(), pathsFrom(), routeKeys(), sameSeg(), trainKeys() (+26 more)
+Cohesion: 0.17
+Nodes (27): endsAtBuffers(), isFacingSignal(), leavesMap(), stepFrom(), pathsFrom(), sameSeg(), arrival(), beyondRoute() (+19 more)
 
 ### Community 243 - "src/index.ts"
-Cohesion: 0.15
-Nodes (21): ClockControls(), LEVEL_CLASS, NO_TRAINS, OperatePanel(), PerformanceLog(), ROUTE_KINDS, showTrain(), TrainList() (+13 more)
+Cohesion: 0.10
+Nodes (30): ClockControls(), LEVEL_CLASS, NO_TRAINS, OperatePanel(), PerformanceLog(), ROUTE_KINDS, showTrain(), TrainList() (+22 more)
 
 ### Community 244 - "sim/__tests__/fixtures.ts"
 Cohesion: 0.13
 Nodes (25): setPreferredDirectionsAlongPath(), addTrain(), CELL, engineFor(), frontCell(), line(), linkedLine(), nameCells() (+17 more)
 
 ### Community 245 - "useEditorHotkeys.ts"
-Cohesion: 0.13
-Nodes (23): RouteControls(), jumpToNextIssue(), moveSelectedAction(), run, stepSelectedService(), applyOperateIntent(), changeSpeed(), chooseRouteKind() (+15 more)
+Cohesion: 0.12
+Nodes (25): RouteControls(), jumpToNextIssue(), moveSelectedAction(), run, runEscape(), stepSelectedService(), resolveEscape(), applyOperateIntent() (+17 more)
 
 ### Community 246 - "trains.ts"
 Cohesion: 0.18
-Nodes (25): pathOf(), segLength(), stepFrom(), followSeg(), liesAgainst(), nextSeg(), beyondRoute(), advanceFront() (+17 more)
+Nodes (24): pathOf(), segLength(), followSeg(), liesAgainst(), nextSeg(), withLies(), advanceFront(), Ahead (+16 more)
 
-### Community 247 - "timetable/__tests__/fixtures.ts"
-Cohesion: 0.26
-Nodes (10): getExitCells(), getLocationNames(), getStartableCells(), locationToCell(), CELL, completeRailwayFixture(), FONT, nameTrack() (+2 more)
+### Community 247 - "locations.test.ts"
+Cohesion: 0.32
+Nodes (11): cellText(), name(), namedLocation(), pairPortals(), platform(), cellToLocation(), getExitCells(), getLocationNames() (+3 more)
+
+### Community 249 - "ElementLayer.ts"
+Cohesion: 0.14
+Nodes (7): ColorMap, createElementLayer(), makeElementSprite(), PLATFORM_SIDE_MAP, PlatformSideMapping, SpriteEntry, TextureCache
 
 ### Community 251 - "log.ts"
 Cohesion: 0.23
@@ -666,77 +663,53 @@ Nodes (6): clockText(), COUNTED, latenessText(), minutesLate(), PerformanceLog, 
 Cohesion: 0.20
 Nodes (9): Context (grounded in current code), F1.1 Length → metres (combined imperial input), F1.2 Speed: mph → km/h, F1.3 Precision, F1 — Unit conversion utilities (in `packages/shared`, pure + unit-tested), F2 — Track colour legend, F3 — Track section editor, F4 — Standalone converter widgets (+1 more)
 
-### Community 253 - "AddPalette.tsx"
-Cohesion: 0.11
-Nodes (24): ALL_LABELS, ASPECT_OPTIONS, CATEGORIES, CATEGORY_KINDS, CATEGORY_LABELS, ELEMENT_LABELS, ELEMENT_TYPES, SENTINEL_SUBTYPE (+16 more)
+### Community 253 - "check-documents.ts"
+Cohesion: 0.20
+Nodes (14): c(), issueText(), loadRailway(), loadTimetable(), railwayProblems(), readDocument(), reportRailway(), reportTimetable() (+6 more)
 
-### Community 254 - "shortcutGates.ts"
-Cohesion: 0.53
-Nodes (3): liveShortcuts(), ShortcutGateState, AppMode
-
-### Community 255 - "operateInput.ts"
-Cohesion: 0.28
-Nodes (7): OperateClick, OperateIntent, resolveOperateClick(), sameCell(), at, idle, start
+### Community 255 - "Cell"
+Cohesion: 0.24
+Nodes (10): OperateClick, OperateInputState, OperateIntent, resolveOperateClick(), sameCell(), at, idle, start (+2 more)
 
 ### Community 256 - "createDirectionLayer"
-Cohesion: 0.16
-Nodes (8): createEndpointOutlines(), redraw(), EndpointOutlines, createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync()
+Cohesion: 0.43
+Nodes (5): createDirectionLayer(), drawArrow(), drawLeg(), setRoutePreview(), sync()
 
-### Community 264 - "gridToWorld"
-Cohesion: 0.22
-Nodes (12): gridToWorld(), dashedLine(), queueCellRect(), strokeCellOutline(), createLinkHighlightLayer(), clearSectionHighlight(), clearSectionSprites(), highlightSection() (+4 more)
+### Community 264 - "TrackLayer.ts"
+Cohesion: 0.19
+Nodes (5): createTrackLayer(), Entry, entryKey(), makeTrackSprite(), TrackLayer
 
-### Community 268 - "graph.ts"
-Cohesion: 0.23
-Nodes (15): OperateInputState, Cell, Rail, buildGraph(), cellKey(), endsAtBuffers(), GraphNode, isFacingSignal() (+7 more)
-
-### Community 270 - "ViewportController.ts"
-Cohesion: 0.23
-Nodes (8): PanControls(), PanControlsProps, SimCanvas(), PAN_BUTTON_STEP, PAN_KEY_SPEED, ViewportControllerOptions, ViewportState, ZOOM_FACTOR
-
-### Community 271 - "Toolbar.tsx"
-Cohesion: 0.13
-Nodes (14): MODES, ModeTip(), ResizeObserverStub, HISTORY_ACTIONS, Tip(), Toolbar(), TOOLS, Kbd() (+6 more)
-
-### Community 273 - ".serializeFieldGroups"
+### Community 268 - "buildMap"
 Cohesion: 0.33
-Nodes (5): buildHoveredTrackInfo(), getTrackColorState(), buildNode(), deadEndOf(), pathsOf()
+Nodes (8): buildMap(), cellOf(), nameEverything(), pieceOf(), placeInactive(), trackDataFor(), where(), locationOf()
+
+### Community 270 - "time.ts"
+Cohesion: 0.39
+Nodes (6): dayOffset(), formatDuration(), formatWallClock(), InvalidTimeError, SECONDS_PER_DAY, tryParseSimTime()
 
 ### Community 274 - "connectivity.ts"
 Cohesion: 0.32
 Nodes (5): ConnectivityPill, describeConnectivity(), FaultCount, FAULTS, plural()
 
-### Community 275 - "TextLayer"
-Cohesion: 0.25
-Nodes (3): createTextLayer(), removeAll(), TextLayer
-
-### Community 276 - "operateLayers.test.ts"
-Cohesion: 0.52
-Nodes (6): drawn(), headcodes(), layer(), seg(), train(), view()
-
-### Community 277 - "useTheme"
-Cohesion: 0.83
-Nodes (3): applyTheme(), getInitial(), useTheme()
-
 ## Knowledge Gaps
-- **540 isolated node(s):** `map`, `train`, `services`, `APP_IMAGE_SIZE`, `DEFAULT_FONT` (+535 more)
+- **539 isolated node(s):** `map`, `train`, `services`, `APP_IMAGE_SIZE`, `DEFAULT_FONT` (+534 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **123 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **126 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Map_` to `Track`, `enums.ts`, `graph.ts`, `.locationToString`, `PlacementController`, `mapFile.ts`, `TextLayer`, `validate.ts`, `effect-journal.test.ts`, `import-railos.ts`, `railway/index.ts`, `gestureOverlay.ts`, `map.ts`, `map-connectivity.ts`, `sim-bridge.ts`, `timetable-store.ts`, `track/index.ts`, `PlacementController.ts`, `parseSimTime`, `Text`, `TimetableEditor.tsx`, `LinkHighlightLayer`, `engine.ts`, `authoring.ts`, `map-serialization.ts`, `usePixiApp.ts`, `sim/__tests__/fixtures.ts`, `timetable/__tests__/fixtures.ts`?**
-  _High betweenness centrality (0.076) - this node is a cross-community bridge._
-- **Why does `Track` connect `Track` to `import-railos.ts`, `railway/index.ts`, `authoring.ts`, `PlacementController.ts`, `gestureOverlay.ts`, `map.ts`, `map-connectivity.ts`, `map-serialization.ts`, `enums.ts`, `Map_`, `graph.ts`, `PlacementController`, `.serializeFieldGroups`, `timetable/__tests__/fixtures.ts`, `LinkHighlightLayer`, `track/index.ts`, `AddPalette.tsx`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `PlacementController` connect `PlacementController` to `TextInputDialog.tsx`, `PlacementController.ts`, `documentActions.ts`, `ViewportController`, `sim-bridge.ts`, `usePixiApp.ts`, `TimetableEditor.tsx`, `Toolbar.tsx`, `timetable-store.ts`, `src/index.ts`, `TextLayer`, `useEditorHotkeys.ts`, `useEditorStore`, `Text`, `track/index.ts`, `LinkHighlightLayer`?**
+- **Why does `Map_` connect `Map_` to `Track`, `TrackLayer.ts`, `AddPalette.tsx`, `Parapet`, `PlacementController`, `mapFile.ts`, `validate.ts`, `effect-journal.test.ts`, `import-railos.ts`, `gestureOverlay.ts`, `Platform`, `map.ts`, `sim-bridge.ts`, `mode-store.ts`, `railway/index.ts`, `PlacementController.ts`, `timetable/__tests__/fixtures.ts`, `Text`, `NamedLocation`, `map-serialization.ts`, `engine.ts`, `authoring.ts`, `Element`, `usePixiApp.ts`, `src/index.ts`, `sim/__tests__/fixtures.ts`, `locations.test.ts`, `ElementLayer.ts`, `check-documents.ts`?**
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
+- **Why does `Track` connect `Track` to `map-serialization.ts`, `import-railos.ts`, `engine.ts`, `authoring.ts`, `PlacementController.ts`, `gestureOverlay.ts`, `map.ts`, `AddPalette.tsx`, `Map_`, `buildMap`, `PlacementController`, `locations.test.ts`, `ElementLayer.ts`, `railway/index.ts`, `NamedLocation`, `recordField`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `PlacementController` connect `PlacementController` to `TextInputDialog.tsx`, `map-serialization.ts`, `PlacementController.ts`, `Text`, `ElementLayer.ts`, `timetableActions.ts`, `TrackLayer.ts`, `ViewportController`, `usePixiApp.ts`, `mode-store.ts`, `src/index.ts`, `useEditorHotkeys.ts`, `TimetableEditor.tsx`, `shortcuts.ts`, `railway/index.ts`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **What connects `map`, `train`, `services` to the rest of the system?**
-  _540 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _539 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `TextInputDialog.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.1251778093883357 - nodes in this community are weakly interconnected._
 - **Should `Track` be split into smaller, more focused modules?**
-  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08140610545790934 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
-- **Should `dependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._
