@@ -1,6 +1,7 @@
 import type { SimView, TrainView } from "@rail-op-sim/shared";
 import { Container, type Graphics, type Text } from "pixi.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 import { attachOperateLayers } from "#/renderer/operateLayers";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
@@ -72,6 +73,18 @@ describe("attachOperateLayers", () => {
 		expect(drawn(world, "signal-state")).toBe(true);
 		expect(drawn(world, "trains")).toBe(true);
 		expect(headcodes(world)).toEqual(["1A01"]);
+	});
+
+	it("puts a train's headcode on the middle of its body", () => {
+		useOperateStore.setState({ view: view() });
+		const text = (layer(world, "trains").children[1] as Container)
+			.children[0] as Text;
+		// Segs at gx 1 and 2 run left to right: the body spans gx 1's entry
+		// edge to gx 2's exit edge, so its middle is the edge between them.
+		const middle = gridToWorld(1, 0).x + CELL_SIZE / 2;
+		expect(text.position.x).toBeCloseTo(middle);
+		expect(text.position.y).toBeCloseTo(gridToWorld(1, 0).y);
+		expect(text.rotation).toBeCloseTo(0);
 	});
 
 	it("drops a train's label once it has gone", () => {

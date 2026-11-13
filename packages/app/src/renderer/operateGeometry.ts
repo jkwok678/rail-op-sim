@@ -114,6 +114,52 @@ export function spanPoints(seg: ViewSeg): Point[] {
 	return out;
 }
 
+/** The last `d` of a polyline, as a polyline — all of it if it is shorter. */
+export function pathTail(points: Point[], d: number): Point[] {
+	const lengths = cumulative(points);
+	const total = lengths[lengths.length - 1];
+	if (points.length < 2 || d >= total) return points;
+	const start = total - d;
+	const out = [atDistance(points, lengths, start)];
+	for (let i = 1; i < points.length - 1; i++) {
+		if (lengths[i] > start + 1e-6) out.push(points[i]);
+	}
+	out.push(points[points.length - 1]);
+	return out;
+}
+
+/**
+ * Where a train's headcode sits: the middle of its longest piece, with the
+ * angle (radians) of the rail there, turned so text never reads upside down.
+ */
+export function labelAnchor(
+	paths: Point[][],
+): { x: number; y: number; angle: number } | null {
+	let best: Point[] | null = null;
+	let bestLength = -1;
+	for (const points of paths) {
+		if (points.length < 2) continue;
+		const lengths = cumulative(points);
+		const length = lengths[lengths.length - 1];
+		if (length > bestLength) {
+			best = points;
+			bestLength = length;
+		}
+	}
+	if (!best) return null;
+	const lengths = cumulative(best);
+	const mid = bestLength / 2;
+	let leg = 1;
+	while (leg < best.length - 1 && lengths[leg] < mid) leg++;
+	const a = best[leg - 1];
+	const b = best[leg];
+	let angle = Math.atan2(b.y - a.y, b.x - a.x);
+	if (angle > Math.PI / 2) angle -= Math.PI;
+	else if (angle <= -Math.PI / 2) angle += Math.PI;
+	const at = atDistance(best, lengths, mid);
+	return { x: at.x, y: at.y, angle };
+}
+
 /** A train's body, rear to front, one polyline per piece (see {@link joinedPaths}). */
 export function trainPaths(train: TrainView): Point[][] {
 	return joinedPaths(train.segs);

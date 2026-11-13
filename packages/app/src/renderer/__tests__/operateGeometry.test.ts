@@ -3,6 +3,8 @@ import { CELL_SIZE } from "#/lib/grid";
 import {
 	edgePoint,
 	joinedPaths,
+	labelAnchor,
+	pathTail,
 	pointAlong,
 	segPath,
 	signalLamp,
@@ -121,5 +123,82 @@ describe("operate geometry", () => {
 		expect(trainColor({ ...base, status: "crashed", wait: null })).toBe(
 			0xdc2626,
 		);
+	});
+
+	it("takes the tail of a polyline", () => {
+		const line = [
+			{ x: 0, y: 0 },
+			{ x: 10, y: 0 },
+		];
+		expect(pathTail(line, 4)).toEqual([
+			{ x: 6, y: 0 },
+			{ x: 10, y: 0 },
+		]);
+		expect(pathTail(line, 25)).toEqual(line);
+	});
+
+	it("keeps the bend when the tail spans one", () => {
+		const bent = [
+			{ x: 0, y: 0 },
+			{ x: 10, y: 0 },
+			{ x: 10, y: 10 },
+		];
+		const tail = pathTail(bent, 14);
+		expect(tail).toHaveLength(3);
+		near(tail[0], { x: 6, y: 0 });
+		near(tail[1], { x: 10, y: 0 });
+		near(tail[2], { x: 10, y: 10 });
+	});
+
+	it("anchors a label at the middle of a straight path", () => {
+		const anchor = labelAnchor([
+			[
+				{ x: 0, y: 0 },
+				{ x: 10, y: 0 },
+			],
+		]);
+		near(anchor as { x: number; y: number }, { x: 5, y: 0 });
+		expect(anchor?.angle).toBeCloseTo(0);
+	});
+
+	it("never turns a label upside down", () => {
+		const left = labelAnchor([
+			[
+				{ x: 10, y: 0 },
+				{ x: 0, y: 0 },
+			],
+		]);
+		expect(left?.angle).toBeCloseTo(0);
+		for (const [a, b] of [
+			[0, 10],
+			[10, 0],
+		]) {
+			const vertical = labelAnchor([
+				[
+					{ x: 0, y: a },
+					{ x: 0, y: b },
+				],
+			]);
+			expect(vertical?.angle).toBeCloseTo(Math.PI / 2);
+		}
+	});
+
+	it("anchors a label on the longest piece", () => {
+		const anchor = labelAnchor([
+			[
+				{ x: 0, y: 0 },
+				{ x: 2, y: 0 },
+			],
+			[
+				{ x: 0, y: 100 },
+				{ x: 0, y: 108 },
+			],
+		]);
+		near(anchor as { x: number; y: number }, { x: 0, y: 104 });
+	});
+
+	it("has no label anchor without a usable piece", () => {
+		expect(labelAnchor([])).toBeNull();
+		expect(labelAnchor([[{ x: 0, y: 0 }]])).toBeNull();
 	});
 });
