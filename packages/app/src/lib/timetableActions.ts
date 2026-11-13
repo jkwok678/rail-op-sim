@@ -1,3 +1,4 @@
+import { hasErrors } from "@rail-op-sim/shared";
 import { PlacementController } from "#/engine/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import {
@@ -34,7 +35,7 @@ export async function loadTimetable(): Promise<string | null> {
 			.replaceTimetable(loaded.data, PlacementController.instance?.map ?? null);
 		useEditorStore.getState().setSaveFormat(loaded.format);
 		debugLog("saveload", `loaded timetable from file (${loaded.format})`);
-		return null;
+		return describeLoadedIssues();
 	} catch (err) {
 		// A rejected file leaves the editor exactly as it was: the message goes
 		// back to the caller to show, and nothing has been replaced.
@@ -43,4 +44,19 @@ export async function loadTimetable(): Promise<string | null> {
 		console.error("timetableActions: failed to load timetable file", err);
 		return message;
 	}
+}
+
+/**
+ * A message for a timetable that loaded but cannot be operated, or null when it
+ * is clean. A file can parse and still fail validation, and the Operate button
+ * only says "fix the errors" — this names the first one so the user is not left
+ * guessing why it is greyed out.
+ */
+function describeLoadedIssues(): string | null {
+	const errors = useTimetableStore
+		.getState()
+		.issues.filter((issue) => issue.severity === "error");
+	if (!hasErrors(errors)) return null;
+	const more = errors.length > 1 ? ` (and ${errors.length - 1} more)` : "";
+	return `Timetable loaded with ${errors.length === 1 ? "an error" : `${errors.length} errors`}, so Operate is unavailable: ${errors[0].message}${more}`;
 }
