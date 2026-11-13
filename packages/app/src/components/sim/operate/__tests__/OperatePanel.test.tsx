@@ -68,6 +68,25 @@ describe("OperatePanel", () => {
 		expect(screen.getByText("Right-click a route to cancel it.")).toBeTruthy();
 	});
 
+	it("sets every automatic route at once", async () => {
+		useOperateStore.setState({ view: view(), routeStart: { gx: 1, gy: 0 } });
+		render(<OperatePanel />);
+		fireEvent.click(screen.getByRole("button", { name: /Set all automatic/ }));
+		expect(sent).toEqual([{ type: "setAllAutoRoutes" }]);
+		await vi.waitFor(() =>
+			expect(useOperateStore.getState().routeStart).toBeNull(),
+		);
+	});
+
+	it("will not set every automatic route while paused", () => {
+		useOperateStore.setState({ view: view({ run: "paused" }) });
+		render(<OperatePanel />);
+		const button = screen.getByRole("button", {
+			name: /Set all automatic/,
+		}) as HTMLButtonElement;
+		expect(button.disabled).toBe(true);
+	});
+
 	it("lists trains and what they do next", () => {
 		useOperateStore.setState({
 			view: view({

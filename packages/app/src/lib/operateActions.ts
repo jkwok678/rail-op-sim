@@ -24,6 +24,16 @@ export function chooseRouteKind(kind: RouteKind): void {
 	useOperateStore.getState().setRouteKind(kind);
 }
 
+/**
+ * Set an automatic signals route on every plain section of line at once. Any
+ * half-made route is dropped, since the clicks it was waiting for may now be
+ * on a route; the engine says how many it set.
+ */
+export async function setAllAutoRoutes(): Promise<void> {
+	const result = await simCommand({ type: "setAllAutoRoutes" });
+	if (result.ok) useOperateStore.getState().setRouteStart(null);
+}
+
 export function toggleRouteCancel(): void {
 	const s = useOperateStore.getState();
 	s.setCancelArmed(!s.cancelArmed);

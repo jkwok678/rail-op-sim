@@ -114,12 +114,12 @@ export function closeSimSession(): void {
 }
 
 /**
- * Send a command to the open session. A refusal is put up as the panel's
- * notice; anything accepted clears it.
+ * Send a command to the open session. What it says — why it was refused, or
+ * what it did — is put up as the panel's notice; a silent success clears it.
  */
 export async function simCommand(cmd: SimCommand): Promise<CommandResult> {
 	if (!active) return { ok: false, message: "No session is open." };
 	const result = await active.command(cmd);
-	useOperateStore.getState().setNotice(result.ok ? null : result.message);
+	useOperateStore.getState().setNotice(result.message ?? null);
 	return result;
 }

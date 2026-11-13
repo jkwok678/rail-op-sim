@@ -14,6 +14,7 @@ describe("parseHostMessage", () => {
 				to: { gx: 5, gy: 0 },
 				kind: "preferred",
 			},
+			{ type: "setAllAutoRoutes" },
 			{ type: "cancelRoute", at: { gx: 3, gy: 0 } },
 			{ type: "togglePoints", at: { gx: 3, gy: 0 } },
 		]) {

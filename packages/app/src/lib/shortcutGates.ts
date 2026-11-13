@@ -80,6 +80,7 @@ export function liveShortcuts(
 		operateSlower: operateLive,
 		operateFaster: operateLive,
 		routeAuto: operateLive,
+		routeAutoAll: operateLive,
 		routePreferred: operateLive,
 		routeUnrestricted: operateLive,
 		routeCancel: operateLive,

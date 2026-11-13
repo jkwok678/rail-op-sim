@@ -123,6 +123,7 @@ describe("liveShortcuts — operate mode", () => {
 		"operateSlower",
 		"operateFaster",
 		"routeAuto",
+		"routeAutoAll",
 		"routePreferred",
 		"routeUnrestricted",
 		"routeCancel",

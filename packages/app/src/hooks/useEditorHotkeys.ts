@@ -6,6 +6,7 @@ import {
 	changeSpeed,
 	chooseRouteKind,
 	runOrPause,
+	setAllAutoRoutes,
 	toggleLog,
 	toggleRouteCancel,
 } from "#/lib/operateActions";
@@ -131,6 +132,7 @@ const run: Record<ShortcutId, () => void> = {
 	operateSlower: () => changeSpeed(-1),
 	operateFaster: () => changeSpeed(1),
 	routeAuto: () => chooseRouteKind("auto"),
+	routeAutoAll: setAllAutoRoutes,
 	routePreferred: () => chooseRouteKind("preferred"),
 	routeUnrestricted: () => chooseRouteKind("unrestricted"),
 	routeCancel: toggleRouteCancel,

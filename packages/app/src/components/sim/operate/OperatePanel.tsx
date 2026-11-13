@@ -12,6 +12,7 @@ import {
 	changeSpeed,
 	chooseRouteKind,
 	runOrPause,
+	setAllAutoRoutes,
 	toggleLog,
 	toggleRouteCancel,
 } from "#/lib/operateActions";
@@ -129,6 +130,7 @@ function RouteControls() {
 	const routeKind = useOperateStore((s) => s.routeKind);
 	const cancelArmed = useOperateStore((s) => s.cancelArmed);
 	const routeStart = useOperateStore((s) => s.routeStart);
+	const run = useOperateStore((s) => s.view?.run);
 	return (
 		<div className="flex flex-col gap-1.5 border-b border-border px-3 py-2">
 			<div role="radiogroup" aria-label="Route kind" className="flex gap-1">
@@ -155,6 +157,17 @@ function RouteControls() {
 					Cancel
 				</Button>
 			</div>
+			<Button
+				variant="outline"
+				size="xs"
+				className="self-start"
+				disabled={!run || run === "paused"}
+				title="Set an automatic route on every plain section between signals"
+				onClick={() => void setAllAutoRoutes()}
+			>
+				<span className="size-2 rounded-full bg-sky-500" />
+				Set all automatic
+			</Button>
 			<p className="text-[10px] text-muted-foreground">
 				{cancelArmed
 					? "Right-click a route to cancel it."

@@ -32,6 +32,7 @@ export type ShortcutId =
 	| "operateSlower"
 	| "operateFaster"
 	| "routeAuto"
+	| "routeAutoAll"
 	| "routePreferred"
 	| "routeUnrestricted"
 	| "routeCancel"
@@ -198,6 +199,12 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		label: "Automatic signals route",
 		group: "Operate",
 	},
+	routeAutoAll: {
+		id: "routeAutoAll",
+		hotkey: "Shift+A",
+		label: "Set every automatic signals route",
+		group: "Operate",
+	},
 	routePreferred: {
 		id: "routePreferred",
 		hotkey: "S",
@@ -332,6 +339,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"operateSlower",
 	"operateFaster",
 	"routeAuto",
+	"routeAutoAll",
 	"routePreferred",
 	"routeUnrestricted",
 	"routeCancel",
