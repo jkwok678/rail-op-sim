@@ -3,8 +3,9 @@
  *
  * A signal stands at the *entry* edge of its cell for the direction it faces,
  * so a train waits for it in the cell behind. A route therefore starts *on*
- * its entry signal's cell and stops short of the next signal: the route ahead
- * of that one starts on it, and routes never share a rail.
+ * its entry signal's cell and stops short of its end signal: the route ahead
+ * of that one starts on it, and routes never share a rail. A preferred or
+ * automatic route may pass through signals between, each clearing in turn.
  */
 
 import type { Cell } from "../railway/timetable/types";
@@ -146,7 +147,8 @@ function unwind(found: SearchNode | null): Seg[] {
 /**
  * Breadth-first search for the shortest route of `kind` from `from` to `to`.
  * Each step must be free of trains and other routes; preferred routes follow
- * preferred directions and may not run past a signal facing them.
+ * preferred directions, through any signals on the way, and stop short of an
+ * end signal.
  */
 function findRoute(
 	graph: RailGraph,
@@ -178,7 +180,7 @@ function findRoute(
 	if (segs) return withLies(graph, state, segs);
 	return failed(
 		followsPreferred(kind)
-			? "No route that way: it must follow preferred directions to the next signal, buffers or an exit."
+			? "No route that way: it must follow preferred directions to a signal, buffers or an exit."
 			: "No route between those two places.",
 	);
 }
@@ -236,9 +238,7 @@ function expand(
 function canExtend(graph: RailGraph, kind: RouteKind, seg: Seg): boolean {
 	if (!followsPreferred(kind)) return true;
 	const node = graph.nodes[seg.node];
-	if (!prefers(node, seg)) return false;
-	// Consecutive signals only: a facing signal ends the route before it.
-	return !isFacingSignal(graph, seg);
+	return prefers(node, seg);
 }
 
 function withLies(graph: RailGraph, state: SimState, segs: Seg[]): RouteFound {

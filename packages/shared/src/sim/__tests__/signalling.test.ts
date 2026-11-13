@@ -74,3 +74,17 @@ describe("signal aspects", () => {
 		expect(aspectAt(engine, 2)).toBe(0);
 	});
 });
+
+describe("aspects on a route through signals", () => {
+	it("clears each signal it passes in sequence behind a red end signal", () => {
+		const engine = engineFor(fourSignals());
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(6),
+			kind: "preferred",
+		});
+		expect(result).toEqual({ ok: true });
+		expect([2, 4, 6].map((gx) => aspectAt(engine, gx))).toEqual([2, 1, 0]);
+	});
+});

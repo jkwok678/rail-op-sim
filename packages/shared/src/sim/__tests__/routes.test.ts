@@ -61,7 +61,7 @@ describe("setting routes", () => {
 		expect(result.ok).toBe(false);
 	});
 
-	it("will not run a preferred route past a signal", () => {
+	it("runs a preferred route through a signal to an exit", () => {
 		const engine = engineFor(twoSignals());
 		const result = engine.handle({
 			type: "setRoute",
@@ -69,7 +69,8 @@ describe("setting routes", () => {
 			to: cell(7),
 			kind: "preferred",
 		});
-		expect(result.ok).toBe(false);
+		expect(result).toEqual({ ok: true });
+		expect(segNodes(engine)).toEqual([2, 3, 4, 5, 6, 7]);
 	});
 
 	it("will not run a signal route against the way it faces", () => {
@@ -441,5 +442,71 @@ describe("setting every automatic route", () => {
 			["0,0", "1,0"],
 			["2,3", "3,3", "4,3"],
 		]);
+	});
+});
+
+/** Signals for rightward running at 2, 4, 6 and 8, exit at 10. */
+const fourSignals = () => line("X->->->->-X");
+
+describe("routes through intermediate signals", () => {
+	for (const kind of ["preferred", "auto"] as const) {
+		it(`sets a ${kind} route past a signal, stopping short of the end signal`, () => {
+			const engine = engineFor(fourSignals());
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(2),
+				to: cell(6),
+				kind,
+			});
+			expect(result).toEqual({ ok: true });
+			expect(segNodes(engine)).toEqual([2, 3, 4, 5]);
+		});
+	}
+
+	it("refuses a route when the section beyond the middle signal is occupied", () => {
+		const engine = engineFor(fourSignals());
+		addTrain(engine, cell(4), cell(5));
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(6),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("refuses a route when another route holds the section beyond the middle signal", () => {
+		const engine = engineFor(fourSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(4),
+			to: cell(6),
+			kind: "preferred",
+		});
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(6),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("still lets routes be chained signal to signal", () => {
+		const engine = engineFor(fourSignals());
+		for (const [from, to] of [
+			[2, 4],
+			[4, 6],
+		]) {
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(from),
+				to: cell(to),
+				kind: "preferred",
+			});
+			expect(result).toEqual({ ok: true });
+		}
+		expect(segNodes(engine, 0)).toEqual([2, 3]);
+		expect(segNodes(engine, 1)).toEqual([4, 5]);
 	});
 });

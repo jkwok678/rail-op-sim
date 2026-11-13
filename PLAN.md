@@ -798,7 +798,7 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
   - `host/engine-host.ts`: a wall-clock accumulator with the clock injected, publishing at 20 Hz;
   - `store/sim-bridge.ts` and `store/operate-store.ts` on the page side.
 - [x] RailOS route setting: automatic-signals, preferred and unrestricted routes, found by BFS over directed cell segments.
-  - A signal stands at the entry edge of its cell. A route starts on its entry signal and stops short of the next one, so routes never share a rail.
+  - A signal stands at the entry edge of its cell. A route starts on its entry signal and stops short of its end signal (a preferred or auto route may pass through signals between), so routes never share a rail.
   - Routes set after a delay: 0.5 s, or 2.5 s when points move.
   - Preferred and unrestricted routes are released behind the train. Entering a route at the wrong end cancels it.
   - Cancelling takes the whole route, and is refused while a train is on it or approaching it.
