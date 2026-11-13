@@ -1,16 +1,16 @@
-# Graph Report - rail-op-sim  (2026-10-27)
+# Graph Report - rail-op-sim  (2026-11-07)
 
 ## Corpus Check
-- 228 files · ~183,970 words
+- 228 files · ~183,986 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2410 nodes · 5821 edges · 274 communities (150 shown, 124 thin omitted)
+- 2410 nodes · 5821 edges · 272 communities (149 shown, 123 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 407 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ae2c87b8`
+- Built from commit: `0e9e899d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -50,7 +50,7 @@
 - compilerOptions
 - import-railos.ts
 - ActionForm.tsx
-- gridToWorld
+- gestureOverlay.ts
 - map.ts
 - map-connectivity.ts
 - shared/package.json
@@ -200,7 +200,6 @@
 - engine.ts
 - PlacementController.ts
 - authoring.ts
-- buildMap
 - compilerOptions
 - NamedElement
 - The railway document
@@ -210,7 +209,7 @@
 - node-env.d.ts
 - Authoring railways and timetables
 - connectivity.ts
-- operateGeometry.ts
+- gridToWorld
 - run.sh
 - app/package.json
 - merge-coverage.mjs
@@ -226,7 +225,6 @@
 - locations.test.ts
 - round1
 - shortcutGates.ts
-- EndpointOutlines
 - check-documents.ts
 - radix-ui
 - @rail-op-sim/shared
@@ -273,7 +271,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (274 total, 124 thin omitted)
+## Communities (272 total, 123 thin omitted)
 
 ### Community 0 - "TimetableEditor.tsx"
 Cohesion: 0.10
@@ -400,16 +398,16 @@ Cohesion: 0.15
 Nodes (12): compilerOptions, module, moduleResolution, noEmit, noUnusedLocals, noUnusedParameters, skipLibCheck, strict (+4 more)
 
 ### Community 33 - "import-railos.ts"
-Cohesion: 0.08
-Nodes (31): ActiveElement, cellFromId(), COMMANDS, errors, InactiveElement, issues, LINKS, map (+23 more)
+Cohesion: 0.07
+Nodes (44): pairPortals(), ActiveElement, buildMap(), cellFromId(), cellOf(), COMMANDS, errors, InactiveElement (+36 more)
 
 ### Community 34 - "ActionForm.tsx"
 Cohesion: 0.23
 Nodes (14): exitFields(), FieldKit, fromRefFields(), joinFields(), nextRefFields(), otherRefField(), Renderer, RENDERERS (+6 more)
 
-### Community 35 - "gridToWorld"
-Cohesion: 0.11
-Nodes (30): gridToWorld(), CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET (+22 more)
+### Community 35 - "gestureOverlay.ts"
+Cohesion: 0.08
+Nodes (29): CellOutlineOptions, createEndpointOutlines(), redraw(), dashedLine(), EndpointOutlines, GESTURE_END_COLOR, GESTURE_INVALID_COLOR, GESTURE_OUTLINE_INSET (+21 more)
 
 ### Community 36 - "map.ts"
 Cohesion: 0.17
@@ -589,15 +587,11 @@ Nodes (32): afterPause(), afterRun(), isSpeed(), SIM_DT, SPEEDS, emptyCounters()
 
 ### Community 226 - "PlacementController.ts"
 Cohesion: 0.15
-Nodes (11): DEFAULT_OPTIONS, ELEMENT_LABELS, themeKey(), usePixiApp(), Subsystem, CELL_SIZE, worldToGrid(), createTrackLayer() (+3 more)
+Nodes (10): DEFAULT_OPTIONS, ELEMENT_LABELS, themeKey(), usePixiApp(), Subsystem, createTrackLayer(), Entry, entryKey() (+2 more)
 
 ### Community 227 - "authoring.ts"
 Cohesion: 0.16
 Nodes (23): map, services, train, APP_IMAGE_SIZE, at(), bridgeUnderpass(), buffer(), crossover() (+15 more)
-
-### Community 228 - "buildMap"
-Cohesion: 0.23
-Nodes (13): pairPortals(), buildMap(), cellOf(), linkOf(), linksOf(), nameEverything(), pairKey(), pieceOf() (+5 more)
 
 ### Community 229 - "compilerOptions"
 Cohesion: 0.12
@@ -631,9 +625,9 @@ Nodes (5): Authoring railways and timetables, Notes, Reference, The rules that b
 Cohesion: 0.32
 Nodes (5): ConnectivityPill, describeConnectivity(), FaultCount, FAULTS, plural()
 
-### Community 238 - "operateGeometry.ts"
+### Community 238 - "gridToWorld"
 Cohesion: 0.11
-Nodes (22): createRouteLayer(), ROUTE_COLORS, RouteLayer, createSignalStateLayer(), LAMP_COLORS, SignalStateLayer, createTrainLayer(), TrainLayer (+14 more)
+Nodes (25): CELL_SIZE, gridToWorld(), worldToGrid(), createRouteLayer(), ROUTE_COLORS, RouteLayer, createSignalStateLayer(), LAMP_COLORS (+17 more)
 
 ### Community 240 - "app/package.json"
 Cohesion: 0.40
@@ -702,14 +696,14 @@ Nodes (3): applyTheme(), getInitial(), useTheme()
 ## Knowledge Gaps
 - **500 isolated node(s):** `map`, `train`, `services`, `APP_IMAGE_SIZE`, `DEFAULT_FONT` (+495 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **124 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **123 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map_` connect `Map_` to `check-documents.ts`, `Track`, `enums.ts`, `map-serialization.ts`, `mapFile.ts`, `validate.ts`, `TextLayer`, `import-railos.ts`, `gridToWorld`, `map.ts`, `map-connectivity.ts`, `sim-bridge.ts`, `railway/index.ts`, `ElementLayer.ts`, `timetable/__tests__/fixtures.ts`, `Text`, `LinkHighlightLayer`, `engine.ts`, `PlacementController.ts`, `authoring.ts`, `NamedElement`, `sim/__tests__/fixtures.ts`, `timetable-store.ts`, `effect-journal.test.ts`, `graph.ts`, `locations.test.ts`?**
+- **Why does `Map_` connect `Map_` to `check-documents.ts`, `Track`, `enums.ts`, `map-serialization.ts`, `mapFile.ts`, `validate.ts`, `TextLayer`, `import-railos.ts`, `gestureOverlay.ts`, `map.ts`, `map-connectivity.ts`, `sim-bridge.ts`, `railway/index.ts`, `ElementLayer.ts`, `timetable/__tests__/fixtures.ts`, `Text`, `LinkHighlightLayer`, `engine.ts`, `PlacementController.ts`, `authoring.ts`, `NamedElement`, `sim/__tests__/fixtures.ts`, `timetable-store.ts`, `effect-journal.test.ts`, `graph.ts`, `locations.test.ts`?**
   _High betweenness centrality (0.073) - this node is a cross-community bridge._
-- **Why does `Track` connect `Track` to `import-railos.ts`, `PlacementController.ts`, `authoring.ts`, `ElementLayer.ts`, `map.ts`, `map-connectivity.ts`, `NamedElement`, `buildMap`, `enums.ts`, `Map_`, `map-serialization.ts`, `graph.ts`, `railway/index.ts`, `locations.test.ts`, `LinkHighlightLayer`, `createTrackData`?**
+- **Why does `Track` connect `Track` to `import-railos.ts`, `PlacementController.ts`, `authoring.ts`, `ElementLayer.ts`, `map.ts`, `map-connectivity.ts`, `NamedElement`, `enums.ts`, `Map_`, `map-serialization.ts`, `graph.ts`, `railway/index.ts`, `locations.test.ts`, `LinkHighlightLayer`, `createTrackData`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Why does `PlacementController` connect `PlacementController` to `TimetableEditor.tsx`, `mode-store.ts`, `PlacementController.ts`, `ElementLayer.ts`, `Text`, `ViewportController`, `useEditorHotkeys.ts`, `map-serialization.ts`, `OperatePanel.tsx`, `mapFile.ts`, `SectionEditPanel.tsx`, `editor-store.ts`, `Toolbar.tsx`, `LinkHighlightLayer`, `TextLayer`?**
   _High betweenness centrality (0.020) - this node is a cross-community bridge._

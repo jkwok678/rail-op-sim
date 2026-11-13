@@ -1391,7 +1391,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer_routelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "routelayer"
     },
     {
@@ -1404,7 +1404,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_signalstatelayer_signalstatelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "signalstatelayer"
     },
     {
@@ -1417,7 +1417,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_trainlayer_trainlayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "trainlayer"
     },
     {
@@ -1430,7 +1430,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_lamp",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "lamp"
     },
     {
@@ -1443,7 +1443,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_point",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "point"
     },
     {
@@ -1941,19 +1941,6 @@
       "norm_label": "appmode"
     },
     {
-      "label": "EndpointOutlines",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L154",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": "endpointoutlines"
-    },
-    {
       "label": "Register",
       "file_type": "code",
       "source_file": "packages/app/src/router.tsx",
@@ -2236,8 +2223,21 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_celloutlineoptions",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "celloutlineoptions"
+    },
+    {
+      "label": "EndpointOutlines",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L154",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": "endpointoutlines"
     },
     {
       "label": "LinkedTrackPair",
@@ -8106,18 +8106,6 @@
       "norm_label": "usepixiapp()"
     },
     {
-      "label": "worldToGrid()",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/grid.ts",
-      "source_location": "L27",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_lib_grid_worldtogrid",
-      "community": 226,
-      "community_name": "PlacementController.ts",
-      "norm_label": "worldtogrid()"
-    },
-    {
       "label": "cellKey()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
@@ -8152,6 +8140,18 @@
       "community": 226,
       "community_name": "PlacementController.ts",
       "norm_label": "entrykey()"
+    },
+    {
+      "label": "makeTrackSprite()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
+      "source_location": "L37",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_layers_tracklayer_maketracksprite",
+      "community": 226,
+      "community_name": "PlacementController.ts",
+      "norm_label": "maketracksprite()"
     },
     {
       "label": ".clear()",
@@ -8440,174 +8440,6 @@
       "community": 227,
       "community_name": "authoring.ts",
       "norm_label": "timetable()"
-    },
-    {
-      "label": "pairPortals()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/authoring.ts",
-      "source_location": "L258",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_authoring_pairportals",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "pairportals()"
-    },
-    {
-      "label": "buildMap()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L431",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_buildmap",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "buildmap()"
-    },
-    {
-      "label": "cellOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L319",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_cellof",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "cellof()"
-    },
-    {
-      "label": "linkOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L129",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_linkof",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "linkof()"
-    },
-    {
-      "label": "linksOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L137",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_linksof",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "linksof()"
-    },
-    {
-      "label": "nameEverything()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L504",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_nameeverything",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "nameeverything()"
-    },
-    {
-      "label": "pairKey()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L168",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_pairkey",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "pairkey()"
-    },
-    {
-      "label": "pieceOf()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L104",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_pieceof",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "pieceof()"
-    },
-    {
-      "label": "placeInactive()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L474",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_placeinactive",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "placeinactive()"
-    },
-    {
-      "label": "readRly()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L241",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_readrly",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "readrly()"
-    },
-    {
-      "label": "switchSubtype()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L175",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_switchsubtype",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "switchsubtype()"
-    },
-    {
-      "label": "trackDataFor()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L322",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_trackdatafor",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "trackdatafor()"
-    },
-    {
-      "label": "where()",
-      "file_type": "code",
-      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
-      "source_location": "L320",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "claude_skills_railway_author_scripts_import_railos_where",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": "where()"
-    },
-    {
-      "label": ".hasPlatform()",
-      "file_type": "code",
-      "source_file": "packages/shared/src/railway/track/track.ts",
-      "source_location": "L377",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_track_hasplatform",
-      "community": 228,
-      "community_name": "buildMap",
-      "norm_label": ".hasplatform()"
     },
     {
       "label": ".constructor()",
@@ -9042,6 +8874,30 @@
       "norm_label": "status()"
     },
     {
+      "label": "gridToWorld()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/grid.ts",
+      "source_location": "L20",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_lib_grid_gridtoworld",
+      "community": 238,
+      "community_name": "gridToWorld",
+      "norm_label": "gridtoworld()"
+    },
+    {
+      "label": "worldToGrid()",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/grid.ts",
+      "source_location": "L27",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_lib_grid_worldtogrid",
+      "community": 238,
+      "community_name": "gridToWorld",
+      "norm_label": "worldtogrid()"
+    },
+    {
       "label": "createRouteLayer()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/RouteLayer.ts",
@@ -9050,7 +8906,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer_createroutelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "createroutelayer()"
     },
     {
@@ -9062,7 +8918,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer_routelayer_sync",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": ".sync()"
     },
     {
@@ -9074,7 +8930,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer_strokepath",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "strokepath()"
     },
     {
@@ -9086,7 +8942,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_signalstatelayer_createsignalstatelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "createsignalstatelayer()"
     },
     {
@@ -9098,7 +8954,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_signalstatelayer_signalstatelayer_sync",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": ".sync()"
     },
     {
@@ -9110,7 +8966,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_trainlayer_createtrainlayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "createtrainlayer()"
     },
     {
@@ -9122,7 +8978,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_trainlayer_trainlayer_sync",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": ".sync()"
     },
     {
@@ -9134,7 +8990,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_edgepoint",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "edgepoint()"
     },
     {
@@ -9146,7 +9002,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_joinedpoints",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "joinedpoints()"
     },
     {
@@ -9158,7 +9014,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_lerp",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "lerp()"
     },
     {
@@ -9170,7 +9026,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_pointalong",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "pointalong()"
     },
     {
@@ -9182,7 +9038,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_signallamp",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "signallamp()"
     },
     {
@@ -9194,7 +9050,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_spanpoints",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "spanpoints()"
     },
     {
@@ -9206,7 +9062,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_traincolor",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "traincolor()"
     },
     {
@@ -9218,7 +9074,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_trainpoints",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "trainpoints()"
     },
     {
@@ -9230,7 +9086,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operatelayers_attachoperatelayers",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "attachoperatelayers()"
     },
     {
@@ -9242,7 +9098,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_tests_operategeometry_test_seg",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "seg()"
     },
     {
@@ -11130,66 +10986,6 @@
       "norm_label": "state()"
     },
     {
-      "label": ".clear()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L164",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_clear",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": ".clear()"
-    },
-    {
-      "label": ".getStart()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L160",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_getstart",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": ".getstart()"
-    },
-    {
-      "label": ".isErasing()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L162",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_iserasing",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": ".iserasing()"
-    },
-    {
-      "label": ".setEnd()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L158",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_setend",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": ".setend()"
-    },
-    {
-      "label": ".setStart()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
-      "source_location": "L156",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_setstart",
-      "community": 255,
-      "community_name": "EndpointOutlines",
-      "norm_label": ".setstart()"
-    },
-    {
       "label": "c()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/authoring.ts",
@@ -11850,6 +11646,30 @@
       "norm_label": ".sync()"
     },
     {
+      "label": "pairPortals()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/authoring.ts",
+      "source_location": "L258",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_authoring_pairportals",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "pairportals()"
+    },
+    {
+      "label": "buildMap()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L431",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_buildmap",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "buildmap()"
+    },
+    {
       "label": "cellFromId()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11860,6 +11680,66 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "cellfromid()"
+    },
+    {
+      "label": "cellOf()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L319",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_cellof",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "cellof()"
+    },
+    {
+      "label": "linkOf()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L129",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_linkof",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "linkof()"
+    },
+    {
+      "label": "linksOf()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L137",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_linksof",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "linksof()"
+    },
+    {
+      "label": "nameEverything()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L504",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_nameeverything",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "nameeverything()"
+    },
+    {
+      "label": "pairKey()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L168",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_pairkey",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "pairkey()"
     },
     {
       "label": "parseAction()",
@@ -11884,6 +11764,42 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "parseservice()"
+    },
+    {
+      "label": "pieceOf()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L104",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_pieceof",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "pieceof()"
+    },
+    {
+      "label": "placeInactive()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L474",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_placeinactive",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "placeinactive()"
+    },
+    {
+      "label": "readRly()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L241",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_readrly",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "readrly()"
     },
     {
       "label": "readTtb()",
@@ -11934,6 +11850,18 @@
       "norm_label": "subtypebylinks()"
     },
     {
+      "label": "switchSubtype()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L175",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_switchsubtype",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "switchsubtype()"
+    },
+    {
       "label": "timeOf()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11946,6 +11874,18 @@
       "norm_label": "timeof()"
     },
     {
+      "label": "trackDataFor()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L322",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_trackdatafor",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "trackdatafor()"
+    },
+    {
       "label": "trainSpec()",
       "file_type": "code",
       "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
@@ -11956,6 +11896,30 @@
       "community": 33,
       "community_name": "import-railos.ts",
       "norm_label": "trainspec()"
+    },
+    {
+      "label": "where()",
+      "file_type": "code",
+      "source_file": ".claude/skills/railway-author/scripts/import-railos.ts",
+      "source_location": "L320",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "claude_skills_railway_author_scripts_import_railos_where",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": "where()"
+    },
+    {
+      "label": ".hasPlatform()",
+      "file_type": "code",
+      "source_file": "packages/shared/src/railway/track/track.ts",
+      "source_location": "L377",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_shared_src_railway_track_track_track_hasplatform",
+      "community": 33,
+      "community_name": "import-railos.ts",
+      "norm_label": ".hasplatform()"
     },
     {
       "label": "exitFields()",
@@ -12138,18 +12102,6 @@
       "norm_label": "choicefield()"
     },
     {
-      "label": "gridToWorld()",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/grid.ts",
-      "source_location": "L20",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_lib_grid_gridtoworld",
-      "community": 35,
-      "community_name": "gridToWorld",
-      "norm_label": "gridtoworld()"
-    },
-    {
       "label": "createEndpointOutlines()",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/gestureOverlay.ts",
@@ -12158,7 +12110,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_createendpointoutlines",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "createendpointoutlines()"
     },
     {
@@ -12170,7 +12122,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_createendpointoutlines_redraw",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "redraw()"
     },
     {
@@ -12182,8 +12134,68 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_dashedline",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "dashedline()"
+    },
+    {
+      "label": ".clear()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L164",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_clear",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": ".clear()"
+    },
+    {
+      "label": ".getStart()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L160",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_getstart",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": ".getstart()"
+    },
+    {
+      "label": ".isErasing()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L162",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_iserasing",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": ".iserasing()"
+    },
+    {
+      "label": ".setEnd()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L158",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_setend",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": ".setend()"
+    },
+    {
+      "label": ".setStart()",
+      "file_type": "code",
+      "source_file": "packages/app/src/renderer/gestureOverlay.ts",
+      "source_location": "L156",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "packages_app_src_renderer_gestureoverlay_endpointoutlines_setstart",
+      "community": 35,
+      "community_name": "gestureOverlay.ts",
+      "norm_label": ".setstart()"
     },
     {
       "label": "queueCellRect()",
@@ -12194,7 +12206,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_queuecellrect",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "queuecellrect()"
     },
     {
@@ -12206,7 +12218,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_strokecelloutline",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "strokecelloutline()"
     },
     {
@@ -12218,7 +12230,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "createlinkhighlightlayer()"
     },
     {
@@ -12230,7 +12242,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_clearsectionhighlight",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "clearsectionhighlight()"
     },
     {
@@ -12242,7 +12254,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_clearsectionsprites",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "clearsectionsprites()"
     },
     {
@@ -12254,7 +12266,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_highlightsection",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "highlightsection()"
     },
     {
@@ -12266,7 +12278,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_setlinkpreview",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "setlinkpreview()"
     },
     {
@@ -12278,7 +12290,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_setsectionpreview",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "setsectionpreview()"
     },
     {
@@ -12290,7 +12302,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_setsectionroutevisible",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "setsectionroutevisible()"
     },
     {
@@ -12302,7 +12314,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_sync",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "sync()"
     },
     {
@@ -12314,20 +12326,8 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer_createlinkhighlightlayer_syncselection",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "syncselection()"
-    },
-    {
-      "label": "makeTrackSprite()",
-      "file_type": "code",
-      "source_file": "packages/app/src/renderer/layers/TrackLayer.ts",
-      "source_location": "L37",
-      "_callable": true,
-      "_origin": "ast",
-      "id": "packages_app_src_renderer_layers_tracklayer_maketracksprite",
-      "community": 35,
-      "community_name": "gridToWorld",
-      "norm_label": "maketracksprite()"
     },
     {
       "label": ".getLinkedTrackPairs()",
@@ -13929,7 +13929,7 @@
       "label": "SWITCH_SUBTYPES()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/__tests__/track-rails.test.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_shared_src_railway_tests_track_rails_test_switch_subtypes",
@@ -14013,7 +14013,7 @@
       "label": "signalFacingExit()",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/track/track-data.ts",
-      "source_location": "L670",
+      "source_location": "L671",
       "_callable": true,
       "_origin": "ast",
       "id": "packages_shared_src_railway_track_track_data_signalfacingexit",
@@ -15824,15 +15824,15 @@
       "norm_label": "signal_codes"
     },
     {
-      "label": "SIGNAL_LAMP_LINK",
+      "label": "SIGNAL_EXIT_LINK",
       "file_type": "code",
       "source_file": "packages/shared/src/railway/track/track-data.ts",
-      "source_location": "L655",
+      "source_location": "L656",
       "_origin": "ast",
-      "id": "packages_shared_src_railway_track_track_data_signal_lamp_link",
+      "id": "packages_shared_src_railway_track_track_data_signal_exit_link",
       "community": 16,
       "community_name": "track-data.ts",
-      "norm_label": "signal_lamp_link"
+      "norm_label": "signal_exit_link"
     },
     {
       "label": "SIGNAL_LINKS",
@@ -17672,28 +17672,6 @@
       "norm_label": "debuglogger.ts"
     },
     {
-      "label": "grid.ts",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/grid.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "packages_app_src_lib_grid",
-      "community": 226,
-      "community_name": "PlacementController.ts",
-      "norm_label": "grid.ts"
-    },
-    {
-      "label": "CELL_SIZE",
-      "file_type": "code",
-      "source_file": "packages/app/src/lib/grid.ts",
-      "source_location": "L14",
-      "_origin": "ast",
-      "id": "packages_app_src_lib_grid_cell_size",
-      "community": 226,
-      "community_name": "PlacementController.ts",
-      "norm_label": "cell_size"
-    },
-    {
       "label": "DirectionLayer.ts",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/DirectionLayer.ts",
@@ -18883,6 +18861,28 @@
       "norm_label": "connectivity.test.ts"
     },
     {
+      "label": "grid.ts",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/grid.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "packages_app_src_lib_grid",
+      "community": 238,
+      "community_name": "gridToWorld",
+      "norm_label": "grid.ts"
+    },
+    {
+      "label": "CELL_SIZE",
+      "file_type": "code",
+      "source_file": "packages/app/src/lib/grid.ts",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "packages_app_src_lib_grid_cell_size",
+      "community": 238,
+      "community_name": "gridToWorld",
+      "norm_label": "cell_size"
+    },
+    {
       "label": "RouteLayer.ts",
       "file_type": "code",
       "source_file": "packages/app/src/renderer/layers/RouteLayer.ts",
@@ -18890,7 +18890,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "routelayer.ts"
     },
     {
@@ -18901,7 +18901,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_routelayer_route_colors",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "route_colors"
     },
     {
@@ -18912,7 +18912,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_signalstatelayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "signalstatelayer.ts"
     },
     {
@@ -18923,7 +18923,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_signalstatelayer_lamp_colors",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "lamp_colors"
     },
     {
@@ -18934,7 +18934,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_trainlayer",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "trainlayer.ts"
     },
     {
@@ -18945,7 +18945,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "operategeometry.ts"
     },
     {
@@ -18956,7 +18956,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_status_colors",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "status_colors"
     },
     {
@@ -18967,7 +18967,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operategeometry_wait_colors",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "wait_colors"
     },
     {
@@ -18978,7 +18978,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_operatelayers",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "operatelayers.ts"
     },
     {
@@ -18989,7 +18989,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_tests_operategeometry_test",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "operategeometry.test.ts"
     },
     {
@@ -19000,7 +19000,7 @@
       "_origin": "ast",
       "id": "packages_shared_src_railway_map_map_connectivity_link_offsets",
       "community": 238,
-      "community_name": "operateGeometry.ts",
+      "community_name": "gridToWorld",
       "norm_label": "link_offsets"
     },
     {
@@ -21358,7 +21358,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gestureoverlay.ts"
     },
     {
@@ -21369,7 +21369,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_end_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_end_color"
     },
     {
@@ -21380,7 +21380,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_invalid_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_invalid_color"
     },
     {
@@ -21391,7 +21391,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_outline_inset",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_outline_inset"
     },
     {
@@ -21402,7 +21402,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_outline_width",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_outline_width"
     },
     {
@@ -21413,7 +21413,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_preview_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_preview_color"
     },
     {
@@ -21424,7 +21424,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_preview_erase_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_preview_erase_color"
     },
     {
@@ -21435,7 +21435,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_start_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_start_color"
     },
     {
@@ -21446,7 +21446,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_gesture_start_erase_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "gesture_start_erase_color"
     },
     {
@@ -21457,7 +21457,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_connector_alpha",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_connector_alpha"
     },
     {
@@ -21468,7 +21468,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_connector_width",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_connector_width"
     },
     {
@@ -21479,7 +21479,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_fill_alpha",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_fill_alpha"
     },
     {
@@ -21490,7 +21490,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_incomplete_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_incomplete_color"
     },
     {
@@ -21501,7 +21501,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_ok_color",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_ok_color"
     },
     {
@@ -21512,7 +21512,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_outline_alpha",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_outline_alpha"
     },
     {
@@ -21523,7 +21523,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_gestureoverlay_state_outline_width",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "state_outline_width"
     },
     {
@@ -21534,7 +21534,7 @@
       "_origin": "ast",
       "id": "packages_app_src_renderer_layers_linkhighlightlayer",
       "community": 35,
-      "community_name": "gridToWorld",
+      "community_name": "gestureOverlay.ts",
       "norm_label": "linkhighlightlayer.ts"
     },
     {
@@ -83654,7 +83654,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/railway/__tests__/track-rails.test.ts",
-      "source_location": "L66",
+      "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_shared_src_railway_tests_track_rails_test",
@@ -85260,11 +85260,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/railway/track/track-data.ts",
-      "source_location": "L655",
+      "source_location": "L656",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_shared_src_railway_track_track_data",
-      "target": "packages_shared_src_railway_track_track_data_signal_lamp_link",
+      "target": "packages_shared_src_railway_track_track_data_signal_exit_link",
       "confidence_score": 1.0
     },
     {
@@ -85282,7 +85282,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "packages/shared/src/railway/track/track-data.ts",
-      "source_location": "L670",
+      "source_location": "L671",
       "weight": 1.0,
       "_origin": "ast",
       "source": "packages_shared_src_railway_track_track_data",
@@ -97041,5 +97041,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ae2c87b892b747a5534305ebe78311d3c4cec6b2"
+  "built_at_commit": "0e9e899d6de1a03309b60f72d511ca2af520c747"
 }
