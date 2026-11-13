@@ -3,6 +3,7 @@ import { PlacementController } from "#/engine/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import {
 	downloadTimetable,
+	type LoadedTimetableFile,
 	pickAndReadTimetableFile,
 } from "#/lib/timetableFile";
 import { useEditorStore } from "#/store/editor-store";
@@ -24,18 +25,25 @@ export function saveTimetable(): void {
 	debugLog("saveload", `saved timetable to file (${format})`);
 }
 
+/** Put an already-parsed timetable in the store; returns any issue message. */
+export function applyLoadedTimetable(
+	loaded: LoadedTimetableFile,
+): string | null {
+	useTimetableStore
+		.getState()
+		.replaceTimetable(loaded.data, PlacementController.instance?.map ?? null);
+	useEditorStore.getState().setSaveFormat(loaded.format);
+	debugLog("saveload", `loaded timetable from file (${loaded.format})`);
+	return describeLoadedIssues();
+}
+
 export async function loadTimetable(): Promise<string | null> {
 	try {
 		// The picker has to be opened from the user gesture that got us here — a
 		// keydown carries user activation, so the hotkey path works too.
 		const loaded = await pickAndReadTimetableFile();
 		if (!loaded) return null; // picker cancelled
-		useTimetableStore
-			.getState()
-			.replaceTimetable(loaded.data, PlacementController.instance?.map ?? null);
-		useEditorStore.getState().setSaveFormat(loaded.format);
-		debugLog("saveload", `loaded timetable from file (${loaded.format})`);
-		return describeLoadedIssues();
+		return applyLoadedTimetable(loaded);
 	} catch (err) {
 		// A rejected file leaves the editor exactly as it was: the message goes
 		// back to the caller to show, and nothing has been replaced.

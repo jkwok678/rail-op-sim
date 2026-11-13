@@ -2,18 +2,13 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SaveLoadControls } from "#/components/sim/SaveLoadControls";
-import {
-	loadDocument,
-	loadTimetableDocument,
-	saveDocument,
-} from "#/lib/documentActions";
+import { loadDocument, saveDocument } from "#/lib/documentActions";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 
 vi.mock("#/lib/documentActions", () => ({
 	saveDocument: vi.fn(),
 	loadDocument: vi.fn(async () => {}),
-	loadTimetableDocument: vi.fn(async () => {}),
 }));
 
 describe("SaveLoadControls", () => {
@@ -31,7 +26,9 @@ describe("SaveLoadControls", () => {
 			screen.getByRole("button", { name: "Save map as YAML" }),
 		).toBeDefined();
 		expect(
-			screen.getByRole("button", { name: "Load map from JSON or YAML" }),
+			screen.getByRole("button", {
+				name: "Load railway or timetable from JSON or YAML",
+			}),
 		).toBeDefined();
 	});
 
@@ -51,26 +48,7 @@ describe("SaveLoadControls", () => {
 		expect(loadDocument).toHaveBeenCalledOnce();
 	});
 
-	it("offers timetable upload on the railway screen only", () => {
-		render(<SaveLoadControls />);
-		fireEvent.click(
-			screen.getByRole("button", {
-				name: "Upload timetable from JSON or YAML",
-			}),
-		);
-		expect(loadTimetableDocument).toHaveBeenCalledOnce();
-		cleanup();
-
-		useModeStore.setState({ mode: "timetable" });
-		render(<SaveLoadControls />);
-		expect(
-			screen.queryByRole("button", {
-				name: "Upload timetable from JSON or YAML",
-			}),
-		).toBeNull();
-		cleanup();
-
-		useModeStore.setState({ mode: "operate" });
+	it("has no separate timetable upload button", () => {
 		render(<SaveLoadControls />);
 		expect(
 			screen.queryByRole("button", {
