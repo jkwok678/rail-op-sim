@@ -71,7 +71,11 @@ export function ModeSwitcher() {
 						<TooltipTrigger asChild>
 							{reason ? <span tabIndex={-1}>{button}</span> : button}
 						</TooltipTrigger>
-						<ModeTip shortcut={reason ? undefined : shortcut}>
+						{/* No badge while operating: the mode keys are off there, so
+						    a slip can't end the session. */}
+						<ModeTip
+							shortcut={reason || mode === "operate" ? undefined : shortcut}
+						>
 							{reason ?? `${label} mode`}
 						</ModeTip>
 					</Tooltip>

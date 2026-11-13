@@ -57,6 +57,10 @@ export function liveShortcuts(
 		!overlayOpen && state.mode === "timetable" && !state.timetablePicking;
 	// The operate keys work the signalling panel, so only while it is on screen.
 	const operateLive = !overlayOpen && state.mode === "operate";
+	// Leaving a session throws it away, so the keys that switch mode are dead
+	// while operating: R and T sit among the signalling keys, and a slip would
+	// end the session. The switcher's buttons remain the way out.
+	const modeKeysLive = !overlayOpen && state.mode !== "operate";
 
 	/** Where a shortcut differs from the default of "not behind an overlay". */
 	const exceptions: Partial<Record<ShortcutId, boolean>> = {
@@ -69,7 +73,8 @@ export function liveShortcuts(
 		toggleEraseMode: toolsLive && state.tool === "direction",
 		// Mirrors the switcher: the timetable needs a railway that is
 		// operationally complete, not merely joined.
-		modeTimetable: !overlayOpen && !state.timetableBlocked,
+		modeRailway: modeKeysLive,
+		modeTimetable: modeKeysLive && !state.timetableBlocked,
 		modeOperate: !overlayOpen && !state.operateBlocked,
 		operateRunPause: operateLive,
 		operateSlower: operateLive,

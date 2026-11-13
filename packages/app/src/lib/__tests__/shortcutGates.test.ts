@@ -144,6 +144,15 @@ describe("liveShortcuts — operate mode", () => {
 		expect(live.undo).toBe(false);
 	});
 
+	it("kills the keys for the other modes while operating", () => {
+		const live = liveShortcuts(state({ mode: "operate" }));
+		expect(live.modeRailway).toBe(false);
+		expect(live.modeTimetable).toBe(false);
+		const editing = liveShortcuts(state({ mode: "timetable" }));
+		expect(editing.modeRailway).toBe(true);
+		expect(editing.modeOperate).toBe(true);
+	});
+
 	it("gates the operate mode key on a runnable timetable", () => {
 		expect(liveShortcuts(state({ operateBlocked: true })).modeOperate).toBe(
 			false,
