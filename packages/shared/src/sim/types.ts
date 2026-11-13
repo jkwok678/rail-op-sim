@@ -179,6 +179,21 @@ export interface ViewSeg {
 	to: number;
 }
 
+/** One booked step of a working, formatted once; static for the working's life. */
+export interface TrainTimetableRow {
+	/** Formatted booked time(s) (e.g. "06:00", "06:01–06:02"), or null when untimed. */
+	time: string | null;
+	/** What the action does and where (e.g. "Ashfield", "pass Barton", "exit"). */
+	label: string;
+}
+
+/** Whether a step has been completed, is the next step, or is still to come. */
+export type TrainTimetableState = "done" | "next" | "upcoming";
+
+export interface TrainTimetableEntry extends TrainTimetableRow {
+	state: TrainTimetableState;
+}
+
 export interface TrainView {
 	id: number;
 	headcode: string;
@@ -190,6 +205,10 @@ export interface TrainView {
 	segs: ViewSeg[];
 	/** What the train does next, for the train list. */
 	next: string;
+	/** Index of the working's current action; rows come from `drainTimetables`. */
+	timetableIndex: number;
+	/** The working has run its course (with `status`, decides each step's state). */
+	workingDone: boolean;
 }
 
 export interface SimView {

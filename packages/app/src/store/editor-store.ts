@@ -2,6 +2,7 @@ import {
 	SignalAspect,
 	type SignalAspectValue,
 	type TrackKind,
+	type TrainTimetableEntry,
 } from "@rail-op-sim/shared";
 import { create } from "zustand";
 import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
@@ -67,6 +68,25 @@ export type HoveredTrackInfo = {
 	aspectLabel: string | null;
 	gx: number;
 	gy: number;
+	/** Viewport coordinates of the pointer (for fixed-position rendering). */
+	screenX: number;
+	screenY: number;
+};
+
+/**
+ * Plain-data snapshot of the train under the pointer, pushed by the placement
+ * controller when "show train info" or "show train timetable" is enabled. Kept
+ * serialisable (no pixi/model references) so it can live in the store and be
+ * read by the tooltip.
+ */
+export type HoveredTrainInfo = {
+	headcode: string;
+	description: string | null;
+	/** Present when "Show train info" is enabled; null when only "Show train timetable" is enabled. */
+	statusLabel: string | null;
+	next: string | null;
+	/** Present when "Show train timetable" is enabled; null when only "Show train info" is enabled. */
+	timetable: TrainTimetableEntry[] | null;
 	/** Viewport coordinates of the pointer (for fixed-position rendering). */
 	screenX: number;
 	screenY: number;
@@ -154,6 +174,12 @@ export interface EditorState {
 	/** Whether hovering the canvas shows a floating track-info tooltip. */
 	showTrackInfo: boolean;
 
+	/** Whether hovering a train on the canvas shows a floating train-info tooltip. */
+	showTrainInfo: boolean;
+
+	/** Whether hovering a train on the canvas shows its timetable in the tooltip. */
+	showTrainTimetable: boolean;
+
 	/** Whether the graph-paper grid behind the tracks is visible. */
 	showGrid: boolean;
 
@@ -175,6 +201,12 @@ export interface EditorState {
 	 * the pointer isn't over a track (or the feature is disabled).
 	 */
 	hoveredTrackInfo: HoveredTrackInfo | null;
+
+	/**
+	 * Plain-data snapshot of the train currently under the pointer, or null when
+	 * the pointer isn't over a train (or the feature is disabled).
+	 */
+	hoveredTrainInfo: HoveredTrainInfo | null;
 
 	/**
 	 * Track connectivity summary, recomputed by the (pixi-owning) placement
@@ -217,6 +249,10 @@ export interface EditorState {
 	toggleShowDirections: () => void;
 	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
 	toggleShowTrackInfo: () => void;
+	/** Toggle the hover train-info tooltip on/off (clears hover when neither train toggle is on). */
+	toggleShowTrainInfo: () => void;
+	/** Toggle the hover train-timetable tooltip on/off (clears hover when neither train toggle is on). */
+	toggleShowTrainTimetable: () => void;
 	/** Toggle the ground grid on/off. */
 	toggleShowGrid: () => void;
 	/** Choose JSON or YAML for the next Save. */
@@ -227,6 +263,8 @@ export interface EditorState {
 	setShortcuts: (open: boolean) => void;
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
+	/** Push (or clear) the train-info snapshot for the tooltip to render. */
+	setHoveredTrainInfo: (info: HoveredTrainInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
 	setTrackStatus: (status: TrackStatus | null) => void;
 	/** Push a fresh undo/redo summary for the toolbar to read. */
@@ -304,10 +342,13 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showLinkHighlights: false,
 	showDirections: false,
 	showTrackInfo: false,
+	showTrainInfo: false,
+	showTrainTimetable: false,
 	showGrid: true,
 	saveFormat: "json",
 	showShortcuts: false,
 	hoveredTrackInfo: null,
+	hoveredTrainInfo: null,
 	trackStatus: null,
 	canUndo: false,
 	canRedo: false,
@@ -397,6 +438,23 @@ export const useEditorStore = create<EditorState>((set) => ({
 			showTrackInfo: !s.showTrackInfo,
 			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
 		})),
+	toggleShowTrainInfo: () =>
+		set((s) => {
+			const next = !s.showTrainInfo;
+			return {
+				showTrainInfo: next,
+				hoveredTrainInfo:
+					!next && !s.showTrainTimetable ? null : s.hoveredTrainInfo,
+			};
+		}),
+	toggleShowTrainTimetable: () =>
+		set((s) => {
+			const next = !s.showTrainTimetable;
+			return {
+				showTrainTimetable: next,
+				hoveredTrainInfo: !next && !s.showTrainInfo ? null : s.hoveredTrainInfo,
+			};
+		}),
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 	setSaveFormat: (format) => {
 		debugLog("store", `setSaveFormat: ${format}`);
@@ -405,6 +463,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 	toggleShortcuts: () => set((s) => ({ showShortcuts: !s.showShortcuts })),
 	setShortcuts: (open) => set({ showShortcuts: open }),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
+	setHoveredTrainInfo: (info) => set({ hoveredTrainInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
 	setHistoryState: (state) => set(state),
 	setZoom: (z) => set({ zoom: z }),

@@ -73,7 +73,7 @@ describe("engine host", () => {
 		});
 		advance(1000);
 		const view = latestView(received);
-		expect(view?.time).toBeGreaterThan(6 * 3600 + 3.5);
+		expect(view?.time).toBeGreaterThan(6 * 3600 + 3);
 		expect(view?.time).toBeLessThanOrEqual(6 * 3600 + 4.01);
 	});
 
@@ -100,5 +100,17 @@ describe("engine host", () => {
 		advance(1000);
 		expect(received).toHaveLength(count);
 		expect(record.closed.right).toBe(true);
+	});
+
+	it("publishes only changed views", () => {
+		const { host, received, advance } = setUp();
+		host.send({ type: "load", map: lineMap(), timetable: emptyTimetable });
+		const updates = () =>
+			received.filter((m) => m.type === "state_update").length;
+		const before = updates();
+		advance(1000);
+		expect(updates()).toBe(before);
+		host.send({ type: "command", id: 1, cmd: { type: "setSpeed", speed: 4 } });
+		expect(updates()).toBe(before + 1);
 	});
 });

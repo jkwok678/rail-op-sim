@@ -100,6 +100,8 @@ describe("OperatePanel", () => {
 						speedKmh: 0,
 						segs: [],
 						next: "arr Barton 06:10",
+						timetableIndex: 0,
+						workingDone: false,
 					},
 				],
 			}),

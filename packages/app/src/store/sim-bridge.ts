@@ -46,6 +46,9 @@ export function startSimBridge(
 			case "log":
 				store().appendLog(message.lines);
 				return;
+			case "timetables":
+				store().mergeTimetables(message.rows);
+				return;
 			case "command_result":
 				waiting.get(message.id)?.(message.result);
 				waiting.delete(message.id);

@@ -123,6 +123,9 @@ const run: Record<ShortcutId, () => void> = {
 	toggleLinkHighlights: () => useEditorStore.getState().toggleLinkHighlights(),
 	toggleDirections: () => useEditorStore.getState().toggleShowDirections(),
 	toggleTrackInfo: () => useEditorStore.getState().toggleShowTrackInfo(),
+	toggleTrainInfo: () => useEditorStore.getState().toggleShowTrainInfo(),
+	toggleTrainTimetable: () =>
+		useEditorStore.getState().toggleShowTrainTimetable(),
 
 	modeRailway: () => useModeStore.getState().setMode("railway"),
 	modeTimetable: () => useModeStore.getState().setMode("timetable"),

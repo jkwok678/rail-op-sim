@@ -58,6 +58,8 @@ describe("operate geometry", () => {
 			speedKmh: 0,
 			segs: [seg(0), seg(1)],
 			next: "",
+			timetableIndex: 0,
+			workingDone: false,
 		});
 		expect(paths).toHaveLength(1);
 		expect(paths[0]).toHaveLength(5);
@@ -110,6 +112,8 @@ describe("operate geometry", () => {
 			speedKmh: 0,
 			segs: [],
 			next: "",
+			timetableIndex: 0,
+			workingDone: false,
 		};
 		expect(trainColor({ ...base, status: "running", wait: null })).toBe(
 			0xcbd5e1,

@@ -10,6 +10,7 @@ export {
 	type RailGraph,
 	type Seg,
 } from "./graph";
+export { timetableEntries, timetableStepState } from "./timetable";
 export type {
 	CommandResult,
 	Counters,
@@ -22,6 +23,9 @@ export type {
 	SimState,
 	SimView,
 	TrainStatus,
+	TrainTimetableEntry,
+	TrainTimetableRow,
+	TrainTimetableState,
 	TrainView,
 	ViewSeg,
 	WaitReason,

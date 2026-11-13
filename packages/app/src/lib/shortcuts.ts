@@ -25,6 +25,8 @@ export type ShortcutId =
 	| "toggleLinkHighlights"
 	| "toggleDirections"
 	| "toggleTrackInfo"
+	| "toggleTrainInfo"
+	| "toggleTrainTimetable"
 	| "modeRailway"
 	| "modeTimetable"
 	| "modeOperate"
@@ -147,6 +149,18 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		id: "toggleTrackInfo",
 		hotkey: "I",
 		label: "Show track info",
+		group: "Display",
+	},
+	toggleTrainInfo: {
+		id: "toggleTrainInfo",
+		hotkey: "H",
+		label: "Show train info",
+		group: "Display",
+	},
+	toggleTrainTimetable: {
+		id: "toggleTrainTimetable",
+		hotkey: "B",
+		label: "Show train timetable",
 		group: "Display",
 	},
 
@@ -332,6 +346,8 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleLinkHighlights",
 	"toggleDirections",
 	"toggleTrackInfo",
+	"toggleTrainInfo",
+	"toggleTrainTimetable",
 	"modeRailway",
 	"modeTimetable",
 	"modeOperate",

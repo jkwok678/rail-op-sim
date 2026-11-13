@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Action } from "../../railway/timetable/types";
-import { repeatHeadcode } from "../timetable";
+import {
+	repeatHeadcode,
+	timetableEntries,
+	timetableStepState,
+} from "../timetable";
 import {
 	cell,
 	engineFor,
@@ -258,7 +262,44 @@ describe("the train list", () => {
 		engine.handle({ type: "run" });
 		engine.advance(1);
 		expect(engine.view().trains[0].next).toBe("dep Terminus 06:05");
+		const rows = engine.drainTimetables();
+		expect(rows[engine.view().trains[0].id]).toEqual([
+			{ time: "06:00", label: "start" },
+			{ time: "06:05", label: "dep Terminus" },
+			{ time: "06:10", label: "exit" },
+		]);
+		expect(engine.drainTimetables()).toEqual({});
+		expect(
+			timetableEntries(
+				rows[engine.view().trains[0].id],
+				engine.view().trains[0],
+			).map((e) => e.state),
+		).toEqual(["done", "next", "upcoming"]);
 		engine.advance(400);
 		expect(engine.view().trains[0].next).toBe("exit 06:10");
+		expect(engine.drainTimetables()).toEqual({});
+		expect(
+			timetableEntries(
+				rows[engine.view().trains[0].id],
+				engine.view().trains[0],
+			).map((e) => e.state),
+		).toEqual(["done", "done", "next"]);
+	});
+});
+
+describe("timetableStepState", () => {
+	it("marks passed steps done and the current step next", () => {
+		expect(timetableStepState(0, 1, false, "running")).toBe("done");
+		expect(timetableStepState(1, 1, false, "running")).toBe("next");
+		expect(timetableStepState(2, 1, false, "running")).toBe("upcoming");
+	});
+
+	it("has no next step once crashed", () => {
+		expect(timetableStepState(1, 1, false, "crashed")).toBe("upcoming");
+	});
+
+	it("finishes every step when the working is done and the train finished", () => {
+		expect(timetableStepState(2, 1, true, "finished")).toBe("done");
+		expect(timetableStepState(2, 1, true, "running")).toBe("upcoming");
 	});
 });

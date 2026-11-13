@@ -34,6 +34,7 @@ import {
 	placeName,
 	type RunnerContext,
 	stopTarget,
+	trainTimetableRows,
 	workDwelling,
 } from "./timetable";
 import { approaching, type MoveEvent, moveTrain, trainSpans } from "./trains";
@@ -45,6 +46,7 @@ import type {
 	SimState,
 	SimView,
 	Train,
+	TrainTimetableRow,
 	ViewSeg,
 	WaitReason,
 } from "./types";
@@ -65,6 +67,13 @@ export interface Engine {
 	view(): SimView;
 	/** Log lines produced since the last call, oldest first. */
 	drainLog(): LogLine[];
+	/**
+	 * Formatted timetable rows, keyed by train id, for every train whose working
+	 * is new or changed since the last call (everything on the first call).
+	 */
+	drainTimetables(): Record<number, TrainTimetableRow[]>;
+	/** Bumped whenever the state may have changed; equal versions mean an equal view. */
+	readonly version: number;
 }
 
 function emptyCounters(): Counters {
@@ -124,6 +133,9 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const ctx: RunnerContext = { graph, state, timetable, log };
 	let drained = 0;
 	let carry = 0;
+	let version = 0;
+	/** Per train id, the working whose rows were last sent. */
+	const sentWorking = new Map<number, string>();
 
 	const refreshAspects = (): void => {
 		const occupied = trainKeys(graph, state.trains);
@@ -197,6 +209,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	};
 
 	const step = (): void => {
+		version++;
 		state.time += SIM_DT;
 		commitPendingRoute(graph, state);
 		dispatchDue(ctx);
@@ -240,7 +253,11 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		graph,
 		timetable,
 		state,
+		get version() {
+			return version;
+		},
 		handle(cmd) {
+			version++;
 			switch (cmd.type) {
 				case "run": {
 					const next = afterRun(state.run);
@@ -313,9 +330,26 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 						viewSeg(span.seg, span.from, span.to),
 					),
 					next: nextActionText(ctx, t),
+					timetableIndex: t.working.index,
+					workingDone: t.working.done,
 				})),
 				counters: { ...state.counters },
 			};
+		},
+		drainTimetables() {
+			const rows: Record<number, TrainTimetableRow[]> = {};
+			const live = new Set<number>();
+			for (const t of state.trains) {
+				live.add(t.id);
+				const key = `${t.working.ref}#${t.working.repeat}`;
+				if (sentWorking.get(t.id) === key) continue;
+				sentWorking.set(t.id, key);
+				rows[t.id] = trainTimetableRows(ctx, t);
+			}
+			for (const id of sentWorking.keys()) {
+				if (!live.has(id)) sentWorking.delete(id);
+			}
+			return rows;
 		},
 		drainLog() {
 			const lines = log.lines.slice(drained);

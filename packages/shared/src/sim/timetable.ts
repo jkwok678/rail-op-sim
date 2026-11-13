@@ -24,7 +24,17 @@ import {
 	startPosition,
 	trainFromSpec,
 } from "./trains";
-import type { ServiceRun, SimState, Train, TrainWorking } from "./types";
+import type {
+	ServiceRun,
+	SimState,
+	Train,
+	TrainStatus,
+	TrainTimetableEntry,
+	TrainTimetableRow,
+	TrainTimetableState,
+	TrainView,
+	TrainWorking,
+} from "./types";
 
 /** RailOS's floor between any two timetabled actions of one train. */
 const MIN_ACTION_GAP = 30;
@@ -245,6 +255,137 @@ function describeAction(a: Action, at: string | null, offset: number): string {
 			: actionTime(a);
 	const when = time === null ? null : formatSimTime(time + offset);
 	return [verb, actionLocation(a), when].filter(Boolean).join(" ");
+}
+
+function formatTimetableAction(
+	a: Action,
+	offset: number,
+): Pick<TrainTimetableEntry, "time" | "label"> {
+	switch (a.kind) {
+		case "startNew":
+			return { time: formatSimTime(a.time + offset), label: "start" };
+		case "startNewService":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `from ${a.fromRef}`,
+			};
+		case "startFromSplit":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `split from ${a.fromRef}`,
+			};
+		case "stop":
+			if (a.arrive !== undefined && a.depart !== undefined) {
+				return {
+					time: `${formatSimTime(a.arrive + offset)}–${formatSimTime(a.depart + offset)}`,
+					label: a.location,
+				};
+			}
+			if (a.arrive !== undefined) {
+				return {
+					time: formatSimTime(a.arrive + offset),
+					label: `arr ${a.location}`,
+				};
+			}
+			if (a.depart !== undefined) {
+				return {
+					time: formatSimTime(a.depart + offset),
+					label: `dep ${a.location}`,
+				};
+			}
+			return { time: null, label: a.location };
+		case "pass":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `pass ${a.location}`,
+			};
+		case "changeDirection":
+			return { time: formatSimTime(a.time + offset), label: "reverse" };
+		case "changeDescription":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `rename "${a.description}"`,
+			};
+		case "changeMaxSpeed":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `max ${a.maxSpeedKmh} km/h`,
+			};
+		case "frontSplit":
+		case "rearSplit":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `split → ${a.newRef}`,
+			};
+		case "joinedBy":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `joined by ${a.otherRef}`,
+			};
+		case "finishNewService":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `→ ${a.nextRef}`,
+			};
+		case "finishJoin":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `join ${a.otherRef}`,
+			};
+		case "finishExit":
+			return { time: formatSimTime(a.time + offset), label: "exit" };
+		case "finishRemainHere":
+			return { time: null, label: "terminates" };
+		default: {
+			const t = actionTime(a);
+			return {
+				time: t !== null ? formatSimTime(t + offset) : null,
+				label: a.kind,
+			};
+		}
+	}
+}
+
+/** Booked timetable rows for `train`'s working, formatted once with repeat offsets applied. */
+export function trainTimetableRows(
+	ctx: RunnerContext,
+	train: Train,
+): TrainTimetableRow[] {
+	const w = train.working;
+	const offset = offsetOf(ctx, w);
+	return actionsOf(ctx, w).map((a) => formatTimetableAction(a, offset));
+}
+
+/**
+ * Where step `i` of a working stands: done once passed (or once a finished
+ * working's train has run its course), next while it is the current action of
+ * a live train, otherwise upcoming.
+ */
+export function timetableStepState(
+	i: number,
+	index: number,
+	workingDone: boolean,
+	status: TrainStatus,
+): TrainTimetableState {
+	if (i < index || (workingDone && status === "finished")) return "done";
+	if (!workingDone && status !== "crashed" && i === index) return "next";
+	return "upcoming";
+}
+
+/** Rows with their step states derived from a train view's position in them. */
+export function timetableEntries(
+	rows: readonly TrainTimetableRow[],
+	train: Pick<TrainView, "timetableIndex" | "workingDone" | "status">,
+): TrainTimetableEntry[] {
+	return rows.map((row, i) => ({
+		...row,
+		state: timetableStepState(
+			i,
+			train.timetableIndex,
+			train.workingDone,
+			train.status,
+		),
+	}));
 }
 
 // ============================================================================

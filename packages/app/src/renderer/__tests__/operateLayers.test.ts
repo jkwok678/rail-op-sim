@@ -17,6 +17,8 @@ const train = (over: Partial<TrainView> = {}): TrainView => ({
 	speedKmh: 50,
 	segs: [seg(1), seg(2)],
 	next: "",
+	timetableIndex: 0,
+	workingDone: false,
 	...over,
 });
 

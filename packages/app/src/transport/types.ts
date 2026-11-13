@@ -5,6 +5,7 @@ import type {
 	SimCommand,
 	SimView,
 	Timetable,
+	TrainTimetableRow,
 } from "@rail-op-sim/shared";
 
 /**
@@ -25,6 +26,8 @@ export type EngineToHost =
 	| { type: "ready" }
 	| { type: "state_update"; view: SimView }
 	| { type: "log"; lines: LogLine[] }
+	/** Formatted timetable rows by train id, for trains whose working is new or changed. */
+	| { type: "timetables"; rows: Record<number, TrainTimetableRow[]> }
 	| { type: "command_result"; id: number; result: CommandResult }
 	| { type: "error"; message: string };
 

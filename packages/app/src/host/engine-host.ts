@@ -24,8 +24,8 @@ export interface HostClock {
 
 /** How often the loop runs. */
 const FRAME_MS = 16;
-/** How often the view is published: 20 Hz is plenty for a signalling panel. */
-const VIEW_MS = 50;
+/** How often a changed view is published: 10 Hz is plenty for a signalling panel. */
+const VIEW_MS = 100;
 /** Most wall time one frame may make up, so a stalled tab does not lurch. */
 const MAX_FRAME_S = 0.25;
 
@@ -37,11 +37,25 @@ export function startEngineHost(
 	let timer: unknown = null;
 	let last = 0;
 	let lastView = 0;
+	let lastVersion = -1;
 
-	const publish = (): void => {
+	/** Send the view when the engine has changed since the last one. */
+	const publishView = (): void => {
 		if (!engine) return;
 		lastView = clock.now();
+		if (engine.version === lastVersion) return;
+		lastVersion = engine.version;
 		transport.send({ type: "state_update", view: engine.view() });
+	};
+
+	/** Timetables go ahead of the view, so its trains already have their rows. */
+	const publish = (): void => {
+		if (!engine) return;
+		const rows = engine.drainTimetables();
+		if (Object.keys(rows).length > 0) {
+			transport.send({ type: "timetables", rows });
+		}
+		publishView();
 		const lines = engine.drainLog();
 		if (lines.length > 0) transport.send({ type: "log", lines });
 	};
@@ -64,6 +78,7 @@ export function startEngineHost(
 	const load = (message: Extract<HostToEngine, { type: "load" }>): void => {
 		const map = new RailMap();
 		deserializeMap(message.map, map);
+		lastVersion = -1;
 		engine = createEngine({
 			map,
 			timetable: parseTimetable(message.timetable),

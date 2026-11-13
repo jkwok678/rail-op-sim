@@ -1,4 +1,10 @@
-import type { Cell, LogLine, RouteKind, SimView } from "@rail-op-sim/shared";
+import type {
+	Cell,
+	LogLine,
+	RouteKind,
+	SimView,
+	TrainTimetableRow,
+} from "@rail-op-sim/shared";
 import { create } from "zustand";
 
 /**
@@ -22,6 +28,8 @@ export interface OperateState {
 	error: string | null;
 	view: SimView | null;
 	log: NumberedLogLine[];
+	/** Formatted timetable rows by train id; static per working. */
+	timetables: Record<number, TrainTimetableRow[]>;
 	routeKind: RouteKind;
 	/** Right-click cancels the route under the cursor while armed. */
 	cancelArmed: boolean;
@@ -34,6 +42,8 @@ export interface OperateState {
 	setStatus: (status: SessionStatus, error?: string | null) => void;
 	setView: (view: SimView) => void;
 	appendLog: (lines: LogLine[]) => void;
+	/** Merge rows for trains whose working is new or changed. */
+	mergeTimetables: (rows: Record<number, TrainTimetableRow[]>) => void;
 	setRouteKind: (kind: RouteKind) => void;
 	setCancelArmed: (armed: boolean) => void;
 	setRouteStart: (cell: Cell | null) => void;
@@ -47,6 +57,7 @@ const initial = {
 	error: null,
 	view: null,
 	log: [],
+	timetables: {},
 	routeKind: "preferred" as RouteKind,
 	cancelArmed: false,
 	routeStart: null,
@@ -57,7 +68,22 @@ const initial = {
 export const useOperateStore = create<OperateState>((set) => ({
 	...initial,
 	setStatus: (status, error = null) => set({ status, error }),
-	setView: (view) => set({ view }),
+	setView: (view) =>
+		set((s) => {
+			// Drop rows of trains that have left the railway.
+			const ids = Object.keys(s.timetables);
+			if (ids.length === 0) return { view };
+			const live = new Set(view.trains.map((t) => t.id));
+			if (ids.every((id) => live.has(Number(id)))) return { view };
+			const timetables: Record<number, TrainTimetableRow[]> = {};
+			for (const id of ids) {
+				if (live.has(Number(id)))
+					timetables[Number(id)] = s.timetables[Number(id)];
+			}
+			return { view, timetables };
+		}),
+	mergeTimetables: (rows) =>
+		set((s) => ({ timetables: { ...s.timetables, ...rows } })),
 	appendLog: (lines) =>
 		set((s) => {
 			const first = (s.log[s.log.length - 1]?.seq ?? 0) + 1;

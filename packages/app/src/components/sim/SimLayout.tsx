@@ -15,6 +15,7 @@ import { StatusBar } from "./StatusBar";
 import { TextInputDialog } from "./TextInputDialog";
 import { Toolbar } from "./Toolbar";
 import { TrackInfoTooltip } from "./TrackInfoTooltip";
+import { TrainInfoTooltip } from "./TrainInfoTooltip";
 import { TimetableEditor } from "./timetable/TimetableEditor";
 
 /**
@@ -88,6 +89,7 @@ export function SimLayout() {
 					/>
 					<ShortcutsDialog />
 					<TrackInfoTooltip />
+					<TrainInfoTooltip />
 				</div>
 				{mode === "timetable" ? <TimetableEditor /> : null}
 				{mode === "operate" ? <OperatePanel /> : null}

@@ -31,6 +31,7 @@ import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
 import { applyOperateIntent } from "#/lib/operateActions";
 import { resolveOperateClick } from "#/lib/operateInput";
 import { buildHoveredTrackInfo } from "#/lib/trackInfo";
+import { buildHoveredTrainInfo, findTrainAt } from "#/lib/trainInfo";
 import type { DirectionLayer } from "#/renderer/layers/DirectionLayer";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
@@ -157,6 +158,9 @@ export class PlacementController {
 
 	private abort?: AbortController;
 	private unsubStore?: () => void;
+	private unsubOperate?: () => void;
+	private unsubMode?: () => void;
+	private lastPointer: { clientX: number; clientY: number } | null = null;
 
 	constructor(opts: PlacementControllerOptions) {
 		this.app = opts.app;
@@ -441,6 +445,18 @@ export class PlacementController {
 			}
 
 			if (
+				(state.showTrackInfo !== prevState.showTrackInfo ||
+					state.showTrainInfo !== prevState.showTrainInfo ||
+					state.showTrainTimetable !== prevState.showTrainTimetable) &&
+				this.lastPointer
+			) {
+				this.updateHoverTooltips(
+					this.lastPointer.clientX,
+					this.lastPointer.clientY,
+				);
+			}
+
+			if (
 				!toolChanged &&
 				state.selectedSubtype === prevState.selectedSubtype &&
 				state.selectedAspect === prevState.selectedAspect &&
@@ -450,6 +466,26 @@ export class PlacementController {
 
 			this.applyCursor();
 			this.refreshGhostSprite();
+		});
+
+		this.unsubOperate = useOperateStore.subscribe((state, prevState) => {
+			const { showTrainInfo, showTrainTimetable } = useEditorStore.getState();
+			if (
+				state.view !== prevState.view &&
+				this.lastPointer &&
+				(showTrainInfo || showTrainTimetable)
+			) {
+				this.updateHoverTooltips(
+					this.lastPointer.clientX,
+					this.lastPointer.clientY,
+				);
+			}
+		});
+
+		this.unsubMode = useModeStore.subscribe((state, prevState) => {
+			if (state.mode !== prevState.mode && state.mode !== "operate") {
+				useEditorStore.getState().setHoveredTrainInfo(null);
+			}
 		});
 
 		this.applyCursor();
@@ -462,6 +498,8 @@ export class PlacementController {
 		}
 		this.abort?.abort();
 		this.unsubStore?.();
+		this.unsubOperate?.();
+		this.unsubMode?.();
 		this.app.canvas.style.cursor = "";
 		this.ghost.destroy({ children: true });
 	}
@@ -1609,13 +1647,14 @@ export class PlacementController {
 					wp.x - this.textDrag.offsetX,
 					wp.y - this.textDrag.offsetY,
 				);
-			// This branch skips the track-info hover below, so a tooltip opened
-			// before the drag would otherwise hang frozen until the release.
+			// This branch skips the info hover below, so a tooltip opened before
+			// the drag would otherwise hang frozen until the release.
 			useEditorStore.getState().setHoveredTrackInfo(null);
+			useEditorStore.getState().setHoveredTrainInfo(null);
 			return;
 		}
 
-		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
+		const { tool, selectedSubtype } = useEditorStore.getState();
 
 		// Text tool: hovering a placed text advertises the drag-to-move gesture.
 		if (tool === "text") {
@@ -1636,27 +1675,10 @@ export class PlacementController {
 		if (tool === "link") this.updateLinkPreview(e);
 		else this.clearLinkPreview();
 
-		// Track-info hover: independent of the ghost/add logic below, so it works
-		// with any tool (e.g. the select tool while inspecting placed track).
-		if (showTrackInfo) {
-			const hoverCell = this.screenToGrid(e.clientX, e.clientY);
-			const track = hoverCell
-				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
-				: null;
-			useEditorStore
-				.getState()
-				.setHoveredTrackInfo(
-					track && hoverCell
-						? buildHoveredTrackInfo(
-								track,
-								hoverCell.gx,
-								hoverCell.gy,
-								e.clientX,
-								e.clientY,
-							)
-						: null,
-				);
-		}
+		// Track/train-info hover: independent of the ghost/add logic below, so it
+		// works with any tool (e.g. select tool inspecting track, or operate mode).
+		this.lastPointer = { clientX: e.clientX, clientY: e.clientY };
+		this.updateHoverTooltips(e.clientX, e.clientY);
 
 		if (tool !== "add" || !selectedSubtype || !this.ghostSprite) {
 			this.ghost.visible = false;
@@ -1672,17 +1694,72 @@ export class PlacementController {
 		this.ghost.visible = true;
 	};
 
+	private updateHoverTooltips(clientX: number, clientY: number): void {
+		const { showTrackInfo, showTrainInfo, showTrainTimetable } =
+			useEditorStore.getState();
+		const wantTrainHover = showTrainInfo || showTrainTimetable;
+		if (!showTrackInfo && !wantTrainHover) return;
+
+		const hoverCell = this.screenToGrid(clientX, clientY);
+		const train =
+			wantTrainHover && hoverCell && useModeStore.getState().mode === "operate"
+				? findTrainAt(
+						useOperateStore.getState().view?.trains ?? [],
+						hoverCell.gx,
+						hoverCell.gy,
+					)
+				: null;
+
+		if (wantTrainHover) {
+			const timetableRows = train
+				? useOperateStore.getState().timetables[train.id]
+				: undefined;
+			useEditorStore.getState().setHoveredTrainInfo(
+				train
+					? buildHoveredTrainInfo(train, clientX, clientY, {
+							showBasic: showTrainInfo,
+							showTimetable: showTrainTimetable,
+							timetableRows,
+						})
+					: null,
+			);
+		}
+
+		if (showTrackInfo) {
+			const track =
+				!train && hoverCell
+					? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
+					: null;
+			useEditorStore
+				.getState()
+				.setHoveredTrackInfo(
+					track && hoverCell
+						? buildHoveredTrackInfo(
+								track,
+								hoverCell.gx,
+								hoverCell.gy,
+								clientX,
+								clientY,
+							)
+						: null,
+				);
+		}
+	}
+
 	private onPointerLeave = (): void => {
+		this.lastPointer = null;
 		this.cancelTextDrag();
 		this.ghost.visible = false;
 		this.clearDirectionPreview();
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
+		useEditorStore.getState().setHoveredTrainInfo(null);
 	};
 
 	private onPointerCancel = (): void => {
 		debugLog("placement", "pointercancel — clearing state");
+		this.lastPointer = null;
 		this.cancelTextDrag();
 		this.downPos = null;
 		this.downRect = null;
@@ -1691,6 +1768,7 @@ export class PlacementController {
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
+		useEditorStore.getState().setHoveredTrainInfo(null);
 	};
 
 	// ── Helpers ──
