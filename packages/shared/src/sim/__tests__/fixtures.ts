@@ -224,6 +224,58 @@ export function passingLoop(): Map_ {
 	return map;
 }
 
+/**
+ * A passing loop with a signal on each leg after the facing points, traffic
+ * running right:
+ *
+ * ```
+ *  row 1:            (2,1)╱‾(3,1)>‾(4,1)╲
+ *  row 0:  X(0) >(1) SW(2) >(3) -(4) -(5) SW(6) -(7) X(8)
+ * ```
+ *
+ * Main signal at (3,0), loop signal at (4,1). `loopPreferred: false` leaves
+ * the loop without preferred directions.
+ */
+export function signalledLoop({ loopPreferred = true } = {}): Map_ {
+	const map = new Map_();
+	place(map, 0, 0, "exit", "EXITLEFT");
+	place(map, 1, 0, "signal", "SIGNALRIGHT");
+	place(map, 2, 0, "switch", "SWITCH1");
+	place(map, 3, 0, "signal", "SIGNALRIGHT");
+	place(map, 4, 0, "straight", "STRAIGHTH");
+	place(map, 5, 0, "straight", "STRAIGHTH");
+	place(map, 6, 0, "switch", "SWITCH2");
+	place(map, 7, 0, "straight", "STRAIGHTH");
+	place(map, 8, 0, "exit", "EXITRIGHT");
+	place(map, 3, 1, "curved", "CURVE1");
+	place(map, 4, 1, "signal", "SIGNALRIGHT");
+	place(map, 5, 1, "curved", "CURVE2");
+	map.makeTrackList();
+	const at = (gx: number, gy: number) => {
+		const track = map.getTrackAt(gx * CELL, gy * CELL);
+		if (!track) throw new Error(`no track at (${gx}, ${gy})`);
+		return track;
+	};
+	// Set by hand: a path search would pick the loop and leave the main line
+	// without preferred directions.
+	for (let gx = 0; gx <= 8; gx++) {
+		at(gx, 0).addPreferredDirection(3, 5);
+		at(gx, 0).addPreferredDirection(5, 3);
+	}
+	if (loopPreferred) {
+		for (const [entry, exit, track] of [
+			[3, 2, at(2, 0)],
+			[6, 5, at(3, 1)],
+			[3, 5, at(4, 1)],
+			[3, 8, at(5, 1)],
+			[0, 5, at(6, 0)],
+		] as const) {
+			track.addPreferredDirection(entry, exit);
+		}
+	}
+	return map;
+}
+
 export function timetable(
 	services: Service[],
 	startTime = t("06:00"),

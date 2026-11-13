@@ -7,6 +7,7 @@ import {
 	line,
 	linkedLine,
 	passingLoop,
+	signalledLoop,
 } from "./fixtures";
 
 /** Signals at 2 and 5 face right; exits at both ends. */
@@ -174,6 +175,105 @@ describe("points", () => {
 			(s) => engine.graph.nodes[s.node].cell,
 		);
 		expect(cells).toContainEqual({ gx: 3, gy: 1 });
+	});
+
+	const routeCells = (engine: ReturnType<typeof engineFor>) =>
+		engine.state.routes[0].segs.map((s) => engine.graph.nodes[s.node].cell);
+
+	it("routes over either leg of facing points, setting them to match", () => {
+		const lies: number[] = [];
+		for (const [to, via] of [
+			[cell(4), { gx: 4, gy: 0 }],
+			[cell(4, 1), { gx: 3, gy: 1 }],
+		] as const) {
+			const engine = engineFor(passingLoop());
+			const sw = nodeAt(engine.graph, cell(2)) as number;
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			expect(result).toEqual({ ok: true });
+			expect(routeCells(engine)).toContainEqual(via);
+			lies.push(engine.state.lies[sw]);
+		}
+		expect(lies[0]).not.toBe(lies[1]);
+	});
+
+	it("throws points lying the other way back for either leg", () => {
+		for (const to of [cell(4), cell(4, 1)]) {
+			const engine = engineFor(passingLoop());
+			const sw = nodeAt(engine.graph, cell(2)) as number;
+			const fresh = engineFor(passingLoop());
+			fresh.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			const wanted = fresh.state.lies[sw];
+			// Start with the points lying the other way.
+			if (engine.state.lies[sw] === wanted) {
+				engine.handle({ type: "togglePoints", at: cell(2) });
+			}
+			expect(engine.state.lies[sw]).not.toBe(wanted);
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			expect(result).toEqual({ ok: true });
+			expect(engine.state.lies[sw]).toBe(wanted);
+		}
+	});
+
+	it("sets preferred and auto routes to a signal on either leg", () => {
+		for (const kind of ["preferred", "auto"] as const) {
+			const lies: number[] = [];
+			for (const [to, via] of [
+				[cell(3), { gx: 3, gy: 0 }],
+				[cell(4, 1), { gx: 3, gy: 1 }],
+			] as const) {
+				const engine = engineFor(signalledLoop());
+				const sw = nodeAt(engine.graph, cell(2)) as number;
+				const result = engine.handle({
+					type: "setRoute",
+					from: cell(1),
+					to,
+					kind,
+				});
+				expect(result).toEqual({ ok: true });
+				const cells = routeCells(engine);
+				if (to.gy === 1) expect(cells).toContainEqual(via);
+				else expect(cells).not.toContainEqual({ gx: 3, gy: 1 });
+				lies.push(engine.state.lies[sw]);
+			}
+			expect(lies[0]).not.toBe(lies[1]);
+		}
+	});
+
+	it("refuses a preferred route over a leg with no preferred direction", () => {
+		const to = cell(4, 1);
+		const preferred = engineFor(signalledLoop({ loopPreferred: false }));
+		expect(
+			preferred.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "preferred",
+			}).ok,
+		).toBe(false);
+		const free = engineFor(signalledLoop({ loopPreferred: false }));
+		expect(
+			free.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			}),
+		).toEqual({ ok: true });
 	});
 });
 

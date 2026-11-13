@@ -191,7 +191,8 @@ function search(
 	end: NodeId,
 	free: (seg: Seg) => boolean,
 ): Seg[] | null {
-	const key = (seg: Seg): number => seg.node * 9 + seg.entry;
+	// The exit counts too: facing points have two legs from one node and entry.
+	const key = (seg: Seg): number => (seg.node * 9 + seg.entry) * 9 + seg.exit;
 	const queue: SearchNode[] = starts.map((seg) => ({ seg, parent: null }));
 	const seen = new Set<number>(starts.map(key));
 	const enqueue = (node: SearchNode): void => {
