@@ -833,8 +833,8 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] Departure is at the latest of the booked time, arrival plus the minimum dwell (default 30 s), and 30 s after the last action.
 - [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
 - [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
+- [x] Signaller control of trains (§8): take/restore control (with location guard when taken at a stop), move forwards, stop, change direction, step forward, pass red signal, signaller join, skip timetabled actions, become follow-on service early, reminders, and train removal.
 - [ ] Next, still from OPERATE-MODE.md:
-  - signaller control of trains (§8);
   - route truncation and approach locking (§5.7–5.8);
   - continuation auto-signals (§5.10);
   - calling on (§5.13). The signal shows its position lights: `signal<Dir>CallingOn.svg` drawn over the red signal; a ground signal shows white instead (`TrackUnit.cpp:4530`);
