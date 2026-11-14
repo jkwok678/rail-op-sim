@@ -27,10 +27,10 @@ const view = (over: Partial<SimView> = {}): SimView => ({
 	run: "running",
 	speed: 1,
 	signals: [
-		{ gx: 3, gy: 0, aspect: 2, aspects: 4 },
-		{ gx: 5, gy: 0, aspect: 0, aspects: 4 },
+		{ gx: 3, gy: 0, subtype: "SIGNALRIGHT", aspect: 2, aspects: 4 },
+		{ gx: 5, gy: 0, subtype: "SIGNALRIGHT", aspect: 0, aspects: 4 },
 	],
-	points: [{ gx: 4, gy: 0, a: 3, b: 5 }],
+	points: [{ gx: 4, gy: 0, subtype: "SWITCH3", a: 3, b: 5 }],
 	routes: [{ id: "R1", kind: "auto", segs: [seg(3), seg(4)] }],
 	pendingRoute: { kind: "preferred", segs: [seg(6)] },
 	trains: [train()],
@@ -53,13 +53,17 @@ const headcodes = (world: Container): string[] =>
 
 let world: Container;
 let detach: () => void;
+const setOverrides = vi.fn();
+const overrides = (): ReadonlyMap<string, readonly string[]> =>
+	setOverrides.mock.lastCall?.[0] ?? new Map();
 
 beforeEach(() => {
 	vi.useFakeTimers();
 	useOperateStore.getState().reset();
 	useModeStore.setState({ mode: "operate" });
+	setOverrides.mockClear();
 	world = new Container();
-	detach = attachOperateLayers(world);
+	detach = attachOperateLayers(world, { setOverrides });
 });
 
 afterEach(() => {
@@ -69,12 +73,28 @@ afterEach(() => {
 });
 
 describe("attachOperateLayers", () => {
-	it("draws routes, lamps, points and trains from the view", () => {
+	it("draws routes and trains from the view", () => {
 		useOperateStore.setState({ view: view() });
 		expect(drawn(world, "routes")).toBe(true);
-		expect(drawn(world, "signal-state")).toBe(true);
 		expect(drawn(world, "trains")).toBe(true);
 		expect(headcodes(world)).toEqual(["1A01"]);
+	});
+
+	it("shows signal aspects and point lies in the track's art", () => {
+		useOperateStore.setState({ view: view() });
+		expect(overrides()).toEqual(
+			new Map([
+				["3,0", ["signalRightDoubleYellow.svg"]],
+				["5,0", ["signalRight.svg"]],
+				["4,0", ["switchGapped3.svg", "switchStraight3.svg"]],
+			]),
+		);
+	});
+
+	it("gives the track its usual art back outside operate mode", () => {
+		useOperateStore.setState({ view: view() });
+		useModeStore.setState({ mode: "railway" });
+		expect(overrides().size).toBe(0);
 	});
 
 	it("puts a train's headcode on the middle of its body", () => {

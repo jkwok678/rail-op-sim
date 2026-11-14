@@ -60,6 +60,13 @@ export interface TrackLayer {
 	clear(): void;
 	/** Apply/remove speed-length colour tints to all track sprites. */
 	syncColors(map: Map_, active: boolean): void;
+	/**
+	 * Draw these cells (keyed `"x,y"`) with the listed `public/graphics/`
+	 * files, bottom to top, in place of their usual art — operate mode's
+	 * signal aspects and point lies. Cells left out, or whose files aren't
+	 * preloaded, show their usual art. Pass an empty map to restore all.
+	 */
+	setOverrides(overrides: ReadonlyMap<string, readonly string[]>): void;
 	destroy(): void;
 }
 
@@ -71,13 +78,23 @@ export interface TrackLayer {
 export function createTrackLayer(textures: TextureCache): TrackLayer {
 	const container = new Container();
 	container.label = "track-layer";
+	/** One sprite per placed track. */
+	const tiles = new Container();
+	/** Operate-mode art, drawn over cells whose tile is hidden. */
+	const overlay = new Container();
+	overlay.label = "track-overrides";
+	container.addChild(tiles, overlay);
 
 	const entries = new Map<string, Entry>();
+	/** Override sprites per cell, with the file list they were built from. */
+	const overridden = new Map<string, { files: string; sprites: Sprite[] }>();
+	/** The overrides last asked for, re-applied after a rebuild. */
+	let requested: ReadonlyMap<string, readonly string[]> = new Map();
 
 	let colorModeActive = false;
 
 	const removeEntry = (key: string, entry: Entry) => {
-		container.removeChild(entry.sprite);
+		tiles.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		entries.delete(key);
 	};
@@ -100,8 +117,44 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		const lk = entryKey(subtype, aspect);
 		const sprite = makeTrackSprite(texture, gx, gy);
 		sprite.label = `track-${key}`;
-		container.addChild(sprite);
+		sprite.visible = !overridden.has(key);
+		tiles.addChild(sprite);
 		entries.set(key, { sprite, lookupKey: lk, subtype, aspect });
+	};
+
+	const dropOverride = (key: string) => {
+		const existing = overridden.get(key);
+		if (!existing) return;
+		for (const sprite of existing.sprites) {
+			overlay.removeChild(sprite);
+			sprite.destroy();
+		}
+		overridden.delete(key);
+		const entry = entries.get(key);
+		if (entry) entry.sprite.visible = true;
+	};
+
+	const applyOverrides = () => {
+		for (const key of [...overridden.keys()]) {
+			if (!requested.has(key)) dropOverride(key);
+		}
+		for (const [key, files] of requested) {
+			const id = files.join("+");
+			if (overridden.get(key)?.files === id) continue;
+			dropOverride(key);
+			const baked = files.map((f) => textures.getFile(f));
+			if (!baked.every((t): t is Texture => t !== null)) continue;
+			const [gxStr, gyStr] = key.split(",");
+			const sprites = baked.map((t) => {
+				const sprite = makeTrackSprite(t, Number(gxStr), Number(gyStr));
+				sprite.label = `track-override-${key}`;
+				overlay.addChild(sprite);
+				return sprite;
+			});
+			overridden.set(key, { files: id, sprites });
+			const entry = entries.get(key);
+			if (entry) entry.sprite.visible = false;
+		}
 	};
 
 	return {
@@ -161,6 +214,8 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			// Re-apply colour tints if the section colour mode is active
 			// (sync may have rebuilt sprites, losing previous tints).
 			if (colorModeActive) this.syncColors(map, true);
+			// …and operate art, which clear() drops with its textures.
+			applyOverrides();
 		},
 
 		upsertCell(subtype, gx, gy, aspect) {
@@ -198,6 +253,8 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		},
 
 		clear() {
+			// Keep `requested`: the next sync rebuilds the overrides too.
+			for (const key of [...overridden.keys()]) dropOverride(key);
 			for (const [key, entry] of entries) removeEntry(key, entry);
 		},
 
@@ -236,7 +293,13 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			}
 		},
 
+		setOverrides(overrides) {
+			requested = overrides;
+			applyOverrides();
+		},
+
 		destroy() {
+			requested = new Map();
 			this.clear();
 			container.destroy({ children: true });
 		},

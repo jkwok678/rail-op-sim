@@ -11,6 +11,9 @@ import { svgToCanvas } from "#/lib/svgToCanvas";
  */
 const SHUNT_PREFIX = "shunt:";
 
+/** Key prefix for raw SVGs loaded by filename rather than by subtype. */
+const FILE_PREFIX = "file:";
+
 /**
  * Colour map that bakes every source fill to a single flat colour. Used for
  * status-coloured track variants, which replace the fills outright instead of
@@ -48,6 +51,13 @@ export interface TextureCache {
 	 * preloaded yet.
 	 */
 	getColored(subtype: string, color: string, aspect?: number): Texture | null;
+	/** Fetch + cache the raw SVG markup for files in `public/graphics/`. */
+	preloadFiles(filenames: readonly string[]): Promise<void>;
+	/**
+	 * Baked texture for a file in `public/graphics/` in the current theme, or
+	 * null if it hasn't been preloaded yet.
+	 */
+	getFile(filename: string): Texture | null;
 	/** Update the active theme colour map and drop baked textures. */
 	setTheme(themeKey: string, colorMap: ColorMap): void;
 	/** Destroy all baked textures. */
@@ -148,6 +158,30 @@ export function createTextureCache(
 			} else {
 				debugLog("textureCache", `get("${key}") → bake returned null`);
 			}
+			return texture;
+		},
+
+		async preloadFiles(filenames) {
+			await Promise.all(
+				filenames.map(async (filename) => {
+					const key = `${FILE_PREFIX}${filename}`;
+					if (raw.has(key)) return;
+					try {
+						raw.set(key, await loadRawSvgByFilename(filename));
+					} catch (err) {
+						console.warn("textureCache: failed to load", filename, err);
+					}
+				}),
+			);
+		},
+
+		getFile(filename) {
+			const key = `${FILE_PREFIX}${filename}`;
+			const bakedKey = `${currentTheme}:${key}`;
+			const existing = baked.get(bakedKey);
+			if (existing) return existing;
+			const texture = bake(key);
+			if (texture) baked.set(bakedKey, texture);
 			return texture;
 		},
 

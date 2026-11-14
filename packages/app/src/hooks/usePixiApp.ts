@@ -4,6 +4,7 @@ import type { PlacementController } from "#/engine/PlacementController";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE } from "#/lib/grid";
+import { OPERATE_ART_FILES } from "#/lib/operateArt";
 import { buildThemeColorMap } from "#/lib/svgColors";
 import { SVG_MAP } from "#/lib/svgMap";
 import { FIT_EXTENT, FIT_PADDING } from "#/lib/viewportActions";
@@ -140,8 +141,9 @@ export function usePixiApp(): UsePixiAppReturn {
 			const directionLayer = createDirectionLayer();
 			world.addChild(directionLayer.container);
 
-			// Operate mode's routes, lamps and trains, driven by the engine's view.
-			stopOperate = attachOperateLayers(world);
+			// Operate mode's routes and trains, and the signal and point art,
+			// driven by the engine's view.
+			stopOperate = attachOperateLayers(world, trackLayer);
 
 			app.stage.addChild(world);
 			debugLog(
@@ -186,9 +188,13 @@ export function usePixiApp(): UsePixiAppReturn {
 			world.addChild(placement.ghost);
 			placement.attach();
 
-			// Preload all track art, then backfill anything placed meanwhile.
+			// Preload all track art and operate mode's signal and point art,
+			// then backfill anything placed (or operated) meanwhile.
 			const allSubtypes = Object.keys(SVG_MAP);
-			textures.preload(allSubtypes).then(() => {
+			Promise.all([
+				textures.preload(allSubtypes),
+				textures.preloadFiles(OPERATE_ART_FILES),
+			]).then(() => {
 				if (destroyed) return;
 				trackColorLayer.sync(placement.map);
 				trackLayer.sync(placement.map);

@@ -1,6 +1,7 @@
 import type { Container } from "pixi.js";
+import { operateArt } from "#/lib/operateArt";
 import { createRouteLayer } from "#/renderer/layers/RouteLayer";
-import { createSignalStateLayer } from "#/renderer/layers/SignalStateLayer";
+import type { TrackLayer } from "#/renderer/layers/TrackLayer";
 import { createTrainLayer } from "#/renderer/layers/TrainLayer";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
@@ -9,22 +10,31 @@ import { useOperateStore } from "#/store/operate-store";
 const FLASH_MS = 250;
 
 /**
- * Add operate mode's layers to `world` — routes under signal lamps under
- * trains — and keep them in step with the engine's published view. Outside
- * operate mode they are empty. Returns a function that stops the updates.
+ * Add operate mode's layers to `world` — routes under trains — and keep them
+ * in step with the engine's published view. Signals and points show their
+ * state in `track`'s own art: lit signals, and points drawn for the way they
+ * lie. Outside operate mode the layers are empty and the track shows its
+ * usual art. Returns a function that stops the updates.
  */
-export function attachOperateLayers(world: Container): () => void {
+export function attachOperateLayers(
+	world: Container,
+	track: Pick<TrackLayer, "setOverrides">,
+): () => void {
 	const routes = createRouteLayer();
-	const signals = createSignalStateLayer();
 	const trains = createTrainLayer();
-	world.addChild(routes.container, signals.container, trains.container);
+	world.addChild(routes.container, trains.container);
 
 	let flashOn = true;
+	const currentView = () =>
+		useModeStore.getState().mode === "operate"
+			? useOperateStore.getState().view
+			: null;
+
+	const syncRoutes = (): void => routes.sync(currentView(), flashOn);
 	const sync = (): void => {
-		const operating = useModeStore.getState().mode === "operate";
-		const view = operating ? useOperateStore.getState().view : null;
+		const view = currentView();
 		routes.sync(view, flashOn);
-		signals.sync(view);
+		track.setOverrides(operateArt(view));
 		trains.sync(view);
 	};
 
@@ -37,12 +47,13 @@ export function attachOperateLayers(world: Container): () => void {
 	const flash = setInterval(() => {
 		if (!useOperateStore.getState().view?.pendingRoute) return;
 		flashOn = !flashOn;
-		sync();
+		syncRoutes();
 	}, FLASH_MS);
 
 	return () => {
 		unsubView();
 		unsubMode();
 		clearInterval(flash);
+		track.setOverrides(new Map());
 	};
 }
