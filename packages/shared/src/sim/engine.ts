@@ -10,6 +10,11 @@
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
+import {
+	availableFollowOnService,
+	canRestoreTimetable,
+	handleTrainCommand,
+} from "./control";
 import { initialCrossings, workCrossings } from "./crossings";
 import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
 import { PerformanceLog } from "./log";
@@ -212,6 +217,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 
 	/** A train that has stopped on the platforms it is due at has arrived. */
 	const arrived = (train: Train, reason: WaitReason): void => {
+		if (train.control.mode === "signaller") return;
 		const target = stopTarget(ctx, train);
 		const here = locationOf(train.segs[train.segs.length - 1]);
 		const shortOf = reason === "signal" || reason === "train";
@@ -227,7 +233,9 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		workCrossings(graph, state);
 		dispatchDue(ctx);
 		for (const train of state.trains) {
-			if (train.status === "dwelling") workDwelling(ctx, train);
+			if (train.status === "dwelling" && train.control.mode === "timetable") {
+				workDwelling(ctx, train);
+			}
 		}
 		refreshAspects();
 		const events: MoveEvent[] = [];
@@ -244,6 +252,8 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	};
 
 	const routeCommand = (cmd: SimCommand): CommandResult => {
+		const trainResult = handleTrainCommand(ctx, cmd);
+		if (trainResult !== null) return trainResult;
 		switch (cmd.type) {
 			case "checkRouteStart":
 				return checkRouteStart(graph, state, cmd.at, cmd.kind);
@@ -354,6 +364,12 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					next: nextActionText(ctx, t),
 					timetableIndex: t.working.index,
 					workingDone: t.working.done,
+					signallerControl: t.control.mode === "signaller",
+					signallerMode:
+						t.control.mode === "signaller" ? t.control.order.kind : "stop",
+					canRestoreTimetable: canRestoreTimetable(graph, t).ok,
+					followOnServiceRef: availableFollowOnService(ctx, t)?.nextRef ?? null,
+					reminder: t.reminder,
 				})),
 				counters: { ...state.counters },
 			};

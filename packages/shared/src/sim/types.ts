@@ -55,6 +55,7 @@ export type WaitReason =
 	| "buffers"
 	| "points"
 	| "station"
+	| "signaller"
 	| null;
 
 export type TrainStatus =
@@ -64,6 +65,29 @@ export type TrainStatus =
 	| "spad"
 	| "crashed"
 	| "finished";
+
+/** Current movement order when a train is under signaller control. */
+export type SignallerMode = "stop" | "move" | "step";
+
+export type SignallerOrder =
+	| { kind: "stop" }
+	| { kind: "move" }
+	| { kind: "step"; remainingM: number };
+
+export type TrainControl =
+	| { mode: "timetable" }
+	| {
+			mode: "signaller";
+			/** Movement order while under signaller control. */
+			order: SignallerOrder;
+			/**
+			 * Named location where signaller control was taken while stopped there,
+			 * or null when taken en route or created under signaller control.
+			 */
+			restoreLocation: string | null;
+			/** Facing signal node the train is authorised to pass at danger once. */
+			allowedRedSignalNode: NodeId | null;
+	  };
 
 /** Where a train is in its timetable. */
 export interface TrainWorking {
@@ -93,6 +117,8 @@ export interface Train {
 	/** Full-service deceleration, m/s². */
 	brakeRate: number;
 	maxSpeed: number;
+	/** Speed cap (m/s) when under signaller control, or null when uncapped. */
+	signallerMaxSpeed: number | null;
 	lengthM: number;
 	/** Occupied segments, rear first. The front is in the last one. */
 	segs: Seg[];
@@ -102,6 +128,10 @@ export interface Train {
 	speed: number;
 	status: TrainStatus;
 	wait: WaitReason;
+	/** Whether the timetable or the signaller is currently driving the train. */
+	control: TrainControl;
+	/** Optional reminder note attached by the signaller. */
+	reminder: string | null;
 	working: TrainWorking;
 }
 
@@ -185,7 +215,19 @@ export type SimCommand =
 	| { type: "setRoute"; from: Cell; to: Cell; kind: RouteKind }
 	| { type: "setAllAutoRoutes" }
 	| { type: "cancelRoute"; at: Cell }
-	| { type: "togglePoints"; at: Cell };
+	| { type: "togglePoints"; at: Cell }
+	| { type: "takeControl"; trainId: number }
+	| { type: "restoreTimetable"; trainId: number }
+	| { type: "moveForwards"; trainId: number }
+	| { type: "stop"; trainId: number }
+	| { type: "changeDirection"; trainId: number }
+	| { type: "stepForward"; trainId: number }
+	| { type: "passRed"; trainId: number }
+	| { type: "removeTrain"; trainId: number }
+	| { type: "signallerJoin"; trainId: number }
+	| { type: "skipActions"; trainId: number; toIndex: number }
+	| { type: "becomeNewService"; trainId: number }
+	| { type: "setReminder"; trainId: number; reminder: string | null };
 
 /** A success may say what it did; a refusal always says why. */
 export type CommandResult =
@@ -233,6 +275,16 @@ export interface TrainView {
 	timetableIndex: number;
 	/** The working has run its course (with `status`, decides each step's state). */
 	workingDone: boolean;
+	/** True while the signaller has manual control instead of the timetable. */
+	signallerControl: boolean;
+	/** Current signaller movement order while `signallerControl` is true. */
+	signallerMode: SignallerMode;
+	/** Whether timetable control can currently be restored for this train. */
+	canRestoreTimetable: boolean;
+	/** Booked follow-on service ref if the train can become it early here, else null. */
+	followOnServiceRef: string | null;
+	/** Optional signaller reminder note attached to the train. */
+	reminder: string | null;
 }
 
 export interface SimView {

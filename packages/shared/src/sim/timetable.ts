@@ -48,7 +48,7 @@ export interface RunnerContext {
 	log: PerformanceLog;
 }
 
-function serviceByRef(tt: Timetable, ref: string): Service | undefined {
+export function serviceByRef(tt: Timetable, ref: string): Service | undefined {
 	return tt.services.find((s) => s.ref === ref);
 }
 
@@ -89,7 +89,7 @@ export function placeName(node: GraphNode): string {
 	return node.location ?? `(${node.cell.gx}, ${node.cell.gy})`;
 }
 
-const actionsOf = (ctx: RunnerContext, w: TrainWorking): Action[] =>
+export const actionsOf = (ctx: RunnerContext, w: TrainWorking): Action[] =>
 	serviceByRef(ctx.timetable, w.ref)?.actions ?? [];
 
 const offsetOf = (ctx: RunnerContext, w: TrainWorking): number => {
@@ -191,13 +191,29 @@ function introduce(
 		);
 	}
 	if (start.signallerControl) {
-		log.warning(
-			state.time,
-			`${train.headcode} was booked to start under signaller control, which is not available yet; it is held.`,
-		);
-		train.working.done = true;
-		train.status = "finished";
-		train.speed = 0;
+		if (rear.kind === "exit") {
+			train.control = {
+				mode: "signaller",
+				order: { kind: "move" },
+				restoreLocation: null,
+				allowedRedSignalNode: null,
+			};
+			if (train.speed <= 0) {
+				train.status = "waiting";
+				train.wait = null;
+			}
+		} else {
+			train.control = {
+				mode: "signaller",
+				order: { kind: "stop" },
+				restoreLocation: null,
+				allowedRedSignalNode: null,
+			};
+			train.speed = 0;
+			train.status = "waiting";
+			train.wait = "signaller";
+		}
+		log.info(state.time, `${train.headcode} started under signaller control`);
 	}
 }
 
@@ -211,7 +227,7 @@ const isCommand = (a: Action): boolean =>
 /** The location a running train is next due to stop at, or null. */
 export function stopTarget(ctx: RunnerContext, train: Train): string | null {
 	const w = train.working;
-	if (w.done) return null;
+	if (w.done || train.control.mode === "signaller") return null;
 	const actions = actionsOf(ctx, w);
 	for (let i = w.index; i < actions.length; i++) {
 		const a = actions[i];
@@ -535,11 +551,12 @@ function runCommand(ctx: RunnerContext, train: Train, a: Command): boolean {
 	return true;
 }
 
-function becomeService(
+export function becomeService(
 	ctx: RunnerContext,
 	train: Train,
 	nextRef: string,
 	where: string,
+	logMessage?: string,
 ): boolean {
 	const next = serviceByRef(ctx.timetable, nextRef);
 	const w = train.working;
@@ -554,15 +571,17 @@ function becomeService(
 	w.index = 1;
 	w.lastActionAt = ctx.state.time;
 	w.releaseAt = null;
+	w.heldReported = false;
+	w.done = false;
 	ctx.log.info(
 		ctx.state.time,
-		`${old} became new service ${train.headcode} at ${where}`,
+		logMessage ?? `${old} became new service ${train.headcode} at ${where}`,
 	);
 	return true;
 }
 
 /** Turn a train round where it stands: the old rear becomes the front. */
-function reverse(graph: RailGraph, train: Train): void {
+export function reverse(graph: RailGraph, train: Train): void {
 	const lengths = train.segs.map((s) => segLengthOf(graph, s));
 	const behind =
 		lengths.slice(0, -1).reduce((sum, len) => sum + len, 0) + train.frontM;
@@ -573,7 +592,7 @@ function reverse(graph: RailGraph, train: Train): void {
 	train.frontM = lengths[0] - rearInto;
 }
 
-function segLengthOf(graph: RailGraph, seg: Seg): number {
+export function segLengthOf(graph: RailGraph, seg: Seg): number {
 	return (
 		graph.nodes[seg.node].paths.find(
 			(p) => p.entry === seg.entry && p.exit === seg.exit,
@@ -636,7 +655,7 @@ export function onEnterLocation(
 	location: string,
 ): void {
 	const w = train.working;
-	if (w.done) return;
+	if (w.done || train.control.mode === "signaller") return;
 	const actions = actionsOf(ctx, w);
 	const j = findBooking(actions, w.index, location);
 	if (j < 0) return;
