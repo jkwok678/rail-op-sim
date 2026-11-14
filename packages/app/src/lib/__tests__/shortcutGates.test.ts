@@ -161,8 +161,14 @@ describe("liveShortcuts — operate mode", () => {
 		expect(liveShortcuts(state()).modeOperate).toBe(true);
 	});
 
-	it("keeps operate keys quiet behind an overlay", () => {
+	it("keeps operate keys quiet behind an overlay or open train dialog", () => {
 		const live = liveShortcuts(state({ mode: "operate", shortcutsOpen: true }));
 		expect(live.operateRunPause).toBe(false);
+		const dialog = liveShortcuts(
+			state({ mode: "operate", trainDialogOpen: true }),
+		);
+		expect(dialog.operateRunPause).toBe(false);
+		expect(dialog.help).toBe(false);
+		expect(dialog.escape).toBe(true);
 	});
 });

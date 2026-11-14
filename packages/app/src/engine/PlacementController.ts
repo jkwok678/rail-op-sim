@@ -580,16 +580,21 @@ export class PlacementController {
 		return !mapEditable;
 	}
 
-	/** Set or cancel a route, or throw points, from a click in operate mode. */
+	/** Set or cancel a route, throw points, or open a train menu in operate mode. */
 	private handleOperateClick(e: PointerEvent): void {
 		const cell = this.screenToGrid(e.clientX, e.clientY);
 		if (!cell) return;
 		const step = this.map.getImageSize();
 		const track = this.map.getTrackAt(cell.gx * step, cell.gy * step);
-		const intent = resolveOperateClick(useOperateStore.getState(), {
+		const operate = useOperateStore.getState();
+		const train = findTrainAt(operate.view?.trains ?? [], cell.gx, cell.gy);
+		const intent = resolveOperateClick(operate, {
 			button: e.button === 2 ? "right" : "left",
 			cell,
 			onPoints: track?.data.kind === "switch",
+			trainId: train?.id ?? null,
+			screenX: e.clientX,
+			screenY: e.clientY,
 		});
 		debugLog("placement", `operate click → ${intent.type}`);
 		void applyOperateIntent(intent);

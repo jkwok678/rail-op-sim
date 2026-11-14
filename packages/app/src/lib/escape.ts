@@ -11,6 +11,7 @@ import type { AddKind, PendingText, Tool } from "#/store/editor-store";
  */
 export type EscapeAction =
 	| { type: "none" }
+	| { type: "closeTrainMenu" }
 	| { type: "cancelCellPick" }
 	| { type: "abandonRoute" }
 	| { type: "disarmRouteCancel" }
@@ -34,6 +35,10 @@ export interface EscapeContext {
 	operateRouteStart?: unknown | null;
 	/** Operate mode: right-click cancels routes. */
 	operateCancelArmed?: boolean;
+	/** Operate mode: train right-click context menu is open. */
+	operateTrainMenuOpen?: boolean;
+	/** Operate mode: a train control modal dialog is open. */
+	operateTrainDialogOpen?: boolean;
 }
 
 /**
@@ -44,9 +49,15 @@ export interface EscapeContext {
  * the user never meant to touch.
  */
 export function resolveEscape(ctx: EscapeContext): EscapeAction {
-	if (ctx.pendingText || ctx.pendingNameTarget || ctx.showShortcuts) {
+	if (
+		ctx.pendingText ||
+		ctx.pendingNameTarget ||
+		ctx.showShortcuts ||
+		ctx.operateTrainDialogOpen
+	) {
 		return { type: "none" };
 	}
+	if (ctx.operateTrainMenuOpen) return { type: "closeTrainMenu" };
 	// An armed "pick on map" is the innermost thing on screen: the canvas is
 	// waiting for one specific click, and Escape is how the user says never
 	// mind without having to click somewhere harmless.

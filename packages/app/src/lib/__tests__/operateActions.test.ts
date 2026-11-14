@@ -101,4 +101,21 @@ describe("applyOperateIntent", () => {
 			{ type: "togglePoints", at },
 		]);
 	});
+
+	it("opens and closes the train menu without talking to the engine", async () => {
+		await applyOperateIntent({
+			type: "openTrainMenu",
+			trainId: 5,
+			screenX: 80,
+			screenY: 160,
+		});
+		expect(useOperateStore.getState().trainMenu).toEqual({
+			trainId: 5,
+			screenX: 80,
+			screenY: 160,
+		});
+		await applyOperateIntent({ type: "none" });
+		expect(useOperateStore.getState().trainMenu).toBeNull();
+		expect(sent).toEqual([]);
+	});
 });

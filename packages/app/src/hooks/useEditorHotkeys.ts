@@ -29,8 +29,13 @@ function runEscape(): void {
 		timetableCellPick: timetable.pendingCellPick,
 		operateRouteStart: operate.routeStart,
 		operateCancelArmed: operate.cancelArmed,
+		operateTrainMenuOpen: operate.trainMenu !== null,
+		operateTrainDialogOpen: operate.trainDialog !== null,
 	});
 	switch (action.type) {
+		case "closeTrainMenu":
+			operate.closeTrainMenu();
+			break;
 		case "abandonRoute":
 			operate.setRouteStart(null);
 			break;
@@ -216,6 +221,7 @@ export function useEditorHotkeys(): void {
 		timetableCanNextIssue:
 			nextIssueTarget(issues, selectedServiceRef, selectedActionIndex) !== null,
 		timetablePicking,
+		trainDialogOpen: useOperateStore((s) => s.trainDialog !== null),
 	});
 
 	// One row per registry entry, always, in registry order: `useHotkeys` keys

@@ -54,6 +54,8 @@ export function buildHoveredTrainInfo(
 		description: showBasic && train.description ? train.description : null,
 		statusLabel: showBasic ? trainStatusLabel(train) : null,
 		next: showBasic && !redundantNext && train.next ? train.next : null,
+		signallerControl: showBasic && train.signallerControl,
+		reminder: showBasic ? train.reminder : null,
 		timetable: showTimetable
 			? timetableEntries(options.timetableRows ?? [], train)
 			: null,

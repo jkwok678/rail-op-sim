@@ -21,6 +21,10 @@ export interface OperateClick {
 	cell: Cell;
 	/** The cell holds points. */
 	onPoints: boolean;
+	/** Train occupying the clicked cell, if any. */
+	trainId?: number | null;
+	screenX?: number;
+	screenY?: number;
 }
 
 export type OperateIntent =
@@ -29,7 +33,13 @@ export type OperateIntent =
 	| { type: "finishRoute"; from: Cell; to: Cell; kind: RouteKind }
 	| { type: "abandonRoute" }
 	| { type: "cancelRoute"; at: Cell }
-	| { type: "togglePoints"; at: Cell };
+	| { type: "togglePoints"; at: Cell }
+	| {
+			type: "openTrainMenu";
+			trainId: number;
+			screenX: number;
+			screenY: number;
+	  };
 
 const sameCell = (a: Cell, b: Cell): boolean => a.gx === b.gx && a.gy === b.gy;
 
@@ -39,7 +49,16 @@ export function resolveOperateClick(
 ): OperateIntent {
 	if (click.button === "right") {
 		if (state.cancelArmed) return { type: "cancelRoute", at: click.cell };
-		return state.routeStart ? { type: "abandonRoute" } : { type: "none" };
+		if (state.routeStart) return { type: "abandonRoute" };
+		if (click.trainId != null) {
+			return {
+				type: "openTrainMenu",
+				trainId: click.trainId,
+				screenX: click.screenX ?? 0,
+				screenY: click.screenY ?? 0,
+			};
+		}
+		return { type: "none" };
 	}
 	if (state.cancelArmed) return { type: "none" };
 	if (state.routeStart) {

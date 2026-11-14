@@ -25,6 +25,29 @@ const simCommand = z.discriminatedUnion("type", [
 	z.object({ type: z.literal("setAllAutoRoutes") }),
 	z.object({ type: z.literal("cancelRoute"), at: cell }),
 	z.object({ type: z.literal("togglePoints"), at: cell }),
+	z.object({ type: z.literal("takeControl"), trainId: z.number() }),
+	z.object({ type: z.literal("restoreTimetable"), trainId: z.number() }),
+	z.object({ type: z.literal("moveForwards"), trainId: z.number() }),
+	z.object({ type: z.literal("stop"), trainId: z.number() }),
+	z.object({ type: z.literal("changeDirection"), trainId: z.number() }),
+	z.object({ type: z.literal("stepForward"), trainId: z.number() }),
+	z.object({ type: z.literal("passRed"), trainId: z.number() }),
+	z.object({ type: z.literal("removeTrain"), trainId: z.number() }),
+	z.object({ type: z.literal("signallerJoin"), trainId: z.number() }),
+	z.object({
+		type: z.literal("skipActions"),
+		trainId: z.number(),
+		toIndex: z.number(),
+	}),
+	z.object({
+		type: z.literal("becomeNewService"),
+		trainId: z.number(),
+	}),
+	z.object({
+		type: z.literal("setReminder"),
+		trainId: z.number(),
+		reminder: z.string().nullable(),
+	}),
 ]);
 
 const hostToEngine = z.discriminatedUnion("type", [

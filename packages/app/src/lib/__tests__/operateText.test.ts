@@ -18,6 +18,11 @@ const train = (over: Partial<TrainView>): TrainView => ({
 	next: "",
 	timetableIndex: 0,
 	workingDone: false,
+	signallerControl: false,
+	signallerMode: "stop",
+	canRestoreTimetable: false,
+	followOnServiceRef: null,
+	reminder: null,
 	...over,
 });
 
@@ -42,6 +47,9 @@ describe("operate panel words", () => {
 		expect(trainStatusLabel(train({ status: "waiting", wait: "signal" }))).toBe(
 			"At signal",
 		);
+		expect(
+			trainStatusLabel(train({ status: "waiting", wait: "signaller" })),
+		).toBe("Signaller hold");
 		expect(trainStatusLabel(train({ status: "dwelling" }))).toBe("At platform");
 		expect(trainStatusLabel(train({ status: "spad" }))).toBe("SPAD");
 	});
@@ -50,6 +58,7 @@ describe("operate panel words", () => {
 		expect(needsAttention(train({ status: "waiting", wait: "signal" }))).toBe(
 			true,
 		);
+		expect(needsAttention(train({ signallerControl: true }))).toBe(true);
 		expect(needsAttention(train({ status: "waiting", wait: "train" }))).toBe(
 			false,
 		);

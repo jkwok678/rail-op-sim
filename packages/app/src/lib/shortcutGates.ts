@@ -28,6 +28,8 @@ export interface ShortcutGateState {
 	timetableCanNextIssue: boolean;
 	/** A canvas cell-pick is waiting; list keys stay out of it. */
 	timetablePicking: boolean;
+	/** Operate mode: a train control dialog (reminder, skip, new service) is open. */
+	trainDialogOpen?: boolean;
 }
 
 /**
@@ -44,7 +46,9 @@ export function liveShortcuts(
 	// put focus in an <input>, so `ignoreInputs` usually covers them, but not
 	// once the user tabs to a button — and the shortcuts overlay has no input at
 	// all, so every letter and digit would otherwise reach the canvas behind it.
-	const overlayOpen = state.editDialogOpen || state.shortcutsOpen;
+	const typingDialogOpen =
+		state.editDialogOpen || Boolean(state.trainDialogOpen);
+	const overlayOpen = typingDialogOpen || state.shortcutsOpen;
 	// The map is read-only outside railway mode, so nothing that edits it — a
 	// tool, erase mode, the map's undo history — can be reachable by key while
 	// the toolbar that offers them is off screen.
@@ -95,7 +99,7 @@ export function liveShortcuts(
 		// The key that opens the reference has to close it again, so it can't be
 		// gated on the overlay it controls — only on the edit dialogs, where the
 		// user is typing.
-		help: !state.editDialogOpen,
+		help: !typingDialogOpen,
 		// Escape has to work *because* an overlay is open, and the modified
 		// shortcuts are unambiguous enough to leave live.
 		escape: true,

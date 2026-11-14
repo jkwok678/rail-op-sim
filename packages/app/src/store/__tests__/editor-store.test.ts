@@ -198,6 +198,8 @@ describe("showTrainInfo and showTrainTimetable", () => {
 			description: null,
 			statusLabel: "60 km/h",
 			next: null,
+			signallerControl: false,
+			reminder: null,
 			timetable: [],
 			screenX: 10,
 			screenY: 20,

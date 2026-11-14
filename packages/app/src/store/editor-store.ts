@@ -85,6 +85,10 @@ export type HoveredTrainInfo = {
 	/** Present when "Show train info" is enabled; null when only "Show train timetable" is enabled. */
 	statusLabel: string | null;
 	next: string | null;
+	/** True when "Show train info" is enabled and train is under signaller control. */
+	signallerControl: boolean;
+	/** Reminder text when "Show train info" is enabled and a reminder is set. */
+	reminder: string | null;
 	/** Present when "Show train timetable" is enabled; null when only "Show train info" is enabled. */
 	timetable: TrainTimetableEntry[] | null;
 	/** Viewport coordinates of the pointer (for fixed-position rendering). */

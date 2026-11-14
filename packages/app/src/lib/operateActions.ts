@@ -46,6 +46,11 @@ export function toggleLog(): void {
 /** Carry out what a canvas click means (see `resolveOperateClick`). */
 export async function applyOperateIntent(intent: OperateIntent): Promise<void> {
 	const store = useOperateStore.getState();
+	if (intent.type === "openTrainMenu") {
+		store.openTrainMenu(intent.trainId, intent.screenX, intent.screenY);
+		return;
+	}
+	if (store.trainMenu) store.closeTrainMenu();
 	switch (intent.type) {
 		case "none":
 			return;

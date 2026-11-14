@@ -30,6 +30,7 @@ const WAITING: Record<NonNullable<TrainView["wait"]>, string> = {
 	buffers: "At buffers",
 	points: "Points against",
 	station: "At platform",
+	signaller: "Signaller hold",
 };
 
 /** What a train is doing, in a couple of words. */
@@ -53,6 +54,7 @@ export function trainStatusLabel(train: TrainView): string {
 /** Whether a train needs the signaller's attention. */
 export function needsAttention(train: TrainView): boolean {
 	return (
+		train.signallerControl ||
 		train.status === "spad" ||
 		train.status === "crashed" ||
 		(train.status === "waiting" &&

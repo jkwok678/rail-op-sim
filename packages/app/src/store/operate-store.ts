@@ -23,6 +23,23 @@ export type NumberedLogLine = LogLine & { seq: number };
 
 export type SessionStatus = "idle" | "loading" | "ready" | "error";
 
+export interface TrainMenuState {
+	trainId: number;
+	screenX: number;
+	screenY: number;
+}
+
+export type TrainDialogKind =
+	| "skipActions"
+	| "becomeNewService"
+	| "setReminder"
+	| "removeTrain";
+
+export interface TrainDialogState {
+	kind: TrainDialogKind;
+	trainId: number;
+}
+
 export interface OperateState {
 	status: SessionStatus;
 	error: string | null;
@@ -35,6 +52,10 @@ export interface OperateState {
 	cancelArmed: boolean;
 	/** First click of a route being set, awaiting its end. */
 	routeStart: Cell | null;
+	/** Open right-click popup menu for a train. */
+	trainMenu: TrainMenuState | null;
+	/** Open dialog for a timetable-linked train command or reminder. */
+	trainDialog: TrainDialogState | null;
 	/** The last thing the engine refused, shown until the next action. */
 	notice: string | null;
 	showLog: boolean;
@@ -47,6 +68,10 @@ export interface OperateState {
 	setRouteKind: (kind: RouteKind) => void;
 	setCancelArmed: (armed: boolean) => void;
 	setRouteStart: (cell: Cell | null) => void;
+	openTrainMenu: (trainId: number, screenX: number, screenY: number) => void;
+	closeTrainMenu: () => void;
+	openTrainDialog: (kind: TrainDialogKind, trainId: number) => void;
+	closeTrainDialog: () => void;
 	setNotice: (notice: string | null) => void;
 	toggleLog: () => void;
 	reset: () => void;
@@ -61,6 +86,8 @@ const initial = {
 	routeKind: "preferred" as RouteKind,
 	cancelArmed: false,
 	routeStart: null,
+	trainMenu: null,
+	trainDialog: null,
 	notice: null,
 	showLog: true,
 };
@@ -70,17 +97,24 @@ export const useOperateStore = create<OperateState>((set) => ({
 	setStatus: (status, error = null) => set({ status, error }),
 	setView: (view) =>
 		set((s) => {
+			const live = new Set((view.trains ?? []).map((t) => t.id));
+			const trainMenu =
+				s.trainMenu && !live.has(s.trainMenu.trainId) ? null : s.trainMenu;
+			const trainDialog =
+				s.trainDialog && !live.has(s.trainDialog.trainId)
+					? null
+					: s.trainDialog;
 			// Drop rows of trains that have left the railway.
 			const ids = Object.keys(s.timetables);
-			if (ids.length === 0) return { view };
-			const live = new Set(view.trains.map((t) => t.id));
-			if (ids.every((id) => live.has(Number(id)))) return { view };
+			if (ids.length === 0 || ids.every((id) => live.has(Number(id)))) {
+				return { view, trainMenu, trainDialog };
+			}
 			const timetables: Record<number, TrainTimetableRow[]> = {};
 			for (const id of ids) {
 				if (live.has(Number(id)))
 					timetables[Number(id)] = s.timetables[Number(id)];
 			}
-			return { view, timetables };
+			return { view, timetables, trainMenu, trainDialog };
 		}),
 	mergeTimetables: (rows) =>
 		set((s) => ({ timetables: { ...s.timetables, ...rows } })),
@@ -91,9 +125,16 @@ export const useOperateStore = create<OperateState>((set) => ({
 			return { log: [...s.log, ...numbered].slice(-LOG_LIMIT) };
 		}),
 	setRouteKind: (routeKind) =>
-		set({ routeKind, routeStart: null, cancelArmed: false }),
-	setCancelArmed: (cancelArmed) => set({ cancelArmed, routeStart: null }),
-	setRouteStart: (routeStart) => set({ routeStart }),
+		set({ routeKind, routeStart: null, cancelArmed: false, trainMenu: null }),
+	setCancelArmed: (cancelArmed) =>
+		set({ cancelArmed, routeStart: null, trainMenu: null }),
+	setRouteStart: (routeStart) => set({ routeStart, trainMenu: null }),
+	openTrainMenu: (trainId, screenX, screenY) =>
+		set({ trainMenu: { trainId, screenX, screenY } }),
+	closeTrainMenu: () => set({ trainMenu: null }),
+	openTrainDialog: (kind, trainId) =>
+		set({ trainMenu: null, trainDialog: { kind, trainId } }),
+	closeTrainDialog: () => set({ trainDialog: null }),
 	setNotice: (notice) => set({ notice }),
 	toggleLog: () => set((s) => ({ showLog: !s.showLog })),
 	reset: () => set({ ...initial }),

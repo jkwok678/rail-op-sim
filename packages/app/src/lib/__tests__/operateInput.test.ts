@@ -63,4 +63,34 @@ describe("resolveOperateClick", () => {
 			expected,
 		);
 	});
+
+	it("opens the train menu on idle right-click over a train, but respects cancel/routeStart first", () => {
+		expect(
+			resolveOperateClick(idle, {
+				button: "right",
+				cell: at,
+				onPoints: false,
+				trainId: 7,
+				screenX: 100,
+				screenY: 200,
+			}),
+		).toEqual({
+			type: "openTrainMenu",
+			trainId: 7,
+			screenX: 100,
+			screenY: 200,
+		});
+		expect(
+			resolveOperateClick(
+				{ ...idle, cancelArmed: true },
+				{ button: "right", cell: at, onPoints: false, trainId: 7 },
+			),
+		).toEqual({ type: "cancelRoute", at });
+		expect(
+			resolveOperateClick(
+				{ ...idle, routeStart: start },
+				{ button: "right", cell: at, onPoints: false, trainId: 7 },
+			),
+		).toEqual({ type: "abandonRoute" });
+	});
 });
