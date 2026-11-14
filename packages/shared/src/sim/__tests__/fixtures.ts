@@ -38,9 +38,10 @@ export function place(
 	kind: TrackKind,
 	subtype: string,
 	platform = false,
+	levelCrossing = false,
 ): void {
 	map.addTrack(
-		createTrackData(kind, subtype, { platform1: platform }),
+		createTrackData(kind, subtype, { platform1: platform, levelCrossing }),
 		gx * CELL,
 		gy * CELL,
 	);
@@ -50,11 +51,11 @@ export function place(
  * Tokens for {@link line}, one per cell left to right along `gy = 0`:
  *
  * - `X` an exit (its open side faces the rest of the line)
- * - `-` plain straight, `P` a straight platform
+ * - `-` plain straight, `P` a straight platform, `L` a level crossing
  * - `>` / `<` a signal for traffic running right / left
  * - `]` / `[` buffer stops at the right / left end
  */
-export type Token = "X" | "-" | "P" | ">" | "<" | "]" | "[";
+export type Token = "X" | "-" | "P" | "L" | ">" | "<" | "]" | "[";
 
 /**
  * A straight railway from tokens, with preferred directions set both ways
@@ -137,6 +138,9 @@ function placeToken(
 			return;
 		case "P":
 			place(map, gx, 0, "straight", "STRAIGHTH", true);
+			return;
+		case "L":
+			place(map, gx, 0, "straight", "STRAIGHTH", false, true);
 			return;
 		case ">":
 			place(map, gx, 0, "signal", "SIGNALRIGHT");

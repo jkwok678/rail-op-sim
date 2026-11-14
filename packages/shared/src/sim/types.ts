@@ -31,6 +31,23 @@ export interface PendingRoute {
 	lies: [NodeId, number][];
 }
 
+/**
+ * Where a level crossing's barriers are, after RailOS: *up* lets road traffic
+ * over and closes the railway; *down* closes the road and opens the railway.
+ * They take a while to move either way, and stay closed to trains meanwhile.
+ */
+export type BarrierState = "up" | "lowering" | "down" | "raising";
+
+export interface CrossingState {
+	barriers: BarrierState;
+	/** When `lowering` or `raising` finishes. */
+	changeAt: number;
+	/** When the barriers last finished lowering. */
+	downSince: number;
+	/** A train has been over the crossing since its barriers went down. */
+	trainSeen: boolean;
+}
+
 /** Why a stationary train is not moving. */
 export type WaitReason =
 	| "signal"
@@ -122,6 +139,11 @@ export interface Counters {
 	incorrectExits: number;
 	spads: number;
 	crashedTrains: number;
+	/**
+	 * Minutes level crossings were down beyond what the traffic needed: all of
+	 * it with no train over them, else past a 3 minute allowance.
+	 */
+	excessLcDownMins: number;
 }
 
 /** One run (repeat) of a service that creates its own train. */
@@ -144,6 +166,8 @@ export interface SimState {
 	lies: number[];
 	/** Signal aspect by node: 0 red, 1 yellow, 2 double yellow, 3 green. */
 	aspects: number[];
+	/** Each level crossing's barriers, by index in the graph's crossings. */
+	crossings: CrossingState[];
 	routes: Route[];
 	pending: PendingRoute | null;
 	nextRouteId: number;
@@ -225,6 +249,12 @@ export interface SimView {
 	}[];
 	/** Every set of points: its subtype and the rail (`a`–`b`) it lies on. */
 	points: { gx: number; gy: number; subtype: string; a: number; b: number }[];
+	/** Every level crossing: its track subtype, its cells in order, its barriers. */
+	levelCrossings: {
+		subtype: string;
+		cells: { gx: number; gy: number }[];
+		barriers: BarrierState;
+	}[];
 	routes: { id: string; kind: RouteKind; segs: ViewSeg[] }[];
 	pendingRoute: { kind: RouteKind; segs: ViewSeg[] } | null;
 	trains: TrainView[];

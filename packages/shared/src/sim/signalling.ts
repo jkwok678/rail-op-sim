@@ -8,9 +8,10 @@
  * A signal clears only along a set route. Walking each route back from its far
  * end, every signal shows one step better than the next signal ahead — red,
  * yellow, double yellow, green — and red when a train stands anywhere between
- * it and that next signal.
+ * it and that next signal, or a level crossing there is not yet down.
  */
 
+import { crossingOpen } from "./crossings";
 import {
 	endsAtBuffers,
 	isFacingSignal,
@@ -24,7 +25,10 @@ import type { Route, SimState } from "./types";
 const RED = 0;
 const GREEN = 3;
 
-/** Nothing to step up from: a train or the plain end of a route lies ahead. */
+/**
+ * Nothing to step up from: a train, a level crossing that is not down, or the
+ * plain end of a route lies ahead.
+ */
 const BLOCKED = -1;
 
 /** As many passes as aspects can step up, so every chain settles. */
@@ -63,7 +67,9 @@ function setRouteAspects(
 	let ahead = endValue(graph, state, route, aspects);
 	for (let i = route.segs.length - 1; i >= 0; i--) {
 		const seg = route.segs[i];
-		if (occupied(i)) ahead = BLOCKED;
+		if (occupied(i) || !crossingOpen(graph, state, seg.node)) {
+			ahead = BLOCKED;
+		}
 		if (isFacingSignal(graph, seg)) {
 			aspects[seg.node] = behind(ahead);
 			ahead = aspects[seg.node];

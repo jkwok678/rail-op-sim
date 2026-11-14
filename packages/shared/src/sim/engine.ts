@@ -10,6 +10,7 @@
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
+import { initialCrossings, workCrossings } from "./crossings";
 import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
 import { PerformanceLog } from "./log";
 import { trainKeys } from "./occupancy";
@@ -102,6 +103,7 @@ function emptyCounters(): Counters {
 		incorrectExits: 0,
 		spads: 0,
 		crashedTrains: 0,
+		excessLcDownMins: 0,
 	};
 }
 
@@ -112,6 +114,7 @@ function initialState(graph: RailGraph, timetable: Timetable): SimState {
 		speed: 1,
 		lies: graph.nodes.map((n) => n.defaultLie),
 		aspects: graph.nodes.map(() => 0),
+		crossings: initialCrossings(graph),
 		routes: [],
 		pending: null,
 		nextRouteId: 1,
@@ -192,6 +195,15 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					`CRASH: ${train.headcode} collided with ${event.other.headcode}`,
 				);
 				return;
+			case "crossingCrash":
+				train.status = "crashed";
+				train.speed = 0;
+				state.counters.crashedTrains++;
+				log.error(
+					state.time,
+					`CRASH: ${train.headcode} CRASHED INTO ROAD TRAFFIC AT A LEVEL CROSSING at ${placeName(graph.nodes[event.seg.node])}`,
+				);
+				return;
 			case "stopped":
 				arrived(train, event.reason);
 				return;
@@ -212,6 +224,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		version++;
 		state.time += SIM_DT;
 		commitPendingRoute(graph, state);
+		workCrossings(graph, state);
 		dispatchDue(ctx);
 		for (const train of state.trains) {
 			if (train.status === "dwelling") workDwelling(ctx, train);
@@ -277,6 +290,9 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					return ok;
 				default: {
 					const result = routeCommand(cmd);
+					// Before the clock starts barriers move at once, so a
+					// cancelled route's crossings go straight back up.
+					if (state.run === "prestart") workCrossings(graph, state);
 					refreshAspects();
 					return result;
 				}
@@ -309,6 +325,11 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 						const rail = n.rails[state.lies[n.id]];
 						return { ...n.cell, subtype: n.subtype, a: rail.a, b: rail.b };
 					}),
+				levelCrossings: graph.crossings.map((lc, i) => ({
+					subtype: graph.nodes[lc.nodes[0]].subtype,
+					cells: lc.nodes.map((id) => ({ ...graph.nodes[id].cell })),
+					barriers: state.crossings[i].barriers,
+				})),
 				routes: state.routes.map((r) => ({
 					id: r.id,
 					kind: r.kind,

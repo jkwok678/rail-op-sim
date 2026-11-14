@@ -11,6 +11,7 @@
 
 import { linkIndexForOffset } from "../railway/map/map-connectivity";
 import type { Cell, TrainSpec } from "../railway/timetable/types";
+import { hitsRoadTraffic } from "./crossings";
 import {
 	isFacingSignal,
 	leavesMap,
@@ -41,7 +42,8 @@ export type MoveEvent =
 	| { type: "left"; train: Train; seg: Seg }
 	| { type: "stopped"; train: Train; reason: WaitReason }
 	| { type: "spad"; train: Train; seg: Seg }
-	| { type: "crash"; train: Train; other: Train };
+	| { type: "crash"; train: Train; other: Train }
+	| { type: "crossingCrash"; train: Train; seg: Seg };
 
 /** What a train can see ahead of it. */
 interface Ahead {
@@ -280,6 +282,11 @@ function advanceFront(
 		events.push({ type: "entered", train, seg: next, from: current });
 		if (isFacingSignal(graph, next) && state.aspects[next.node] === 0) {
 			events.push({ type: "spad", train, seg: next });
+		}
+		// RailOS (TrainUnit.cpp:903): faster than a crawl onto a crossing
+		// whose barriers are not down, and the train hits road traffic.
+		if (hitsRoadTraffic(graph, state, next, train.speed)) {
+			events.push({ type: "crossingCrash", train, seg: next });
 		}
 		const hit = state.trains.find(
 			(t) =>

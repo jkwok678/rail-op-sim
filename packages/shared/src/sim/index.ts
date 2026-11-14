@@ -12,6 +12,7 @@ export {
 } from "./graph";
 export { timetableEntries, timetableStepState } from "./timetable";
 export type {
+	BarrierState,
 	CommandResult,
 	Counters,
 	LogLevel,

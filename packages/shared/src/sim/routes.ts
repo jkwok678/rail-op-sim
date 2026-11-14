@@ -6,9 +6,14 @@
  * its entry signal's cell and stops short of its end signal: the route ahead
  * of that one starts on it, and routes never share a rail. A preferred or
  * automatic route may pass through signals between, each clearing in turn.
+ *
+ * No route starts or ends on a level crossing, and an automatic route may not
+ * pass over one: its barriers must come down for each train, which only a
+ * route set for that train does.
  */
 
 import type { Cell } from "../railway/timetable/types";
+import { crossingChanging, lowerCrossingsOn } from "./crossings";
 import {
 	endsAtBuffers,
 	type GraphNode,
@@ -65,6 +70,8 @@ const prefers = (
  * into the railway; unrestricted routes start on any plain cell either way.
  */
 function startSegs(node: GraphNode, kind: RouteKind): Seg[] | string {
+	if (node.crossing !== null)
+		return "A route cannot start on a level crossing.";
 	if (followsPreferred(kind)) {
 		if (node.signalExit !== null) {
 			const seg = node.paths.find((p) => p.exit === node.signalExit);
@@ -162,6 +169,8 @@ function findRoute(
 	if (startId === null || endId === null)
 		return failed("There is no track there.");
 	if (startId === endId) return failed("A route must end somewhere else.");
+	if (graph.nodes[endId].crossing !== null)
+		return failed("A route cannot end on a level crossing.");
 	const starts = startSegs(graph.nodes[startId], kind);
 	if (typeof starts === "string") return failed(starts);
 
@@ -178,6 +187,11 @@ function findRoute(
 	}
 	const segs = search(graph, kind, open, endId, free);
 	if (segs) return withLies(graph, state, segs);
+	if (kind === "auto" && search(graph, kind, open, endId, free, true)) {
+		return failed(
+			"An automatic signals route cannot pass over a level crossing.",
+		);
+	}
 	return failed(
 		followsPreferred(kind)
 			? "No route that way: it must follow preferred directions to a signal, buffers or an exit."
@@ -185,13 +199,18 @@ function findRoute(
 	);
 }
 
-/** Breadth-first from `starts` until `end` is reached, or null. */
+/**
+ * Breadth-first from `starts` until `end` is reached, or null. `overCrossings`
+ * lets an automatic route over level crossings, to tell whether they are all
+ * that stand in its way.
+ */
 function search(
 	graph: RailGraph,
 	kind: RouteKind,
 	starts: Seg[],
 	end: NodeId,
 	free: (seg: Seg) => boolean,
+	overCrossings = false,
 ): Seg[] | null {
 	// The exit counts too: facing points have two legs from one node and entry.
 	const key = (seg: Seg): number => (seg.node * 9 + seg.entry) * 9 + seg.exit;
@@ -203,7 +222,15 @@ function search(
 		queue.push(node);
 	};
 	for (let head = 0; head < queue.length && head < SEARCH_LIMIT; head++) {
-		const found = expand(graph, kind, queue[head], end, free, enqueue);
+		const found = expand(
+			graph,
+			kind,
+			queue[head],
+			end,
+			free,
+			enqueue,
+			overCrossings,
+		);
 		if (found) return found;
 	}
 	return null;
@@ -217,6 +244,7 @@ function expand(
 	end: NodeId,
 	free: (seg: Seg) => boolean,
 	enqueue: (node: SearchNode) => void,
+	overCrossings: boolean,
 ): Seg[] | null {
 	const step = stepFrom(graph, current.seg.node, current.seg.exit);
 	if (!step) return null;
@@ -227,7 +255,7 @@ function expand(
 		if (reached === "include" && free(seg)) {
 			return unwind({ seg, parent: current });
 		}
-		if (canExtend(graph, kind, seg) && free(seg)) {
+		if (canExtend(graph, kind, seg, overCrossings) && free(seg)) {
 			enqueue({ seg, parent: current });
 		}
 	}
@@ -235,9 +263,17 @@ function expand(
 }
 
 /** Whether a route of `kind` may carry on through `seg`. */
-function canExtend(graph: RailGraph, kind: RouteKind, seg: Seg): boolean {
+function canExtend(
+	graph: RailGraph,
+	kind: RouteKind,
+	seg: Seg,
+	overCrossings: boolean,
+): boolean {
 	if (!followsPreferred(kind)) return true;
 	const node = graph.nodes[seg.node];
+	if (kind === "auto" && node.crossing !== null && !overCrossings) {
+		return false;
+	}
 	return prefers(node, seg);
 }
 
@@ -298,6 +334,7 @@ export function commitPendingRoute(graph: RailGraph, state: SimState): void {
 		return;
 	for (const [node, rail] of pending.lies) state.lies[node] = rail;
 	state.routes.push(pending.route);
+	lowerCrossingsOn(graph, state, pending.route);
 }
 
 /**
@@ -306,7 +343,7 @@ export function commitPendingRoute(graph: RailGraph, state: SimState): void {
  * directions to just short of the next signal, or onto an exit.
  *
  * Only sections the signaller has no choice about are set — a section through
- * points or a crossing, into buffers, onto an unpaired linked track, or on
+ * points or a crossing, over a level crossing, into buffers, onto an unpaired linked track, or on
  * track preferred both ways (where an automatic route would lock out the other
  * direction) is left for setting by hand. Paired linked tracks are plain line:
  * a section carries on through the hop to the partner. Nothing moves, so the
@@ -357,6 +394,7 @@ function plainSeg(
 	const node = graph.nodes[seg.node];
 	return (
 		!needsChoosing(node) &&
+		node.crossing === null &&
 		prefers(node, seg) &&
 		!twoWay(node, seg) &&
 		free(seg)
@@ -396,7 +434,8 @@ function plainAutoRoute(
 
 /**
  * Cancel the route through `at`, whole. Refused while a train is on it or
- * running towards its entry close enough that it could not stop.
+ * running towards its entry close enough that it could not stop, and while a
+ * level crossing on it is still moving.
  */
 export function cancelRoute(
 	graph: RailGraph,
@@ -413,6 +452,9 @@ export function cancelRoute(
 	}
 	if (approaching(route)) {
 		return failed("A train is too close to that route to stop for it.");
+	}
+	if (crossingChanging(graph, state, route.segs)) {
+		return failed("The level crossing on that route is still moving.");
 	}
 	state.routes.splice(state.routes.indexOf(route), 1);
 	return { ok: true };

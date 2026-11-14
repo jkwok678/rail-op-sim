@@ -75,6 +75,18 @@ export interface GraphNode {
 	 * cell is one key.
 	 */
 	occKeys: number[];
+	/** Index into {@link RailGraph.crossings} when a level crossing is here. */
+	crossing: number | null;
+}
+
+/**
+ * A level crossing: one cell, or several parallel tracks side by side whose
+ * crossing cells touch (RailOS's linked level crossings). The barriers of all
+ * of them move together.
+ */
+export interface LevelCrossing {
+	/** Top to bottom, then left to right. */
+	nodes: NodeId[];
 }
 
 export interface RailGraph {
@@ -85,6 +97,7 @@ export interface RailGraph {
 	locations: ReadonlyMap<string, NodeId[]>;
 	/** `next[node * 9 + link]`: where leaving through `link` arrives, or null. */
 	next: (Step | null)[];
+	crossings: LevelCrossing[];
 }
 
 export const cellKey = (cell: Cell): string => `${cell.gx},${cell.gy}`;
@@ -180,7 +193,53 @@ export function buildGraph(map: Map_): RailGraph {
 		}
 	});
 
-	return { nodes, byCell, locations, next };
+	const crossings = groupCrossings(nodes, byCell, (id) =>
+		tracks[id].hasLevelCrossing(),
+	);
+
+	return { nodes, byCell, locations, next, crossings };
+}
+
+/**
+ * The cell next to a crossing on a track of `subtype` that would carry the
+ * same road: below a horizontal track, right of a vertical one. Diagonal
+ * crossings stand alone.
+ */
+function roadNeighbour(subtype: string, cell: Cell): Cell | null {
+	if (subtype === "STRAIGHTH") return { gx: cell.gx, gy: cell.gy + 1 };
+	if (subtype === "STRAIGHTV") return { gx: cell.gx + 1, gy: cell.gy };
+	return null;
+}
+
+/**
+ * Group level-crossing cells into crossings and number each node's crossing.
+ * Nodes are sorted top to bottom, so walking down (or right) from the first
+ * cell of each crossing finds the rest in order.
+ */
+function groupCrossings(
+	nodes: GraphNode[],
+	byCell: ReadonlyMap<string, NodeId>,
+	hasCrossing: (id: NodeId) => boolean,
+): LevelCrossing[] {
+	const crossings: LevelCrossing[] = [];
+	for (const node of nodes) {
+		if (!hasCrossing(node.id) || node.crossing !== null) continue;
+		const members = [node.id];
+		node.crossing = crossings.length;
+		for (
+			let cell = roadNeighbour(node.subtype, node.cell);
+			cell;
+			cell = roadNeighbour(node.subtype, cell)
+		) {
+			const id = byCell.get(cellKey(cell));
+			if (id === undefined || !hasCrossing(id)) break;
+			if (nodes[id].subtype !== node.subtype) break;
+			nodes[id].crossing = crossings.length;
+			members.push(id);
+		}
+		crossings.push({ nodes: members });
+	}
+	return crossings;
 }
 
 function resolveStep(
@@ -222,6 +281,7 @@ function buildNode(track: Track, id: NodeId, cell: Cell): GraphNode {
 		location: locationOf(track),
 		preferred: track.getPreferredDirections(),
 		occKeys,
+		crossing: null,
 	};
 }
 

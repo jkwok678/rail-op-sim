@@ -19,6 +19,7 @@ const view = (over: Partial<SimView> = {}): SimView => ({
 	speed: 1,
 	signals: [],
 	points: [],
+	levelCrossings: [],
 	routes: [],
 	pendingRoute: null,
 	trains: [],

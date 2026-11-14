@@ -31,6 +31,16 @@ const view = (over: Partial<SimView> = {}): SimView => ({
 		{ gx: 5, gy: 0, subtype: "SIGNALRIGHT", aspect: 0, aspects: 4 },
 	],
 	points: [{ gx: 4, gy: 0, subtype: "SWITCH3", a: 3, b: 5 }],
+	levelCrossings: [
+		{
+			subtype: "STRAIGHTH",
+			cells: [
+				{ gx: 7, gy: 0 },
+				{ gx: 7, gy: 1 },
+			],
+			barriers: "down",
+		},
+	],
 	routes: [{ id: "R1", kind: "auto", segs: [seg(3), seg(4)] }],
 	pendingRoute: { kind: "preferred", segs: [seg(6)] },
 	trains: [train()],
