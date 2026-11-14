@@ -810,11 +810,17 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
   - they keep to speed limits ahead;
   - they enter from an exit or start standing on two cells, and leave by an exit.
 - [x] Faults: a SPAD stops the train, and two trains on one rail crash.
+- [x] Automatic level crossings (OPERATE-MODE §5.12, `sim/crossings.ts`). Crossing cells on parallel tracks side by side are one crossing whose barriers move together.
+  - A route set over a crossing lowers its barriers: 30 s, shortened below ×1 so it takes the same real time, and at once before the clock starts. Signals protecting it stay red until they are down.
+  - Once no route or train is on it, it rises again in 10 s. The time it stood down for nothing (past a 3 minute allowance once a train has crossed) adds to `excessLcDownMins`.
+  - No route starts or ends on a crossing, an automatic signals route may not pass over one, and a route cannot be cancelled while its crossing is moving.
+  - A train running onto a crossing that is not down at over 1 km/h crashes into road traffic.
 - [x] Operate mode (`O`) is gated on a complete railway and a timetable with services and no errors.
   - The docked panel has the clock, run/pause, speed, route kind, cancel, the train list and the performance log.
   - The canvas shows route bands, and trains with headcodes. Signals and points show their state in the track art, as RailOS draws them (`lib/operateArt.ts`):
     - a main signal is lit red, yellow, double yellow or green (`signal<Dir>[Yellow|DoubleYellow|Green].svg`), a shunt signal two reds or two whites (`shunt<Dir>[Red|White].svg`);
-    - points are drawn with a gap (`<family>Gapped<n>.svg`) plus the rail they lie for (`<family>Straight|Diverging<n>.svg`, or `switchSplitLeftFork|RightFork<n>.svg`).
+    - points are drawn with a gap (`<family>Gapped<n>.svg`) plus the rail they lie for (`<family>Straight|Diverging<n>.svg`, or `switchSplitLeftFork|RightFork<n>.svg`);
+    - a level crossing with barriers up (closed to trains) keeps its usual `levelCrossingH|V.svg`. Down, the barriers turn to lie along the track: a horizontal track shows `levelCrossingV.svg`, a vertical one `levelCrossingH.svg`, and a crossing over several tracks has `VTop`/`VBottom` (or `HLeft`/`HRight`) end tiles with `Plain` between (`TrackUnit.cpp:6835`). Moving barriers flash between the two. A diagonal crossing has no lowered art and keeps its icon.
   - Keys: `P` run/pause, `,` and `.` for speed, `A`/`S`/`U` for route kind, `C` cancel, `J` log.
 - [ ] Interpolate train positions between published views (they currently step at 20 Hz)
 
@@ -832,7 +838,7 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
   - route truncation and approach locking (§5.7–5.8);
   - continuation auto-signals (§5.10);
   - calling on (§5.13). The signal shows its position lights: `signal<Dir>CallingOn.svg` drawn over the red signal; a ground signal shows white instead (`TrackUnit.cpp:4530`);
-  - level crossings (§5.12). Barriers up (closed to trains) is the usual `levelCrossingH|V.svg`; a manually lowered crossing is green (`levelCrossing…Manual.svg`). A crossing wider than one cell uses the `Top`/`Bottom` (or `Left`/`Right`) end tiles and `Plain` between (`TrackUnit.cpp:6835`);
+  - manual level crossings (§5.12): left-click to lower or raise, never auto-raised, a warning while one is left down. A manually lowered crossing is green (`levelCrossing…Manual.svg`, laid out like the automatic tiles below);
   - splits and joins (§6.8);
   - random delays, failures and TSRs (§9). A failed signal shows `signal<Dir>Failed.svg`, a failed ground signal `shunt<Dir>Failed.svg` (RailOS's `FailedSigTable`);
   - the Actions Due panel (§11);
