@@ -8,6 +8,8 @@ import { AddPalette } from "./AddPalette";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { NameElementDialog } from "./NameElementDialog";
 import { OperatePanel } from "./operate/OperatePanel";
+import { TrainContextMenu } from "./operate/TrainContextMenu";
+import { TrainDialogs } from "./operate/TrainDialogs";
 import { SectionEditPanel } from "./SectionEditPanel";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SimCanvas } from "./SimCanvas";
@@ -92,7 +94,13 @@ export function SimLayout() {
 					<TrainInfoTooltip />
 				</div>
 				{mode === "timetable" ? <TimetableEditor /> : null}
-				{mode === "operate" ? <OperatePanel /> : null}
+				{mode === "operate" ? (
+					<>
+						<OperatePanel />
+						<TrainContextMenu />
+						<TrainDialogs />
+					</>
+				) : null}
 			</div>
 			<StatusBar />
 		</div>

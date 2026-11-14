@@ -19,6 +19,11 @@ const train = (over: Partial<TrainView> = {}): TrainView => ({
 	next: "",
 	timetableIndex: 0,
 	workingDone: false,
+	signallerControl: false,
+	signallerMode: "stop",
+	canRestoreTimetable: false,
+	followOnServiceRef: null,
+	reminder: null,
 	...over,
 });
 

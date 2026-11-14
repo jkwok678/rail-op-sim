@@ -96,6 +96,14 @@ export function createTrainLayer(): TrainLayer {
 						anchor.y - uy + ny,
 					])
 					.fill({ color: trainColor(train) });
+				if (train.signallerControl) {
+					bodies.stroke({ width: 2, color: 0xd97706 });
+				}
+				if (train.reminder !== null) {
+					bodies
+						.circle(anchor.x + ux - nx * 0.65, anchor.y + uy - ny * 0.65, 3)
+						.fill({ color: 0x0284c7 });
+				}
 				const head = pieces[pieces.length - 1];
 				const tail = pathTail(head, BODY_WIDTH * 0.35);
 				bodies.moveTo(tail[0].x, tail[0].y);

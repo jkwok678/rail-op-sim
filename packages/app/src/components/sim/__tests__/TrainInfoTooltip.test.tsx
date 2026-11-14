@@ -9,6 +9,8 @@ const BASE: HoveredTrainInfo = {
 	description: "London to Brighton",
 	statusLabel: "85 km/h",
 	next: "arr Brighton 06:30",
+	signallerControl: false,
+	reminder: null,
 	timetable: null,
 	screenX: 100,
 	screenY: 200,
@@ -82,5 +84,14 @@ describe("TrainInfoTooltip", () => {
 		expect(tip.textContent).not.toContain("85 km/h");
 		expect(tip.textContent).toContain("06:00");
 		expect(tip.textContent).toContain("terminates");
+	});
+
+	it("shows signaller control and reminder when set", () => {
+		const tip = show({
+			signallerControl: true,
+			reminder: "Hold for 1B02",
+		});
+		expect(tip.textContent).toContain("Signaller control");
+		expect(tip.textContent).toContain("Reminder: Hold for 1B02");
 	});
 });

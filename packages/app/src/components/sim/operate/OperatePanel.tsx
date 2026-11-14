@@ -192,6 +192,7 @@ const NO_TRAINS: TrainView[] = [];
 
 function TrainList() {
 	const trains = useOperateStore((s) => s.view?.trains ?? NO_TRAINS);
+	const openTrainMenu = useOperateStore((s) => s.openTrainMenu);
 	return (
 		<div className="min-h-0 flex-1 overflow-y-auto">
 			{trains.length === 0 ? (
@@ -213,9 +214,35 @@ function TrainList() {
 								key={train.id}
 								className="cursor-pointer hover:bg-muted/50"
 								onClick={() => showTrain(train)}
-								title={train.description || undefined}
+								onContextMenu={(e) => {
+									e.preventDefault();
+									openTrainMenu(train.id, e.clientX, e.clientY);
+								}}
+								title={
+									[train.description, train.reminder]
+										.filter(Boolean)
+										.join(" · ") || undefined
+								}
 							>
-								<td className="px-3 py-0.5 font-mono">{train.headcode}</td>
+								<td className="px-3 py-0.5 font-mono">
+									<span>{train.headcode}</span>
+									{train.signallerControl ? (
+										<span
+											title="Signaller control"
+											className="ml-1 inline-block rounded bg-amber-500/15 px-1 text-[9px] font-sans font-medium text-amber-700 dark:text-amber-300"
+										>
+											SC
+										</span>
+									) : null}
+									{train.reminder ? (
+										<span
+											title={`Reminder: ${train.reminder}`}
+											className="ml-1 inline-block rounded bg-sky-500/15 px-1 text-[9px] font-sans font-medium text-sky-700 dark:text-sky-300"
+										>
+											Note
+										</span>
+									) : null}
+								</td>
 								<td
 									className={
 										needsAttention(train)

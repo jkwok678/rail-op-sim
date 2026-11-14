@@ -224,6 +224,7 @@ const WAIT_COLORS: Record<NonNullable<TrainView["wait"]>, number> = {
 	buffers: 0x67e8f9,
 	points: 0xfb923c,
 	station: 0x86efac,
+	signaller: 0xfbbf24,
 };
 
 export function trainColor(train: TrainView): number {

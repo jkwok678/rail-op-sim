@@ -60,6 +60,11 @@ describe("operate geometry", () => {
 			next: "",
 			timetableIndex: 0,
 			workingDone: false,
+			signallerControl: false,
+			signallerMode: "stop",
+			canRestoreTimetable: false,
+			followOnServiceRef: null,
+			reminder: null,
 		});
 		expect(paths).toHaveLength(1);
 		expect(paths[0]).toHaveLength(5);
@@ -114,6 +119,11 @@ describe("operate geometry", () => {
 			next: "",
 			timetableIndex: 0,
 			workingDone: false,
+			signallerControl: false,
+			signallerMode: "stop" as const,
+			canRestoreTimetable: false,
+			followOnServiceRef: null,
+			reminder: null,
 		};
 		expect(trainColor({ ...base, status: "running", wait: null })).toBe(
 			0xcbd5e1,
@@ -126,6 +136,9 @@ describe("operate geometry", () => {
 		);
 		expect(trainColor({ ...base, status: "crashed", wait: null })).toBe(
 			0xdc2626,
+		);
+		expect(trainColor({ ...base, status: "waiting", wait: "signaller" })).toBe(
+			0xfbbf24,
 		);
 	});
 

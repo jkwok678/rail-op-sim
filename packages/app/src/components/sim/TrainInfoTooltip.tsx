@@ -34,6 +34,12 @@ export function TrainInfoTooltip() {
 					{info.next ? ` · ${info.next}` : ""}
 				</div>
 			) : null}
+			{info.signallerControl ? (
+				<div className="text-amber-300">Signaller control</div>
+			) : null}
+			{info.reminder ? (
+				<div className="text-sky-300">Reminder: {info.reminder}</div>
+			) : null}
 			{info.timetable !== null && info.timetable.length > 0 ? (
 				<ul className="mt-1 space-y-0.5 border-t border-background/20 pt-1 font-mono text-[10px]">
 					{info.timetable.map((entry, index) => (

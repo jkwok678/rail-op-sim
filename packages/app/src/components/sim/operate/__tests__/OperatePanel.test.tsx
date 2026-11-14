@@ -88,7 +88,7 @@ describe("OperatePanel", () => {
 		expect(button.disabled).toBe(true);
 	});
 
-	it("lists trains and what they do next", () => {
+	it("lists trains and what they do next, and opens train menu on right-click", () => {
 		useOperateStore.setState({
 			view: view({
 				trains: [
@@ -103,14 +103,30 @@ describe("OperatePanel", () => {
 						next: "arr Barton 06:10",
 						timetableIndex: 0,
 						workingDone: false,
+						signallerControl: true,
+						signallerMode: "stop",
+						canRestoreTimetable: true,
+						followOnServiceRef: null,
+						reminder: "Hold at home",
 					},
 				],
 			}),
 		});
 		render(<OperatePanel />);
 		expect(screen.getByText("1A01")).toBeTruthy();
+		expect(screen.getByText("SC")).toBeTruthy();
+		expect(screen.getByText("Note")).toBeTruthy();
 		expect(screen.getByText("At signal")).toBeTruthy();
 		expect(screen.getByText("arr Barton 06:10")).toBeTruthy();
+		fireEvent.contextMenu(screen.getByText("1A01"), {
+			clientX: 120,
+			clientY: 240,
+		});
+		expect(useOperateStore.getState().trainMenu).toEqual({
+			trainId: 1,
+			screenX: 120,
+			screenY: 240,
+		});
 	});
 
 	it("shows the log and the last refusal", () => {
