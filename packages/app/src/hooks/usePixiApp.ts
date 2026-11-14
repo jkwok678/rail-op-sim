@@ -141,9 +141,9 @@ export function usePixiApp(): UsePixiAppReturn {
 			const directionLayer = createDirectionLayer();
 			world.addChild(directionLayer.container);
 
-			// Operate mode's routes and trains, and the signal and point art,
+			// Operate mode's routes and trains, and the signal, point and crossing art,
 			// driven by the engine's view.
-			stopOperate = attachOperateLayers(world, trackLayer);
+			stopOperate = attachOperateLayers(world, trackLayer, elementLayer);
 
 			app.stage.addChild(world);
 			debugLog(

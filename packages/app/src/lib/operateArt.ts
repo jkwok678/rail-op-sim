@@ -1,4 +1,9 @@
-import { getRails, SignalAspect, type SimView } from "@rail-op-sim/shared";
+import {
+	type BarrierState,
+	getRails,
+	SignalAspect,
+	type SimView,
+} from "@rail-op-sim/shared";
 import { SHUNT_SVG_MAP, SVG_MAP } from "#/lib/svgMap";
 import { signalLamp } from "#/renderer/operateGeometry";
 
@@ -258,6 +263,70 @@ export function operateArt(view: SimView | null): Map<string, string[]> {
 	return art;
 }
 
+/**
+ * The tile a level-crossing cell shows with its barriers down, open to trains
+ * (RailOS's `PlotLoweredLinkedLevelCrossingBarriers`): the barriers turn to
+ * lie along the track. A crossing over several tracks side by side has its
+ * barriers on the outer tracks' outer sides only, with plain road between.
+ * Null for a diagonal crossing, which RailOS has no art for.
+ */
+export function openCrossingTile(
+	subtype: string,
+	index: number,
+	count: number,
+): string | null {
+	// Our H/V name the track, so a horizontal track's lowered barriers are
+	// the vertical crossing's art, and stack top to bottom.
+	const family =
+		subtype === "STRAIGHTH"
+			? { only: "V", first: "VTop", last: "VBottom" }
+			: subtype === "STRAIGHTV"
+				? { only: "H", first: "HLeft", last: "HRight" }
+				: null;
+	if (!family) return null;
+	const part =
+		count === 1
+			? family.only
+			: index === 0
+				? family.first
+				: index === count - 1
+					? family.last
+					: "Plain";
+	return `levelCrossing${part}.svg`;
+}
+
+/** Whether a crossing shows its open-to-trains art, given the flash phase. */
+const showsOpen = (barriers: BarrierState, flashOn: boolean): boolean =>
+	barriers === "down" ||
+	((barriers === "lowering" || barriers === "raising") && flashOn);
+
+/**
+ * The art each level-crossing cell shows in `view`, keyed by cell. Barriers
+ * up keep the usual crossing art; down shows {@link openCrossingTile}; on the
+ * move the two alternate with `flashOn`, as RailOS flashes them.
+ */
+export function crossingArt(
+	view: SimView | null,
+	flashOn: boolean,
+): Map<string, string> {
+	const art = new Map<string, string>();
+	if (!view) return art;
+	for (const lc of view.levelCrossings) {
+		if (!showsOpen(lc.barriers, flashOn)) continue;
+		lc.cells.forEach(({ gx, gy }, i) => {
+			const file = openCrossingTile(lc.subtype, i, lc.cells.length);
+			if (file) art.set(cellKey(gx, gy), file);
+		});
+	}
+	return art;
+}
+
+/** Whether any level crossing in `view` has its barriers on the move. */
+export const crossingsChanging = (view: SimView | null): boolean =>
+	view?.levelCrossings.some(
+		(lc) => lc.barriers === "lowering" || lc.barriers === "raising",
+	) ?? false;
+
 /** Every file {@link operateArt} can ask for, to preload before operating. */
 export const OPERATE_ART_FILES: readonly string[] = (() => {
 	const files = new Set<string>();
@@ -273,6 +342,17 @@ export const OPERATE_ART_FILES: readonly string[] = (() => {
 	for (const subtype of Object.keys(FILLET_LINKS)) {
 		for (const r of getRails("switch", subtype as never)) {
 			for (const f of pointsArt(subtype, r.a, r.b) ?? []) files.add(f);
+		}
+	}
+	for (const subtype of ["STRAIGHTH", "STRAIGHTV"]) {
+		for (const [i, n] of [
+			[0, 1],
+			[0, 3],
+			[1, 3],
+			[2, 3],
+		]) {
+			const f = openCrossingTile(subtype, i, n);
+			if (f) files.add(f);
 		}
 	}
 	return [...files];

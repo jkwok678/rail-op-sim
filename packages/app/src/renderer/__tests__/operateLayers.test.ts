@@ -66,14 +66,26 @@ let detach: () => void;
 const setOverrides = vi.fn();
 const overrides = (): ReadonlyMap<string, readonly string[]> =>
 	setOverrides.mock.lastCall?.[0] ?? new Map();
+const setLevelCrossingArt = vi.fn();
+const crossings = (): ReadonlyMap<string, string> =>
+	setLevelCrossingArt.mock.lastCall?.[0] ?? new Map();
+const lowered = new Map([
+	["7,0", "levelCrossingVTop.svg"],
+	["7,1", "levelCrossingVBottom.svg"],
+]);
 
 beforeEach(() => {
 	vi.useFakeTimers();
 	useOperateStore.getState().reset();
 	useModeStore.setState({ mode: "operate" });
 	setOverrides.mockClear();
+	setLevelCrossingArt.mockClear();
 	world = new Container();
-	detach = attachOperateLayers(world, { setOverrides });
+	detach = attachOperateLayers(
+		world,
+		{ setOverrides },
+		{ setLevelCrossingArt },
+	);
 });
 
 afterEach(() => {
@@ -105,6 +117,23 @@ describe("attachOperateLayers", () => {
 		useOperateStore.setState({ view: view() });
 		useModeStore.setState({ mode: "railway" });
 		expect(overrides().size).toBe(0);
+		expect(crossings().size).toBe(0);
+	});
+
+	it("shows a crossing's lowered barriers", () => {
+		useOperateStore.setState({ view: view() });
+		expect(crossings()).toEqual(lowered);
+	});
+
+	it("flashes a crossing whose barriers are on the move", () => {
+		const moving = view({
+			pendingRoute: null,
+			levelCrossings: [{ ...view().levelCrossings[0], barriers: "lowering" }],
+		});
+		useOperateStore.setState({ view: moving });
+		const first = crossings().size;
+		vi.advanceTimersByTime(250);
+		expect(crossings().size).not.toBe(first);
 	});
 
 	it("puts a train's headcode on the middle of its body", () => {

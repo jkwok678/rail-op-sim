@@ -3,7 +3,9 @@ import { resolve } from "node:path";
 import { getRails, SignalAspect, SwitchType } from "@rail-op-sim/shared";
 import { describe, expect, it } from "vitest";
 import {
+	crossingArt,
 	OPERATE_ART_FILES,
+	openCrossingTile,
 	operateArt,
 	pointsArt,
 	signalArt,
@@ -104,6 +106,55 @@ describe("operateArt", () => {
 	});
 });
 
+describe("openCrossingTile", () => {
+	it("turns the barriers along a single track", () => {
+		expect(openCrossingTile("STRAIGHTH", 0, 1)).toBe("levelCrossingV.svg");
+		expect(openCrossingTile("STRAIGHTV", 0, 1)).toBe("levelCrossingH.svg");
+	});
+
+	it("puts barriers on the outer sides of a crossing over several tracks", () => {
+		const across = (subtype: string) =>
+			[0, 1, 2].map((i) => openCrossingTile(subtype, i, 3));
+		expect(across("STRAIGHTH")).toEqual([
+			"levelCrossingVTop.svg",
+			"levelCrossingPlain.svg",
+			"levelCrossingVBottom.svg",
+		]);
+		expect(across("STRAIGHTV")).toEqual([
+			"levelCrossingHLeft.svg",
+			"levelCrossingPlain.svg",
+			"levelCrossingHRight.svg",
+		]);
+	});
+
+	it("has nothing for a diagonal crossing", () => {
+		expect(openCrossingTile("STRAIGHTLEFTUP", 0, 1)).toBeNull();
+	});
+});
+
+describe("crossingArt", () => {
+	const view = (barriers: string) =>
+		({
+			levelCrossings: [
+				{ subtype: "STRAIGHTV", cells: [{ gx: 4, gy: 5 }], barriers },
+			],
+		}) as never;
+
+	it("shows lowered barriers, and keeps the usual art while they are up", () => {
+		expect(crossingArt(view("down"), false)).toEqual(
+			new Map([["4,5", "levelCrossingH.svg"]]),
+		);
+		expect(crossingArt(view("up"), true).size).toBe(0);
+	});
+
+	it("alternates while the barriers move", () => {
+		for (const moving of ["lowering", "raising"]) {
+			expect(crossingArt(view(moving), true).size).toBe(1);
+			expect(crossingArt(view(moving), false).size).toBe(0);
+		}
+	});
+});
+
 describe("OPERATE_ART_FILES", () => {
 	it("all exist in public/graphics", () => {
 		const missing = OPERATE_ART_FILES.filter(
@@ -114,7 +165,8 @@ describe("OPERATE_ART_FILES", () => {
 
 	it("covers every signal state and points leg", () => {
 		// 8 directions × (red, yellow, double yellow, green, shunt red, shunt
-		// white) + 32 points × (gapped, two legs).
-		expect(OPERATE_ART_FILES).toHaveLength(8 * 6 + 32 * 3);
+		// white) + 32 points × (gapped, two legs) + crossings lowered over one
+		// track or several (2 × only, first, last; one plain).
+		expect(OPERATE_ART_FILES).toHaveLength(8 * 6 + 32 * 3 + 2 * 3 + 1);
 	});
 });

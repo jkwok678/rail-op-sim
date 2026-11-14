@@ -80,6 +80,9 @@ function cellKey(gx: number, gy: number): string {
 	return `${gx},${gy}`;
 }
 
+/** Suffix of a level crossing's sprite key, after its cell key. */
+const LC_SUFFIX = ":lc";
+
 /** Create a PixiJS Sprite at the given grid cell, same conventions as TrackLayer. */
 function makeElementSprite(texture: Texture, gx: number, gy: number): Sprite {
 	const sprite = new Sprite(texture);
@@ -121,6 +124,13 @@ export interface ElementLayer {
 	upsertElement(lookupKey: string, gx: number, gy: number): void;
 	/** Remove all sprites at a cell. */
 	removeCell(gx: number, gy: number): void;
+	/**
+	 * Draw these level-crossing cells (keyed `"x,y"`) with the given
+	 * `public/graphics/` file in place of their usual crossing art — operate
+	 * mode's lowered barriers. Cells left out, or whose file isn't preloaded,
+	 * show the usual art. Pass an empty map to restore all.
+	 */
+	setLevelCrossingArt(art: ReadonlyMap<string, string>): void;
 	/** Drop everything so the next sync rebuilds. */
 	clear(): void;
 	destroy(): void;
@@ -138,6 +148,23 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 	underlay.label = "element-underlay";
 
 	const spriteEntries = new Map<string, SpriteEntry>();
+	/** Level-crossing art last asked for, re-applied after a rebuild. */
+	let crossingArt: ReadonlyMap<string, string> = new Map();
+
+	/** Point each crossing sprite at its operate art, or back at its usual art. */
+	const applyCrossingArt = () => {
+		for (const [key, entry] of spriteEntries) {
+			if (!key.endsWith(LC_SUFFIX)) continue;
+			const file = crossingArt.get(key.slice(0, -LC_SUFFIX.length));
+			const texture =
+				(file && textures.getFile(file)) || textures.get(entry.lookupKey);
+			if (texture && entry.sprite.texture !== texture) {
+				entry.sprite.texture = texture;
+				entry.sprite.width = CELL_SIZE;
+				entry.sprite.height = CELL_SIZE;
+			}
+		}
+	};
 
 	/** Remove a sprite entry and its display object. */
 	const removeSpriteEntry = (key: string, entry: SpriteEntry) => {
@@ -259,7 +286,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 							: subtype === "STRAIGHTV"
 								? "LEVELCROSSING_V"
 								: "LEVELCROSSING";
-					const key = cellKey(gx, gy) + ":lc";
+					const key = cellKey(gx, gy) + LC_SUFFIX;
 					seenSpriteKeys.add(key);
 					upsertSprite(key, lcKey, gx, gy);
 				}
@@ -273,6 +300,8 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 					removed++;
 				}
 			}
+			// Rebuilt crossing sprites start on their usual art.
+			applyCrossingArt();
 
 			debugLog(
 				"trackLayer",
@@ -289,6 +318,11 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 			const key = cellKey(gx, gy);
 			const existing = spriteEntries.get(key);
 			if (existing) removeSpriteEntry(key, existing);
+		},
+
+		setLevelCrossingArt(art) {
+			crossingArt = art;
+			applyCrossingArt();
 		},
 
 		clear() {
