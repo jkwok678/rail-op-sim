@@ -215,8 +215,16 @@ export interface SimView {
 	time: number;
 	run: RunState;
 	speed: number;
-	signals: { gx: number; gy: number; aspect: number; aspects: number }[];
-	points: { gx: number; gy: number; a: number; b: number }[];
+	/** Every signal: its subtype, aspect (0 red … 3 green) and capability. */
+	signals: {
+		gx: number;
+		gy: number;
+		subtype: string;
+		aspect: number;
+		aspects: number;
+	}[];
+	/** Every set of points: its subtype and the rail (`a`–`b`) it lies on. */
+	points: { gx: number; gy: number; subtype: string; a: number; b: number }[];
 	routes: { id: string; kind: RouteKind; segs: ViewSeg[] }[];
 	pendingRoute: { kind: RouteKind; segs: ViewSeg[] } | null;
 	trains: TrainView[];

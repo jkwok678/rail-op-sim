@@ -299,6 +299,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					.filter((n) => n.signalExit !== null)
 					.map((n) => ({
 						...n.cell,
+						subtype: n.subtype,
 						aspect: state.aspects[n.id],
 						aspects: n.signalAspects,
 					})),
@@ -306,7 +307,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					.filter((n) => n.kind === "switch")
 					.map((n) => {
 						const rail = n.rails[state.lies[n.id]];
-						return { ...n.cell, a: rail.a, b: rail.b };
+						return { ...n.cell, subtype: n.subtype, a: rail.a, b: rail.b };
 					}),
 				routes: state.routes.map((r) => ({
 					id: r.id,
