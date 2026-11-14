@@ -812,7 +812,9 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] Faults: a SPAD stops the train, and two trains on one rail crash.
 - [x] Operate mode (`O`) is gated on a complete railway and a timetable with services and no errors.
   - The docked panel has the clock, run/pause, speed, route kind, cancel, the train list and the performance log.
-  - The canvas shows route bands, signal lamps, point lies, and trains with headcodes.
+  - The canvas shows route bands, and trains with headcodes. Signals and points show their state in the track art, as RailOS draws them (`lib/operateArt.ts`):
+    - a main signal is lit red, yellow, double yellow or green (`signal<Dir>[Yellow|DoubleYellow|Green].svg`), a shunt signal two reds or two whites (`shunt<Dir>[Red|White].svg`);
+    - points are drawn with a gap (`<family>Gapped<n>.svg`) plus the rail they lie for (`<family>Straight|Diverging<n>.svg`, or `switchSplitLeftFork|RightFork<n>.svg`).
   - Keys: `P` run/pause, `,` and `.` for speed, `A`/`S`/`U` for route kind, `C` cancel, `J` log.
 - [ ] Interpolate train positions between published views (they currently step at 20 Hz)
 
@@ -829,10 +831,10 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
   - signaller control of trains (§8);
   - route truncation and approach locking (§5.7–5.8);
   - continuation auto-signals (§5.10);
-  - calling on (§5.13);
-  - level crossings (§5.12);
+  - calling on (§5.13). The signal shows its position lights: `signal<Dir>CallingOn.svg` drawn over the red signal; a ground signal shows white instead (`TrackUnit.cpp:4530`);
+  - level crossings (§5.12). Barriers up (closed to trains) is the usual `levelCrossingH|V.svg`; a manually lowered crossing is green (`levelCrossing…Manual.svg`). A crossing wider than one cell uses the `Top`/`Bottom` (or `Left`/`Right`) end tiles and `Plain` between (`TrackUnit.cpp:6835`);
   - splits and joins (§6.8);
-  - random delays, failures and TSRs (§9);
+  - random delays, failures and TSRs (§9). A failed signal shows `signal<Dir>Failed.svg`, a failed ground signal `shunt<Dir>Failed.svg` (RailOS's `FailedSigTable`);
   - the Actions Due panel (§11);
   - saved sessions (§14);
   - a train length in the timetable's `TrainSpec`.
