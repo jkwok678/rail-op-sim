@@ -101,7 +101,13 @@ export interface TrainWorking {
 	lastActionAt: number;
 	/** When the train may leave `at`, once worked out. */
 	releaseAt: number | null;
-	/** Set once a hold for an unsupported action has been reported. */
+	/**
+	 * Extra seconds on top of a stop's minimum dwell. A front split adds 30 so
+	 * the rear portion lets the front portion leave first, and a rear split
+	 * adds them to the new train.
+	 */
+	extraDwell: number;
+	/** Set once a hold for this action has been reported, so it is said once. */
 	heldReported: boolean;
 	/** The service has run its course; the train stays where it is. */
 	done: boolean;

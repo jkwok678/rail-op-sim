@@ -833,13 +833,13 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] Departure is at the latest of the booked time, arrival plus the minimum dwell (default 30 s), and 30 s after the last action.
 - [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
 - [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
+- [x] Splits and joins (§6.8): front/rear split over 4 platform cells (`splitEnds`), `joinedBy`/`finishJoin` coupling (`mergeTrainInto`), 30 s ordering/action gap.
 - [x] Signaller control of trains (§8): take/restore control (with location guard when taken at a stop), move forwards, stop, change direction, step forward, pass red signal, signaller join, skip timetabled actions, become follow-on service early, reminders, and train removal.
 - [x] Calling on (§5.13): magenta eligibility when stopped at a red signal for an occupied platform up to 4 km ahead, `Calling-on` mode (`Shift+O`) showing `signal<Dir>CallingOn.svg` over red / `shunt<Dir>White.svg`, immediate unrestricted route to first platform cell, and 30 km/h speed cap.
 - [ ] Next, still from OPERATE-MODE.md:
   - route truncation and approach locking (§5.7–5.8);
   - continuation auto-signals (§5.10);
   - manual level crossings (§5.12): left-click to lower or raise, never auto-raised, a warning while one is left down. A manually lowered crossing is green (`levelCrossing…Manual.svg`, laid out like the automatic tiles below);
-  - splits and joins (§6.8);
   - random delays, failures and TSRs (§9). A failed signal shows `signal<Dir>Failed.svg`, a failed ground signal `shunt<Dir>Failed.svg` (RailOS's `FailedSigTable`);
   - the Actions Due panel (§11);
   - saved sessions (§14);
@@ -853,14 +853,13 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
   - Train arrives at destination, its ID gets a new headcode and new timetable entry
   - No new train created — existing train changes identity
   - Configurable turnaround time
-- [ ] **Splits**:
+- [x] **Splits**:
   - Train arrives at split point
-  - Front portion becomes train A (new headcode), rear portion becomes train B
-  - Both depart independently on their own timetable entries
-- [ ] **Joins**:
-  - Train A and Train B arrive at join point
-  - They couple together and depart as a single train under a new headcode
-  - Validation: train types and lengths must be compatible
+  - Front portion becomes one portion (half mass, power and length) and rear becomes the other
+  - Both depart independently on their own timetable entries (30 s extra dwell keeps the front ahead)
+- [x] **Joins**:
+  - Incoming `finishJoin` train approaches via calling-on (§5.13) when a red signal protects the occupied platform
+  - Couples to `joinedBy` partner (`mergeTrainInto`), combining mass, power, brake rate, speed cap, length and reminders
 - [ ] **Shuttles**:
   - Train goes back and forth between two points N times
   - No explicit entries needed — define shuttle: endpoints, headcode, interval, count

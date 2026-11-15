@@ -328,6 +328,7 @@ export function addTrain(
 			arrivedAt: null,
 			lastActionAt: 0,
 			releaseAt: null,
+			extraDwell: 0,
 			heldReported: false,
 			done: false,
 		},

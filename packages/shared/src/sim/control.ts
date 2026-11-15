@@ -18,6 +18,7 @@ import { releaseBehind } from "./routes";
 import {
 	actionsOf,
 	becomeService,
+	mergeTrainInto,
 	placeName,
 	type RunnerContext,
 	repeatHeadcode,
@@ -512,26 +513,8 @@ function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 		train.frontM = oldFrontLen;
 	}
 
-	const totalMass = other.massKg + train.massKg;
-	other.brakeRate =
-		(other.brakeRate * other.massKg + train.brakeRate * train.massKg) /
-		totalMass;
-	other.massKg = totalMass;
-	other.powerW += train.powerW;
-	other.maxSpeed = Math.min(other.maxSpeed, train.maxSpeed);
-	if (train.signallerMaxSpeed !== null) {
-		other.signallerMaxSpeed =
-			other.signallerMaxSpeed !== null
-				? Math.min(other.signallerMaxSpeed, train.signallerMaxSpeed)
-				: train.signallerMaxSpeed;
-	}
-	other.lengthM += train.lengthM;
 	other.segs = [...train.segs, ...other.segs];
-	if (train.reminder && !other.reminder) {
-		other.reminder = train.reminder;
-	} else if (train.reminder && other.reminder) {
-		other.reminder = `${other.reminder}; ${train.reminder}`;
-	}
+	mergeTrainInto(ctx, other, train);
 
 	other.control = {
 		mode: "signaller",
@@ -541,9 +524,6 @@ function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 	};
 	other.status = "waiting";
 	other.wait = "signaller";
-
-	ctx.state.trains = ctx.state.trains.filter((t) => t !== train);
-	markRunDone(ctx, train.id);
 	ctx.log.info(ctx.state.time, `${train.headcode} joined to ${other.headcode}`);
 	return ok();
 }

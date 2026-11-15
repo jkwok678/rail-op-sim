@@ -33,6 +33,7 @@ import {
 import { computeAspects } from "./signalling";
 import {
 	dispatchDue,
+	dwellForJoin,
 	expandRuns,
 	nextActionText,
 	onEnterLocation,
@@ -216,6 +217,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 			case "stopped":
 				train.callingOn = false;
 				arrived(train, event.reason);
+				dwellForJoin(ctx, train);
 				return;
 		}
 	};
