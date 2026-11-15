@@ -9,6 +9,7 @@
 
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
+import { callOn, refreshCallingOnFlags } from "./callingOn";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
 import {
 	availableFollowOnService,
@@ -119,6 +120,7 @@ function initialState(graph: RailGraph, timetable: Timetable): SimState {
 		speed: 1,
 		lies: graph.nodes.map((n) => n.defaultLie),
 		aspects: graph.nodes.map(() => 0),
+		callingOnSignals: [],
 		crossings: initialCrossings(graph),
 		routes: [],
 		pending: null,
@@ -181,6 +183,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				onLeftRailway(ctx, train, event.seg);
 				return;
 			case "spad":
+				train.callingOn = false;
 				train.status = "spad";
 				train.speed = 0;
 				state.counters.spads++;
@@ -191,6 +194,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				return;
 			case "crash":
 				for (const t of [train, event.other]) {
+					t.callingOn = false;
 					t.status = "crashed";
 					t.speed = 0;
 				}
@@ -210,6 +214,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				);
 				return;
 			case "stopped":
+				train.callingOn = false;
 				arrived(train, event.reason);
 				return;
 		}
@@ -244,6 +249,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 		}
 		for (const event of events) handleEvent(event);
 		refreshAspects();
+		refreshCallingOnFlags(graph, state, timetable);
 	};
 
 	const viewSeg = (seg: Seg, from = 0, to = 1): ViewSeg => {
@@ -261,6 +267,8 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				return setRoute(graph, state, cmd.from, cmd.to, cmd.kind);
 			case "setAllAutoRoutes":
 				return setAllAutoRoutes(graph, state);
+			case "callOn":
+				return callOn(graph, state, timetable, cmd.at);
 			case "cancelRoute":
 				return cancelRoute(graph, state, cmd.at, (route) =>
 					state.trains.some((t) => approaching(graph, state, t, route)),
@@ -304,6 +312,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					// cancelled route's crossings go straight back up.
 					if (state.run === "prestart") workCrossings(graph, state);
 					refreshAspects();
+					refreshCallingOnFlags(graph, state, timetable);
 					return result;
 				}
 			}
@@ -328,6 +337,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 						subtype: n.subtype,
 						aspect: state.aspects[n.id],
 						aspects: n.signalAspects,
+						callingOn: state.callingOnSignals.includes(n.id),
 					})),
 				points: graph.nodes
 					.filter((n) => n.kind === "switch")
@@ -370,6 +380,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					canRestoreTimetable: canRestoreTimetable(graph, t).ok,
 					followOnServiceRef: availableFollowOnService(ctx, t)?.nextRef ?? null,
 					reminder: t.reminder,
+					callingOnAllowed: t.callingOnAllowed,
 				})),
 				counters: { ...state.counters },
 			};

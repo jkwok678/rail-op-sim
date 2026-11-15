@@ -95,10 +95,12 @@ describe("applyOperateIntent", () => {
 	it("cancels routes and throws points", async () => {
 		await applyOperateIntent({ type: "cancelRoute", at });
 		await applyOperateIntent({ type: "togglePoints", at });
+		await applyOperateIntent({ type: "callOn", at });
 		await applyOperateIntent({ type: "none" });
 		expect(sent).toEqual([
 			{ type: "cancelRoute", at },
 			{ type: "togglePoints", at },
+			{ type: "callOn", at },
 		]);
 	});
 

@@ -24,6 +24,7 @@ const train = (over: Partial<TrainView> = {}): TrainView => ({
 	canRestoreTimetable: false,
 	followOnServiceRef: null,
 	reminder: null,
+	callingOnAllowed: false,
 	...over,
 });
 
@@ -32,8 +33,22 @@ const view = (over: Partial<SimView> = {}): SimView => ({
 	run: "running",
 	speed: 1,
 	signals: [
-		{ gx: 3, gy: 0, subtype: "SIGNALRIGHT", aspect: 2, aspects: 4 },
-		{ gx: 5, gy: 0, subtype: "SIGNALRIGHT", aspect: 0, aspects: 4 },
+		{
+			gx: 3,
+			gy: 0,
+			subtype: "SIGNALRIGHT",
+			aspect: 2,
+			aspects: 4,
+			callingOn: false,
+		},
+		{
+			gx: 5,
+			gy: 0,
+			subtype: "SIGNALRIGHT",
+			aspect: 0,
+			aspects: 4,
+			callingOn: false,
+		},
 	],
 	points: [{ gx: 4, gy: 0, subtype: "SWITCH3", a: 3, b: 5 }],
 	levelCrossings: [

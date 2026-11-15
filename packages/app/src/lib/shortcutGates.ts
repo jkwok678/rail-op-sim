@@ -28,6 +28,8 @@ export interface ShortcutGateState {
 	timetableCanNextIssue: boolean;
 	/** A canvas cell-pick is waiting; list keys stay out of it. */
 	timetablePicking: boolean;
+	/** Operate mode: at least one train can currently be called on (§5.13). */
+	canCallOn?: boolean;
 	/** Operate mode: a train control dialog (reminder, skip, new service) is open. */
 	trainDialogOpen?: boolean;
 }
@@ -87,6 +89,7 @@ export function liveShortcuts(
 		routeAutoAll: operateLive,
 		routePreferred: operateLive,
 		routeUnrestricted: operateLive,
+		routeCallOn: operateLive && Boolean(state.canCallOn),
 		routeCancel: operateLive,
 		operateLog: operateLive,
 		prevService: timetableLive && state.timetableCanStep,

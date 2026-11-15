@@ -13,6 +13,7 @@
  */
 
 import type { Cell } from "../railway/timetable/types";
+import { clearCallingOnSignal } from "./callingOn";
 import { crossingChanging, lowerCrossingsOn } from "./crossings";
 import {
 	endsAtBuffers,
@@ -456,6 +457,7 @@ export function cancelRoute(
 	if (crossingChanging(graph, state, route.segs)) {
 		return failed("The level crossing on that route is still moving.");
 	}
+	for (const seg of route.segs) clearCallingOnSignal(state, seg.node);
 	state.routes.splice(state.routes.indexOf(route), 1);
 	return { ok: true };
 }

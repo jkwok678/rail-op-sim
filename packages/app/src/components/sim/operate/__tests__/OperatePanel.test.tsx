@@ -64,6 +64,10 @@ describe("OperatePanel", () => {
 		render(<OperatePanel />);
 		fireEvent.click(screen.getByRole("radio", { name: /Unrestricted/ }));
 		expect(useOperateStore.getState().routeKind).toBe("unrestricted");
+		const callOnBtn = screen.getByRole("button", {
+			name: /Calling-on/,
+		}) as HTMLButtonElement;
+		expect(callOnBtn.disabled).toBe(true);
 		fireEvent.click(screen.getByRole("button", { name: /Cancel/ }));
 		expect(useOperateStore.getState().cancelArmed).toBe(true);
 		expect(screen.getByText("Right-click a route to cancel it.")).toBeTruthy();
@@ -108,6 +112,7 @@ describe("OperatePanel", () => {
 						canRestoreTimetable: true,
 						followOnServiceRef: null,
 						reminder: "Hold at home",
+						callingOnAllowed: false,
 					},
 				],
 			}),
@@ -118,6 +123,10 @@ describe("OperatePanel", () => {
 		expect(screen.getByText("Note")).toBeTruthy();
 		expect(screen.getByText("At signal")).toBeTruthy();
 		expect(screen.getByText("arr Barton 06:10")).toBeTruthy();
+		expect(
+			(screen.getByRole("button", { name: /Calling-on/ }) as HTMLButtonElement)
+				.disabled,
+		).toBe(true);
 		fireEvent.contextMenu(screen.getByText("1A01"), {
 			clientX: 120,
 			clientY: 240,

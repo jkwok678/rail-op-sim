@@ -4,6 +4,7 @@
  */
 
 import type { Action } from "../railway/timetable/types";
+import { clearCallingOnSignal } from "./callingOn";
 import {
 	isFacingSignal,
 	leavesMap,
@@ -210,6 +211,12 @@ function takeControl(ctx: RunnerContext, trainId: number): CommandResult {
 	if (train.control.mode === "signaller")
 		return fail("Train is already under signaller control.");
 
+	train.callingOn = false;
+	train.callingOnAllowed = false;
+	if (train.allowedCallOnNode !== null) {
+		clearCallingOnSignal(ctx.state, train.allowedCallOnNode);
+		train.allowedCallOnNode = null;
+	}
 	const restoreLocation =
 		train.speed <= 0 && train.working.at !== null ? train.working.at : null;
 

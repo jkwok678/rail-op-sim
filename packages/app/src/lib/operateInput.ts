@@ -13,6 +13,7 @@ import type { Cell, RouteKind } from "@rail-op-sim/shared";
 export interface OperateInputState {
 	routeKind: RouteKind;
 	cancelArmed: boolean;
+	callOnArmed?: boolean;
 	routeStart: Cell | null;
 }
 
@@ -33,6 +34,7 @@ export type OperateIntent =
 	| { type: "finishRoute"; from: Cell; to: Cell; kind: RouteKind }
 	| { type: "abandonRoute" }
 	| { type: "cancelRoute"; at: Cell }
+	| { type: "callOn"; at: Cell }
 	| { type: "togglePoints"; at: Cell }
 	| {
 			type: "openTrainMenu";
@@ -61,6 +63,7 @@ export function resolveOperateClick(
 		return { type: "none" };
 	}
 	if (state.cancelArmed) return { type: "none" };
+	if (state.callOnArmed) return { type: "callOn", at: click.cell };
 	if (state.routeStart) {
 		if (sameCell(state.routeStart, click.cell)) return { type: "abandonRoute" };
 		return {

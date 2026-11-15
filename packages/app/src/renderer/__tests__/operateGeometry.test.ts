@@ -65,6 +65,7 @@ describe("operate geometry", () => {
 			canRestoreTimetable: false,
 			followOnServiceRef: null,
 			reminder: null,
+			callingOnAllowed: false,
 		});
 		expect(paths).toHaveLength(1);
 		expect(paths[0]).toHaveLength(5);
@@ -124,6 +125,7 @@ describe("operate geometry", () => {
 			canRestoreTimetable: false,
 			followOnServiceRef: null,
 			reminder: null,
+			callingOnAllowed: false,
 		};
 		expect(trainColor({ ...base, status: "running", wait: null })).toBe(
 			0xcbd5e1,

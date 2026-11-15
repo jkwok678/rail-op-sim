@@ -90,7 +90,16 @@ describe("pointsArt", () => {
 describe("operateArt", () => {
 	it("keys each signal and set of points by cell", () => {
 		const art = operateArt({
-			signals: [{ gx: 1, gy: 2, subtype: "SIGNALLEFT", aspect: 3, aspects: 4 }],
+			signals: [
+				{
+					gx: 1,
+					gy: 2,
+					subtype: "SIGNALLEFT",
+					aspect: 3,
+					aspects: 4,
+					callingOn: false,
+				},
+			],
 			points: [{ gx: -1, gy: 0, subtype: "SWITCH3", a: 3, b: 5 }],
 		} as never);
 		expect(art).toEqual(
@@ -164,9 +173,9 @@ describe("OPERATE_ART_FILES", () => {
 	});
 
 	it("covers every signal state and points leg", () => {
-		// 8 directions × (red, yellow, double yellow, green, shunt red, shunt
-		// white) + 32 points × (gapped, two legs) + crossings lowered over one
-		// track or several (2 × only, first, last; one plain).
-		expect(OPERATE_ART_FILES).toHaveLength(8 * 6 + 32 * 3 + 2 * 3 + 1);
+		// 8 directions × (red, yellow, double yellow, green, calling-on, shunt
+		// red, shunt white) + 32 points × (gapped, two legs) + crossings lowered
+		// over one track or several (2 × only, first, last; one plain).
+		expect(OPERATE_ART_FILES).toHaveLength(8 * 7 + 32 * 3 + 2 * 3 + 1);
 	});
 });

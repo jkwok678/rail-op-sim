@@ -50,6 +50,8 @@ export interface OperateState {
 	routeKind: RouteKind;
 	/** Right-click cancels the route under the cursor while armed. */
 	cancelArmed: boolean;
+	/** Next click on a qualifying stop signal calls its waiting train on (§5.13). */
+	callOnArmed: boolean;
 	/** First click of a route being set, awaiting its end. */
 	routeStart: Cell | null;
 	/** Open right-click popup menu for a train. */
@@ -67,6 +69,7 @@ export interface OperateState {
 	mergeTimetables: (rows: Record<number, TrainTimetableRow[]>) => void;
 	setRouteKind: (kind: RouteKind) => void;
 	setCancelArmed: (armed: boolean) => void;
+	setCallOnArmed: (armed: boolean) => void;
 	setRouteStart: (cell: Cell | null) => void;
 	openTrainMenu: (trainId: number, screenX: number, screenY: number) => void;
 	closeTrainMenu: () => void;
@@ -85,6 +88,7 @@ const initial = {
 	timetables: {},
 	routeKind: "preferred" as RouteKind,
 	cancelArmed: false,
+	callOnArmed: false,
 	routeStart: null,
 	trainMenu: null,
 	trainDialog: null,
@@ -97,6 +101,8 @@ export const useOperateStore = create<OperateState>((set) => ({
 	setStatus: (status, error = null) => set({ status, error }),
 	setView: (view) =>
 		set((s) => {
+			const callOnArmed =
+				s.callOnArmed && (view.trains ?? []).some((t) => t.callingOnAllowed);
 			const live = new Set((view.trains ?? []).map((t) => t.id));
 			const trainMenu =
 				s.trainMenu && !live.has(s.trainMenu.trainId) ? null : s.trainMenu;
@@ -107,14 +113,14 @@ export const useOperateStore = create<OperateState>((set) => ({
 			// Drop rows of trains that have left the railway.
 			const ids = Object.keys(s.timetables);
 			if (ids.length === 0 || ids.every((id) => live.has(Number(id)))) {
-				return { view, trainMenu, trainDialog };
+				return { view, callOnArmed, trainMenu, trainDialog };
 			}
 			const timetables: Record<number, TrainTimetableRow[]> = {};
 			for (const id of ids) {
 				if (live.has(Number(id)))
 					timetables[Number(id)] = s.timetables[Number(id)];
 			}
-			return { view, timetables, trainMenu, trainDialog };
+			return { view, callOnArmed, timetables, trainMenu, trainDialog };
 		}),
 	mergeTimetables: (rows) =>
 		set((s) => ({ timetables: { ...s.timetables, ...rows } })),
@@ -125,10 +131,19 @@ export const useOperateStore = create<OperateState>((set) => ({
 			return { log: [...s.log, ...numbered].slice(-LOG_LIMIT) };
 		}),
 	setRouteKind: (routeKind) =>
-		set({ routeKind, routeStart: null, cancelArmed: false, trainMenu: null }),
+		set({
+			routeKind,
+			routeStart: null,
+			cancelArmed: false,
+			callOnArmed: false,
+			trainMenu: null,
+		}),
 	setCancelArmed: (cancelArmed) =>
-		set({ cancelArmed, routeStart: null, trainMenu: null }),
-	setRouteStart: (routeStart) => set({ routeStart, trainMenu: null }),
+		set({ cancelArmed, callOnArmed: false, routeStart: null, trainMenu: null }),
+	setCallOnArmed: (callOnArmed) =>
+		set({ callOnArmed, cancelArmed: false, routeStart: null, trainMenu: null }),
+	setRouteStart: (routeStart) =>
+		set({ routeStart, callOnArmed: false, trainMenu: null }),
 	openTrainMenu: (trainId, screenX, screenY) =>
 		set({ trainMenu: { trainId, screenX, screenY } }),
 	closeTrainMenu: () => set({ trainMenu: null }),

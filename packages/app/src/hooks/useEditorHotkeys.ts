@@ -7,6 +7,7 @@ import {
 	chooseRouteKind,
 	runOrPause,
 	setAllAutoRoutes,
+	toggleCallOn,
 	toggleLog,
 	toggleRouteCancel,
 } from "#/lib/operateActions";
@@ -143,6 +144,7 @@ const run: Record<ShortcutId, () => void> = {
 	routeAutoAll: setAllAutoRoutes,
 	routePreferred: () => chooseRouteKind("preferred"),
 	routeUnrestricted: () => chooseRouteKind("unrestricted"),
+	routeCallOn: toggleCallOn,
 	routeCancel: toggleRouteCancel,
 	operateLog: toggleLog,
 
@@ -221,6 +223,9 @@ export function useEditorHotkeys(): void {
 		timetableCanNextIssue:
 			nextIssueTarget(issues, selectedServiceRef, selectedActionIndex) !== null,
 		timetablePicking,
+		canCallOn: useOperateStore(
+			(s) => s.view?.trains.some((t) => t.callingOnAllowed) ?? false,
+		),
 		trainDialogOpen: useOperateStore((s) => s.trainDialog !== null),
 	});
 

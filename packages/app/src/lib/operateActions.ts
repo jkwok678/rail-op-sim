@@ -39,6 +39,12 @@ export function toggleRouteCancel(): void {
 	s.setCancelArmed(!s.cancelArmed);
 }
 
+export function toggleCallOn(): void {
+	const s = useOperateStore.getState();
+	if (!s.callOnArmed && !s.view?.trains.some((t) => t.callingOnAllowed)) return;
+	s.setCallOnArmed(!s.callOnArmed);
+}
+
 export function toggleLog(): void {
 	useOperateStore.getState().toggleLog();
 }
@@ -80,6 +86,10 @@ export async function applyOperateIntent(intent: OperateIntent): Promise<void> {
 		}
 		case "cancelRoute":
 			await simCommand({ type: "cancelRoute", at: intent.at });
+			return;
+		case "callOn":
+			store.setCallOnArmed(false);
+			await simCommand({ type: "callOn", at: intent.at });
 			return;
 		case "togglePoints":
 			await simCommand({ type: "togglePoints", at: intent.at });

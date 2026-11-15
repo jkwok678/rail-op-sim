@@ -194,15 +194,23 @@ export function signalArt(
 	subtype: string,
 	aspect: number,
 	capability: number,
+	callingOn = false,
 ): string[] | null {
 	const lamp = signalLamp(aspect, capability);
 	if (capability === SignalAspect.SHUNT) {
 		const red = SHUNT_SVG_MAP[subtype];
 		if (!red) return null;
-		return [lamp === "red" ? red : red.replace(/Red\.svg$/, "White.svg")];
+		return [
+			lamp === "red" && !callingOn
+				? red
+				: red.replace(/Red\.svg$/, "White.svg"),
+		];
 	}
 	const base = SVG_MAP[subtype];
 	if (!base || !subtype.startsWith("SIGNAL")) return null;
+	if (callingOn) {
+		return [base, `${stem(base)}CallingOn.svg`];
+	}
 	switch (lamp) {
 		case "red":
 			return [base];
@@ -253,7 +261,7 @@ export function operateArt(view: SimView | null): Map<string, string[]> {
 	const art = new Map<string, string[]>();
 	if (!view) return art;
 	for (const s of view.signals) {
-		const files = signalArt(s.subtype, s.aspect, s.aspects);
+		const files = signalArt(s.subtype, s.aspect, s.aspects, s.callingOn);
 		if (files) art.set(cellKey(s.gx, s.gy), files);
 	}
 	for (const p of view.points) {
@@ -333,8 +341,10 @@ export const OPERATE_ART_FILES: readonly string[] = (() => {
 	for (const subtype of Object.keys(SHUNT_SVG_MAP)) {
 		for (const capability of [1, 2, 3, 4]) {
 			for (let aspect = 0; aspect <= 3; aspect++) {
-				for (const f of signalArt(subtype, aspect, capability) ?? []) {
-					files.add(f);
+				for (const co of [false, true]) {
+					for (const f of signalArt(subtype, aspect, capability, co) ?? []) {
+						files.add(f);
+					}
 				}
 			}
 		}

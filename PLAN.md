@@ -834,10 +834,10 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
 - [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
 - [x] Signaller control of trains (§8): take/restore control (with location guard when taken at a stop), move forwards, stop, change direction, step forward, pass red signal, signaller join, skip timetabled actions, become follow-on service early, reminders, and train removal.
+- [x] Calling on (§5.13): magenta eligibility when stopped at a red signal for an occupied platform up to 4 km ahead, `Calling-on` mode (`Shift+O`) showing `signal<Dir>CallingOn.svg` over red / `shunt<Dir>White.svg`, immediate unrestricted route to first platform cell, and 30 km/h speed cap.
 - [ ] Next, still from OPERATE-MODE.md:
   - route truncation and approach locking (§5.7–5.8);
   - continuation auto-signals (§5.10);
-  - calling on (§5.13). The signal shows its position lights: `signal<Dir>CallingOn.svg` drawn over the red signal; a ground signal shows white instead (`TrackUnit.cpp:4530`);
   - manual level crossings (§5.12): left-click to lower or raise, never auto-raised, a warning while one is left down. A manually lowered crossing is green (`levelCrossing…Manual.svg`, laid out like the automatic tiles below);
   - splits and joins (§6.8);
   - random delays, failures and TSRs (§9). A failed signal shows `signal<Dir>Failed.svg`, a failed ground signal `shunt<Dir>Failed.svg` (RailOS's `FailedSigTable`);

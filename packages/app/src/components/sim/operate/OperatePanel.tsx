@@ -13,6 +13,7 @@ import {
 	chooseRouteKind,
 	runOrPause,
 	setAllAutoRoutes,
+	toggleCallOn,
 	toggleLog,
 	toggleRouteCancel,
 } from "#/lib/operateActions";
@@ -129,17 +130,29 @@ function ClockControls() {
 function RouteControls() {
 	const routeKind = useOperateStore((s) => s.routeKind);
 	const cancelArmed = useOperateStore((s) => s.cancelArmed);
+	const callOnArmed = useOperateStore((s) => s.callOnArmed);
 	const routeStart = useOperateStore((s) => s.routeStart);
 	const run = useOperateStore((s) => s.view?.run);
+	const canCallOn = useOperateStore(
+		(s) => s.view?.trains.some((t) => t.callingOnAllowed) ?? false,
+	);
 	return (
 		<div className="flex flex-col gap-1.5 border-b border-border px-3 py-2">
-			<div role="radiogroup" aria-label="Route kind" className="flex gap-1">
+			<div
+				role="radiogroup"
+				aria-label="Route kind"
+				className="flex flex-wrap gap-1"
+			>
 				{ROUTE_KINDS.map(({ kind, label, swatch }) => (
 					<Button
 						key={kind}
 						role="radio"
-						aria-checked={routeKind === kind && !cancelArmed}
-						variant={routeKind === kind && !cancelArmed ? "secondary" : "ghost"}
+						aria-checked={routeKind === kind && !cancelArmed && !callOnArmed}
+						variant={
+							routeKind === kind && !cancelArmed && !callOnArmed
+								? "secondary"
+								: "ghost"
+						}
 						size="xs"
 						onClick={() => chooseRouteKind(kind)}
 					>
@@ -157,23 +170,37 @@ function RouteControls() {
 					Cancel
 				</Button>
 			</div>
-			<Button
-				variant="outline"
-				size="xs"
-				className="self-start"
-				disabled={!run || run === "paused"}
-				title="Set an automatic route on every plain section between signals"
-				onClick={() => void setAllAutoRoutes()}
-			>
-				<span className="size-2 rounded-full bg-sky-500" />
-				Set all automatic
-			</Button>
+			<div className="flex flex-wrap gap-1">
+				<Button
+					variant="outline"
+					size="xs"
+					disabled={!run || run === "paused"}
+					title="Set an automatic route on every plain section between signals"
+					onClick={() => void setAllAutoRoutes()}
+				>
+					<span className="size-2 rounded-full bg-sky-500" />
+					Set all automatic
+				</Button>
+				<Button
+					variant={callOnArmed ? "secondary" : "outline"}
+					size="xs"
+					aria-pressed={callOnArmed}
+					disabled={!canCallOn || !run || run === "paused"}
+					title="Call a train standing at red onto an occupied platform (Shift+O)"
+					onClick={toggleCallOn}
+				>
+					<span className="size-2 rounded-full bg-fuchsia-400" />
+					Calling-on
+				</Button>
+			</div>
 			<p className="text-[10px] text-muted-foreground">
-				{cancelArmed
-					? "Right-click a route to cancel it."
-					: routeStart
-						? "Click where the route ends — right-click to abandon."
-						: "Click a signal to start a route; click points to change them."}
+				{callOnArmed
+					? "Click the stop signal to call the waiting train on."
+					: cancelArmed
+						? "Right-click a route to cancel it."
+						: routeStart
+							? "Click where the route ends — right-click to abandon."
+							: "Click a signal to start a route; click points to change them."}
 			</p>
 		</div>
 	);

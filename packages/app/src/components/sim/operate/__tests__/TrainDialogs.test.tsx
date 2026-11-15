@@ -35,6 +35,7 @@ const train = (over: Partial<TrainView> = {}): TrainView => ({
 	canRestoreTimetable: false,
 	followOnServiceRef: "2B99",
 	reminder: null,
+	callingOnAllowed: false,
 	...over,
 });
 

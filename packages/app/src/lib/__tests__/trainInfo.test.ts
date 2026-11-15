@@ -22,6 +22,7 @@ function makeTrain(over: Partial<TrainView> = {}): TrainView {
 		canRestoreTimetable: false,
 		followOnServiceRef: null,
 		reminder: null,
+		callingOnAllowed: false,
 		...over,
 	};
 }

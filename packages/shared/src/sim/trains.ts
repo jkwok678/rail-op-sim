@@ -11,6 +11,7 @@
 
 import { linkIndexForOffset } from "../railway/map/map-connectivity";
 import type { Cell, TrainSpec } from "../railway/timetable/types";
+import { CALL_ON_MAX_SPEED_MS, clearCallingOnSignal } from "./callingOn";
 import { hitsRoadTraffic } from "./crossings";
 import {
 	isFacingSignal,
@@ -61,9 +62,11 @@ const planningBrake = (train: Train): number => train.brakeRate / 2;
 
 /** Maximum speed (m/s) the train may run at under its current control mode. */
 export function effectiveMaxSpeed(train: Train): number {
-	return train.control.mode === "signaller" && train.signallerMaxSpeed !== null
-		? Math.min(train.maxSpeed, train.signallerMaxSpeed)
-		: train.maxSpeed;
+	const base =
+		train.control.mode === "signaller" && train.signallerMaxSpeed !== null
+			? Math.min(train.maxSpeed, train.signallerMaxSpeed)
+			: train.maxSpeed;
+	return train.callingOn ? Math.min(base, CALL_ON_MAX_SPEED_MS) : base;
 }
 
 export function trainFromSpec(
@@ -94,6 +97,9 @@ export function trainFromSpec(
 		wait: null,
 		control: { mode: "timetable" },
 		reminder: null,
+		callingOnAllowed: false,
+		callingOn: false,
+		allowedCallOnNode: null,
 		working,
 	};
 }
@@ -177,7 +183,7 @@ function lookAhead(
 	const allowedRedSignalNode =
 		train.control.mode === "signaller"
 			? train.control.allowedRedSignalNode
-			: null;
+			: train.allowedCallOnNode;
 	while (dist < reach) {
 		const next = nextSeg(graph, state.lies, seg);
 		const reason = stopReason(
@@ -361,11 +367,17 @@ function advanceFront(
 		train.frontM -= len;
 		train.segs.push(next);
 		events.push({ type: "entered", train, seg: next, from: current });
-		const wasAllowed =
+		const wasSignallerAllowed =
 			train.control.mode === "signaller" &&
 			train.control.allowedRedSignalNode === next.node;
-		if (wasAllowed && train.control.mode === "signaller") {
+		const wasCallOnAllowed = train.allowedCallOnNode === next.node;
+		const wasAllowed = wasSignallerAllowed || wasCallOnAllowed;
+		if (wasSignallerAllowed && train.control.mode === "signaller") {
 			train.control.allowedRedSignalNode = null;
+		}
+		if (wasCallOnAllowed) {
+			train.allowedCallOnNode = null;
+			clearCallingOnSignal(state, next.node);
 		}
 		if (
 			!wasAllowed &&

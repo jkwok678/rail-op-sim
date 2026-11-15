@@ -132,6 +132,12 @@ export interface Train {
 	control: TrainControl;
 	/** Optional reminder note attached by the signaller. */
 	reminder: string | null;
+	/** Eligible to be called on past the protecting red signal (§5.13). */
+	callingOnAllowed: boolean;
+	/** Currently advancing under calling-on authority (30 km/h cap). */
+	callingOn: boolean;
+	/** Red signal node the train was called on past, cleared on entry. */
+	allowedCallOnNode: NodeId | null;
 	working: TrainWorking;
 }
 
@@ -196,6 +202,8 @@ export interface SimState {
 	lies: number[];
 	/** Signal aspect by node: 0 red, 1 yellow, 2 double yellow, 3 green. */
 	aspects: number[];
+	/** Signal nodes currently showing a calling-on aspect (§5.13). */
+	callingOnSignals: NodeId[];
 	/** Each level crossing's barriers, by index in the graph's crossings. */
 	crossings: CrossingState[];
 	routes: Route[];
@@ -214,6 +222,7 @@ export type SimCommand =
 	| { type: "checkRouteStart"; at: Cell; kind: RouteKind }
 	| { type: "setRoute"; from: Cell; to: Cell; kind: RouteKind }
 	| { type: "setAllAutoRoutes" }
+	| { type: "callOn"; at: Cell }
 	| { type: "cancelRoute"; at: Cell }
 	| { type: "togglePoints"; at: Cell }
 	| { type: "takeControl"; trainId: number }
@@ -285,6 +294,8 @@ export interface TrainView {
 	followOnServiceRef: string | null;
 	/** Optional signaller reminder note attached to the train. */
 	reminder: string | null;
+	/** Whether the train can currently be called on past its red signal (§5.13). */
+	callingOnAllowed: boolean;
 }
 
 export interface SimView {
@@ -298,6 +309,7 @@ export interface SimView {
 		subtype: string;
 		aspect: number;
 		aspects: number;
+		callingOn: boolean;
 	}[];
 	/** Every set of points: its subtype and the rail (`a`–`b`) it lies on. */
 	points: { gx: number; gy: number; subtype: string; a: number; b: number }[];

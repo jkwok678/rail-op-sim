@@ -23,6 +23,7 @@ const simCommand = z.discriminatedUnion("type", [
 		kind: routeKind,
 	}),
 	z.object({ type: z.literal("setAllAutoRoutes") }),
+	z.object({ type: z.literal("callOn"), at: cell }),
 	z.object({ type: z.literal("cancelRoute"), at: cell }),
 	z.object({ type: z.literal("togglePoints"), at: cell }),
 	z.object({ type: z.literal("takeControl"), trainId: z.number() }),

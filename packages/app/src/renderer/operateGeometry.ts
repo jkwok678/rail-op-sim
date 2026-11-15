@@ -227,7 +227,10 @@ const WAIT_COLORS: Record<NonNullable<TrainView["wait"]>, number> = {
 	signaller: 0xfbbf24,
 };
 
+const CALL_ON_COLOR = 0xff33ff;
+
 export function trainColor(train: TrainView): number {
+	if (train.callingOnAllowed) return CALL_ON_COLOR;
 	return train.status === "waiting"
 		? WAIT_COLORS[train.wait ?? "station"]
 		: STATUS_COLORS[train.status];
