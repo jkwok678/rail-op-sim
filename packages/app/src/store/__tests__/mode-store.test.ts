@@ -25,7 +25,7 @@ const status = (over: Partial<TrackStatus>): TrackStatus => ({
 });
 
 beforeEach(() => {
-	useModeStore.setState({ mode: "railway" });
+	useModeStore.setState({ mode: "railway", blockedNotice: null });
 	useEditorStore.setState({
 		tool: "select",
 		selectedKind: null,
@@ -198,5 +198,42 @@ describe("operateBlockedReason", () => {
 		);
 		const warning = { severity: "warning" as const, code: "w", message: "w" };
 		expect(operateBlockedReason(status({}), tt(1), [warning])).toBeNull();
+	});
+});
+
+describe("blockedNotice", () => {
+	it("records the mode a gate refused", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		expect(mode().setMode("timetable")).toBe(false);
+		expect(mode().blockedNotice).toBe("timetable");
+	});
+
+	it("clears on any successful switch", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		mode().setMode("operate");
+		expect(mode().blockedNotice).toBe("operate");
+		useEditorStore.setState({ trackStatus: status({}) });
+		expect(mode().setMode("timetable")).toBe(true);
+		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("can be dismissed", () => {
+		useEditorStore.setState({ trackStatus: null });
+		mode().setMode("timetable");
+		mode().dismissBlockedNotice();
+		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("is not raised when the user declines to leave operate mode", () => {
+		useModeStore.setState({
+			mode: "operate",
+			confirmLeaveOperate: () => false,
+		});
+		useOperateStore.setState({
+			status: "ready",
+			view: { run: "running" } as never,
+		});
+		expect(mode().setMode("railway")).toBe(false);
+		expect(mode().blockedNotice).toBeNull();
 	});
 });

@@ -32,6 +32,13 @@ export type AppMode = "railway" | "timetable" | "operate";
 export interface ModeState {
 	mode: AppMode;
 	/**
+	 * The mode the user last tried to enter and was refused by a gate, so the
+	 * screen can say why — a tooltip or a silent hotkey is easy to miss. Cleared
+	 * by any successful switch, or dismissed.
+	 */
+	blockedNotice: AppMode | null;
+	dismissBlockedNotice: () => void;
+	/**
 	 * Switch to `mode`, returning whether it happened. Refused when the railway
 	 * cannot yet be timetabled — see {@link timetableBlockedReason}.
 	 */
@@ -81,6 +88,8 @@ function sessionStarted(): boolean {
 
 export const useModeStore = create<ModeState>((set, get) => ({
 	mode: "railway",
+	blockedNotice: null,
+	dismissBlockedNotice: () => set({ blockedNotice: null }),
 
 	setMode: (mode) => {
 		const prev = get().mode;
@@ -98,6 +107,7 @@ export const useModeStore = create<ModeState>((set, get) => ({
 			const reason = blockedReason(mode);
 			if (reason) {
 				debugLog("store", `setMode: ${mode} refused — ${reason}`);
+				set({ blockedNotice: mode });
 				return false;
 			}
 			// Put the map down: back to Select, which cancels any half-made
@@ -114,7 +124,7 @@ export const useModeStore = create<ModeState>((set, get) => ({
 		}
 
 		debugLog("store", `setMode: ${prev} → ${mode}`);
-		set({ mode });
+		set({ mode, blockedNotice: null });
 		return true;
 	},
 

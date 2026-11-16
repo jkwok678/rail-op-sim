@@ -9,8 +9,6 @@ const state = (
 	canUndo: true,
 	canRedo: true,
 	railwayConnected: true,
-	timetableBlocked: false,
-	operateBlocked: false,
 	editDialogOpen: false,
 	shortcutsOpen: false,
 	timetableCanStep: false,
@@ -51,10 +49,10 @@ describe("liveShortcuts", () => {
 		);
 	});
 
-	it("follows the switcher in refusing an incomplete railway's timetable", () => {
-		expect(liveShortcuts(state({ timetableBlocked: true })).modeTimetable).toBe(
-			false,
-		);
+	it("leaves a gated mode's key live so the refusal reaches the notice", () => {
+		const live = liveShortcuts(state());
+		expect(live.modeTimetable).toBe(true);
+		expect(live.modeOperate).toBe(true);
 	});
 
 	it("silences single keys behind the shortcuts overlay, except the one that closes it", () => {
@@ -152,13 +150,6 @@ describe("liveShortcuts — operate mode", () => {
 		const editing = liveShortcuts(state({ mode: "timetable" }));
 		expect(editing.modeRailway).toBe(true);
 		expect(editing.modeOperate).toBe(true);
-	});
-
-	it("gates the operate mode key on a runnable timetable", () => {
-		expect(liveShortcuts(state({ operateBlocked: true })).modeOperate).toBe(
-			false,
-		);
-		expect(liveShortcuts(state()).modeOperate).toBe(true);
 	});
 
 	it("keeps operate keys quiet behind an overlay or open train dialog", () => {

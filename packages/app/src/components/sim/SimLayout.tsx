@@ -5,6 +5,7 @@ import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
 import { AddPalette } from "./AddPalette";
+import { ModeGateNotice } from "./ModeGateNotice";
 import { ModeSwitcher } from "./ModeSwitcher";
 import { NameElementDialog } from "./NameElementDialog";
 import { OperatePanel } from "./operate/OperatePanel";
@@ -57,6 +58,7 @@ export function SimLayout() {
 				<div className="relative min-w-0 flex-1 overflow-hidden">
 					<SimCanvas />
 					<ModeSwitcher />
+					<ModeGateNotice />
 					{mode === "railway" ? (
 						<>
 							<Toolbar />

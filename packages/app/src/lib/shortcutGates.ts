@@ -10,10 +10,6 @@ export interface ShortcutGateState {
 	canRedo: boolean;
 	/** Every link joined and every portal paired: the direction tool's gate. */
 	railwayConnected: boolean;
-	/** The railway is not yet complete enough to timetable. */
-	timetableBlocked: boolean;
-	/** The railway or timetable is not ready to operate. */
-	operateBlocked: boolean;
 	/** The text or name dialog is open, with the user typing in it. */
 	editDialogOpen: boolean;
 	/** The shortcuts reference is open. */
@@ -77,11 +73,11 @@ export function liveShortcuts(
 		toolSection: toolsLive,
 		toolDirection: toolsLive && state.railwayConnected,
 		toggleEraseMode: toolsLive && state.tool === "direction",
-		// Mirrors the switcher: the timetable needs a railway that is
-		// operationally complete, not merely joined.
+		// A gated mode's key stays live: `setMode` refuses it and raises the
+		// switcher's notice saying why, where a dead key would just do nothing.
 		modeRailway: modeKeysLive,
-		modeTimetable: modeKeysLive && !state.timetableBlocked,
-		modeOperate: !overlayOpen && !state.operateBlocked,
+		modeTimetable: modeKeysLive,
+		modeOperate: !overlayOpen,
 		operateRunPause: operateLive,
 		operateSlower: operateLive,
 		operateFaster: operateLive,

@@ -16,7 +16,7 @@ import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { moveActionTo, nextIssueTarget, stepService } from "#/lib/timetableNav";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
-import { useBlockedReasons, useModeStore } from "#/store/mode-store";
+import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
@@ -194,7 +194,6 @@ export function useEditorHotkeys(): void {
 	const selectedServiceRef = useTimetableStore((s) => s.selectedServiceRef);
 	const selectedActionIndex = useTimetableStore((s) => s.selectedActionIndex);
 	const issues = useTimetableStore((s) => s.issues);
-	const blocked = useBlockedReasons();
 	const timetablePicking = useTimetableStore((s) => s.pendingCellPick !== null);
 	const selectedActionCount =
 		services.find((service) => service.ref === selectedServiceRef)?.actions
@@ -207,8 +206,6 @@ export function useEditorHotkeys(): void {
 		canUndo: useEditorStore((s) => s.canUndo),
 		canRedo: useEditorStore((s) => s.canRedo),
 		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
-		timetableBlocked: blocked.timetable !== null,
-		operateBlocked: blocked.operate !== null,
 		editDialogOpen: useEditorStore((s) =>
 			Boolean(s.pendingText || s.pendingNameTarget),
 		),
