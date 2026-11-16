@@ -1009,9 +1009,9 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 
 **Deliverable**: Ready to share with users.
 
-- [ ] **Error boundaries** around the canvas, each panel, and the router — graceful degradation
-- [ ] **Loading states**: skeleton screens while session loads, spinner during worker init
-- [ ] **Empty states**: helpful prompts when no track built, no trains placed, no timetable loaded
+- [x] **Error boundaries** around the canvas, each panel, and the router — graceful degradation
+- [x] **Loading states**: spinners while the canvas starts, while the operate session loads, and while a route is pending — skeleton screens were dropped, since each wait is too brief and too unlike its final layout for a skeleton to help
+- [x] **Empty states**: helpful prompts when no track built, no trains placed, no timetable loaded
 - [x] **Keyboard shortcut reference**: `?` key shows overlay with all shortcuts — generated from the `SHORTCUTS` registry in `packages/app/src/lib/shortcuts.ts`, which every binding site, the toolbar badges and the overlay read from
 - [ ] **Tutorial scenario**: pre-built simple network with step-by-step instructions (build track → place signal → place train → set route → run)
 - [ ] **PWA**: service worker for offline use, installable (manifest.json already exists)
