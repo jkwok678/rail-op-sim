@@ -34,6 +34,18 @@ export function startSimBridge(
 	const store = useOperateStore.getState;
 	const waiting = new Map<number, (result: CommandResult) => void>();
 	let nextId = 1;
+	/** Set once the connection has died: nothing more will be answered. */
+	let failure: string | null = null;
+
+	/**
+	 * Show why the session is in trouble, and settle every command still
+	 * waiting so no caller hangs on an answer that cannot come.
+	 */
+	const fail = (message: string): void => {
+		store().setStatus("error", message);
+		for (const resolve of waiting.values()) resolve({ ok: false, message });
+		waiting.clear();
+	};
 
 	const stopListening = transport.onMessage((message: EngineToHost) => {
 		switch (message.type) {
@@ -55,9 +67,14 @@ export function startSimBridge(
 				return;
 			case "error":
 				debugLog("sim", `engine error: ${message.message}`);
-				store().setStatus("error", message.message);
+				fail(message.message);
 				return;
 		}
+	});
+	const stopListeningForErrors = transport.onError((message) => {
+		debugLog("sim", `transport error: ${message}`);
+		failure = message;
+		fail(message);
 	});
 
 	store().reset();
@@ -66,6 +83,9 @@ export function startSimBridge(
 
 	return {
 		command(cmd) {
+			if (failure !== null) {
+				return Promise.resolve({ ok: false, message: failure });
+			}
 			const id = nextId++;
 			return new Promise((resolve) => {
 				waiting.set(id, resolve);
@@ -74,6 +94,7 @@ export function startSimBridge(
 		},
 		dispose() {
 			stopListening();
+			stopListeningForErrors();
 			for (const resolve of waiting.values()) {
 				resolve({ ok: false, message: "The session has ended." });
 			}
@@ -98,22 +119,63 @@ function workerTransport(): HostTransport {
 	);
 }
 
+/**
+ * Stands in for a worker that could not be created (no Worker support, a
+ * blocked script): it fails as soon as the bridge sends it anything, so the
+ * session lands in the error state through the same path as any other dead
+ * connection, rather than throwing out of the effect that opens it.
+ */
+function unavailableTransport(message: string): HostTransport {
+	const failed = new Set<(message: string) => void>();
+	return {
+		send() {
+			for (const handler of [...failed]) handler(message);
+		},
+		onMessage: () => () => {},
+		onError(handler) {
+			failed.add(handler);
+			return () => failed.delete(handler);
+		},
+		close() {},
+	};
+}
+
+function connect(): HostTransport {
+	try {
+		return workerTransport();
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		return unavailableTransport(
+			`The simulation worker could not start: ${reason}`,
+		);
+	}
+}
+
 let active: SimBridge | null = null;
+/** What the open session was started with, so it can be started again. */
+let last: { map: SerializedMap; timetable: Timetable } | null = null;
 
 /** Open the operate session, closing any previous one. */
 export function openSimSession(
 	map: SerializedMap,
 	timetable: Timetable,
-	transport: HostTransport = workerTransport(),
+	transport?: HostTransport,
 ): SimBridge {
 	active?.dispose();
-	active = startSimBridge(transport, map, timetable);
+	last = { map, timetable };
+	active = startSimBridge(transport ?? connect(), map, timetable);
 	return active;
+}
+
+/** Start the session again from the same railway and timetable, on a fresh worker. */
+export function restartSimSession(): void {
+	if (last) openSimSession(last.map, last.timetable);
 }
 
 export function closeSimSession(): void {
 	active?.dispose();
 	active = null;
+	last = null;
 }
 
 /**

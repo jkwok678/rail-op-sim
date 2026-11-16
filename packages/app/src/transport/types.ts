@@ -29,6 +29,11 @@ export type EngineToHost =
 	/** Formatted timetable rows by train id, for trains whose working is new or changed. */
 	| { type: "timetables"; rows: Record<number, TrainTimetableRow[]> }
 	| { type: "command_result"; id: number; result: CommandResult }
+	/**
+	 * The engine has stopped and dropped its state; nothing more will be
+	 * answered. Never sent for a problem the engine carries on through — a
+	 * refused command is a `command_result` with `ok: false`.
+	 */
 	| { type: "error"; message: string };
 
 /** One end of a connection: send `Out`, receive `In`. */
@@ -36,6 +41,13 @@ export interface SimTransport<In, Out> {
 	send(message: Out): void;
 	/** Listen for messages; returns a function that stops listening. */
 	onMessage(handler: (message: In) => void): () => void;
+	/**
+	 * Listen for the connection itself failing — a worker's uncaught error, a
+	 * message that could not be deserialised, later a dropped socket. Distinct
+	 * from an `error` message, which the engine sends while still working.
+	 * Returns a function that stops listening.
+	 */
+	onError(handler: (message: string) => void): () => void;
 	close(): void;
 }
 

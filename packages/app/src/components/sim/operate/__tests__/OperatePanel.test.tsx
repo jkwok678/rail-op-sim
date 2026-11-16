@@ -3,6 +3,7 @@ import type { SimView } from "@rail-op-sim/shared";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OperatePanel } from "#/components/sim/operate/OperatePanel";
+import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 
 const sent = vi.hoisted(() => [] as unknown[]);
@@ -10,6 +11,9 @@ vi.mock("#/store/sim-bridge", () => ({
 	simCommand: async (cmd: unknown) => {
 		sent.push(cmd);
 		return { ok: true };
+	},
+	restartSimSession: () => {
+		sent.push("restart");
 	},
 }));
 
@@ -34,10 +38,69 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("OperatePanel", () => {
-	it("renders while the engine is still loading", () => {
+	it("shows a spinner in the train list while the engine starts", () => {
 		render(<OperatePanel />);
-		expect(screen.getByText("Loading")).toBeTruthy();
+		expect(screen.getByRole("status", { name: "Starting the simulation" }));
+		expect(screen.getByText("Starting the simulation…")).toBeTruthy();
+		useOperateStore.setState({ status: "loading" });
+		expect(screen.getByText("Starting the simulation…")).toBeTruthy();
+	});
+
+	it("says the clock has not started when nothing is on the railway before Run", () => {
+		useOperateStore.setState({ status: "ready", view: view() });
+		render(<OperatePanel />);
+		expect(screen.getByText(/The clock has not started/)).toBeTruthy();
+		expect(screen.queryByText("No trains on the railway yet.")).toBeNull();
+	});
+
+	it("keeps the plain empty message once the clock has run", () => {
+		useOperateStore.setState({
+			status: "ready",
+			view: view({ run: "running" }),
+		});
+		render(<OperatePanel />);
 		expect(screen.getByText("No trains on the railway yet.")).toBeTruthy();
+	});
+
+	it("replaces the train list with an error state, controls disabled, log kept", () => {
+		useOperateStore.setState({
+			status: "error",
+			error: "worker exploded",
+			view: view(),
+			log: [{ seq: 1, time: 0, level: "error", text: "06:00:00 ERROR: oops" }],
+		});
+		render(<OperatePanel />);
+		const alert = screen.getByRole("alert");
+		expect(alert.textContent).toContain("The simulation stopped");
+		expect(alert.textContent).toContain("worker exploded");
+		expect(
+			(screen.getByRole("button", { name: /Run/ }) as HTMLButtonElement)
+				.disabled,
+		).toBe(true);
+		expect(
+			(screen.getByRole("radio", { name: /Unrestricted/ }) as HTMLButtonElement)
+				.disabled,
+		).toBe(true);
+		expect(screen.getByRole("log").textContent).toContain("ERROR: oops");
+	});
+
+	it("restarts the session from the error state", () => {
+		useOperateStore.setState({ status: "error", error: "boom" });
+		render(<OperatePanel />);
+		fireEvent.click(screen.getByRole("button", { name: "Restart session" }));
+		expect(sent).toEqual(["restart"]);
+	});
+
+	it("goes back to the railway from the error state without asking", () => {
+		useModeStore.setState({ mode: "operate" });
+		useOperateStore.setState({
+			status: "error",
+			error: "boom",
+			view: view({ run: "running" }),
+		});
+		render(<OperatePanel />);
+		fireEvent.click(screen.getByRole("button", { name: "Back to railway" }));
+		expect(useModeStore.getState().mode).toBe("railway");
 	});
 
 	it("shows the clock and starts it", () => {
@@ -94,6 +157,7 @@ describe("OperatePanel", () => {
 
 	it("lists trains and what they do next, and opens train menu on right-click", () => {
 		useOperateStore.setState({
+			status: "ready",
 			view: view({
 				trains: [
 					{

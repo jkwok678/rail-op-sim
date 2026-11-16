@@ -60,19 +60,40 @@ export function startEngineHost(
 		if (lines.length > 0) transport.send({ type: "log", lines });
 	};
 
-	const frame = (): void => {
-		if (!engine) return;
-		const now = clock.now();
-		const seconds = Math.min((now - last) / 1000, MAX_FRAME_S);
-		last = now;
-		engine.advance(seconds * engine.state.speed);
-		if (now - lastView >= VIEW_MS) publish();
-		timer = clock.schedule(frame, FRAME_MS);
-	};
-
 	const stop = (): void => {
 		if (timer !== null) clock.cancel(timer);
 		timer = null;
+	};
+
+	/**
+	 * Give up on the engine. Whatever threw may have left it half-advanced, so
+	 * its state can no longer be trusted: stop the clock, drop it, and say so —
+	 * otherwise the panel just freezes. Later commands find nothing loaded.
+	 * This is the only place an `error` message is sent, so the host can take
+	 * every one as the end of the session.
+	 */
+	const fail = (error: unknown): void => {
+		stop();
+		engine = null;
+		transport.send({
+			type: "error",
+			message: error instanceof Error ? error.message : String(error),
+		});
+	};
+
+	const frame = (): void => {
+		if (!engine) return;
+		try {
+			const now = clock.now();
+			const seconds = Math.min((now - last) / 1000, MAX_FRAME_S);
+			last = now;
+			engine.advance(seconds * engine.state.speed);
+			if (now - lastView >= VIEW_MS) publish();
+		} catch (error) {
+			fail(error);
+			return;
+		}
+		timer = clock.schedule(frame, FRAME_MS);
 	};
 
 	const load = (message: Extract<HostToEngine, { type: "load" }>): void => {
@@ -113,17 +134,16 @@ export function startEngineHost(
 
 	transport.onMessage((raw) => {
 		const parsed = parseHostMessage(raw);
+		// Fatal like any other error: the host and engine no longer agree on
+		// the protocol, and a command lost here could never be answered.
 		if (!parsed.ok) {
-			transport.send({ type: "error", message: parsed.error });
+			fail(parsed.error);
 			return;
 		}
 		try {
 			handle(parsed.message);
 		} catch (error) {
-			transport.send({
-				type: "error",
-				message: error instanceof Error ? error.message : String(error),
-			});
+			fail(error);
 		}
 	});
 }

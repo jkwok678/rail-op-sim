@@ -6,6 +6,7 @@ import {
 } from "@rail-op-sim/shared";
 import { useEffect, useRef } from "react";
 import { Button } from "#/components/ui/button";
+import { Spinner } from "#/components/ui/spinner";
 import { PlacementController } from "#/engine/PlacementController";
 import { gridToWorld } from "#/lib/grid";
 import {
@@ -23,7 +24,9 @@ import {
 	speedLabel,
 	trainStatusLabel,
 } from "#/lib/operateText";
+import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
+import { restartSimSession } from "#/store/sim-bridge";
 
 /** The route kinds, coloured as RailOS draws them. */
 const ROUTE_KINDS: { kind: RouteKind; label: string; swatch: string }[] = [
@@ -37,8 +40,6 @@ const ROUTE_KINDS: { kind: RouteKind; label: string; swatch: string }[] = [
  * the route controls, the trains on the railway and the performance log.
  */
 export function OperatePanel() {
-	const status = useOperateStore((s) => s.status);
-	const error = useOperateStore((s) => s.error);
 	const notice = useOperateStore((s) => s.notice);
 	const showLog = useOperateStore((s) => s.showLog);
 
@@ -49,14 +50,6 @@ export function OperatePanel() {
 		>
 			<ClockControls />
 			<RouteControls />
-			{status === "error" ? (
-				<p
-					role="alert"
-					className="border-b border-border bg-destructive/10 px-3 py-1.5 text-destructive"
-				>
-					{error}
-				</p>
-			) : null}
 			{notice ? (
 				<p
 					role="status"
@@ -77,9 +70,16 @@ export function OperatePanel() {
 	);
 }
 
+/** Whether the session has died, leaving its controls with nothing to drive. */
+function useErrored(): boolean {
+	return useOperateStore((s) => s.status === "error");
+}
+
 function ClockControls() {
 	const view = useOperateStore((s) => s.view);
+	const errored = useErrored();
 	const running = view?.run === "running";
+	const live = view !== null && !errored;
 	return (
 		<div className="flex items-center gap-2 border-b border-border px-3 py-2">
 			<div className="flex flex-1 flex-col">
@@ -98,7 +98,7 @@ function ClockControls() {
 				variant="ghost"
 				size="icon-xs"
 				aria-label="Slower"
-				disabled={!view}
+				disabled={!live}
 				onClick={() => changeSpeed(-1)}
 			>
 				<Minus />
@@ -114,12 +114,12 @@ function ClockControls() {
 				variant="ghost"
 				size="icon-xs"
 				aria-label="Faster"
-				disabled={!view}
+				disabled={!live}
 				onClick={() => changeSpeed(1)}
 			>
 				<Plus />
 			</Button>
-			<Button size="sm" disabled={!view} onClick={runOrPause}>
+			<Button size="sm" disabled={!live} onClick={runOrPause}>
 				{running ? <Pause /> : <Play />}
 				{running ? "Pause" : "Run"}
 			</Button>
@@ -128,6 +128,7 @@ function ClockControls() {
 }
 
 function RouteControls() {
+	const errored = useErrored();
 	const routeKind = useOperateStore((s) => s.routeKind);
 	const cancelArmed = useOperateStore((s) => s.cancelArmed);
 	const callOnArmed = useOperateStore((s) => s.callOnArmed);
@@ -154,6 +155,7 @@ function RouteControls() {
 								: "ghost"
 						}
 						size="xs"
+						disabled={errored}
 						onClick={() => chooseRouteKind(kind)}
 					>
 						<span className={`size-2 rounded-full ${swatch}`} />
@@ -164,6 +166,7 @@ function RouteControls() {
 					aria-pressed={cancelArmed}
 					variant={cancelArmed ? "destructive" : "ghost"}
 					size="xs"
+					disabled={errored}
 					onClick={toggleRouteCancel}
 				>
 					<Prohibit />
@@ -174,7 +177,7 @@ function RouteControls() {
 				<Button
 					variant="outline"
 					size="xs"
-					disabled={!run || run === "paused"}
+					disabled={errored || !run || run === "paused"}
 					title="Set an automatic route on every plain section between signals"
 					onClick={() => void setAllAutoRoutes()}
 				>
@@ -185,7 +188,7 @@ function RouteControls() {
 					variant={callOnArmed ? "secondary" : "outline"}
 					size="xs"
 					aria-pressed={callOnArmed}
-					disabled={!canCallOn || !run || run === "paused"}
+					disabled={errored || !canCallOn || !run || run === "paused"}
 					title="Call a train standing at red onto an occupied platform (Shift+O)"
 					onClick={toggleCallOn}
 				>
@@ -217,14 +220,63 @@ function showTrain(train: TrainView): void {
 /** One shared empty list, so the selector is stable before the first view. */
 const NO_TRAINS: TrainView[] = [];
 
+/**
+ * The session died: say so and what can be done. The clock and route controls
+ * above are disabled meanwhile; the performance log below stays, since it may
+ * say what went wrong.
+ */
+function SessionError() {
+	const error = useOperateStore((s) => s.error);
+	return (
+		<div
+			role="alert"
+			className="flex flex-col gap-2 border-b border-border bg-destructive/10 p-3"
+		>
+			<p className="font-medium text-destructive">The simulation stopped</p>
+			<p className="break-words text-muted-foreground">{error}</p>
+			<div className="flex gap-2">
+				<Button size="xs" onClick={restartSimSession}>
+					Restart session
+				</Button>
+				<Button
+					variant="outline"
+					size="xs"
+					onClick={() => useModeStore.getState().setMode("railway")}
+				>
+					Back to railway
+				</Button>
+			</div>
+		</div>
+	);
+}
+
 function TrainList() {
+	const status = useOperateStore((s) => s.status);
 	const trains = useOperateStore((s) => s.view?.trains ?? NO_TRAINS);
+	const prestart = useOperateStore((s) => s.view?.run === "prestart");
 	const openTrainMenu = useOperateStore((s) => s.openTrainMenu);
+	if (status === "error") {
+		return (
+			<div className="min-h-0 flex-1 overflow-y-auto">
+				<SessionError />
+			</div>
+		);
+	}
+	if (status === "idle" || status === "loading") {
+		return (
+			<div className="flex min-h-0 flex-1 items-center justify-center gap-2 text-muted-foreground">
+				<Spinner label="Starting the simulation" />
+				<span>Starting the simulation…</span>
+			</div>
+		);
+	}
 	return (
 		<div className="min-h-0 flex-1 overflow-y-auto">
 			{trains.length === 0 ? (
 				<p className="p-3 text-muted-foreground">
-					No trains on the railway yet.
+					{prestart
+						? "The clock has not started. Press Run to start it — trains enter at their booked times."
+						: "No trains on the railway yet."}
 				</p>
 			) : (
 				<table className="w-full">

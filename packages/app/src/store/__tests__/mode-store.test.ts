@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import {
 	blockedReason,
@@ -235,5 +235,17 @@ describe("blockedNotice", () => {
 		});
 		expect(mode().setMode("railway")).toBe(false);
 		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("does not ask to confirm leaving a session that errored", () => {
+		const confirm = vi.fn(() => false);
+		useModeStore.setState({ mode: "operate", confirmLeaveOperate: confirm });
+		useOperateStore.setState({
+			status: "error",
+			error: "boom",
+			view: { run: "running" } as never,
+		});
+		expect(mode().setMode("railway")).toBe(true);
+		expect(confirm).not.toHaveBeenCalled();
 	});
 });

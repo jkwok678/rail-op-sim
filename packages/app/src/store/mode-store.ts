@@ -80,9 +80,14 @@ export function operateBlockedReason(
 	return null;
 }
 
-/** Whether leaving operate mode would throw away a session that has run. */
+/**
+ * Whether leaving operate mode would throw away a session that has run. A
+ * session that errored has nothing left worth confirming: its engine is gone.
+ */
 function sessionStarted(): boolean {
-	const run = useOperateStore.getState().view?.run;
+	const { status, view } = useOperateStore.getState();
+	if (status === "error") return false;
+	const run = view?.run;
 	return run !== undefined && run !== "prestart";
 }
 
