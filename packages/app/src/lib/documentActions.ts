@@ -1,4 +1,9 @@
-import { decodeDocument, pickAndReadDocuments } from "#/lib/documentFile";
+import {
+	decodeDocument,
+	type LoadedDocument,
+	type PickedDocument,
+	pickAndReadDocuments,
+} from "#/lib/documentFile";
 import { applyLoadedMap, loadMap, saveMap } from "#/lib/mapActions";
 import { parseMapText } from "#/lib/mapFile";
 import {
@@ -73,34 +78,9 @@ async function loadRailwayOrTimetable(): Promise<void> {
 					? { kind: "timetable", data: parseTimetableText(text, format) }
 					: { kind: "map", data: parseMapText(text, format) },
 		);
-		if (!picked) {
-			useTimetableStore.getState().setLoadError(null);
-			return;
-		}
-		const maps = picked.filter((p) => p.data.kind === "map");
-		const timetables = picked.filter((p) => p.data.kind === "timetable");
-		if (picked.length > 2 || maps.length > 1 || timetables.length > 1) {
-			useTimetableStore
-				.getState()
-				.setLoadError(
-					"Pick at most one railway and one timetable — nothing was loaded.",
-				);
-			return;
-		}
-
-		let error: string | null = null;
-		for (const doc of maps) {
-			if (doc.data.kind === "map")
-				applyLoadedMap({ data: doc.data.data, format: doc.format });
-		}
-		for (const doc of timetables) {
-			if (doc.data.kind === "timetable")
-				error = applyLoadedTimetable({
-					data: doc.data.data,
-					format: doc.format,
-				});
-		}
-		useTimetableStore.getState().setLoadError(error);
+		useTimetableStore
+			.getState()
+			.setLoadError(picked ? applyRailwayPick(picked) : null);
 	} catch (err) {
 		console.error("documentActions: failed to load file", err);
 		useTimetableStore
@@ -111,6 +91,36 @@ async function loadRailwayOrTimetable(): Promise<void> {
 					: "That file is not a railway or timetable.",
 			);
 	}
+}
+
+/**
+ * Apply a parsed railway-mode pick — railway first, then timetable — and
+ * return the error to show, or `null`. A set with duplicate kinds or more
+ * than two files is refused without applying anything.
+ */
+function applyRailwayPick(
+	picked: PickedDocument<RailwayOrTimetable>[],
+): string | null {
+	const maps: LoadedDocument<RailwayOrTimetable & { kind: "map" }>[] = [];
+	const timetables: LoadedDocument<
+		RailwayOrTimetable & { kind: "timetable" }
+	>[] = [];
+	for (const { data, format } of picked) {
+		if (data.kind === "map") maps.push({ data, format });
+		else timetables.push({ data, format });
+	}
+	if (maps.length > 1 || timetables.length > 1)
+		return "Pick at most one railway and one timetable — nothing was loaded.";
+
+	const [map] = maps;
+	const [timetable] = timetables;
+	if (map) applyLoadedMap({ data: map.data.data, format: map.format });
+	return timetable
+		? applyLoadedTimetable({
+				data: timetable.data.data,
+				format: timetable.format,
+			})
+		: null;
 }
 
 export async function loadDocument(): Promise<void> {
