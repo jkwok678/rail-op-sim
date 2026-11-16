@@ -15,7 +15,8 @@ type Subsystem =
 	| "textureCache"
 	| "pixi"
 	| "saveload"
-	| "sim";
+	| "sim"
+	| "ui";
 
 const enabled = new Set(
 	(import.meta.env.VITE_DEBUG_LOG ?? "")
