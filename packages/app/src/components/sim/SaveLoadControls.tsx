@@ -19,7 +19,7 @@ export function SaveLoadControls() {
 	const saveLabel = `Save ${noun} as ${formatLabel}`;
 	const loadLabel =
 		mode === "railway"
-			? "Load railway or timetable from JSON or YAML"
+			? "Load railway and/or timetable from JSON or YAML (select both to load together)"
 			: `Load ${noun} from JSON or YAML`;
 
 	return (

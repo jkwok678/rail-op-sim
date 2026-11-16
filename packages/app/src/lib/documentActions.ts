@@ -1,4 +1,4 @@
-import { decodeDocument, pickAndReadDocument } from "#/lib/documentFile";
+import { decodeDocument, pickAndReadDocuments } from "#/lib/documentFile";
 import { applyLoadedMap, loadMap, saveMap } from "#/lib/mapActions";
 import { parseMapText } from "#/lib/mapFile";
 import {
@@ -44,34 +44,63 @@ function isTimetableText(text: string, format: "json" | "yaml"): boolean {
 	}
 }
 
+/** What a file picked in railway mode turned out to be. */
+type RailwayOrTimetable =
+	| { kind: "map"; data: ReturnType<typeof parseMapText> }
+	| { kind: "timetable"; data: ReturnType<typeof parseTimetableText> };
+
 /**
- * Railway mode's single upload: the picked file may be a railway or a
- * timetable, and is routed by what it contains.
+ * Railway mode's upload: pick a railway, a timetable, or both at once, in any
+ * order, and each file is routed by what it contains.
+ *
+ * The railway is always applied first however the files were listed, because
+ * the timetable is validated against the railway it lands on — applied the
+ * other way round it would be judged against the old map and report errors
+ * the new one does not have. Loading a map keeps the timetable and
+ * revalidates it, so railway-then-timetable leaves both in place and the
+ * issues Operate is gated on already computed; no visit to timetable mode is
+ * needed.
+ *
+ * Every file is parsed before anything is applied, and a set that cannot
+ * make sense (two railways, two timetables, more than two files) is refused
+ * whole, so a bad pick never half-replaces the user's work.
  */
 async function loadRailwayOrTimetable(): Promise<void> {
 	try {
-		const loaded = await pickAndReadDocument((text, format) =>
-			isTimetableText(text, format)
-				? ({
-						kind: "timetable",
-						data: parseTimetableText(text, format),
-					} as const)
-				: ({ kind: "map", data: parseMapText(text, format) } as const),
+		const picked = await pickAndReadDocuments<RailwayOrTimetable>(
+			(text, format) =>
+				isTimetableText(text, format)
+					? { kind: "timetable", data: parseTimetableText(text, format) }
+					: { kind: "map", data: parseMapText(text, format) },
 		);
-		if (!loaded) {
+		if (!picked) {
 			useTimetableStore.getState().setLoadError(null);
 			return;
 		}
-		if (loaded.data.kind === "timetable") {
-			const error = applyLoadedTimetable({
-				data: loaded.data.data,
-				format: loaded.format,
-			});
-			useTimetableStore.getState().setLoadError(error);
-		} else {
-			applyLoadedMap({ data: loaded.data.data, format: loaded.format });
-			useTimetableStore.getState().setLoadError(null);
+		const maps = picked.filter((p) => p.data.kind === "map");
+		const timetables = picked.filter((p) => p.data.kind === "timetable");
+		if (picked.length > 2 || maps.length > 1 || timetables.length > 1) {
+			useTimetableStore
+				.getState()
+				.setLoadError(
+					"Pick at most one railway and one timetable — nothing was loaded.",
+				);
+			return;
 		}
+
+		let error: string | null = null;
+		for (const doc of maps) {
+			if (doc.data.kind === "map")
+				applyLoadedMap({ data: doc.data.data, format: doc.format });
+		}
+		for (const doc of timetables) {
+			if (doc.data.kind === "timetable")
+				error = applyLoadedTimetable({
+					data: doc.data.data,
+					format: doc.format,
+				});
+		}
+		useTimetableStore.getState().setLoadError(error);
 	} catch (err) {
 		console.error("documentActions: failed to load file", err);
 		useTimetableStore

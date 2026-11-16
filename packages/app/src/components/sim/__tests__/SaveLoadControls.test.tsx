@@ -27,7 +27,7 @@ describe("SaveLoadControls", () => {
 		).toBeDefined();
 		expect(
 			screen.getByRole("button", {
-				name: "Load railway or timetable from JSON or YAML",
+				name: "Load railway and/or timetable from JSON or YAML (select both to load together)",
 			}),
 		).toBeDefined();
 	});
