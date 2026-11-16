@@ -1,5 +1,6 @@
 import type { Application } from "pixi.js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { guardTicker } from "#/engine/guardTicker";
 import type { PlacementController } from "#/engine/PlacementController";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
@@ -10,7 +11,13 @@ import { SVG_MAP } from "#/lib/svgMap";
 import { FIT_EXTENT, FIT_PADDING } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
 
+/** How far the canvas has got: `error` means PixiJS could not start at all. */
+export type CanvasStatus = "loading" | "ready" | "error";
+
 export interface UsePixiAppReturn {
+	status: CanvasStatus;
+	/** Why the canvas could not start, when `status` is `error`. */
+	error: string | null;
 	/** Attach to a `<div>` in JSX. The PixiJS canvas mounts inside it. */
 	containerRef: React.RefObject<HTMLDivElement | null>;
 	/** The PixiJS Application (null before mount). */
@@ -35,6 +42,13 @@ export function usePixiApp(): UsePixiAppReturn {
 	const appRef = useRef<Application | null>(null);
 	const viewportRef = useRef<ViewportController | null>(null);
 	const placementRef = useRef<PlacementController | null>(null);
+	const [status, setStatus] = useState<CanvasStatus>("loading");
+	const [error, setError] = useState<string | null>(null);
+	/**
+	 * Set to a function that throws, so a crash in a running frame is rethrown
+	 * while rendering, where the canvas's error boundary can catch it.
+	 */
+	const [, setCrash] = useState<null>(null);
 
 	useEffect(() => {
 		let destroyed = false;
@@ -90,6 +104,16 @@ export function usePixiApp(): UsePixiAppReturn {
 				app.destroy(true);
 				return;
 			}
+			// An error thrown in a frame would otherwise end the render loop and
+			// leave a frozen canvas with no word why. Throwing it during a render
+			// hands it to the canvas's error boundary, which says so.
+			guardTicker(app.ticker, (crash) => {
+				if (destroyed) return;
+				console.error("The canvas crashed while drawing", crash);
+				setCrash(() => {
+					throw crash;
+				});
+			});
 
 			// Scene graph: stage → world → { ground, tracks, ghost }
 			const world = new Container();
@@ -194,16 +218,22 @@ export function usePixiApp(): UsePixiAppReturn {
 			Promise.all([
 				textures.preload(allSubtypes),
 				textures.preloadFiles(OPERATE_ART_FILES),
-			]).then(() => {
-				if (destroyed) return;
-				trackColorLayer.sync(placement.map);
-				trackLayer.sync(placement.map);
-				elementLayer.sync(placement.map);
-				textLayer.sync(placement.map);
-				directionLayer.sync(placement.map);
-				placement.refreshGhost();
-				debugLog("pixi", "init complete — ready for interaction");
-			});
+			])
+				.then(() => {
+					if (destroyed) return;
+					trackColorLayer.sync(placement.map);
+					trackLayer.sync(placement.map);
+					elementLayer.sync(placement.map);
+					textLayer.sync(placement.map);
+					directionLayer.sync(placement.map);
+					placement.refreshGhost();
+					debugLog("pixi", "init complete — ready for interaction");
+				})
+				// The canvas works without the art (pieces appear as it loads or
+				// not at all), so this is logged rather than failing the canvas.
+				.catch((reason: unknown) => {
+					console.error("Track art failed to load", reason);
+				});
 
 			// Theme: rebuild grid colours and re-bake track/ghost textures.
 			themeObserver = new MutationObserver(() => {
@@ -248,9 +278,15 @@ export function usePixiApp(): UsePixiAppReturn {
 			appRef.current = app;
 			viewportRef.current = viewport;
 			placementRef.current = placement;
+			setStatus("ready");
 		};
 
-		init();
+		init().catch((reason: unknown) => {
+			if (destroyed) return;
+			console.error("The canvas failed to start", reason);
+			setError(reason instanceof Error ? reason.message : String(reason));
+			setStatus("error");
+		});
 
 		return () => {
 			debugLog("pixi", "cleanup — destroying");
@@ -270,5 +306,5 @@ export function usePixiApp(): UsePixiAppReturn {
 		};
 	}, []);
 
-	return { containerRef, appRef, viewportRef, placementRef };
+	return { containerRef, appRef, viewportRef, placementRef, status, error };
 }
