@@ -364,8 +364,9 @@ interface Service {
 // Action is a discriminated union: startNew | startNewService | startFromSplit
 // | stop | pass | changeDirection | frontSplit | rearSplit | joinedBy
 // | changeDescription | changeMaxSpeed | finishNewService | finishJoin
-// | finishExit | finishRemainHere (plus the shuttle variants, typed but not
-// yet supported). See timetable/types.ts for the fields of each.
+// | finishExit | finishRemainHere | finishToShuttle | startNewShuttle
+// | startShuttle | startFromShuttle | finishShuttleRemainHere
+// | finishShuttleNewService. See timetable/types.ts for the fields of each.
 
 // === Failures & Disruptions ===
 
@@ -779,7 +780,7 @@ action-list model; the deliverable is unchanged.
 - [x] Import/export timetable as a JSON *or* YAML file, over the same helpers
       the map uses (`lib/documentFile.ts`)
 - [ ] Timetable is saved as part of the session in IndexedDB
-- [ ] Shuttle actions in the editor (typed in the model, reported as unsupported)
+- [x] Shuttle actions and service repeats in the editor (`startNewShuttle`, `startShuttle`, `startFromShuttle`, `finishToShuttle`, `finishShuttleRemainHere`, `finishShuttleNewService`, plus `repeat` interval/increment/count)
 - [ ] `.ttb` import/export (`timetable/ttb.ts`, designed for, not built)
 
 ### Milestone 21: Timetable Engine — Basic Dispatch
@@ -860,9 +861,9 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] **Joins**:
   - Incoming `finishJoin` train approaches via calling-on (§5.13) when a red signal protects the occupied platform
   - Couples to `joinedBy` partner (`mergeTrainInto`), combining mass, power, brake rate, speed cap, length and reminders
-- [ ] **Shuttles**:
-  - Train goes back and forth between two points N times
-  - No explicit entries needed — define shuttle: endpoints, headcode, interval, count
+- [x] **Shuttles**:
+  - Repeating shuttle pairs (`startNewShuttle`/`startShuttle` ↔ `finishShuttleRemainHere`/`finishShuttleNewService`) plus non-repeating `finishToShuttle` feeders and `startFromShuttle` tails
+  - Validated for repeat parity, timing, and loop integrity; expanded at runtime by `buildSimServices` and dispatched smoothly via `finishShuttleToNext`/`becomeNewService`
 - [ ] **Repeating services**:
   - Timetable has a `repeatRule` — daily, weekday, saturday, sunday
   - At end of period, timetable resets and re-dispatches

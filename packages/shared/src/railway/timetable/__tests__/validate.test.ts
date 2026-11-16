@@ -34,6 +34,48 @@ const startNew: Action = {
 };
 const finishRemainHere: Action = { kind: "finishRemainHere" };
 
+/** An outward shuttle and the return that finishes it, one interval later. */
+function linkedShuttle(): Timetable {
+	const repeat = { intervalMinutes: 30, headcodeIncrement: 1, count: 2 };
+	return timetable([
+		{
+			ref: "1A01",
+			train: { ...TRAIN, startSpeedKmh: 0 },
+			repeat,
+			actions: [
+				{
+					kind: "startNewShuttle",
+					time: parseSimTime("06:00"),
+					rear: { gx: 0, gy: 0 },
+					front: { gx: 1, gy: 0 },
+					otherRef: "1A02",
+				},
+				{
+					kind: "finishNewService",
+					time: parseSimTime("06:10"),
+					nextRef: "1A02",
+				},
+			],
+		},
+		{
+			ref: "1A02",
+			repeat,
+			actions: [
+				{
+					kind: "startNewService",
+					time: parseSimTime("06:10"),
+					fromRef: "1A01",
+				},
+				{
+					kind: "finishShuttleRemainHere",
+					time: parseSimTime("06:30"),
+					otherRef: "1A01",
+				},
+			],
+		},
+	]);
+}
+
 describe("validateTimetableStructure — a valid timetable", () => {
 	it("reports nothing on a two-service timetable that hands a train over", () => {
 		expect(validateTimetableStructure(twoServiceTimetable())).toEqual([]);
@@ -198,11 +240,89 @@ describe("validateTimetableStructure — the shape of a service", () => {
 		expect(structureCodes(tt)).toContain("action-after-finish");
 	});
 
-	it("unsupported-shuttle: a shuttle, which the editor cannot build yet", () => {
+	it("shuttle-needs-repeat: a shuttle with nothing to repeat", () => {
 		const tt = timetable([
 			{
 				ref: "1A01",
+				train: { ...TRAIN, startSpeedKmh: 0 },
+				actions: [
+					{
+						kind: "startNewShuttle",
+						time: parseSimTime("06:00"),
+						rear: { gx: 0, gy: 0 },
+						front: { gx: 1, gy: 0 },
+						otherRef: "1A01",
+					},
+					{
+						kind: "finishShuttleRemainHere",
+						time: parseSimTime("06:30"),
+						otherRef: "1A01",
+					},
+				],
+			},
+		]);
+		expect(structureCodes(tt)).toContain("shuttle-needs-repeat");
+	});
+
+	it("accepts a shuttle pair that names each other and repeats together", () => {
+		expect(structureCodes(linkedShuttle())).not.toContain("shuttle-time");
+		expect(hasErrors(validateTimetableStructure(linkedShuttle()))).toBe(false);
+	});
+
+	it("shuttle-time: the first return is not one interval after the start", () => {
+		const tt = linkedShuttle();
+		const finish = tt.services[1].actions[1];
+		if (finish.kind !== "finishShuttleRemainHere") {
+			throw new Error("expected a shuttle finish");
+		}
+		finish.time = parseSimTime("06:40");
+		expect(structureCodes(tt)).toContain("shuttle-time");
+	});
+
+	it("shuttle-start-speed: a shuttle train that is already moving", () => {
+		const tt = linkedShuttle();
+		const train = tt.services[0].train;
+		if (!train) throw new Error("expected a train");
+		train.startSpeedKmh = 40;
+		expect(structureCodes(tt)).toContain("shuttle-start-speed");
+	});
+
+	it("shuttle-no-repeat: a feeder that also repeats", () => {
+		const tt = timetable([
+			{
+				ref: "1A00",
 				train: { ...TRAIN },
+				repeat: { intervalMinutes: 10, headcodeIncrement: 1, count: 1 },
+				actions: [
+					startNew,
+					{
+						kind: "finishToShuttle",
+						time: parseSimTime("06:10"),
+						nextRef: "1A01",
+					},
+				],
+			},
+		]);
+		expect(structureCodes(tt)).toContain("shuttle-no-repeat");
+	});
+
+	it("shuttle-repeat-mismatch: alternating shuttle halves with different repeats", () => {
+		const tt = linkedShuttle();
+		tt.services[1].repeat = {
+			intervalMinutes: 20,
+			headcodeIncrement: 1,
+			count: 2,
+		};
+		expect(structureCodes(tt)).toContain("shuttle-repeat-mismatch");
+	});
+
+	it("shuttle-integrity: a shuttle whose chain leaves the loop instead of returning", () => {
+		const repeat = { intervalMinutes: 30, headcodeIncrement: 1, count: 2 };
+		const tt = timetable([
+			{
+				ref: "1A01",
+				train: { ...TRAIN, startSpeedKmh: 0 },
+				repeat,
 				actions: [
 					{
 						kind: "startNewShuttle",
@@ -211,11 +331,149 @@ describe("validateTimetableStructure — the shape of a service", () => {
 						front: { gx: 1, gy: 0 },
 						otherRef: "1A02",
 					},
+					// Points to 1A03 which simply terminates instead of leading to 1A02.
+					{
+						kind: "finishNewService",
+						time: parseSimTime("06:10"),
+						nextRef: "1A03",
+					},
+				],
+			},
+			{
+				ref: "1A03",
+				actions: [
+					{
+						kind: "startNewService",
+						time: parseSimTime("06:10"),
+						fromRef: "1A01",
+					},
+					finishRemainHere,
+				],
+			},
+			{
+				ref: "1A02",
+				repeat,
+				actions: [
+					startNew,
+					{
+						kind: "finishShuttleRemainHere",
+						time: parseSimTime("06:30"),
+						otherRef: "1A01",
+					},
+				],
+			},
+		]);
+		expect(structureCodes(tt)).toContain("shuttle-integrity");
+	});
+
+	it("unmatched-reference: one-sided shuttle links in both feeder and tail directions", () => {
+		const repeat = { intervalMinutes: 30, headcodeIncrement: 1, count: 1 };
+		// 1) startShuttle whose named feeder does not finishToShuttle to it.
+		const badFeeder = timetable([
+			{
+				ref: "1A00",
+				train: { ...TRAIN },
+				actions: [startNew, finishRemainHere],
+			},
+			{
+				ref: "1A01",
+				repeat,
+				actions: [
+					{
+						kind: "startShuttle",
+						time: parseSimTime("06:00"),
+						fromRef: "1A00",
+						otherRef: "1A01",
+					},
+					{
+						kind: "finishShuttleRemainHere",
+						time: parseSimTime("06:30"),
+						otherRef: "1A01",
+					},
+				],
+			},
+		]);
+		const feederIssues = validateTimetableStructure(badFeeder);
+		expect(codes(issuesForService(feederIssues, "1A01"))).toContain(
+			"unmatched-reference",
+		);
+
+		// 2) startFromShuttle whose named shuttle does not finishShuttleNewService to it.
+		const badTail = timetable([
+			{
+				ref: "1A01",
+				train: { ...TRAIN, startSpeedKmh: 0 },
+				repeat,
+				actions: [
+					{
+						kind: "startNewShuttle",
+						time: parseSimTime("06:00"),
+						rear: { gx: 0, gy: 0 },
+						front: { gx: 1, gy: 0 },
+						otherRef: "1A01",
+					},
+					{
+						kind: "finishShuttleRemainHere",
+						time: parseSimTime("06:30"),
+						otherRef: "1A01",
+					},
+				],
+			},
+			{
+				ref: "1B01",
+				actions: [
+					{
+						kind: "startFromShuttle",
+						time: parseSimTime("07:00"),
+						fromRef: "1A01",
+					},
 					finishRemainHere,
 				],
 			},
 		]);
-		expect(structureCodes(tt)).toContain("unsupported-shuttle");
+		const tailIssues = validateTimetableStructure(badTail);
+		expect(codes(issuesForService(tailIssues, "1B01"))).toContain(
+			"unmatched-reference",
+		);
+	});
+
+	it("shuttle-time: non-repeating tail service starts at the wrong time after last repeat", () => {
+		const repeat = { intervalMinutes: 30, headcodeIncrement: 1, count: 2 };
+		const tt = timetable([
+			{
+				ref: "1A01",
+				train: { ...TRAIN, startSpeedKmh: 0 },
+				repeat,
+				actions: [
+					{
+						kind: "startNewShuttle",
+						time: parseSimTime("06:00"),
+						rear: { gx: 0, gy: 0 },
+						front: { gx: 1, gy: 0 },
+						otherRef: "1A01",
+					},
+					{
+						kind: "finishShuttleNewService",
+						time: parseSimTime("06:30"),
+						otherRef: "1A01",
+						nextRef: "1B01",
+					},
+				],
+			},
+			{
+				ref: "1B01",
+				actions: [
+					{
+						kind: "startFromShuttle",
+						// Last repeat of 1A01 finishes at 06:30 + 2 * 30m = 07:30; 07:35 is off.
+						time: parseSimTime("07:35"),
+						fromRef: "1A01",
+					},
+					finishRemainHere,
+				],
+			},
+		]);
+		expect(structureCodes(tt)).toContain("shuttle-time");
 	});
 });
 

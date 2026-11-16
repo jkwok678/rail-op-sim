@@ -36,11 +36,13 @@ Source: `packages/shared/src/railway/timetable/validate.ts`.
 | Code | Severity | Cause | Fix |
 | --- | --- | --- | --- |
 | `no-actions` | error | Empty `actions` | A service needs at least a start and a finish. |
-| `no-start` | error | First action is not a start kind | Put a `startNew` / `startNewService` / `startFromSplit` first. |
+| `no-start` | error | First action is not a start kind | Put a start kind (`startNew`, `startNewService`, `startFromSplit`, or a shuttle start) first. |
 | `no-finish` | error | Last action is not a finish kind | End with a finish kind. |
 | `start-not-first` | error | A start kind appears later | Only one start, at index 0. |
 | `action-after-finish` | error | Actions after the finish | Move them before it, or split the working into two services. |
-| `unsupported-shuttle` | error | Any shuttle kind | Not implemented yet — model it as two ordinary services handing over. |
+| `shuttle-needs-repeat` | error | A shuttle service has no `repeat` (or `count < 1`) | Add a `repeat` with `count ≥ 1` on every repeating shuttle service. |
+| `shuttle-no-repeat` | error | `finishToShuttle` feeder or `startFromShuttle` tail carries a `repeat` | Drop `repeat` from non-repeating feeder/tail services. |
+| `shuttle-start-speed` | error | `startNewShuttle` with `startSpeedKmh !== 0` | Set `startSpeedKmh: 0`. |
 
 ## Times
 
@@ -59,9 +61,12 @@ Source: `packages/shared/src/railway/timetable/validate.ts`.
 | --- | --- | --- | --- |
 | `unknown-service-ref` | error | Names a service that is not in the timetable | Add it, or correct the ref. |
 | `self-reference` | error | A service names itself | Name the other working. |
-| `unmatched-reference` | error | One end of a link has no answer | Add the matching action: `finishNewService` ↔ `startNewService`, `frontSplit`/`rearSplit` ↔ `startFromSplit`, `joinedBy` ↔ `finishJoin`. |
+| `unmatched-reference` | error | One end of a link has no answer | Add the matching action: `finishNewService` ↔ `startNewService`, `frontSplit`/`rearSplit` ↔ `startFromSplit`, `joinedBy` ↔ `finishJoin`, `finishToShuttle` ↔ `startShuttle`, shuttle start `otherRef` ↔ shuttle finish `otherRef`, `finishShuttleNewService` ↔ `startFromShuttle`. |
 | `ambiguous-reference` | error | Two actions answer the same link | Leave exactly one. |
 | `reference-time-mismatch` | error | The two ends are booked at different times | Make them equal. |
+| `shuttle-repeat-mismatch` | error | Alternating shuttle services disagree on `intervalMinutes`, `headcodeIncrement`, or `count` | Make both shuttle services share the exact same `repeat`. |
+| `shuttle-time` | error | Shuttle leg finish, feeder handover, or tail takeover time disagrees with the shuttle repeat interval | Align the leg duration with `intervalMinutes`, feeder/shuttle times, and tail time with `finish + count * interval`. |
+| `shuttle-integrity` | error | Following `finishNewService` from a shuttle start does not return to `otherRef` | Complete the loop so the chain finishes with `finishShuttleRemainHere` or `finishShuttleNewService` naming the shuttle start. |
 
 ## Against the railway
 

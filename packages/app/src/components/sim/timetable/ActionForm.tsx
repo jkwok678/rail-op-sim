@@ -34,6 +34,8 @@ export interface ActionFormProps {
 	locations: string[];
 	/** Other services in the timetable, for the reference fields. */
 	otherRefs: ServiceRef[];
+	/** Current service ref, selectable as a shuttle partner for self-alternating shuttles. */
+	selfRef?: ServiceRef;
 	/** Arm the canvas to fill one of this action's cell fields. */
 	onPick: (field: PendingCellPick["field"], exitIndex?: number) => void;
 	/** The pick currently armed, if it belongs to this action. */
@@ -49,6 +51,7 @@ interface FieldKit<A extends Action> {
 		label: string,
 		value: string,
 		commit: (ref: ServiceRef) => void,
+		allowSelf?: boolean,
 	): ReactNode;
 	locationField(value: string, commit: (name: string) => void): ReactNode;
 	cellField(
@@ -89,12 +92,34 @@ const startNewFields: Renderer<"startNew" | "startNewShuttle"> = (kit) => (
 	</>
 );
 
-const fromRefFields: Renderer<
-	"startNewService" | "startFromSplit" | "startShuttle" | "startFromShuttle"
-> = (kit) => (
+const fromRefFields: Renderer<"startNewService" | "startFromSplit"> = (kit) => (
 	<>
 		{timeField(kit)}
 		{kit.refField("From service", kit.action.fromRef, (fromRef) =>
+			kit.patch({ fromRef }),
+		)}
+	</>
+);
+
+const startShuttleFields: Renderer<"startShuttle"> = (kit) => (
+	<>
+		{timeField(kit)}
+		{kit.refField("From feeder service", kit.action.fromRef, (fromRef) =>
+			kit.patch({ fromRef }),
+		)}
+		{kit.refField(
+			"Shuttle partner",
+			kit.action.otherRef,
+			(otherRef) => kit.patch({ otherRef }),
+			true,
+		)}
+	</>
+);
+
+const startFromShuttleFields: Renderer<"startFromShuttle"> = (kit) => (
+	<>
+		{timeField(kit)}
+		{kit.refField("From shuttle service", kit.action.fromRef, (fromRef) =>
 			kit.patch({ fromRef }),
 		)}
 	</>
@@ -109,11 +134,7 @@ const splitFields: Renderer<"frontSplit" | "rearSplit"> = (kit) => (
 	</>
 );
 
-const otherRefField = (
-	kit: FieldKit<
-		ActionOf<"joinedBy" | "finishJoin" | "finishShuttleRemainHere">
-	>,
-) =>
+const otherRefField = (kit: FieldKit<ActionOf<"joinedBy" | "finishJoin">>) =>
 	kit.refField("Other service", kit.action.otherRef, (otherRef) =>
 		kit.patch({ otherRef }),
 	);
@@ -125,11 +146,42 @@ const joinFields: Renderer<"joinedBy" | "finishJoin"> = (kit) => (
 	</>
 );
 
-const nextRefFields: Renderer<
-	"finishNewService" | "finishShuttleNewService"
-> = (kit) => (
+const nextRefFields: Renderer<"finishNewService" | "finishToShuttle"> = (
+	kit,
+) => (
 	<>
 		{timeField(kit)}
+		{kit.refField(
+			kit.action.kind === "finishToShuttle"
+				? "Shuttle service"
+				: "Next service",
+			kit.action.nextRef,
+			(nextRef) => kit.patch({ nextRef }),
+		)}
+	</>
+);
+
+const shuttleRemainFields: Renderer<"finishShuttleRemainHere"> = (kit) => (
+	<>
+		{timeField(kit)}
+		{kit.refField(
+			"Shuttle partner",
+			kit.action.otherRef,
+			(otherRef) => kit.patch({ otherRef }),
+			true,
+		)}
+	</>
+);
+
+const shuttleHandoverFields: Renderer<"finishShuttleNewService"> = (kit) => (
+	<>
+		{timeField(kit)}
+		{kit.refField(
+			"Shuttle partner",
+			kit.action.otherRef,
+			(otherRef) => kit.patch({ otherRef }),
+			true,
+		)}
 		{kit.refField("Next service", kit.action.nextRef, (nextRef) =>
 			kit.patch({ nextRef }),
 		)}
@@ -221,11 +273,21 @@ const exitFields: Renderer<"finishExit"> = (kit) => {
  */
 const RENDERERS: { [K in Action["kind"]]: Renderer<K> } = {
 	startNew: startNewFields,
-	startNewShuttle: startNewFields,
+	startNewShuttle: (kit) => (
+		<>
+			{startNewFields(kit)}
+			{kit.refField(
+				"Shuttle partner",
+				kit.action.otherRef,
+				(otherRef) => kit.patch({ otherRef }),
+				true,
+			)}
+		</>
+	),
 	startNewService: fromRefFields,
 	startFromSplit: fromRefFields,
-	startShuttle: fromRefFields,
-	startFromShuttle: fromRefFields,
+	startShuttle: startShuttleFields,
+	startFromShuttle: startFromShuttleFields,
 	stop: stopFields,
 	pass: (kit) => (
 		<>
@@ -240,7 +302,6 @@ const RENDERERS: { [K in Action["kind"]]: Renderer<K> } = {
 	rearSplit: splitFields,
 	joinedBy: joinFields,
 	finishJoin: joinFields,
-	finishShuttleRemainHere: otherRefField,
 	changeDescription: (kit) => (
 		<>
 			{timeField(kit)}
@@ -263,7 +324,9 @@ const RENDERERS: { [K in Action["kind"]]: Renderer<K> } = {
 		</>
 	),
 	finishNewService: nextRefFields,
-	finishShuttleNewService: nextRefFields,
+	finishToShuttle: nextRefFields,
+	finishShuttleRemainHere: shuttleRemainFields,
+	finishShuttleNewService: shuttleHandoverFields,
 	finishExit: exitFields,
 	// The one action with nothing to set: a train staying put has no time to
 	// be late for and nowhere else to be.
@@ -279,21 +342,26 @@ export function ActionForm({
 	onChange,
 	locations,
 	otherRefs,
+	selfRef,
 	onPick,
 	pendingPick,
 }: ActionFormProps) {
 	const picking = (field: PendingCellPick["field"], exitIndex?: number) =>
 		pendingPick?.field === field &&
 		(field !== "exit" || pendingPick.exitIndex === exitIndex);
+	const partnerRefs =
+		selfRef && !otherRefs.includes(selfRef)
+			? [selfRef, ...otherRefs]
+			: otherRefs;
 
 	const kit: FieldKit<Action> = {
 		action,
 		patch: (changes) => onChange({ ...action, ...changes } as Action),
-		refField: (label, value, commit) => (
+		refField: (label, value, commit, allowSelf = false) => (
 			<ChoiceField
 				label={label}
 				value={value}
-				options={otherRefs}
+				options={allowSelf ? partnerRefs : otherRefs}
 				onCommit={commit}
 				emptyHint="No other services to refer to yet."
 			/>

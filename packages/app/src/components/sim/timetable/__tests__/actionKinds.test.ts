@@ -98,11 +98,19 @@ describe("describeAction", () => {
 		).toBe("07:15 exit (0, 1) or (9, 1)");
 	});
 
-	it("falls back to the raw kind for shuttles, which the picker does not offer", () => {
-		const shuttle = createAction("startShuttle", { time: t });
+	it("summarises a shuttle by the services it links", () => {
 		expect(ACTION_KIND_OPTIONS.some((o) => o.kind === "startShuttle")).toBe(
-			false,
+			true,
 		);
-		expect(describeAction(shuttle)).toBe("startShuttle");
+		expect(
+			describeAction(
+				createAction("startShuttle", { time: t, otherRef: "2B01" }),
+			),
+		).toBe("07:15 shuttle from 2B01 ↔ 2B01");
+		expect(
+			describeAction(
+				createAction("finishShuttleRemainHere", { time: t, otherRef: "2B01" }),
+			),
+		).toBe("07:15 shuttle ↔ 2B01");
 	});
 });

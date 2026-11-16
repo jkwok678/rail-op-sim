@@ -24,6 +24,7 @@ function renderForm(
 	options: {
 		locations?: string[];
 		otherRefs?: string[];
+		selfRef?: string;
 		pendingPick?: PendingCellPick | null;
 	} = {},
 ) {
@@ -36,6 +37,7 @@ function renderForm(
 			onPick={onPick}
 			locations={options.locations ?? []}
 			otherRefs={options.otherRefs ?? []}
+			selfRef={options.selfRef}
 			pendingPick={options.pendingPick ?? null}
 		/>,
 	);
@@ -135,6 +137,31 @@ describe("ActionForm", () => {
 			screen.getByRole("button", { name: "Pick Exit 2 on the map" }),
 		);
 		expect(onPick).toHaveBeenCalledWith("exit", 1);
+	});
+
+	it("asks a shuttle for its feeder and the service it alternates with", () => {
+		renderForm(createAction("startShuttle", { time: t, otherRef: "2B01" }), {
+			otherRefs: ["2B01"],
+		});
+		expect(screen.getByLabelText("From feeder service")).toBeDefined();
+		expect(screen.getByLabelText("Shuttle partner")).toBeDefined();
+	});
+
+	it("offers selfRef for shuttle partner fields without offering it for feeder or next service", () => {
+		Element.prototype.scrollIntoView = vi.fn();
+		const { onChange } = renderForm(createAction("startShuttle", { time: t }), {
+			otherRefs: ["2B01"],
+			selfRef: "1S01",
+		});
+		fireEvent.click(screen.getByLabelText("Shuttle partner"));
+		fireEvent.click(screen.getByRole("option", { name: "1S01" }));
+		expect(onChange).toHaveBeenCalledWith(
+			expect.objectContaining({ kind: "startShuttle", otherRef: "1S01" }),
+		);
+
+		fireEvent.click(screen.getByLabelText("From feeder service"));
+		expect(screen.queryByRole("option", { name: "1S01" })).toBeNull();
+		expect(screen.getByRole("option", { name: "2B01" })).toBeDefined();
 	});
 
 	it("explains an empty reference list instead of offering nothing", () => {

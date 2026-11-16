@@ -770,6 +770,115 @@ describe("splits and joins", () => {
 	});
 });
 
+describe("shuttles", () => {
+	const shuttleRepeat = {
+		intervalMinutes: 10,
+		headcodeIncrement: 1,
+		count: 1,
+	};
+
+	it("introduces one train, repeats it, then terminates", () => {
+		const { engine, log } = runLog(
+			bay(),
+			timetable([
+				service(
+					"1A01",
+					[
+						{
+							kind: "startNewShuttle",
+							time: t("06:00"),
+							rear: cell(1),
+							front: cell(2),
+							otherRef: "1A01",
+						},
+						{
+							kind: "finishShuttleRemainHere",
+							time: t("06:10"),
+							otherRef: "1A01",
+						},
+					],
+					{ repeat: shuttleRepeat },
+				),
+			]),
+			1500,
+		);
+		expect(engine.state.runs).toHaveLength(1);
+		expect(log).toContain("06:10:00: 1A01 became new service 1A02 at Bay");
+		expect(log).toContain("06:20:00: 1A02 terminated at Bay");
+		expect(engine.state.trains).toHaveLength(1);
+	});
+
+	it("hands a feeder over to the shuttle it names", () => {
+		const { log } = runLog(
+			bay(),
+			timetable([
+				service("1A00", [
+					enter("06:00", 1, 2),
+					{ kind: "finishToShuttle", time: t("06:00"), nextRef: "1A01" },
+				]),
+				service(
+					"1A01",
+					[
+						{
+							kind: "startShuttle",
+							time: t("06:00"),
+							fromRef: "1A00",
+							otherRef: "1A02",
+						},
+						{ kind: "stop", location: "Bay", depart: t("06:05") },
+						{ kind: "finishRemainHere" },
+					],
+					{ train: undefined },
+				),
+			]),
+			120,
+		);
+		expect(log).toContain("06:00:30: 1A00 became new service 1A01 at Bay");
+	});
+
+	it("forms the non-repeating service after the last repeat", () => {
+		const { log } = runLog(
+			bay(),
+			timetable([
+				service(
+					"1A01",
+					[
+						{
+							kind: "startNewShuttle",
+							time: t("06:00"),
+							rear: cell(1),
+							front: cell(2),
+							otherRef: "1A01",
+						},
+						{
+							kind: "finishShuttleNewService",
+							time: t("06:10"),
+							otherRef: "1A01",
+							nextRef: "1B01",
+						},
+					],
+					{ repeat: shuttleRepeat },
+				),
+				service(
+					"1B01",
+					[
+						{
+							kind: "startFromShuttle",
+							time: t("06:20"),
+							fromRef: "1A01",
+						},
+						{ kind: "finishRemainHere" },
+					],
+					{ train: undefined },
+				),
+			]),
+			1500,
+		);
+		expect(log).toContain("06:10:00: 1A01 became new service 1A02 at Bay");
+		expect(log).toContain("06:20:00: 1A02 became new service 1B01 at Bay");
+	});
+});
+
 describe("timetableStepState", () => {
 	it("marks passed steps done and the current step next", () => {
 		expect(timetableStepState(0, 1, false, "running")).toBe("done");

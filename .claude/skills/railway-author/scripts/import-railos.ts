@@ -647,14 +647,35 @@ function parseAction(field: string, seenLocation: () => boolean): Action {
 			return { kind: "rearSplit", time, newRef: third, ...w };
 		case "jbo":
 			return { kind: "joinedBy", time, otherRef: third, ...w };
+		case "Snt-sh": {
+			const [rear, front] = third.split(" ");
+			return {
+				kind: "startNewShuttle",
+				time,
+				rear: cellFromId(rear),
+				front: cellFromId(front),
+				otherRef: fourth,
+				...w,
+			};
+		}
+		case "Sns-sh":
+			return { kind: "startShuttle", time, fromRef: fourth, otherRef: third, ...w };
+		case "Sns-fsh":
+			return { kind: "startFromShuttle", time, fromRef: third, ...w };
+		case "F-nshs":
+			return { kind: "finishToShuttle", time, nextRef: third, ...w };
 		case "Fns":
 			return { kind: "finishNewService", time, nextRef: third, ...w };
 		case "Fjo":
 			return { kind: "finishJoin", time, otherRef: third, ...w };
 		case "Fer":
 			return { kind: "finishExit", time, exits: third.split(" ").filter(Boolean).map(cellFromId), ...w };
+		case "Frh-sh":
+			return { kind: "finishShuttleRemainHere", time, otherRef: third, ...w };
+		case "Fns-sh":
+			return { kind: "finishShuttleNewService", time, otherRef: third, nextRef: fourth, ...w };
 		default:
-			throw new Error(`"${word}" (shuttles) is not supported yet`);
+			throw new Error(`Unsupported timetable action "${word}"`);
 	}
 }
 

@@ -58,8 +58,13 @@ export function serviceByRef(tt: Timetable, ref: string): Service | undefined {
 /** Every run of every service that brings on a train of its own. */
 export function expandRuns(tt: Timetable): ServiceRun[] {
 	return tt.services.flatMap((service) => {
-		if (service.actions[0]?.kind !== "startNew") return [];
-		const count = 1 + (service.repeat?.count ?? 0);
+		const start = service.actions[0];
+		if (start?.kind !== "startNew" && start?.kind !== "startNewShuttle") {
+			return [];
+		}
+		// A shuttle re-uses the one train; only its first repeat is introduced.
+		const count =
+			start.kind === "startNewShuttle" ? 1 : 1 + (service.repeat?.count ?? 0);
 		return Array.from({ length: count }, (_, repeat) => ({
 			ref: service.ref,
 			repeat,
@@ -110,7 +115,12 @@ export function dispatchDue(ctx: RunnerContext): void {
 		if (run.status !== "pending") continue;
 		const service = serviceByRef(ctx.timetable, run.ref);
 		const start = service?.actions[0];
-		if (!service || start?.kind !== "startNew") continue;
+		if (
+			!service ||
+			(start?.kind !== "startNew" && start?.kind !== "startNewShuttle")
+		) {
+			continue;
+		}
 		if (ctx.state.time < start.time + repeatOffset(service, run.repeat))
 			continue;
 		dispatch(ctx, run, service, start);
@@ -121,7 +131,7 @@ function dispatch(
 	ctx: RunnerContext,
 	run: ServiceRun,
 	service: Service,
-	start: ActionOf<"startNew">,
+	start: ActionOf<"startNew" | "startNewShuttle">,
 ): void {
 	const { graph, state, log } = ctx;
 	const headcode = repeatHeadcode(service, run.repeat);
@@ -173,7 +183,7 @@ function dispatch(
 function introduce(
 	ctx: RunnerContext,
 	train: Train,
-	start: ActionOf<"startNew">,
+	start: ActionOf<"startNew" | "startNewShuttle">,
 ): void {
 	const { graph, state, log } = ctx;
 	const rear = graph.nodes[train.segs[0].node];
@@ -194,7 +204,7 @@ function introduce(
 			`${train.headcode} created at ${placeName(frontNode)}`,
 		);
 	}
-	if (start.signallerControl) {
+	if (start.kind === "startNew" && start.signallerControl) {
 		if (rear.kind === "exit") {
 			train.control = {
 				mode: "signaller",
@@ -260,9 +270,12 @@ const ACTION_WORDS: Partial<Record<Action["kind"], string>> = {
 	rearSplit: "split",
 	joinedBy: "joined by",
 	finishNewService: "next service",
+	finishToShuttle: "to shuttle",
 	finishJoin: "join",
 	finishExit: "exit",
 	finishRemainHere: "terminates",
+	finishShuttleRemainHere: "shuttle",
+	finishShuttleNewService: "shuttle",
 };
 
 function describeAction(a: Action, at: string | null, offset: number): string {
@@ -356,17 +369,40 @@ function formatTimetableAction(
 				time: formatSimTime(a.time + offset),
 				label: `join ${a.otherRef}`,
 			};
+		case "finishToShuttle":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `→ shuttle ${a.nextRef}`,
+			};
 		case "finishExit":
 			return { time: formatSimTime(a.time + offset), label: "exit" };
 		case "finishRemainHere":
 			return { time: null, label: "terminates" };
-		default: {
-			const t = actionTime(a);
+		case "startNewShuttle":
 			return {
-				time: t !== null ? formatSimTime(t + offset) : null,
-				label: a.kind,
+				time: formatSimTime(a.time + offset),
+				label: `shuttle ↔ ${a.otherRef}`,
 			};
-		}
+		case "startShuttle":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `shuttle from ${a.fromRef}`,
+			};
+		case "startFromShuttle":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `from shuttle ${a.fromRef}`,
+			};
+		case "finishShuttleRemainHere":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `shuttle ↔ ${a.otherRef}`,
+			};
+		case "finishShuttleNewService":
+			return {
+				time: formatSimTime(a.time + offset),
+				label: `shuttle ↔ ${a.otherRef} → ${a.nextRef}`,
+			};
 	}
 }
 
@@ -453,6 +489,10 @@ function workOne(ctx: RunnerContext, train: Train): boolean {
 		case "finishJoin":
 			awaitJoin(ctx, train, a);
 			return false;
+		case "finishToShuttle":
+		case "finishShuttleRemainHere":
+		case "finishShuttleNewService":
+			return runShuttleFinish(ctx, train, a);
 		default:
 			holdUnsupported(ctx, train, a);
 			return false;
@@ -574,6 +614,7 @@ export function becomeService(
 	nextRef: string,
 	where: string,
 	logMessage?: string,
+	repeat?: number,
 ): boolean {
 	const next = serviceByRef(ctx.timetable, nextRef);
 	const w = train.working;
@@ -582,6 +623,7 @@ export function becomeService(
 		return false;
 	}
 	const old = train.headcode;
+	if (repeat !== undefined) w.repeat = repeat;
 	train.headcode = repeatHeadcode(next, w.repeat);
 	if (next.description) train.description = next.description;
 	w.ref = next.ref;
@@ -952,6 +994,85 @@ function portionTrain(
 	return portion;
 }
 
+/**
+ * Where a shuttle finish sends the train: the next repeat of the service it
+ * alternates with, or — on the last repeat — the non-repeating service it
+ * forms. `finishShuttleRemainHere` ends the day instead.
+ */
+function runShuttleFinish(
+	ctx: RunnerContext,
+	train: Train,
+	a: ActionOf<
+		"finishToShuttle" | "finishShuttleRemainHere" | "finishShuttleNewService"
+	>,
+): boolean {
+	if (!actionDue(ctx, train, a.time)) return false;
+	const where = standingAt(ctx, train);
+	if (a.kind === "finishToShuttle") {
+		return becomeService(ctx, train, a.nextRef, where, undefined, 0);
+	}
+	const total =
+		serviceByRef(ctx.timetable, train.working.ref)?.repeat?.count ?? 0;
+	if (train.working.repeat < total) {
+		return becomeService(
+			ctx,
+			train,
+			a.otherRef,
+			where,
+			undefined,
+			train.working.repeat + 1,
+		);
+	}
+	if (a.kind === "finishShuttleRemainHere") {
+		remainHere(ctx, train);
+		return false;
+	}
+	return becomeService(ctx, train, a.nextRef, where, undefined, 0);
+}
+
+/**
+ * The follow-on a train can become, and which repeat of it. A shuttle that
+ * still has repeats left returns to the service it alternates with; its last
+ * repeat forms the non-repeating service, when it has one.
+ */
+export interface ServiceHandover {
+	ref: string;
+	repeat: number;
+	/** Index of the finish action this handover comes from. */
+	actionIndex: number;
+}
+
+export function handoverTarget(
+	ctx: RunnerContext,
+	train: Train,
+): ServiceHandover | null {
+	const actions = actionsOf(ctx, train.working);
+	const w = train.working;
+	for (let i = w.index; i < actions.length; i++) {
+		const a = actions[i];
+		if (a.kind === "finishNewService") {
+			return { ref: a.nextRef, repeat: w.repeat, actionIndex: i };
+		}
+		if (a.kind === "finishToShuttle") {
+			return { ref: a.nextRef, repeat: 0, actionIndex: i };
+		}
+		if (
+			a.kind === "finishShuttleRemainHere" ||
+			a.kind === "finishShuttleNewService"
+		) {
+			const total = serviceByRef(ctx.timetable, w.ref)?.repeat?.count ?? 0;
+			if (w.repeat < total) {
+				return { ref: a.otherRef, repeat: w.repeat + 1, actionIndex: i };
+			}
+			if (a.kind === "finishShuttleNewService") {
+				return { ref: a.nextRef, repeat: 0, actionIndex: i };
+			}
+			return null;
+		}
+	}
+	return null;
+}
+
 const JOIN_PARTNER = {
 	joinedBy: "finishJoin",
 	finishJoin: "joinedBy",
@@ -1191,6 +1312,9 @@ function missedEvent(
 		case "finishJoin":
 			return `${headcode} failed to join another train at ${where}`;
 		case "finishNewService":
+		case "finishToShuttle":
+		case "finishShuttleRemainHere":
+		case "finishShuttleNewService":
 			return `${headcode} failed to form a new service at ${where}`;
 		case "finishRemainHere":
 			return `${headcode} failed to terminate at ${where}`;

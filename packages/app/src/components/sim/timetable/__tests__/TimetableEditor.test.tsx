@@ -225,4 +225,50 @@ describe("TimetableEditor service detail", () => {
 		render(<TimetableEditor />);
 		expect(screen.getByText("No problems.")).toBeDefined();
 	});
+
+	it("seeds a default train when adding a train-creating start action", () => {
+		Element.prototype.scrollIntoView = () => {};
+		seed(timetable(), "3C01");
+		render(<TimetableEditor />);
+		expect(store().timetable.services[2].train).toBeUndefined();
+
+		fireEvent.click(screen.getByRole("combobox", { name: "Add an action" }));
+		fireEvent.click(
+			screen.getByRole("option", { name: "Start a new shuttle train" }),
+		);
+
+		expect(store().timetable.services[2].actions[0].kind).toBe(
+			"startNewShuttle",
+		);
+		expect(store().timetable.services[2].train).toBeDefined();
+	});
+
+	it("adds, edits and removes a service repeat", () => {
+		seed(timetable(), "1A01");
+		render(<TimetableEditor />);
+		fireEvent.click(screen.getByRole("button", { name: /Add repeat/ }));
+		expect(store().timetable.services[0].repeat).toEqual({
+			intervalMinutes: 30,
+			headcodeIncrement: 1,
+			count: 1,
+		});
+
+		fireEvent.change(screen.getByLabelText("Interval (min)"), {
+			target: { value: "20" },
+		});
+		fireEvent.change(screen.getByLabelText("Headcode +"), {
+			target: { value: "2" },
+		});
+		fireEvent.change(screen.getByLabelText("Count"), {
+			target: { value: "3" },
+		});
+		expect(store().timetable.services[0].repeat).toEqual({
+			intervalMinutes: 20,
+			headcodeIncrement: 2,
+			count: 3,
+		});
+
+		fireEvent.click(screen.getByRole("button", { name: "Remove repeat" }));
+		expect(store().timetable.services[0].repeat).toBeUndefined();
+	});
 });

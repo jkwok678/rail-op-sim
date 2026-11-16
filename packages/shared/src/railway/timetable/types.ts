@@ -115,10 +115,15 @@ export type StartAction = ActionBase &
 				otherRef: ServiceRef;
 		  }
 		| {
-				/** The return leg of a shuttle pair, taking over at the far end. */
+				/**
+				 * The first leg of a shuttle fed by a non-repeating service.
+				 * `fromRef` is that feeder (`finishToShuttle`); `otherRef` is the
+				 * service this one alternates with.
+				 */
 				kind: "startShuttle";
 				time: SimTime;
 				fromRef: ServiceRef;
+				otherRef: ServiceRef;
 		  }
 		| {
 				/** A non-shuttle service that takes the train off a finished shuttle. */
@@ -185,6 +190,12 @@ export type FinishAction = ActionBase &
 				otherRef: ServiceRef;
 		  }
 		| {
+				/** Hand a non-repeating feeder to the shuttle `nextRef`. */
+				kind: "finishToShuttle";
+				time: SimTime;
+				nextRef: ServiceRef;
+		  }
+		| {
 				/**
 				 * Stay where the last action left the train, under signaller control.
 				 * The one finish with no time of its own — there is nothing to be late
@@ -199,9 +210,12 @@ export type FinishAction = ActionBase &
 				exits: Cell[];
 		  }
 		| {
-				/** End a shuttle where it stands, under signaller control. */
+				/**
+				 * Repeat back to the shuttle start `otherRef`. Once every repeat has
+				 * run, terminate here.
+				 */
 				kind: "finishShuttleRemainHere";
-				/** The shuttle service this one was alternating with. */
+				time: SimTime;
 				otherRef: ServiceRef;
 		  }
 		| {
@@ -237,6 +251,7 @@ export const START_KINDS = [
 export const FINISH_KINDS = [
 	"finishNewService",
 	"finishJoin",
+	"finishToShuttle",
 	"finishRemainHere",
 	"finishExit",
 	"finishShuttleRemainHere",
@@ -255,15 +270,12 @@ export const INTERMEDIATE_KINDS = [
 	"changeMaxSpeed",
 ] as const satisfies readonly IntermediateAction["kind"][];
 
-/**
- * Shuttle kinds, declared so the union is complete but not yet supported by the
- * editor or the engine. The validator reports them rather than letting a
- * half-understood service through.
- */
+/** Kinds that exist only as part of a shuttle. */
 export const SHUTTLE_KINDS = [
 	"startNewShuttle",
 	"startShuttle",
 	"startFromShuttle",
+	"finishToShuttle",
 	"finishShuttleRemainHere",
 	"finishShuttleNewService",
 ] as const;
@@ -288,7 +300,7 @@ export function isIntermediateAction(
 	return (INTERMEDIATE_KINDS as readonly string[]).includes(action.kind);
 }
 
-/** True for the shuttle kinds the editor and engine do not handle yet. */
+/** True for an action that only a shuttle uses. */
 export function isShuttleAction(action: Action): boolean {
 	return (SHUTTLE_KINDS as readonly string[]).includes(action.kind);
 }

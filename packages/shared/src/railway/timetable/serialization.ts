@@ -202,6 +202,7 @@ const ACTION_READERS: {
 		kind: "startShuttle",
 		time: f.time(),
 		fromRef: f.ref("fromRef"),
+		otherRef: f.ref("otherRef"),
 	}),
 	startFromShuttle: (f) => ({
 		kind: "startFromShuttle",
@@ -250,9 +251,15 @@ const ACTION_READERS: {
 		time: f.time(),
 		nextRef: f.ref("nextRef"),
 	}),
+	finishToShuttle: (f) => ({
+		kind: "finishToShuttle",
+		time: f.time(),
+		nextRef: f.ref("nextRef"),
+	}),
 	finishRemainHere: () => ({ kind: "finishRemainHere" }),
 	finishShuttleRemainHere: (f) => ({
 		kind: "finishShuttleRemainHere",
+		time: f.time(),
 		otherRef: f.ref("otherRef"),
 	}),
 	finishShuttleNewService: (f) => ({

@@ -675,4 +675,81 @@ describe("signaller train control", () => {
 		expect(engine.state.trains).toHaveLength(0);
 		expect(engine.state.counters.unexpectedExits).toBe(0);
 	});
+
+	it("advances a shuttle to its next repeat or tail service early via becomeNewService", () => {
+		const map = line("X--P--P--X");
+		nameCells(map, [3], "Ashfield");
+		nameCells(map, [6], "Barton");
+		const tt = timetable([
+			service(
+				"1A01",
+				[
+					{
+						kind: "startNewShuttle",
+						time: t("06:00"),
+						rear: cell(2),
+						front: cell(3),
+						otherRef: "1A01",
+					},
+					{
+						kind: "stop",
+						location: "Ashfield",
+						arrive: t("06:00"),
+						depart: t("06:05"),
+					},
+					{
+						kind: "stop",
+						location: "Barton",
+						arrive: t("06:08"),
+						depart: t("06:09"),
+					},
+					{
+						kind: "finishShuttleNewService",
+						time: t("06:10"),
+						otherRef: "1A01",
+						nextRef: "2B99",
+					},
+				],
+				{ repeat: { intervalMinutes: 10, headcodeIncrement: 1, count: 1 } },
+			),
+			service(
+				"2B99",
+				[
+					{ kind: "startFromShuttle", time: t("06:20"), fromRef: "1A01" },
+					{
+						kind: "stop",
+						location: "Ashfield",
+						arrive: t("06:20"),
+						depart: t("06:21"),
+					},
+					{ kind: "finishExit", time: t("06:25"), exits: [cell(9)] },
+				],
+				{ train: undefined },
+			),
+		]);
+		const engine = engineFor(map, tt);
+		engine.handle({ type: "run" });
+		runFor(engine, 1);
+
+		const train = engine.state.trains[0];
+		expect(train.headcode).toBe("1A01");
+		expect(engine.view().trains[0].followOnServiceRef).toBe("1A02");
+
+		// First repeat: advances to next repeat 1A02 (repeat = 1).
+		expect(
+			engine.handle({ type: "becomeNewService", trainId: train.id }),
+		).toEqual({ ok: true });
+		expect(train.headcode).toBe("1A02");
+		expect(train.working.ref).toBe("1A01");
+		expect(train.working.repeat).toBe(1);
+
+		// On the last repeat: follow-on is now the non-repeating tail service 2B99.
+		expect(engine.view().trains[0].followOnServiceRef).toBe("2B99");
+		expect(
+			engine.handle({ type: "becomeNewService", trainId: train.id }),
+		).toEqual({ ok: true });
+		expect(train.headcode).toBe("2B99");
+		expect(train.working.ref).toBe("2B99");
+		expect(train.working.repeat).toBe(0);
+	});
 });

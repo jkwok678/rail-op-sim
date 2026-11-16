@@ -28,7 +28,6 @@ import {
 	createsTrain,
 	FINISH_KINDS,
 	isFinishAction,
-	isShuttleAction,
 	isStartAction,
 	MAX_SERVICE_REF_LENGTH,
 	type Repeat,
@@ -126,6 +125,7 @@ export function validateTimetableStructure(tt: Timetable): TimetableIssue[] {
 	}
 
 	validateCrossReferences(tt, out);
+	validateShuttles(tt, out);
 	return out.issues;
 }
 
@@ -229,13 +229,6 @@ function validateShape(service: Service, out: IssueList): boolean {
 			out.error(
 				"action-after-finish",
 				`"${ref}" carries on after it finishes.`,
-				at(i),
-			);
-		}
-		if (isShuttleAction(action)) {
-			out.error(
-				"unsupported-shuttle",
-				`Shuttle services are not supported yet ("${action.kind}").`,
 				at(i),
 			);
 		}
@@ -523,8 +516,334 @@ function validateCrossReferences(tt: Timetable, out: IssueList): void {
 	});
 }
 
+const SHUTTLE_STARTS = new Set<Action["kind"]>([
+	"startNewShuttle",
+	"startShuttle",
+]);
+const SHUTTLE_FINISHES = new Set<Action["kind"]>([
+	"finishShuttleRemainHere",
+	"finishShuttleNewService",
+]);
+
+/** Ten seconds, the slack RailOS allows on a shuttle's repeat times. */
+const SHUTTLE_TIME_SLACK = 10;
+
 /**
- * Match one direction of a link against the other.
+ * Shuttle links: a repeating pair that names each other, a feeder with no
+ * repeat of its own, and a tail that starts when the last repeat finishes.
+ *
+ * RailOS checks these in `CheckCrossReferencesAndSetData`,
+ * `CheckNonRepeatingShuttleLinksAndSetData` and `CheckShuttleServiceIntegrity`.
+ */
+function validateShuttles(tt: Timetable, out: IssueList): void {
+	const byRef = new Map<ServiceRef, Service>();
+	for (const service of tt.services) {
+		if (!byRef.has(service.ref)) byRef.set(service.ref, service);
+	}
+
+	for (const service of tt.services) {
+		const start = service.actions[0];
+		const finish = service.actions[service.actions.length - 1];
+		const where = { serviceRef: service.ref };
+		const shuttles =
+			(start !== undefined && SHUTTLE_STARTS.has(start.kind)) ||
+			(finish !== undefined && SHUTTLE_FINISHES.has(finish.kind));
+		if (shuttles && !service.repeat) {
+			out.error(
+				"shuttle-needs-repeat",
+				`"${service.ref}" is a shuttle, so it needs a repeat.`,
+				where,
+			);
+		}
+		if (shuttles && service.repeat && service.repeat.count < 1) {
+			out.error(
+				"shuttle-needs-repeat",
+				`"${service.ref}" must run at least one repeat.`,
+				where,
+			);
+		}
+		const linksWithoutRepeating =
+			start?.kind === "startFromShuttle" || finish?.kind === "finishToShuttle";
+		if (linksWithoutRepeating && service.repeat) {
+			out.error(
+				"shuttle-no-repeat",
+				`"${service.ref}" links a shuttle without itself repeating, so it cannot have a repeat.`,
+				where,
+			);
+		}
+		if (
+			start?.kind === "startNewShuttle" &&
+			service.train &&
+			service.train.startSpeedKmh !== 0
+		) {
+			out.error(
+				"shuttle-start-speed",
+				`"${service.ref}" starts a shuttle, so it must start from rest.`,
+				where,
+			);
+		}
+	}
+
+	const claimedFinishes = new Set<ServiceRef>();
+	for (const service of tt.services) {
+		const start = service.actions[0];
+		if (start?.kind !== "startNewShuttle" && start?.kind !== "startShuttle") {
+			continue;
+		}
+		const where = { serviceRef: service.ref, actionIndex: 0 };
+		if (start.kind === "startShuttle") {
+			const feeder = byRef.get(start.fromRef);
+			if (!feeder) {
+				out.error(
+					"unknown-service-ref",
+					`"${service.ref}" refers to "${start.fromRef}", which is not in this timetable.`,
+					where,
+				);
+			} else if (start.fromRef === service.ref) {
+				out.error(
+					"self-reference",
+					`"${service.ref}" refers to itself.`,
+					where,
+				);
+			} else if (
+				!feeder.actions.some(
+					(a) => a.kind === "finishToShuttle" && a.nextRef === service.ref,
+				)
+			) {
+				out.error(
+					"unmatched-reference",
+					`"${service.ref}" expects to start a shuttle from "${start.fromRef}", but "${start.fromRef}" does not hand over to it.`,
+					where,
+				);
+			}
+		}
+
+		const other = byRef.get(start.otherRef);
+		if (!other) {
+			out.error(
+				"unknown-service-ref",
+				`"${service.ref}" refers to "${start.otherRef}", which is not in this timetable.`,
+				where,
+			);
+			continue;
+		}
+		claimedFinishes.add(other.ref);
+		const finish = other.actions[other.actions.length - 1];
+		if (
+			(finish?.kind !== "finishShuttleRemainHere" &&
+				finish?.kind !== "finishShuttleNewService") ||
+			finish.otherRef !== service.ref
+		) {
+			out.error(
+				"unmatched-reference",
+				`"${service.ref}" alternates with "${other.ref}", but "${other.ref}" does not shuttle back to it.`,
+				where,
+			);
+			continue;
+		}
+		if (service.repeat && other.repeat) {
+			const same =
+				service.repeat.intervalMinutes === other.repeat.intervalMinutes &&
+				service.repeat.headcodeIncrement === other.repeat.headcodeIncrement &&
+				service.repeat.count === other.repeat.count;
+			if (!same) {
+				out.error(
+					"shuttle-repeat-mismatch",
+					`"${service.ref}" and "${other.ref}" must repeat on the same interval, increment and count.`,
+					where,
+				);
+			}
+			const expected = start.time + service.repeat.intervalMinutes * 60;
+			if (Math.abs(expected - finish.time) > SHUTTLE_TIME_SLACK) {
+				out.error(
+					"shuttle-time",
+					`"${other.ref}" should finish its first shuttle leg at ${formatSimTime(expected)}.`,
+					{ serviceRef: other.ref, actionIndex: other.actions.length - 1 },
+				);
+			}
+		}
+		const linked = shuttleFinish(byRef, service);
+		if (!linked || linked.otherRef !== service.ref) {
+			out.error(
+				"shuttle-integrity",
+				`"${service.ref}" never shuttles back to its own start.`,
+				where,
+			);
+		}
+	}
+
+	for (const service of tt.services) {
+		const finish = service.actions[service.actions.length - 1];
+		if (
+			finish?.kind !== "finishShuttleRemainHere" &&
+			finish?.kind !== "finishShuttleNewService"
+		) {
+			continue;
+		}
+		if (claimedFinishes.has(service.ref)) continue;
+		const where = {
+			serviceRef: service.ref,
+			actionIndex: service.actions.length - 1,
+		};
+		if (!byRef.has(finish.otherRef)) {
+			out.error(
+				"unknown-service-ref",
+				`"${service.ref}" refers to "${finish.otherRef}", which is not in this timetable.`,
+				where,
+			);
+		} else {
+			out.error(
+				"unmatched-reference",
+				`"${service.ref}" shuttles back to "${finish.otherRef}", but that service does not alternate with it.`,
+				where,
+			);
+		}
+	}
+
+	for (const service of tt.services) {
+		const start = service.actions[0];
+		if (start?.kind === "startFromShuttle") {
+			const where = { serviceRef: service.ref, actionIndex: 0 };
+			const shuttle = byRef.get(start.fromRef);
+			if (!shuttle) {
+				out.error(
+					"unknown-service-ref",
+					`"${service.ref}" refers to "${start.fromRef}", which is not in this timetable.`,
+					where,
+				);
+			} else if (start.fromRef === service.ref) {
+				out.error(
+					"self-reference",
+					`"${service.ref}" refers to itself.`,
+					where,
+				);
+			} else {
+				const shuttleFinishAction = shuttle.actions[shuttle.actions.length - 1];
+				if (
+					shuttleFinishAction?.kind !== "finishShuttleNewService" ||
+					shuttleFinishAction.nextRef !== service.ref
+				) {
+					out.error(
+						"unmatched-reference",
+						`"${service.ref}" expects to take over from shuttle "${start.fromRef}", but "${start.fromRef}" does not form it.`,
+						where,
+					);
+				}
+			}
+		}
+
+		service.actions.forEach((action, i) => {
+			if (action.kind !== "finishToShuttle") return;
+			const where = { serviceRef: service.ref, actionIndex: i };
+			const shuttle = byRef.get(action.nextRef);
+			if (!shuttle) {
+				out.error(
+					"unknown-service-ref",
+					`"${service.ref}" refers to "${action.nextRef}", which is not in this timetable.`,
+					where,
+				);
+				return;
+			}
+			if (action.nextRef === service.ref) {
+				out.error(
+					"self-reference",
+					`"${service.ref}" refers to itself.`,
+					where,
+				);
+				return;
+			}
+			const shuttleStart = shuttle.actions[0];
+			if (
+				shuttleStart?.kind !== "startShuttle" ||
+				shuttleStart.fromRef !== service.ref
+			) {
+				out.error(
+					"unmatched-reference",
+					`"${service.ref}" hands over to shuttle "${action.nextRef}", but that shuttle does not start from it.`,
+					where,
+				);
+				return;
+			}
+			if (shuttleStart.time !== action.time) {
+				out.error(
+					"shuttle-time",
+					`"${action.nextRef}" should start when "${service.ref}" hands it over, at ${formatSimTime(action.time)}.`,
+					where,
+				);
+			}
+		});
+
+		const finish = service.actions[service.actions.length - 1];
+		if (finish?.kind !== "finishShuttleNewService") continue;
+		const where = {
+			serviceRef: service.ref,
+			actionIndex: service.actions.length - 1,
+		};
+		const tail = byRef.get(finish.nextRef);
+		if (!tail) {
+			out.error(
+				"unknown-service-ref",
+				`"${service.ref}" refers to "${finish.nextRef}", which is not in this timetable.`,
+				where,
+			);
+			continue;
+		}
+		if (finish.nextRef === service.ref) {
+			out.error("self-reference", `"${service.ref}" refers to itself.`, where);
+			continue;
+		}
+		const tailStart = tail.actions[0];
+		if (
+			tailStart?.kind !== "startFromShuttle" ||
+			tailStart.fromRef !== service.ref
+		) {
+			out.error(
+				"unmatched-reference",
+				`"${service.ref}" forms "${finish.nextRef}" after its last repeat, but that service does not take over from it.`,
+				where,
+			);
+			continue;
+		}
+		if (!service.repeat) continue;
+		const expected =
+			finish.time + service.repeat.count * service.repeat.intervalMinutes * 60;
+		if (Math.abs(tailStart.time - expected) > SHUTTLE_TIME_SLACK) {
+			out.error(
+				"shuttle-time",
+				`"${finish.nextRef}" should start at ${formatSimTime(expected)}, when "${service.ref}" finishes its last repeat.`,
+				{ serviceRef: finish.nextRef, actionIndex: 0 },
+			);
+		}
+	}
+}
+
+/**
+ * The shuttle finish reached by following `finishNewService` links from
+ * `start`, or null when the chain leaves the shuttle or loops.
+ */
+function shuttleFinish(
+	byRef: Map<ServiceRef, Service>,
+	start: Service,
+): ActionOf<"finishShuttleRemainHere" | "finishShuttleNewService"> | null {
+	const seen = new Set<ServiceRef>();
+	let current: Service | undefined = start;
+	while (current && !seen.has(current.ref)) {
+		seen.add(current.ref);
+		const last = current.actions[current.actions.length - 1];
+		if (
+			last?.kind === "finishShuttleRemainHere" ||
+			last?.kind === "finishShuttleNewService"
+		) {
+			return last;
+		}
+		if (last?.kind !== "finishNewService") return null;
+		current = byRef.get(last.nextRef);
+	}
+	return null;
+}
+
+/**
+ * Match one direction of a non-shuttle link against the other.
  *
  * A reference pairs when the service it names names it back. Anything left over
  * on either side is reported against the end that made it — which is the end

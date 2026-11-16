@@ -81,13 +81,14 @@ rather than a hand-patch.
   horizontal track, LEFT/RIGHT on vertical. The map ignores a mismatch; the
   `platform` helper turns that silence into an error.
 - **A service is exactly one start action, then intermediates, then exactly one
-  finish action**, in time order. A start that creates a train (`startNew`)
-  needs a `train` spec; one that takes over an existing train must not have one.
+  finish action**, in time order. A start that creates a train (`startNew`,
+  `startNewShuttle`) needs a `train` spec; one that takes over an existing
+  train must not have one.
 - **Links between services are matched from both ends.** `finishNewService` →
   `startNewService`, `frontSplit`/`rearSplit` → `startFromSplit`, `joinedBy` →
-  `finishJoin`, each naming the other, at the same time.
-- **Shuttle kinds are not supported yet.** The validator rejects them; do not
-  write them.
+  `finishJoin`, and shuttle links (`finishToShuttle` → `startShuttle`,
+  shuttle start `otherRef` ↔ shuttle finish `otherRef`,
+  `finishShuttleNewService` → `startFromShuttle`), each naming the other.
 
 ## Reference
 

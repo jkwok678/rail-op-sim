@@ -18,6 +18,7 @@ import { releaseBehind } from "./routes";
 import {
 	actionsOf,
 	becomeService,
+	handoverTarget,
 	mergeTrainInto,
 	placeName,
 	type RunnerContext,
@@ -44,6 +45,7 @@ function isFinishAction(a: Action): boolean {
 	return (
 		a.kind === "finishNewService" ||
 		a.kind === "finishJoin" ||
+		a.kind === "finishToShuttle" ||
 		a.kind === "finishRemainHere" ||
 		a.kind === "finishExit" ||
 		a.kind === "finishShuttleRemainHere" ||
@@ -107,6 +109,8 @@ export interface FollowOnCandidate {
 	nextRef: string;
 	/** Service ref in the loaded timetable. */
 	rawRef: string;
+	/** Which repeat of the follow-on the train becomes. */
+	repeat: number;
 	/** Index of the follow-on finish action in the current service. */
 	finishIndex: number;
 	/** Index in the follow-on service's actions where the train resumes. */
@@ -130,19 +134,9 @@ export function availableFollowOnService(
 	) {
 		return null;
 	}
-	const actions = actionsOf(ctx, train.working);
-	let targetRef: string | null = null;
-	let finishIndex = -1;
-	for (let i = train.working.index; i < actions.length; i++) {
-		const a = actions[i];
-		if (a.kind === "finishNewService" || a.kind === "finishShuttleNewService") {
-			targetRef = a.nextRef;
-			finishIndex = i;
-			break;
-		}
-	}
-	if (!targetRef || finishIndex < 0) return null;
-	const next = serviceByRef(ctx.timetable, targetRef);
+	const target = handoverTarget(ctx, train);
+	if (!target) return null;
+	const next = serviceByRef(ctx.timetable, target.ref);
 	if (!next) return null;
 
 	const here = train.working.at;
@@ -159,10 +153,11 @@ export function availableFollowOnService(
 			: matchIdx;
 
 	return {
-		nextRef: repeatHeadcode(next, train.working.repeat),
+		nextRef: repeatHeadcode(next, target.repeat),
 		rawRef: next.ref,
-		finishIndex,
+		finishIndex: target.actionIndex,
 		resumeIndex,
+		repeat: target.repeat,
 	};
 }
 
@@ -601,24 +596,17 @@ function becomeNewService(ctx: RunnerContext, trainId: number): CommandResult {
 	if (train.working.done)
 		return fail("Train has already finished its timetable.");
 
-	const actions = actionsOf(ctx, train.working);
-	let targetRef: string | null = null;
-	for (let i = train.working.index; i < actions.length; i++) {
-		const a = actions[i];
-		if (a.kind === "finishNewService" || a.kind === "finishShuttleNewService") {
-			targetRef = a.nextRef;
-			break;
-		}
-	}
-	if (!targetRef) return fail("This service has no follow-on service.");
+	const target = handoverTarget(ctx, train);
+	if (!target) return fail("This service has no follow-on service.");
 
 	const candidate = availableFollowOnService(ctx, train);
 	if (!candidate) {
 		return fail(
-			`Follow-on service ${targetRef} does not call at ${train.working.at}.`,
+			`Follow-on service ${target.ref} does not call at ${train.working.at}.`,
 		);
 	}
 
+	const actions = actionsOf(ctx, train.working);
 	const oldIndex = train.working.index;
 	const nextActions =
 		serviceByRef(ctx.timetable, candidate.rawRef)?.actions ?? [];
@@ -639,9 +627,10 @@ function becomeNewService(ctx: RunnerContext, trainId: number): CommandResult {
 		candidate.rawRef,
 		here,
 		`${oldHeadcode} became follow-on service ${nextHeadcode} early at ${here}`,
+		candidate.repeat,
 	);
 	if (!changed) {
-		return fail(`Follow-on service ${targetRef} not found.`);
+		return fail(`Follow-on service ${target.ref} not found.`);
 	}
 
 	if (skippedReversals % 2 === 1) {
