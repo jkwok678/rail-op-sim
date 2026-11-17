@@ -548,8 +548,8 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
   - Validate with Zod schemas for safety
 - [ ] Build save flow: `Cmd+S` → `SaveDialog` (name, optional description) → write to IndexedDB with timestamp
 - [ ] Build load flow: landing page (`/`) shows list of saved sessions → click to load → navigate to `/sim`
-- [ ] Build `useAutoSave.ts` — saves to IndexedDB every 60 seconds with debounce, shows "saved" indicator
-- [ ] IndexedDB schema: `sessions` store keyed by ID, with name, description, createdAt, updatedAt, state blob
+- [x] Build `useAutoSave.ts` — saves to IndexedDB every 60 seconds with debounce, shows "saved" indicator (1 s debounce instead of 60 s, so a refresh never loses work)
+- [x] IndexedDB schema: `sessions` store keyed by ID, with name, description, createdAt, updatedAt, state blob
 
 ### Milestone 7: Transport Architecture & Worker Shell
 
@@ -779,7 +779,9 @@ action-list model; the deliverable is unchanged.
   - Locations exist on the railway; start positions are joined track; exits are exits
 - [x] Import/export timetable as a JSON *or* YAML file, over the same helpers
       the map uses (`lib/documentFile.ts`)
-- [ ] Timetable is saved as part of the session in IndexedDB
+- [x] Timetable is saved as part of the session in IndexedDB
+  - The railway is saved in the same `autosave` session (Dexie `sessions` table,
+    `lib/db.ts`), restored on load, debounced ~1 s and flushed on `pagehide`
 - [x] Shuttle actions and service repeats in the editor (`startNewShuttle`, `startShuttle`, `startFromShuttle`, `finishToShuttle`, `finishShuttleRemainHere`, `finishShuttleNewService`, plus `repeat` interval/increment/count)
 - [ ] `.ttb` import/export (`timetable/ttb.ts`, designed for, not built)
 
