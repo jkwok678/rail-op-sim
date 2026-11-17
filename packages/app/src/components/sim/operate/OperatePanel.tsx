@@ -4,7 +4,7 @@ import {
 	type RouteKind,
 	type TrainView,
 } from "@rail-op-sim/shared";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import { Button } from "#/components/ui/button";
 import { Spinner } from "#/components/ui/spinner";
 import { PlacementController } from "#/engine/PlacementController";
@@ -17,6 +17,7 @@ import {
 	toggleCallOn,
 	toggleLog,
 	toggleRouteCancel,
+	toggleSummary,
 } from "#/lib/operateActions";
 import {
 	needsAttention,
@@ -24,6 +25,11 @@ import {
 	speedLabel,
 	trainStatusLabel,
 } from "#/lib/operateText";
+import {
+	formatMinutes,
+	type IncidentSeverity,
+	summariseCounters,
+} from "#/lib/performanceSummary";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 import { restartSimSession } from "#/store/sim-bridge";
@@ -37,7 +43,8 @@ const ROUTE_KINDS: { kind: RouteKind; label: string; swatch: string }[] = [
 
 /**
  * The signalling panel docked beside the canvas in operate mode: the clock,
- * the route controls, the trains on the railway and the performance log.
+ * the route controls, the trains on the railway, the performance summary and
+ * the performance log.
  */
 export function OperatePanel() {
 	const notice = useOperateStore((s) => s.notice);
@@ -59,6 +66,7 @@ export function OperatePanel() {
 				</p>
 			) : null}
 			<TrainList />
+			<PerformanceSummary />
 			<div className="flex items-center justify-between border-t border-border px-3 py-1">
 				<span className="font-medium">Performance log</span>
 				<Button variant="ghost" size="xs" onClick={toggleLog}>
@@ -340,6 +348,125 @@ function TrainList() {
 				</table>
 			)}
 		</div>
+	);
+}
+
+const SEVERITY_CLASS: Record<IncidentSeverity, string> = {
+	warning: "text-amber-700 dark:text-amber-300",
+	error: "text-destructive",
+};
+
+function PerformanceSummary() {
+	const counters = useOperateStore((s) => s.view?.counters);
+	const showSummary = useOperateStore((s) => s.showSummary);
+	const summary = useMemo(
+		() => (counters ? summariseCounters(counters) : null),
+		[counters],
+	);
+	if (!summary) return null;
+
+	return (
+		<>
+			<div className="flex items-center justify-between gap-2 border-t border-border px-3 py-1">
+				<div className="flex min-w-0 items-baseline gap-2">
+					<span className="shrink-0 font-medium">Performance summary</span>
+					<span className="truncate text-[10px] text-muted-foreground tabular-nums">
+						{summary.headline.map((part, i) => (
+							<Fragment key={part.text}>
+								{i > 0 ? " · " : null}
+								<span
+									className={
+										part.severity ? SEVERITY_CLASS[part.severity] : undefined
+									}
+								>
+									{part.text}
+								</span>
+							</Fragment>
+						))}
+					</span>
+				</div>
+				<Button
+					variant="ghost"
+					size="xs"
+					aria-expanded={showSummary}
+					onClick={toggleSummary}
+				>
+					{showSummary ? "Hide" : "Show"}
+				</Button>
+			</div>
+			{showSummary ? (
+				<section
+					aria-label="Performance summary"
+					className="border-t border-border px-3 py-1.5 text-[10px]"
+				>
+					<table className="w-full tabular-nums">
+						<thead className="text-muted-foreground">
+							<tr>
+								<th scope="col" className="py-0.5 text-left font-normal">
+									<span className="sr-only">Event</span>
+								</th>
+								<th scope="col" className="py-0.5 text-right font-normal">
+									On time
+								</th>
+								<th scope="col" className="py-0.5 text-right font-normal">
+									Late
+								</th>
+								<th scope="col" className="py-0.5 text-right font-normal">
+									Early
+								</th>
+								<th scope="col" className="py-0.5 text-right font-normal">
+									<abbr title="Total minutes late" className="no-underline">
+										Late min Σ
+									</abbr>
+								</th>
+								<th scope="col" className="py-0.5 text-right font-normal">
+									<abbr title="Total minutes early" className="no-underline">
+										Early min Σ
+									</abbr>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{summary.events.map((row) => (
+								<tr key={row.label}>
+									<th
+										scope="row"
+										className="py-0.5 text-left font-normal text-muted-foreground"
+									>
+										{row.label}
+									</th>
+									<td className="py-0.5 text-right">{row.onTime}</td>
+									<td className="py-0.5 text-right">{row.late}</td>
+									<td className="py-0.5 text-right">{row.early ?? "—"}</td>
+									<td className="py-0.5 text-right">{row.lateMins}</td>
+									<td className="py-0.5 text-right">{row.earlyMins ?? "—"}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+					<dl className="mt-1.5 grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 border-t border-border pt-1.5">
+						{summary.incidents.map((item) => {
+							const valueText =
+								item.unit === "minutes"
+									? formatMinutes(item.value)
+									: String(item.value);
+							const valueClass =
+								item.value > 0
+									? `font-medium ${SEVERITY_CLASS[item.severity]}`
+									: "text-muted-foreground";
+							return (
+								<Fragment key={item.label}>
+									<dt className="text-muted-foreground">{item.label}</dt>
+									<dd className={`text-right tabular-nums ${valueClass}`}>
+										{valueText}
+									</dd>
+								</Fragment>
+							);
+						})}
+					</dl>
+				</section>
+			) : null}
+		</>
 	);
 }
 

@@ -84,7 +84,8 @@ export interface Engine {
 	readonly version: number;
 }
 
-function emptyCounters(): Counters {
+/** Zeroed performance counters for a fresh session or test fixture. */
+export function emptyCounters(): Counters {
 	return {
 		onTimeArrivals: 0,
 		lateArrivals: 0,

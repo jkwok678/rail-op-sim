@@ -45,6 +45,10 @@ export function toggleCallOn(): void {
 	s.setCallOnArmed(!s.callOnArmed);
 }
 
+export function toggleSummary(): void {
+	useOperateStore.getState().toggleSummary();
+}
+
 export function toggleLog(): void {
 	useOperateStore.getState().toggleLog();
 }

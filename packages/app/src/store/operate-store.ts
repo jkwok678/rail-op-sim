@@ -60,6 +60,7 @@ export interface OperateState {
 	trainDialog: TrainDialogState | null;
 	/** The last thing the engine refused, shown until the next action. */
 	notice: string | null;
+	showSummary: boolean;
 	showLog: boolean;
 
 	setStatus: (status: SessionStatus, error?: string | null) => void;
@@ -76,6 +77,7 @@ export interface OperateState {
 	openTrainDialog: (kind: TrainDialogKind, trainId: number) => void;
 	closeTrainDialog: () => void;
 	setNotice: (notice: string | null) => void;
+	toggleSummary: () => void;
 	toggleLog: () => void;
 	reset: () => void;
 }
@@ -93,6 +95,7 @@ const initial = {
 	trainMenu: null,
 	trainDialog: null,
 	notice: null,
+	showSummary: false,
 	showLog: true,
 };
 
@@ -151,6 +154,7 @@ export const useOperateStore = create<OperateState>((set) => ({
 		set({ trainMenu: null, trainDialog: { kind, trainId } }),
 	closeTrainDialog: () => set({ trainDialog: null }),
 	setNotice: (notice) => set({ notice }),
+	toggleSummary: () => set((s) => ({ showSummary: !s.showSummary })),
 	toggleLog: () => set((s) => ({ showLog: !s.showLog })),
 	reset: () => set({ ...initial }),
 }));

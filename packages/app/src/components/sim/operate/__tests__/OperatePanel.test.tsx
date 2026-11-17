@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
-import type { SimView } from "@rail-op-sim/shared";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { emptyCounters, type SimView } from "@rail-op-sim/shared";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OperatePanel } from "#/components/sim/operate/OperatePanel";
 import { useModeStore } from "#/store/mode-store";
@@ -27,7 +33,7 @@ const view = (over: Partial<SimView> = {}): SimView => ({
 	routes: [],
 	pendingRoute: null,
 	trains: [],
-	counters: {} as SimView["counters"],
+	counters: emptyCounters(),
 	...over,
 });
 
@@ -213,5 +219,100 @@ describe("OperatePanel", () => {
 		expect(screen.getByText("There is a train in the way.")).toBeTruthy();
 		fireEvent.click(screen.getByRole("button", { name: "Hide" }));
 		expect(screen.queryByRole("log")).toBeNull();
+	});
+
+	it("shows the performance summary headline collapsed by default", () => {
+		useOperateStore.setState({ status: "ready", view: view() });
+		render(<OperatePanel />);
+		expect(screen.getByText("Performance summary")).toBeTruthy();
+		expect(
+			screen.getByText(
+				(_, el) => el?.textContent === "— on time · 0 incidents",
+			),
+		).toBeTruthy();
+		expect(
+			screen.queryByRole("region", { name: "Performance summary" }),
+		).toBeNull();
+		const toggle = screen.getByRole("button", { name: "Show" });
+		expect(toggle.getAttribute("aria-expanded")).toBe("false");
+	});
+
+	it("expands the performance summary with event rows and incidents", () => {
+		useOperateStore.setState({
+			status: "ready",
+			view: view({
+				counters: {
+					...emptyCounters(),
+					onTimeArrivals: 9,
+					lateArrivals: 1,
+					totLateArrMins: 4,
+					spads: 1,
+					excessLcDownMins: 2.5,
+				},
+			}),
+		});
+		render(<OperatePanel />);
+		expect(
+			screen.getByText(
+				(_, el) =>
+					el?.textContent ===
+					"90% on time · 1 incident · 2.5 min excess crossing time",
+			),
+		).toBeTruthy();
+		expect(screen.getByText("1 incident").className).toContain(
+			"text-destructive",
+		);
+		expect(
+			screen.getByText("2.5 min excess crossing time").className,
+		).toContain("text-amber-700");
+
+		const toggle = screen.getByRole("button", { name: "Show" });
+		fireEvent.click(toggle);
+		expect(toggle.getAttribute("aria-expanded")).toBe("true");
+
+		const region = screen.getByRole("region", { name: "Performance summary" });
+		expect(
+			within(region)
+				.getByRole("columnheader", { name: "Late min Σ" })
+				.querySelector("abbr")?.title,
+		).toBe("Total minutes late");
+		const arrivalsRow = within(region)
+			.getByRole("rowheader", { name: "Arrivals" })
+			.closest("tr");
+		expect(arrivalsRow).not.toBeNull();
+		expect(
+			within(arrivalsRow as HTMLElement)
+				.getAllByRole("cell")
+				.map((c) => c.textContent),
+		).toEqual(["9", "1", "0", "4", "0"]);
+
+		const departuresRow = within(region)
+			.getByRole("rowheader", { name: "Departures" })
+			.closest("tr");
+		expect(departuresRow).not.toBeNull();
+		expect(
+			within(departuresRow as HTMLElement)
+				.getAllByRole("cell")
+				.map((c) => c.textContent),
+		).toEqual(["0", "0", "—", "0", "—"]);
+
+		const spadLabel = within(region).getByText("SPADs");
+		const spadValue = spadLabel.nextElementSibling;
+		expect(spadValue?.textContent).toBe("1");
+		expect(spadValue?.className).toContain("text-destructive");
+
+		const lcLabel = within(region).getByText("Excess crossing-down time");
+		const lcValue = lcLabel.nextElementSibling;
+		expect(lcValue?.textContent).toBe("2.5 min");
+		expect(lcValue?.className).toContain("text-amber-700");
+	});
+
+	it("renders nothing for the performance summary while loading with no view", () => {
+		useOperateStore.setState({ status: "loading", view: null });
+		render(<OperatePanel />);
+		expect(screen.queryByText("Performance summary")).toBeNull();
+		expect(
+			screen.queryByRole("region", { name: "Performance summary" }),
+		).toBeNull();
 	});
 });

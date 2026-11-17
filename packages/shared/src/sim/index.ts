@@ -1,7 +1,12 @@
 // Barrel exports for the simulation engine
 
 export { SIM_DT, SPEEDS, stepSpeed } from "./clock";
-export { createEngine, type Engine, type EngineOptions } from "./engine";
+export {
+	createEngine,
+	type Engine,
+	type EngineOptions,
+	emptyCounters,
+} from "./engine";
 export {
 	buildGraph,
 	type GraphNode,

@@ -834,6 +834,7 @@ Restated, as M20 was, against what the codebase actually is: a grid of cells wit
 - [x] Departure is at the latest of the booked time, arrival plus the minimum dwell (default 30 s), and 30 s after the last action.
 - [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
 - [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
+- [x] Performance summary in the operate panel: punctuality, per-event on-time/late/early counts and minutes, and incidents (missed events, wrong exits, SPADs, crashes, excess crossing-down time).
 - [x] Splits and joins (§6.8): front/rear split over 4 platform cells (`splitEnds`), `joinedBy`/`finishJoin` coupling (`mergeTrainInto`), 30 s ordering/action gap.
 - [x] Signaller control of trains (§8): take/restore control (with location guard when taken at a stop), move forwards, stop, change direction, step forward, pass red signal, signaller join, skip timetabled actions, become follow-on service early, reminders, and train removal.
 - [x] Calling on (§5.13): magenta eligibility when stopped at a red signal for an occupied platform up to 4 km ahead, `Calling-on` mode (`Shift+O`) showing `signal<Dir>CallingOn.svg` over red / `shunt<Dir>White.svg`, immediate unrestricted route to first platform cell, and 30 km/h speed cap.
