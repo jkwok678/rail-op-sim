@@ -1,4 +1,5 @@
 import { ErrorBoundary } from "#/components/ErrorBoundary";
+import { useAutoSave } from "#/hooks/useAutoSave";
 import { usePixiApp } from "#/hooks/usePixiApp";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
@@ -17,6 +18,7 @@ import { ZoomSlider } from "./ZoomSlider";
  */
 export function SimCanvas() {
 	const { containerRef, viewportRef, status, error } = usePixiApp();
+	useAutoSave(status === "ready");
 	const mode = useModeStore((s) => s.mode);
 	const trackCount = useEditorStore((s) => s.trackStatus?.total ?? 0);
 

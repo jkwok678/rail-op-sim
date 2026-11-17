@@ -27,6 +27,7 @@ export function StatusBar() {
 	const tool = useEditorStore((s) => s.tool);
 	const directionHint = useEditorStore((s) => s.directionHint);
 	const toggleShortcuts = useEditorStore((s) => s.toggleShortcuts);
+	const autosave = useEditorStore((s) => s.autosave);
 	const operating = useModeStore((s) => s.mode === "operate");
 
 	// Derive connectivity status from the plain summary the placement controller
@@ -51,6 +52,7 @@ export function StatusBar() {
 				{operating ? <OperateClock /> : null}
 			</span>
 			<div className="flex items-center gap-1">
+				<AutosaveStatus autosave={autosave} />
 				<Button
 					variant="ghost"
 					size="icon-xs"
@@ -83,6 +85,31 @@ function OperateClock() {
 		<span role="timer" aria-label="Operating clock" className="tabular-nums">
 			· {formatSimTime(view.time, true)} {speedLabel(view.speed)} —{" "}
 			{runLabel(view.run)}
+		</span>
+	);
+}
+
+/** A quiet note on whether the session is safely stored in the browser. */
+function AutosaveStatus({
+	autosave,
+}: {
+	autosave: { lastSavedAt: number | null; error: boolean };
+}) {
+	if (autosave.error) {
+		return (
+			<span role="status" className="text-amber-600 dark:text-amber-400">
+				Autosave failed
+			</span>
+		);
+	}
+	if (autosave.lastSavedAt === null) return null;
+	const time = new Date(autosave.lastSavedAt).toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	return (
+		<span role="status" className="tabular-nums">
+			Saved {time}
 		</span>
 	);
 }

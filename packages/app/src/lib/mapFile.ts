@@ -79,7 +79,9 @@ export function downloadMap(
 }
 
 /** Minimal structural check that a parsed object is a supported SerializedMap. */
-function assertSerializedMap(value: unknown): asserts value is SerializedMap {
+export function assertSerializedMap(
+	value: unknown,
+): asserts value is SerializedMap {
 	if (typeof value !== "object" || value === null) {
 		throw new InvalidMapFileError("File is not a valid map (not an object).");
 	}

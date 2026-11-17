@@ -194,6 +194,16 @@ export interface EditorState {
 	saveFormat: MapFileFormat;
 
 	/**
+	 * Counts every history publish — each undoable map commit, undo, redo and
+	 * load. `canUndo` and the labels often stay the same across commits, so this
+	 * is what autosave watches to know the map changed.
+	 */
+	historyRevision: number;
+
+	/** When the session was last autosaved, and whether the latest attempt failed. */
+	autosave: { lastSavedAt: number | null; error: boolean };
+
+	/**
 	 * Whether the keyboard-shortcut reference overlay is open. Lives in the store
 	 * rather than in the layout's local state so the Escape cascade can see it —
 	 * it is one of the things Escape has to yield to.
@@ -265,6 +275,11 @@ export interface EditorState {
 	toggleShortcuts: () => void;
 	/** Open or close the keyboard-shortcut reference overlay. */
 	setShortcuts: (open: boolean) => void;
+	/** Record the outcome of an autosave attempt. */
+	setAutosave: (autosave: {
+		lastSavedAt: number | null;
+		error: boolean;
+	}) => void;
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
 	/** Push (or clear) the train-info snapshot for the tooltip to render. */
@@ -350,10 +365,12 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showTrainTimetable: false,
 	showGrid: true,
 	saveFormat: "json",
+	autosave: { lastSavedAt: null, error: false },
 	showShortcuts: false,
 	hoveredTrackInfo: null,
 	hoveredTrainInfo: null,
 	trackStatus: null,
+	historyRevision: 0,
 	canUndo: false,
 	canRedo: false,
 	undoLabel: null,
@@ -464,12 +481,14 @@ export const useEditorStore = create<EditorState>((set) => ({
 		debugLog("store", `setSaveFormat: ${format}`);
 		set({ saveFormat: format });
 	},
+	setAutosave: (autosave) => set({ autosave }),
 	toggleShortcuts: () => set((s) => ({ showShortcuts: !s.showShortcuts })),
 	setShortcuts: (open) => set({ showShortcuts: open }),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
 	setHoveredTrainInfo: (info) => set({ hoveredTrainInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
-	setHistoryState: (state) => set(state),
+	setHistoryState: (state) =>
+		set((s) => ({ ...state, historyRevision: s.historyRevision + 1 })),
 	setZoom: (z) => set({ zoom: z }),
 	setToolbarPos: (pos) => set({ toolbarPos: pos }),
 
