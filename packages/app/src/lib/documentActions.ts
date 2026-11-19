@@ -1,4 +1,11 @@
 import {
+	createEmptyTimetable,
+	Map as Map_,
+	serializeMap,
+} from "@rail-op-sim/shared";
+import { PlacementController } from "#/engine/PlacementController";
+import { debugLog } from "#/lib/debugLogger";
+import {
 	decodeDocument,
 	type LoadedDocument,
 	type PickedDocument,
@@ -132,4 +139,31 @@ export async function loadDocument(): Promise<void> {
 	} else {
 		await loadMap();
 	}
+}
+
+/**
+ * Throw the timetable away and start an empty one. The autosave picks the
+ * change up like any other, so a refresh no longer brings the old one back.
+ */
+export function clearTimetable(): void {
+	useTimetableStore
+		.getState()
+		.replaceTimetable(
+			createEmptyTimetable(),
+			PlacementController.instance?.map ?? null,
+		);
+	debugLog("saveload", "cleared the timetable");
+}
+
+/**
+ * Start a new railway: an empty map and an empty timetable. The timetable goes
+ * too because it is booked onto the railway — against an empty map every
+ * service would be an error. Like opening a file, this drops the undo history.
+ */
+export function newRailway(): void {
+	const controller = PlacementController.instance;
+	if (!controller) return;
+	controller.loadFromData(serializeMap(new Map_()));
+	clearTimetable();
+	debugLog("saveload", "started a new railway");
 }

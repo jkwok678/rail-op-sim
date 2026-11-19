@@ -8,6 +8,7 @@ import { runLabel, speedLabel } from "#/lib/operateText";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
+import { NewDocumentControl } from "./NewDocumentControl";
 import { SaveLoadControls } from "./SaveLoadControls";
 import { SettingsMenu } from "./SettingsMenu";
 
@@ -62,6 +63,7 @@ export function StatusBar() {
 				>
 					<Keyboard />
 				</Button>
+				<NewDocumentControl />
 				<SaveLoadControls />
 				<SettingsMenu />
 				<Button
