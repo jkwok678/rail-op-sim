@@ -9,6 +9,7 @@ import {
 	isStartAction,
 	issuesForService,
 	MAX_SERVICE_REF_LENGTH,
+	type Repeat,
 	type Service,
 	type ServiceRef,
 	type TimetableIssue,
@@ -328,6 +329,13 @@ function ServiceDetail({
 				/>
 			) : null}
 
+			<RepeatFields
+				repeat={service.repeat}
+				onCommit={(repeat) =>
+					store().updateService(service.ref, { repeat }, map)
+				}
+			/>
+
 			<div className="mt-3 mb-1 flex items-center justify-between">
 				<span className="font-medium">Actions</span>
 				<AddActionButton service={service} />
@@ -426,6 +434,66 @@ function TrainSpecFields({
 	);
 }
 
+/** Optional repeat rule: interval, headcode increment, and further run count. */
+function RepeatFields({
+	repeat,
+	onCommit,
+}: {
+	repeat: Repeat | undefined;
+	onCommit: (repeat: Repeat | undefined) => void;
+}) {
+	if (!repeat) {
+		return (
+			<div className="mt-2 flex items-center justify-between border border-border px-2 py-1">
+				<span className="text-[10px] text-muted-foreground">Repeat</span>
+				<Button
+					variant="outline"
+					size="xs"
+					onClick={() =>
+						onCommit({ intervalMinutes: 30, headcodeIncrement: 1, count: 1 })
+					}
+				>
+					<Plus /> Add repeat
+				</Button>
+			</div>
+		);
+	}
+
+	const set = (changes: Partial<Repeat>): void =>
+		onCommit({ ...repeat, ...changes });
+
+	return (
+		<fieldset className="mt-2 border border-border p-2">
+			<legend className="px-1 text-[10px] text-muted-foreground">Repeat</legend>
+			<div className="grid grid-cols-3 gap-1.5">
+				<NumberField
+					label="Interval (min)"
+					value={repeat.intervalMinutes}
+					min={1}
+					onCommit={(intervalMinutes) => set({ intervalMinutes })}
+				/>
+				<NumberField
+					label="Headcode +"
+					value={repeat.headcodeIncrement}
+					min={0}
+					onCommit={(headcodeIncrement) => set({ headcodeIncrement })}
+				/>
+				<NumberField
+					label="Count"
+					value={repeat.count}
+					min={1}
+					onCommit={(count) => set({ count })}
+				/>
+			</div>
+			<div className="mt-1.5 flex justify-end">
+				<Button variant="ghost" size="xs" onClick={() => onCommit(undefined)}>
+					Remove repeat
+				</Button>
+			</div>
+		</fieldset>
+	);
+}
+
 /** The kind picker, which adds a seeded action of whatever is chosen. */
 function AddActionButton({ service }: { service: Service }) {
 	const store = useTimetableStore.getState;
@@ -440,6 +508,13 @@ function AddActionButton({ service }: { service: Service }) {
 			time: previousTime ?? undefined,
 		});
 		store().addAction(service.ref, action, map);
+		if (isStartAction(action) && createsTrain(action) && !service.train) {
+			store().updateService(
+				service.ref,
+				{ train: createDefaultTrainSpec() },
+				map,
+			);
+		}
 		store().selectAction(service.actions.length);
 	};
 
@@ -541,6 +616,7 @@ function ActionRow({
 						action={action}
 						locations={locations}
 						otherRefs={otherRefs}
+						selfRef={service.ref}
 						pendingPick={pendingCellPick}
 						onChange={(next) =>
 							store().updateAction(service.ref, index, next, map)

@@ -192,6 +192,30 @@ describe("map serialization round-trip", () => {
 		expect(map.getParapetList()).toEqual([]);
 		expect(map.getTextList()).toEqual([]);
 	});
+
+	it("keeps a named location riding on its track through a round trip", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+		map.createAddNamedLocation(0, 0);
+		const loaded = new Map_();
+		deserializeMap(serializeMap(map), loaded);
+		const track = loaded.getTrackAt(0, 0);
+		expect(track).not.toBeNull();
+		expect(loaded.getNamedLocationAt(0, 0)).not.toBeNull();
+		expect(track?.getLinkedNamedLocation()).toBe(
+			loaded.getNamedLocationAt(0, 0),
+		);
+	});
 });
 
 // ============================================================================

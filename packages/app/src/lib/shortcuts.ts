@@ -25,8 +25,21 @@ export type ShortcutId =
 	| "toggleLinkHighlights"
 	| "toggleDirections"
 	| "toggleTrackInfo"
+	| "toggleTrainInfo"
+	| "toggleTrainTimetable"
 	| "modeRailway"
 	| "modeTimetable"
+	| "modeOperate"
+	| "operateRunPause"
+	| "operateSlower"
+	| "operateFaster"
+	| "routeAuto"
+	| "routeAutoAll"
+	| "routePreferred"
+	| "routeUnrestricted"
+	| "routeCallOn"
+	| "routeCancel"
+	| "operateLog"
 	| "prevService"
 	| "nextService"
 	| "nextIssue"
@@ -46,6 +59,7 @@ export type ShortcutId =
 /** Heading a shortcut is listed under in the reference overlay. */
 export type ShortcutGroup =
 	| "Mode"
+	| "Operate"
 	| "Timetable"
 	| "Tools"
 	| "View"
@@ -138,6 +152,18 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		label: "Show track info",
 		group: "Display",
 	},
+	toggleTrainInfo: {
+		id: "toggleTrainInfo",
+		hotkey: "H",
+		label: "Show train info",
+		group: "Display",
+	},
+	toggleTrainTimetable: {
+		id: "toggleTrainTimetable",
+		hotkey: "B",
+		label: "Show train timetable",
+		group: "Display",
+	},
 
 	// Modes — one key per mode rather than a toggle, so a key always lands in
 	// the same place and an "operate" mode can take a letter of its own later.
@@ -154,6 +180,75 @@ export const SHORTCUTS: Record<ShortcutId, Shortcut> = {
 		hotkey: "T",
 		label: "Timetable mode",
 		group: "Mode",
+	},
+	modeOperate: {
+		id: "modeOperate",
+		hotkey: "O",
+		label: "Operate mode",
+		group: "Mode",
+	},
+
+	// Operate. Route kinds by initial — Automatic, Signal-to-signal (preferred)
+	// and Unrestricted — since the tools own the digits RailOS used for them.
+	operateRunPause: {
+		id: "operateRunPause",
+		hotkey: "P",
+		label: "Run / pause the clock",
+		group: "Operate",
+	},
+	operateSlower: {
+		id: "operateSlower",
+		hotkey: ",",
+		label: "Slow the clock down",
+		group: "Operate",
+	},
+	operateFaster: {
+		id: "operateFaster",
+		hotkey: ".",
+		label: "Speed the clock up",
+		group: "Operate",
+	},
+	routeAuto: {
+		id: "routeAuto",
+		hotkey: "A",
+		label: "Automatic signals route",
+		group: "Operate",
+	},
+	routeAutoAll: {
+		id: "routeAutoAll",
+		hotkey: "Shift+A",
+		label: "Set every automatic signals route",
+		group: "Operate",
+	},
+	routePreferred: {
+		id: "routePreferred",
+		hotkey: "S",
+		label: "Preferred route",
+		group: "Operate",
+	},
+	routeUnrestricted: {
+		id: "routeUnrestricted",
+		hotkey: "U",
+		label: "Unrestricted route",
+		group: "Operate",
+	},
+	routeCallOn: {
+		id: "routeCallOn",
+		hotkey: "Shift+O",
+		label: "Calling-on signal",
+		group: "Operate",
+	},
+	routeCancel: {
+		id: "routeCancel",
+		hotkey: "C",
+		label: "Cancel routes (right-click one)",
+		group: "Operate",
+	},
+	operateLog: {
+		id: "operateLog",
+		hotkey: "J",
+		label: "Show performance log",
+		group: "Operate",
 	},
 
 	// Timetable lists. Brackets step through services the way the left column
@@ -258,8 +353,21 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 	"toggleLinkHighlights",
 	"toggleDirections",
 	"toggleTrackInfo",
+	"toggleTrainInfo",
+	"toggleTrainTimetable",
 	"modeRailway",
 	"modeTimetable",
+	"modeOperate",
+	"operateRunPause",
+	"operateSlower",
+	"operateFaster",
+	"routeAuto",
+	"routeAutoAll",
+	"routePreferred",
+	"routeUnrestricted",
+	"routeCallOn",
+	"routeCancel",
+	"operateLog",
 	"prevService",
 	"nextService",
 	"nextIssue",
@@ -279,6 +387,7 @@ export const SHORTCUT_ORDER: ShortcutId[] = [
 /** Headings for the reference overlay, in the order it shows them. */
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 	"Mode",
+	"Operate",
 	"Timetable",
 	"Tools",
 	"Edit",

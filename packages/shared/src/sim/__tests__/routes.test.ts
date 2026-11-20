@@ -1,0 +1,558 @@
+import { describe, expect, it } from "vitest";
+import { nodeAt } from "../graph";
+import {
+	addTrain,
+	CELL,
+	cell,
+	engineFor,
+	line,
+	linkedLine,
+	passingLoop,
+	signalledLoop,
+} from "./fixtures";
+
+/** Signals at 2 and 5 face right; exits at both ends. */
+const twoSignals = () => line("X->-->-X");
+
+const segNodes = (engine: ReturnType<typeof engineFor>, i = 0) =>
+	engine.state.routes[i].segs.map((s) => engine.graph.nodes[s.node].cell.gx);
+
+describe("setting routes", () => {
+	it("sets a preferred route from a signal up to, not onto, the next one", () => {
+		const engine = engineFor(twoSignals());
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(5),
+			kind: "preferred",
+		});
+		expect(result).toEqual({ ok: true });
+		expect(segNodes(engine)).toEqual([2, 3, 4]);
+	});
+
+	it("runs a route to an exit onto the exit itself", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(5),
+			to: cell(7),
+			kind: "auto",
+		});
+		expect(segNodes(engine)).toEqual([5, 6, 7]);
+	});
+
+	it("starts a route at an exit, heading into the railway", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(2),
+			kind: "preferred",
+		});
+		expect(segNodes(engine)).toEqual([0, 1]);
+	});
+
+	it("will not start a preferred route on plain track", () => {
+		const engine = engineFor(twoSignals());
+		const result = engine.handle({
+			type: "checkRouteStart",
+			at: cell(3),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("runs a preferred route through a signal to an exit", () => {
+		const engine = engineFor(twoSignals());
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(result).toEqual({ ok: true });
+		expect(segNodes(engine)).toEqual([2, 3, 4, 5, 6, 7]);
+	});
+
+	it("will not run a signal route against the way it faces", () => {
+		const engine = engineFor(twoSignals());
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(5),
+			to: cell(0),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("lets an unrestricted route run past signals, either way", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(6),
+			to: cell(1),
+			kind: "unrestricted",
+		});
+		expect(segNodes(engine)).toEqual([6, 5, 4, 3, 2, 1]);
+	});
+
+	it("will not let routes share a rail", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(1),
+			to: cell(4),
+			kind: "unrestricted",
+		});
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(6),
+			to: cell(3),
+			kind: "unrestricted",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("refuses an automatic route into buffers", () => {
+		const engine = engineFor(line("X->-]"));
+		const auto = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(4),
+			kind: "auto",
+		});
+		expect(auto.ok).toBe(false);
+		const preferred = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(4),
+			kind: "preferred",
+		});
+		expect(preferred.ok).toBe(true);
+	});
+});
+
+describe("points", () => {
+	it("sets the points a route needs and locks them", () => {
+		const engine = engineFor(passingLoop());
+		const sw = nodeAt(engine.graph, cell(2)) as number;
+		const main = engine.state.lies[sw];
+		engine.handle({
+			type: "setRoute",
+			from: cell(1),
+			to: cell(4, 1),
+			kind: "unrestricted",
+		});
+		expect(engine.state.lies[sw]).not.toBe(main);
+		expect(engine.handle({ type: "togglePoints", at: cell(2) }).ok).toBe(false);
+	});
+
+	it("throws free points over by hand", () => {
+		const engine = engineFor(passingLoop());
+		const sw = nodeAt(engine.graph, cell(5)) as number;
+		const before = engine.state.lies[sw];
+		expect(engine.handle({ type: "togglePoints", at: cell(5) })).toEqual({
+			ok: true,
+		});
+		expect(engine.state.lies[sw]).toBe(1 - before);
+		expect(engine.view().points).toHaveLength(2);
+	});
+
+	it("takes the loop for a preferred route when the main line is held", () => {
+		const engine = engineFor(passingLoop());
+		engine.handle({
+			type: "setRoute",
+			from: cell(3),
+			to: cell(4),
+			kind: "unrestricted",
+		});
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(result).toEqual({ ok: true });
+		const cells = engine.state.routes[1].segs.map(
+			(s) => engine.graph.nodes[s.node].cell,
+		);
+		expect(cells).toContainEqual({ gx: 3, gy: 1 });
+	});
+
+	const routeCells = (engine: ReturnType<typeof engineFor>) =>
+		engine.state.routes[0].segs.map((s) => engine.graph.nodes[s.node].cell);
+
+	it("runs straight along the main line rather than round a loop as short", () => {
+		for (const [from, to, kind] of [
+			[cell(0), cell(7), "preferred"],
+			[cell(7), cell(0), "preferred"],
+			[cell(1), cell(6), "unrestricted"],
+			[cell(6), cell(1), "unrestricted"],
+		] as const) {
+			const engine = engineFor(passingLoop());
+			expect(engine.handle({ type: "setRoute", from, to, kind })).toEqual({
+				ok: true,
+			});
+			expect(routeCells(engine).every((c) => c.gy === 0)).toBe(true);
+		}
+	});
+
+	it("takes the shorter way in metres, not in cells", () => {
+		const map = passingLoop();
+		// The main line between the points is made far longer than the loop.
+		for (const gx of [3, 4])
+			map.getTrackAt(gx * CELL, 0)?.setTrackMainLength(1000);
+		const engine = engineFor(map);
+		engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(routeCells(engine)).toContainEqual({ gx: 3, gy: 1 });
+	});
+
+	it("runs straight even when that means throwing points lying for the loop", () => {
+		const engine = engineFor(passingLoop());
+		const sw = nodeAt(engine.graph, cell(2)) as number;
+		const main = engine.state.lies[sw];
+		engine.handle({ type: "togglePoints", at: cell(2) });
+		engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(routeCells(engine).every((c) => c.gy === 0)).toBe(true);
+		expect(engine.state.lies[sw]).toBe(main);
+	});
+
+	it("routes over either leg of facing points, setting them to match", () => {
+		const lies: number[] = [];
+		for (const [to, via] of [
+			[cell(4), { gx: 4, gy: 0 }],
+			[cell(4, 1), { gx: 3, gy: 1 }],
+		] as const) {
+			const engine = engineFor(passingLoop());
+			const sw = nodeAt(engine.graph, cell(2)) as number;
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			expect(result).toEqual({ ok: true });
+			expect(routeCells(engine)).toContainEqual(via);
+			lies.push(engine.state.lies[sw]);
+		}
+		expect(lies[0]).not.toBe(lies[1]);
+	});
+
+	it("throws points lying the other way back for either leg", () => {
+		for (const to of [cell(4), cell(4, 1)]) {
+			const engine = engineFor(passingLoop());
+			const sw = nodeAt(engine.graph, cell(2)) as number;
+			const fresh = engineFor(passingLoop());
+			fresh.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			const wanted = fresh.state.lies[sw];
+			// Start with the points lying the other way.
+			if (engine.state.lies[sw] === wanted) {
+				engine.handle({ type: "togglePoints", at: cell(2) });
+			}
+			expect(engine.state.lies[sw]).not.toBe(wanted);
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			});
+			expect(result).toEqual({ ok: true });
+			expect(engine.state.lies[sw]).toBe(wanted);
+		}
+	});
+
+	it("sets preferred and auto routes to a signal on either leg", () => {
+		for (const kind of ["preferred", "auto"] as const) {
+			const lies: number[] = [];
+			for (const [to, via] of [
+				[cell(3), { gx: 3, gy: 0 }],
+				[cell(4, 1), { gx: 3, gy: 1 }],
+			] as const) {
+				const engine = engineFor(signalledLoop());
+				const sw = nodeAt(engine.graph, cell(2)) as number;
+				const result = engine.handle({
+					type: "setRoute",
+					from: cell(1),
+					to,
+					kind,
+				});
+				expect(result).toEqual({ ok: true });
+				const cells = routeCells(engine);
+				if (to.gy === 1) expect(cells).toContainEqual(via);
+				else expect(cells).not.toContainEqual({ gx: 3, gy: 1 });
+				lies.push(engine.state.lies[sw]);
+			}
+			expect(lies[0]).not.toBe(lies[1]);
+		}
+	});
+
+	it("refuses a preferred route over a leg with no preferred direction", () => {
+		const to = cell(4, 1);
+		const preferred = engineFor(signalledLoop({ loopPreferred: false }));
+		expect(
+			preferred.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "preferred",
+			}).ok,
+		).toBe(false);
+		const free = engineFor(signalledLoop({ loopPreferred: false }));
+		expect(
+			free.handle({
+				type: "setRoute",
+				from: cell(1),
+				to,
+				kind: "unrestricted",
+			}),
+		).toEqual({ ok: true });
+	});
+});
+
+describe("route timing and cancelling", () => {
+	it("holds a route pending while it sets, longer when points move", () => {
+		const engine = engineFor(passingLoop());
+		engine.handle({ type: "run" });
+		engine.handle({
+			type: "setRoute",
+			from: cell(1),
+			to: cell(4, 1),
+			kind: "unrestricted",
+		});
+		expect(engine.state.routes).toHaveLength(0);
+		expect(engine.view().pendingRoute).not.toBeNull();
+		engine.advance(2);
+		expect(engine.state.routes).toHaveLength(0);
+		engine.advance(0.6);
+		expect(engine.state.routes).toHaveLength(1);
+		expect(engine.view().pendingRoute).toBeNull();
+	});
+
+	it("cancels a whole route", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(5),
+			kind: "preferred",
+		});
+		expect(engine.handle({ type: "cancelRoute", at: cell(3) })).toEqual({
+			ok: true,
+		});
+		expect(engine.state.routes).toHaveLength(0);
+		expect(engine.handle({ type: "cancelRoute", at: cell(3) }).ok).toBe(false);
+	});
+
+	it("will not set routes while paused", () => {
+		const engine = engineFor(twoSignals());
+		engine.handle({ type: "run" });
+		engine.handle({ type: "pause" });
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(5),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+});
+
+describe("setting every automatic route", () => {
+	const setAll = (engine: ReturnType<typeof engineFor>) =>
+		engine.handle({ type: "setAllAutoRoutes" });
+	const allNodes = (engine: ReturnType<typeof engineFor>) =>
+		engine.state.routes.map((r) =>
+			r.segs.map((s) => {
+				const { gx, gy } = engine.graph.nodes[s.node].cell;
+				return `${gx},${gy}`;
+			}),
+		);
+
+	it("sets every plain section, each stopping short of the next signal", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		expect(setAll(engine)).toEqual({
+			ok: true,
+			message: "Set 3 automatic routes.",
+		});
+		expect(engine.state.routes.every((r) => r.kind === "auto")).toBe(true);
+		expect(engine.state.routes.map((_, i) => segNodes(engine, i))).toEqual([
+			[0, 1],
+			[2, 3, 4],
+			[5, 6, 7],
+		]);
+		expect(engine.state.pending).toBeNull();
+	});
+
+	it("clears the signals at once", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		setAll(engine);
+		const signal = nodeAt(engine.graph, cell(2));
+		expect(engine.state.aspects[signal as number]).toBeGreaterThan(0);
+	});
+
+	it("leaves a section into buffers alone", () => {
+		const engine = engineFor(line("X->-]", {}, { oneWay: true }));
+		setAll(engine);
+		expect(engine.state.routes.map((_, i) => segNodes(engine, i))).toEqual([
+			[0, 1],
+		]);
+	});
+
+	it("leaves track preferred both ways alone", () => {
+		const engine = engineFor(twoSignals());
+		expect(setAll(engine).ok).toBe(false);
+		expect(engine.state.routes).toHaveLength(0);
+	});
+
+	it("leaves a section through points alone", () => {
+		const engine = engineFor(passingLoop());
+		expect(setAll(engine).ok).toBe(false);
+	});
+
+	it("skips a section a route or a train already holds", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(5),
+			kind: "preferred",
+		});
+		addTrain(engine, cell(6), cell(7));
+		expect(setAll(engine)).toEqual({
+			ok: true,
+			message: "Set 1 automatic route.",
+		});
+		expect(engine.state.routes.map((r) => r.kind)).toEqual([
+			"preferred",
+			"auto",
+		]);
+		expect(segNodes(engine, 1)).toEqual([0, 1]);
+	});
+
+	it("says when there is nothing left to set", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		setAll(engine);
+		expect(setAll(engine)).toEqual({
+			ok: false,
+			message: "No automatic routes left to set.",
+		});
+	});
+
+	it("will not set them while paused", () => {
+		const engine = engineFor(line("X->-->-X", {}, { oneWay: true }));
+		engine.handle({ type: "run" });
+		engine.handle({ type: "pause" });
+		expect(setAll(engine).ok).toBe(false);
+		expect(engine.state.routes).toHaveLength(0);
+	});
+
+	it("carries a section on through paired linked tracks", () => {
+		const engine = engineFor(linkedLine());
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,0", "3,0", "4,0", "0,3", "1,3"],
+			["2,3", "3,3", "4,3"],
+		]);
+	});
+
+	it("never ends a section on an unpaired linked track", () => {
+		const engine = engineFor(linkedLine({ paired: false }));
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,3", "3,3", "4,3"],
+		]);
+	});
+
+	it("leaves a section alone while a train stands beyond the hop", () => {
+		const engine = engineFor(linkedLine());
+		addTrain(engine, cell(0, 3), cell(1, 3));
+		setAll(engine);
+		expect(allNodes(engine)).toEqual([
+			["0,0", "1,0"],
+			["2,3", "3,3", "4,3"],
+		]);
+	});
+});
+
+/** Signals for rightward running at 2, 4, 6 and 8, exit at 10. */
+const fourSignals = () => line("X->->->->-X");
+
+describe("routes through intermediate signals", () => {
+	for (const kind of ["preferred", "auto"] as const) {
+		it(`sets a ${kind} route past a signal, stopping short of the end signal`, () => {
+			const engine = engineFor(fourSignals());
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(2),
+				to: cell(6),
+				kind,
+			});
+			expect(result).toEqual({ ok: true });
+			expect(segNodes(engine)).toEqual([2, 3, 4, 5]);
+		});
+	}
+
+	it("refuses a route when the section beyond the middle signal is occupied", () => {
+		const engine = engineFor(fourSignals());
+		addTrain(engine, cell(4), cell(5));
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(6),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("refuses a route when another route holds the section beyond the middle signal", () => {
+		const engine = engineFor(fourSignals());
+		engine.handle({
+			type: "setRoute",
+			from: cell(4),
+			to: cell(6),
+			kind: "preferred",
+		});
+		const result = engine.handle({
+			type: "setRoute",
+			from: cell(2),
+			to: cell(6),
+			kind: "preferred",
+		});
+		expect(result.ok).toBe(false);
+	});
+
+	it("still lets routes be chained signal to signal", () => {
+		const engine = engineFor(fourSignals());
+		for (const [from, to] of [
+			[2, 4],
+			[4, 6],
+		]) {
+			const result = engine.handle({
+				type: "setRoute",
+				from: cell(from),
+				to: cell(to),
+				kind: "preferred",
+			});
+			expect(result).toEqual({ ok: true });
+		}
+		expect(segNodes(engine, 0)).toEqual([2, 3]);
+		expect(segNodes(engine, 1)).toEqual([4, 5]);
+	});
+});

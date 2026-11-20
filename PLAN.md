@@ -364,8 +364,9 @@ interface Service {
 // Action is a discriminated union: startNew | startNewService | startFromSplit
 // | stop | pass | changeDirection | frontSplit | rearSplit | joinedBy
 // | changeDescription | changeMaxSpeed | finishNewService | finishJoin
-// | finishExit | finishRemainHere (plus the shuttle variants, typed but not
-// yet supported). See timetable/types.ts for the fields of each.
+// | finishExit | finishRemainHere | finishToShuttle | startNewShuttle
+// | startShuttle | startFromShuttle | finishShuttleRemainHere
+// | finishShuttleNewService. See timetable/types.ts for the fields of each.
 
 // === Failures & Disruptions ===
 
@@ -547,8 +548,8 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
   - Validate with Zod schemas for safety
 - [ ] Build save flow: `Cmd+S` → `SaveDialog` (name, optional description) → write to IndexedDB with timestamp
 - [ ] Build load flow: landing page (`/`) shows list of saved sessions → click to load → navigate to `/sim`
-- [ ] Build `useAutoSave.ts` — saves to IndexedDB every 60 seconds with debounce, shows "saved" indicator
-- [ ] IndexedDB schema: `sessions` store keyed by ID, with name, description, createdAt, updatedAt, state blob
+- [x] Build `useAutoSave.ts` — saves to IndexedDB every 60 seconds with debounce, shows "saved" indicator (1 s debounce instead of 60 s, so a refresh never loses work)
+- [x] IndexedDB schema: `sessions` store keyed by ID, with name, description, createdAt, updatedAt, state blob
 
 ### Milestone 7: Transport Architecture & Worker Shell
 
@@ -727,6 +728,11 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
   - Edge cost = `edge.length` (prefer shorter paths)
   - Edge validity checks: wrong direction (unless bi-di), electrification mismatch, gauge restriction
   - Heuristic = straight-line distance from current vertex to target
+- Note: built as Dijkstra in `sim/routes.ts` rather than A* — linked-track hops
+  break a straight-line heuristic. Cost is compared in order: length in metres,
+  then diverging legs of points, then points that must move, so a route runs
+  straight where that is as short. The editor's `findPathBetween` likewise
+  prefers fewest tracks, then fewest bends.
 - [ ] Path post-processing: the raw A* result is a list of edges → convert to `RouteSegment[]` with required point positions
 - [ ] Handle "no path exists" — return structured error (dead end, wrong electrification, etc.)
 - [ ] Unit tests: find path through junction, verify blocked path returns no result
@@ -778,36 +784,75 @@ action-list model; the deliverable is unchanged.
   - Locations exist on the railway; start positions are joined track; exits are exits
 - [x] Import/export timetable as a JSON *or* YAML file, over the same helpers
       the map uses (`lib/documentFile.ts`)
-- [ ] Timetable is saved as part of the session in IndexedDB
-- [ ] Shuttle actions in the editor (typed in the model, reported as unsupported)
+- [x] Timetable is saved as part of the session in IndexedDB
+  - The railway is saved in the same `autosave` session (Dexie `sessions` table,
+    `lib/db.ts`), restored on load, debounced ~1 s and flushed on `pagehide`
+- [x] Shuttle actions and service repeats in the editor (`startNewShuttle`, `startShuttle`, `startFromShuttle`, `finishToShuttle`, `finishShuttleRemainHere`, `finishShuttleNewService`, plus `repeat` interval/increment/count)
 - [ ] `.ttb` import/export (`timetable/ttb.ts`, designed for, not built)
 
 ### Milestone 21: Timetable Engine — Basic Dispatch
 
-**Deliverable**: At the scheduled time, a train appears at the origin and begins following its route.
+**Deliverable**: A third app mode, **Operate**, where the signaller sets routes and trains run the timetable.
 
-- [ ] Implement `engine/TimetableEngine.ts`:
-  - On each tick, check for entries whose `departureTime` has been reached
-  - `dispatchTrain(entry)`: creates a train at the entry's origin, assigns it the entry's route
-  - Train begins moving toward first stop (or destination if no stops)
-  - Handle time acceleration: at 16x sim speed, trains still dispatch correctly
-- [ ] `TimetableEngine` owns the timetable, sends dispatch commands to `SimState`
-- [ ] Visual: when a train is dispatched, notification appears in status bar
+Restated, as M20 was, against what the codebase actually is: a grid of cells with links, not the vertex/edge graph sketched in M2–M19. The engine sits on that grid and fills the parts of M7–M8 and M12–M19 that operating needs. OPERATE-MODE.md (railway-dot-exe's behaviour) is the reference, not the spec.
+
+- [x] Pure-TS engine in `packages/shared/src/sim/`, with no DOM:
+  - `graph.ts`: an immutable rail graph built from the map once on entry;
+  - `routes.ts`, `signalling.ts`, `trains.ts`, `timetable.ts`, `log.ts`;
+  - `engine.ts`: `createEngine({ map, timetable })` → `handle(cmd)` / `advance(seconds)` / `view()` / `drainLog()`.
+- [x] Fixed-step clock: `SIM_DT` = 0.1 s of timetable time. Speeds run ×¼ to ×16; the run state is PreStart → Running ⇄ Paused.
+- [x] Hosted in a Web Worker behind the transport from this plan:
+  - `transport/types.ts`, `postmessage-transport.ts`, and Valibot schemas for everything the engine accepts;
+  - `host/engine-host.ts`: a wall-clock accumulator with the clock injected, publishing at 20 Hz;
+  - `store/sim-bridge.ts` and `store/operate-store.ts` on the page side.
+- [x] RailOS route setting: automatic-signals, preferred and unrestricted routes, found by BFS over directed cell segments.
+  - A signal stands at the entry edge of its cell. A route starts on its entry signal and stops short of its end signal (a preferred or auto route may pass through signals between), so routes never share a rail.
+  - Routes set after a delay: 0.5 s, or 2.5 s when points move.
+  - Preferred and unrestricted routes are released behind the train. Entering a route at the wrong end cancels it.
+  - Cancelling takes the whole route, and is refused while a train is on it or approaching it.
+- [x] Signal aspects are recomputed from routes and occupancy every step. Each signal is one step better than the next one ahead; buffers count as a red signal and an exit as clear.
+- [x] Points have a lie: the main rail by default, set by routes, and thrown by hand when nothing holds them.
+- [x] Trains are a 200 m body laid back from the front, measured in metres. Each step:
+  - they look ahead for their movement authority: a red signal, buffers, the train ahead, points lying against them, or their stop point;
+  - they brake on a curve at half their brake rate, and accelerate under power up to an adhesion cap;
+  - they keep to speed limits ahead;
+  - they enter from an exit or start standing on two cells, and leave by an exit.
+- [x] Faults: a SPAD stops the train, and two trains on one rail crash.
+- [x] Automatic level crossings (OPERATE-MODE §5.12, `sim/crossings.ts`). Crossing cells on parallel tracks side by side are one crossing whose barriers move together.
+  - A route set over a crossing lowers its barriers: 30 s, shortened below ×1 so it takes the same real time, and at once before the clock starts. Signals protecting it stay red until they are down.
+  - Once no route or train is on it, it rises again in 10 s. The time it stood down for nothing (past a 3 minute allowance once a train has crossed) adds to `excessLcDownMins`.
+  - No route starts or ends on a crossing, an automatic signals route may not pass over one, and a route cannot be cancelled while its crossing is moving.
+  - A train running onto a crossing that is not down at over 1 km/h crashes into road traffic.
+- [x] Operate mode (`O`) is gated on a complete railway and a timetable with services and no errors.
+  - The docked panel has the clock, run/pause, speed, route kind, cancel, the train list and the performance log.
+  - The canvas shows route bands, and trains with headcodes. Signals and points show their state in the track art, as RailOS draws them (`lib/operateArt.ts`):
+    - a main signal is lit red, yellow, double yellow or green (`signal<Dir>[Yellow|DoubleYellow|Green].svg`), a shunt signal two reds or two whites (`shunt<Dir>[Red|White].svg`);
+    - points are drawn with a gap (`<family>Gapped<n>.svg`) plus the rail they lie for (`<family>Straight|Diverging<n>.svg`, or `switchSplitLeftFork|RightFork<n>.svg`);
+    - a level crossing with barriers up (closed to trains) keeps its usual `levelCrossingH|V.svg`. Down, the barriers turn to lie along the track: a horizontal track shows `levelCrossingV.svg`, a vertical one `levelCrossingH.svg`, and a crossing over several tracks has `VTop`/`VBottom` (or `HLeft`/`HRight`) end tiles with `Plain` between (`TrackUnit.cpp:6835`). Moving barriers flash between the two. A diagonal crossing has no lowered art and keeps its icon.
+  - Keys: `P` run/pause, `,` and `.` for speed, `A`/`S`/`U` for route kind, `C` cancel, `J` log.
+- [ ] Interpolate train positions between published views (they currently step at 20 Hz)
 
 ### Milestone 22: Timetable Engine — Stops & Dwell
 
 **Deliverable**: Trains stop at stations, wait for dwell time, and depart on schedule.
 
-- [ ] Stopping behavior:
-  - As train approaches a station stop, it calculates braking point and decelerates
-  - Train stops at the correct platform position for the scheduled dwell time
-  - At departure time, train accelerates away
-- [ ] Early/late handling:
-  - If train arrives early: waits until scheduled departure time
-  - If train arrives late: minimum dwell (e.g., 30 seconds) then departs immediately
-  - Tries to recover time by running at max speed where possible
-- [ ] Passing stops: train passes through station without stopping (still logged)
-- [ ] Station display: when a train is stopped at a platform, show "1A23 to London 14:32" style indicator
+- [x] `startNew` services, and their repeats with headcode increments, come on at their time. A blocked entry is retried and reported once.
+- [x] Stops at the far end of the run of cells carrying the location's name. Passes register when the front enters the location.
+- [x] Departure is at the latest of the booked time, arrival plus the minimum dwell (default 30 s), and 30 s after the last action.
+- [x] Also supported: `changeDirection`, `changeDescription`, `changeMaxSpeed`, `finishNewService`/`startNewService` (same train), `finishRemainHere` and `finishExit`.
+- [x] Performance log in RailOS's wording. Lateness is truncated toward zero, and counters cover arrivals, passes, departures, exits, missed events, wrong exits, SPADs and crashes.
+- [x] Performance summary in the operate panel: punctuality, per-event on-time/late/early counts and minutes, and incidents (missed events, wrong exits, SPADs, crashes, excess crossing-down time).
+- [x] Splits and joins (§6.8): front/rear split over 4 platform cells (`splitEnds`), `joinedBy`/`finishJoin` coupling (`mergeTrainInto`), 30 s ordering/action gap.
+- [x] Signaller control of trains (§8): take/restore control (with location guard when taken at a stop), move forwards, stop, change direction, step forward, pass red signal, signaller join, skip timetabled actions, become follow-on service early, reminders, and train removal.
+- [x] Calling on (§5.13): magenta eligibility when stopped at a red signal for an occupied platform up to 4 km ahead, `Calling-on` mode (`Shift+O`) showing `signal<Dir>CallingOn.svg` over red / `shunt<Dir>White.svg`, immediate unrestricted route to first platform cell, and 30 km/h speed cap.
+- [ ] Next, still from OPERATE-MODE.md:
+  - route truncation and approach locking (§5.7–5.8);
+  - continuation auto-signals (§5.10);
+  - manual level crossings (§5.12): left-click to lower or raise, never auto-raised, a warning while one is left down. A manually lowered crossing is green (`levelCrossing…Manual.svg`, laid out like the automatic tiles below);
+  - random delays, failures and TSRs (§9). A failed signal shows `signal<Dir>Failed.svg`, a failed ground signal `shunt<Dir>Failed.svg` (RailOS's `FailedSigTable`);
+  - the Actions Due panel (§11);
+  - saved sessions (§14);
+  - a train length in the timetable's `TrainSpec`.
 
 ### Milestone 23: Timetable Engine — Advanced Operations
 
@@ -817,17 +862,16 @@ action-list model; the deliverable is unchanged.
   - Train arrives at destination, its ID gets a new headcode and new timetable entry
   - No new train created — existing train changes identity
   - Configurable turnaround time
-- [ ] **Splits**:
+- [x] **Splits**:
   - Train arrives at split point
-  - Front portion becomes train A (new headcode), rear portion becomes train B
-  - Both depart independently on their own timetable entries
-- [ ] **Joins**:
-  - Train A and Train B arrive at join point
-  - They couple together and depart as a single train under a new headcode
-  - Validation: train types and lengths must be compatible
-- [ ] **Shuttles**:
-  - Train goes back and forth between two points N times
-  - No explicit entries needed — define shuttle: endpoints, headcode, interval, count
+  - Front portion becomes one portion (half mass, power and length) and rear becomes the other
+  - Both depart independently on their own timetable entries (30 s extra dwell keeps the front ahead)
+- [x] **Joins**:
+  - Incoming `finishJoin` train approaches via calling-on (§5.13) when a red signal protects the occupied platform
+  - Couples to `joinedBy` partner (`mergeTrainInto`), combining mass, power, brake rate, speed cap, length and reminders
+- [x] **Shuttles**:
+  - Repeating shuttle pairs (`startNewShuttle`/`startShuttle` ↔ `finishShuttleRemainHere`/`finishShuttleNewService`) plus non-repeating `finishToShuttle` feeders and `startFromShuttle` tails
+  - Validated for repeat parity, timing, and loop integrity; expanded at runtime by `buildSimServices` and dispatched smoothly via `finishShuttleToNext`/`becomeNewService`
 - [ ] **Repeating services**:
   - Timetable has a `repeatRule` — daily, weekday, saturday, sunday
   - At end of period, timetable resets and re-dispatches
@@ -973,9 +1017,9 @@ action-list model; the deliverable is unchanged.
 
 **Deliverable**: Ready to share with users.
 
-- [ ] **Error boundaries** around the canvas, each panel, and the router — graceful degradation
-- [ ] **Loading states**: skeleton screens while session loads, spinner during worker init
-- [ ] **Empty states**: helpful prompts when no track built, no trains placed, no timetable loaded
+- [x] **Error boundaries** around the canvas, each panel, and the router — graceful degradation
+- [x] **Loading states**: spinners while the canvas starts, while the operate session loads, and while a route is pending — skeleton screens were dropped, since each wait is too brief and too unlike its final layout for a skeleton to help
+- [x] **Empty states**: helpful prompts when no track built, no trains placed, no timetable loaded
 - [x] **Keyboard shortcut reference**: `?` key shows overlay with all shortcuts — generated from the `SHORTCUTS` registry in `packages/app/src/lib/shortcuts.ts`, which every binding site, the toolbar badges and the overlay read from
 - [ ] **Tutorial scenario**: pre-built simple network with step-by-step instructions (build track → place signal → place train → set route → run)
 - [ ] **PWA**: service worker for offline use, installable (manifest.json already exists)

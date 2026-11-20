@@ -17,6 +17,7 @@ import {
 	serializeMap,
 	setPreferredDirectionsAlongPath,
 	type Text,
+	type Track,
 	undoEntries,
 } from "@rail-op-sim/shared";
 import {
@@ -28,7 +29,10 @@ import { EditHistory, type RefreshFlags } from "#/engine/EditHistory";
 import type { ViewportController } from "#/engine/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
+import { applyOperateIntent } from "#/lib/operateActions";
+import { resolveOperateClick } from "#/lib/operateInput";
 import { buildHoveredTrackInfo } from "#/lib/trackInfo";
+import { buildHoveredTrainInfo, findTrainAt } from "#/lib/trainInfo";
 import type { DirectionLayer } from "#/renderer/layers/DirectionLayer";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import type { LinkHighlightLayer } from "#/renderer/layers/LinkHighlightLayer";
@@ -44,6 +48,7 @@ import {
 	useEditorStore,
 } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 /** Pointer travel (CSS px) above which a release counts as a drag, not a click. */
@@ -154,6 +159,9 @@ export class PlacementController {
 
 	private abort?: AbortController;
 	private unsubStore?: () => void;
+	private unsubOperate?: () => void;
+	private unsubMode?: () => void;
+	private lastPointer: { clientX: number; clientY: number } | null = null;
 
 	constructor(opts: PlacementControllerOptions) {
 		this.app = opts.app;
@@ -407,7 +415,7 @@ export class PlacementController {
 
 				// Entering section tool — show colour overlay immediately for all tracks
 				if (state.tool === "section" && prevState.tool !== "section") {
-					this.trackColorLayer.sync(this.map);
+					this.trackColorLayer.show(this.map);
 				}
 
 				// Leaving section tool — clear section highlight & hide colour overlay
@@ -438,6 +446,18 @@ export class PlacementController {
 			}
 
 			if (
+				(state.showTrackInfo !== prevState.showTrackInfo ||
+					state.showTrainInfo !== prevState.showTrainInfo ||
+					state.showTrainTimetable !== prevState.showTrainTimetable) &&
+				this.lastPointer
+			) {
+				this.updateHoverTooltips(
+					this.lastPointer.clientX,
+					this.lastPointer.clientY,
+				);
+			}
+
+			if (
 				!toolChanged &&
 				state.selectedSubtype === prevState.selectedSubtype &&
 				state.selectedAspect === prevState.selectedAspect &&
@@ -445,12 +465,28 @@ export class PlacementController {
 			)
 				return;
 
-			debugLog(
-				"placement",
-				`store change — tool=${state.tool} kind=${state.selectedKind ?? "null"} subtype=${state.selectedSubtype ?? "null"}`,
-			);
 			this.applyCursor();
 			this.refreshGhostSprite();
+		});
+
+		this.unsubOperate = useOperateStore.subscribe((state, prevState) => {
+			const { showTrainInfo, showTrainTimetable } = useEditorStore.getState();
+			if (
+				state.view !== prevState.view &&
+				this.lastPointer &&
+				(showTrainInfo || showTrainTimetable)
+			) {
+				this.updateHoverTooltips(
+					this.lastPointer.clientX,
+					this.lastPointer.clientY,
+				);
+			}
+		});
+
+		this.unsubMode = useModeStore.subscribe((state, prevState) => {
+			if (state.mode !== prevState.mode && state.mode !== "operate") {
+				useEditorStore.getState().setHoveredTrainInfo(null);
+			}
 		});
 
 		this.applyCursor();
@@ -463,6 +499,8 @@ export class PlacementController {
 		}
 		this.abort?.abort();
 		this.unsubStore?.();
+		this.unsubOperate?.();
+		this.unsubMode?.();
 		this.app.canvas.style.cursor = "";
 		this.ghost.destroy({ children: true });
 	}
@@ -478,7 +516,6 @@ export class PlacementController {
 
 	private onPointerDown = (e: PointerEvent): void => {
 		if (e.button !== 0 && e.button !== 2) return;
-		debugLog("placement", `pointerdown at (${e.clientX}, ${e.clientY})`);
 		this.downPos = { x: e.clientX, y: e.clientY };
 		this.downRect = this.app.canvas.getBoundingClientRect();
 		this.downWasPanning = this.viewport.isPanning;
@@ -514,6 +551,12 @@ export class PlacementController {
 	 * click outside railway mode.
 	 */
 	private claimClick(e: PointerEvent): boolean {
+		// Operate mode: every click works the signalling, never the map.
+		if (useModeStore.getState().mode === "operate") {
+			this.handleOperateClick(e);
+			return true;
+		}
+
 		// Outside railway mode the map is a read-only backdrop. Entering another
 		// mode already puts the tool back to Select, which edits nothing — this
 		// is the backstop, so no path that leaves a tool armed can reach the map.
@@ -536,6 +579,26 @@ export class PlacementController {
 		}
 
 		return !mapEditable;
+	}
+
+	/** Set or cancel a route, throw points, or open a train menu in operate mode. */
+	private handleOperateClick(e: PointerEvent): void {
+		const cell = this.screenToGrid(e.clientX, e.clientY);
+		if (!cell) return;
+		const step = this.map.getImageSize();
+		const track = this.map.getTrackAt(cell.gx * step, cell.gy * step);
+		const operate = useOperateStore.getState();
+		const train = findTrainAt(operate.view?.trains ?? [], cell.gx, cell.gy);
+		const intent = resolveOperateClick(operate, {
+			button: e.button === 2 ? "right" : "left",
+			cell,
+			onPoints: track?.data.kind === "switch",
+			trainId: train?.id ?? null,
+			screenX: e.clientX,
+			screenY: e.clientY,
+		});
+		debugLog("placement", `operate click → ${intent.type}`);
+		void applyOperateIntent(intent);
 	}
 
 	/** Fill the timetable's pending cell field from where the click landed. */
@@ -566,10 +629,6 @@ export class PlacementController {
 		this.textDrag = null;
 
 		const { tool, selectedKind, selectedSubtype } = useEditorStore.getState();
-		debugLog(
-			"placement",
-			`pointerup — tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"} downWasPanning=${this.downWasPanning} isPanning=${this.viewport.isPanning}`,
-		);
 
 		if (this.downWasPanning || this.viewport.isPanning) {
 			debugLog("placement", "pointerup ignored — was panning");
@@ -781,8 +840,7 @@ export class PlacementController {
 						{ gx: cell.gx, gy: cell.gy },
 					);
 					this.linkHighlightLayer.container.visible = true;
-					this.trackColorLayer.sync(this.map);
-					this.trackColorLayer.container.visible = true;
+					this.trackColorLayer.show(this.map);
 					this.sectionHoverKey = null;
 					debugLog(
 						"placement",
@@ -1074,7 +1132,8 @@ export class PlacementController {
 			}
 
 			// 3) Otherwise delete the whole element (track / NamedLocation /
-			//    Concourse / Parapet) plus any text cascade.
+			//    Concourse / Parapet) plus any text cascade. A named location on a
+			//    track is deleted before the track under it.
 			const deleted = this.commit(
 				"Delete element",
 				{
@@ -1092,16 +1151,20 @@ export class PlacementController {
 				"placement",
 				`right-click → deleteElement at (${cell.gx},${cell.gy}) — ${deleted ? "removed" : "nothing there"}`,
 			);
-			if (deleted) {
-				this.trackLayer.removeCell(cell.gx, cell.gy);
-				this.elementLayer.sync(this.map);
-				this.textLayer.sync(this.map);
-				this.linkHighlightLayer.sync(this.map);
-				this.trackColorLayer.sync(this.map);
-				this.directionLayer.sync(this.map);
-				this.publishTrackStatus();
-			}
+			if (deleted) this.refreshAfterDelete(cell.gx, cell.gy);
 		}
+	}
+
+	/** Bring every layer up to date after `deleteElement` removed something. */
+	private refreshAfterDelete(gx: number, gy: number): void {
+		// A named location riding on a track goes first; the track stays.
+		if (!this.map.getTrackAt(gx, gy)) this.trackLayer.removeCell(gx, gy);
+		this.elementLayer.sync(this.map);
+		this.textLayer.sync(this.map);
+		this.linkHighlightLayer.sync(this.map);
+		this.trackColorLayer.sync(this.map);
+		this.directionLayer.sync(this.map);
+		this.publishTrackStatus();
 	}
 
 	/** Place a non-track element on the map and sync the element layer. */
@@ -1331,6 +1394,27 @@ export class PlacementController {
 		this.nameElementAt(gx, gy, content, "namedLocation");
 	}
 
+	/** Apply a mutation to every track in the selected section and refresh layers. */
+	private mutateSelectedSection(
+		label: string,
+		mutate: (track: Track) => void,
+	): number {
+		const { sectionTracks } = useEditorStore.getState();
+		this.commit(label, { track: true, trackColor: true, status: true }, () => {
+			for (const coord of sectionTracks) {
+				const track = this.map.getTrackAt(coord.gx, coord.gy);
+				if (track) mutate(track);
+			}
+		});
+		this.trackLayer.sync(this.map);
+		this.trackColorLayer.show(this.map);
+		// Drop the purple route tint (keeping the endpoint outlines) so the
+		// speed/length colours just applied are visible rather than covered.
+		this.linkHighlightLayer.setSectionRouteVisible(false);
+		this.publishTrackStatus();
+		return sectionTracks.length;
+	}
+
 	/**
 	 * Apply speed/length edits from the section panel to every track in the
 	 * selected section.
@@ -1341,35 +1425,20 @@ export class PlacementController {
 		secondarySpeed?: number;
 		secondaryLength?: number;
 	}): void {
-		const { sectionTracks } = useEditorStore.getState();
-		this.commit(
+		const count = this.mutateSelectedSection(
 			"Change speed & length",
-			{ track: true, trackColor: true, status: true },
-			() => {
-				for (const coord of sectionTracks) {
-					const track = this.map.getTrackAt(coord.gx, coord.gy);
-					if (!track) continue;
-					track.setTrackMainSpeed(values.mainSpeed);
-					track.setTrackMainLength(values.mainLength);
-					if (values.secondarySpeed !== undefined) {
-						track.setTrackSecondarySpeed(values.secondarySpeed);
-					}
-					if (values.secondaryLength !== undefined) {
-						track.setTrackSecondaryLength(values.secondaryLength);
-					}
+			(track) => {
+				track.setTrackMainSpeed(values.mainSpeed);
+				track.setTrackMainLength(values.mainLength);
+				if (values.secondarySpeed !== undefined) {
+					track.setTrackSecondarySpeed(values.secondarySpeed);
+				}
+				if (values.secondaryLength !== undefined) {
+					track.setTrackSecondaryLength(values.secondaryLength);
 				}
 			},
 		);
-		this.trackLayer.sync(this.map);
-		this.trackColorLayer.sync(this.map);
-		// Drop the purple route tint (keeping the endpoint outlines) so the
-		// speed/length colours just applied are visible rather than covered.
-		this.linkHighlightLayer.setSectionRouteVisible(false);
-		this.publishTrackStatus();
-		debugLog(
-			"placement",
-			`applySectionEdit — ${sectionTracks.length} tracks updated`,
-		);
+		debugLog("placement", `applySectionEdit — ${count} tracks updated`);
 	}
 
 	/** Clear the section highlight overlay (public for SectionEditPanel). */
@@ -1379,26 +1448,13 @@ export class PlacementController {
 
 	/** Restore defaults for all tracks in the selected section. */
 	restoreSection(): void {
-		const { sectionTracks } = useEditorStore.getState();
-		this.commit(
+		const count = this.mutateSelectedSection(
 			"Restore section defaults",
-			{ track: true, trackColor: true, status: true },
-			() => {
-				for (const coord of sectionTracks) {
-					const track = this.map.getTrackAt(coord.gx, coord.gy);
-					if (!track) continue;
-					track.restoreDefaults();
-				}
+			(track) => {
+				track.restoreDefaults();
 			},
 		);
-		this.trackLayer.sync(this.map);
-		this.trackColorLayer.sync(this.map);
-		this.linkHighlightLayer.setSectionRouteVisible(false);
-		this.publishTrackStatus();
-		debugLog(
-			"placement",
-			`restoreSection — ${sectionTracks.length} tracks reset to defaults`,
-		);
+		debugLog("placement", `restoreSection — ${count} tracks reset to defaults`);
 	}
 
 	// ── Save / load ─────────────────────────────────────────────────────
@@ -1589,13 +1645,14 @@ export class PlacementController {
 					wp.x - this.textDrag.offsetX,
 					wp.y - this.textDrag.offsetY,
 				);
-			// This branch skips the track-info hover below, so a tooltip opened
-			// before the drag would otherwise hang frozen until the release.
+			// This branch skips the info hover below, so a tooltip opened before
+			// the drag would otherwise hang frozen until the release.
 			useEditorStore.getState().setHoveredTrackInfo(null);
+			useEditorStore.getState().setHoveredTrainInfo(null);
 			return;
 		}
 
-		const { tool, selectedSubtype, showTrackInfo } = useEditorStore.getState();
+		const { tool, selectedSubtype } = useEditorStore.getState();
 
 		// Text tool: hovering a placed text advertises the drag-to-move gesture.
 		if (tool === "text") {
@@ -1616,27 +1673,10 @@ export class PlacementController {
 		if (tool === "link") this.updateLinkPreview(e);
 		else this.clearLinkPreview();
 
-		// Track-info hover: independent of the ghost/add logic below, so it works
-		// with any tool (e.g. the select tool while inspecting placed track).
-		if (showTrackInfo) {
-			const hoverCell = this.screenToGrid(e.clientX, e.clientY);
-			const track = hoverCell
-				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
-				: null;
-			useEditorStore
-				.getState()
-				.setHoveredTrackInfo(
-					track && hoverCell
-						? buildHoveredTrackInfo(
-								track,
-								hoverCell.gx,
-								hoverCell.gy,
-								e.clientX,
-								e.clientY,
-							)
-						: null,
-				);
-		}
+		// Track/train-info hover: independent of the ghost/add logic below, so it
+		// works with any tool (e.g. select tool inspecting track, or operate mode).
+		this.lastPointer = { clientX: e.clientX, clientY: e.clientY };
+		this.updateHoverTooltips(e.clientX, e.clientY);
 
 		if (tool !== "add" || !selectedSubtype || !this.ghostSprite) {
 			this.ghost.visible = false;
@@ -1652,17 +1692,88 @@ export class PlacementController {
 		this.ghost.visible = true;
 	};
 
+	private findHoveredTrain(hoverCell: { gx: number; gy: number } | null) {
+		if (!hoverCell || useModeStore.getState().mode !== "operate") return null;
+		const trains = useOperateStore.getState().view?.trains ?? [];
+		return findTrainAt(trains, hoverCell.gx, hoverCell.gy);
+	}
+
+	private updateTrainHoverTooltip(
+		train: ReturnType<typeof findTrainAt>,
+		clientX: number,
+		clientY: number,
+		showTrainInfo: boolean,
+		showTrainTimetable: boolean,
+	): void {
+		const info = train
+			? buildHoveredTrainInfo(train, clientX, clientY, {
+					showBasic: showTrainInfo,
+					showTimetable: showTrainTimetable,
+					timetableRows: useOperateStore.getState().timetables[train.id],
+				})
+			: null;
+		useEditorStore.getState().setHoveredTrainInfo(info);
+	}
+
+	private updateTrackHoverTooltip(
+		hoverCell: { gx: number; gy: number } | null,
+		blockedByTrain: boolean,
+		clientX: number,
+		clientY: number,
+	): void {
+		const track =
+			!blockedByTrain && hoverCell
+				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
+				: null;
+		const info =
+			track && hoverCell
+				? buildHoveredTrackInfo(
+						track,
+						hoverCell.gx,
+						hoverCell.gy,
+						clientX,
+						clientY,
+					)
+				: null;
+		useEditorStore.getState().setHoveredTrackInfo(info);
+	}
+
+	private updateHoverTooltips(clientX: number, clientY: number): void {
+		const { showTrackInfo, showTrainInfo, showTrainTimetable } =
+			useEditorStore.getState();
+		const wantTrainHover = showTrainInfo || showTrainTimetable;
+		if (!showTrackInfo && !wantTrainHover) return;
+
+		const hoverCell = this.screenToGrid(clientX, clientY);
+		const train = wantTrainHover ? this.findHoveredTrain(hoverCell) : null;
+		if (wantTrainHover) {
+			this.updateTrainHoverTooltip(
+				train,
+				clientX,
+				clientY,
+				showTrainInfo,
+				showTrainTimetable,
+			);
+		}
+		if (showTrackInfo) {
+			this.updateTrackHoverTooltip(hoverCell, train !== null, clientX, clientY);
+		}
+	}
+
 	private onPointerLeave = (): void => {
+		this.lastPointer = null;
 		this.cancelTextDrag();
 		this.ghost.visible = false;
 		this.clearDirectionPreview();
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
+		useEditorStore.getState().setHoveredTrainInfo(null);
 	};
 
 	private onPointerCancel = (): void => {
 		debugLog("placement", "pointercancel — clearing state");
+		this.lastPointer = null;
 		this.cancelTextDrag();
 		this.downPos = null;
 		this.downRect = null;
@@ -1671,6 +1782,7 @@ export class PlacementController {
 		this.clearSectionPreview();
 		this.clearLinkPreview();
 		useEditorStore.getState().setHoveredTrackInfo(null);
+		useEditorStore.getState().setHoveredTrainInfo(null);
 	};
 
 	// ── Helpers ──
@@ -1702,12 +1814,6 @@ export class PlacementController {
 		const wx = (sx - this.world.position.x) / this.world.scale.x;
 		const wy = (sy - this.world.position.y) / this.world.scale.y;
 		const result = worldToGrid(wx, wy);
-		if (!result) {
-			debugLog(
-				"placement",
-				`screenToGrid(${clientX},${clientY}) → null — rect=(${rect.left},${rect.top},${rect.width}x${rect.height}) worldPos=(${this.world.position.x.toFixed(1)},${this.world.position.y.toFixed(1)}) worldScale=(${this.world.scale.x.toFixed(3)},${this.world.scale.y.toFixed(3)})`,
-			);
-		}
 		return result;
 	}
 
@@ -1721,10 +1827,6 @@ export class PlacementController {
 		else if (tool === "section") cursor = "pointer";
 		else if (tool === "direction") cursor = "pointer";
 		canvas.style.cursor = cursor;
-		debugLog(
-			"placement",
-			`cursor → "${cursor}" (tool=${tool} subtype=${selectedSubtype ?? "null"})`,
-		);
 	}
 
 	/** Rebuild the ghost sprite to match the current subtype and aspect, or hide it. */
@@ -1733,10 +1835,6 @@ export class PlacementController {
 			useEditorStore.getState();
 
 		if (tool !== "add" || !selectedSubtype) {
-			debugLog(
-				"placement",
-				`refreshGhost — hiding (tool=${tool} kind=${selectedKind ?? "null"} subtype=${selectedSubtype ?? "null"})`,
-			);
 			this.clearGhostSprite();
 			this.ghost.visible = false;
 			return;
@@ -1748,10 +1846,6 @@ export class PlacementController {
 			aspect === this.ghostAspect &&
 			this.ghostSprite
 		) {
-			debugLog(
-				"placement",
-				`refreshGhost — unchanged (subtype=${selectedSubtype} aspect=${aspect})`,
-			);
 			return;
 		}
 
@@ -1764,10 +1858,6 @@ export class PlacementController {
 			return;
 		}
 
-		debugLog(
-			"placement",
-			`refreshGhost — building sprite for "${selectedSubtype}" aspect=${aspect}`,
-		);
 		this.clearGhostSprite();
 		const sprite = makeTrackSprite(texture, 0, 0);
 		this.ghost.addChild(sprite);

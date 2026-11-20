@@ -1,9 +1,15 @@
 import { Keyboard, Moon, Sun } from "@phosphor-icons/react";
+import { formatSimTime } from "@rail-op-sim/shared";
 import { useMemo } from "react";
 import { Button } from "#/components/ui/button";
 import { useTheme } from "#/hooks/useTheme";
 import { describeConnectivity } from "#/lib/connectivity";
+import { runLabel, speedLabel } from "#/lib/operateText";
 import { useEditorStore } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
+import { NewDocumentControl } from "./NewDocumentControl";
+import { RailosImportControl } from "./RailosImportControl";
 import { SaveLoadControls } from "./SaveLoadControls";
 import { SettingsMenu } from "./SettingsMenu";
 
@@ -15,7 +21,7 @@ const THEME_SWITCH = {
 
 /**
  * The footer: how complete the railway is, any hint from the direction tool,
- * and the document and display controls.
+ * the timetable clock while operating, and the document and display controls.
  */
 export function StatusBar() {
 	const { theme, toggle } = useTheme();
@@ -23,6 +29,8 @@ export function StatusBar() {
 	const tool = useEditorStore((s) => s.tool);
 	const directionHint = useEditorStore((s) => s.directionHint);
 	const toggleShortcuts = useEditorStore((s) => s.toggleShortcuts);
+	const autosave = useEditorStore((s) => s.autosave);
+	const operating = useModeStore((s) => s.mode === "operate");
 
 	// Derive connectivity status from the plain summary the placement controller
 	// publishes to the store. No pixi/controller access here, so this component
@@ -43,8 +51,10 @@ export function StatusBar() {
 						· {directionHint}
 					</span>
 				) : null}
+				{operating ? <OperateClock /> : null}
 			</span>
 			<div className="flex items-center gap-1">
+				<AutosaveStatus autosave={autosave} />
 				<Button
 					variant="ghost"
 					size="icon-xs"
@@ -54,7 +64,9 @@ export function StatusBar() {
 				>
 					<Keyboard />
 				</Button>
+				<NewDocumentControl />
 				<SaveLoadControls />
+				<RailosImportControl />
 				<SettingsMenu />
 				<Button
 					variant="ghost"
@@ -66,5 +78,42 @@ export function StatusBar() {
 				</Button>
 			</div>
 		</footer>
+	);
+}
+
+/** The timetable clock, its speed and whether it is running. */
+function OperateClock() {
+	const view = useOperateStore((s) => s.view);
+	if (!view) return null;
+	return (
+		<span role="timer" aria-label="Operating clock" className="tabular-nums">
+			· {formatSimTime(view.time, true)} {speedLabel(view.speed)} —{" "}
+			{runLabel(view.run)}
+		</span>
+	);
+}
+
+/** A quiet note on whether the session is safely stored in the browser. */
+function AutosaveStatus({
+	autosave,
+}: {
+	autosave: { lastSavedAt: number | null; error: boolean };
+}) {
+	if (autosave.error) {
+		return (
+			<span role="status" className="text-amber-600 dark:text-amber-400">
+				Autosave failed
+			</span>
+		);
+	}
+	if (autosave.lastSavedAt === null) return null;
+	const time = new Date(autosave.lastSavedAt).toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	return (
+		<span role="status" className="tabular-nums">
+			Saved {time}
+		</span>
 	);
 }

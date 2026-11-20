@@ -44,9 +44,16 @@ of that, and `writeDocuments` refuses to save anything the validator rejects.
    .claude/skills/railway-author/scripts/run.sh \
      .claude/skills/railway-author/scripts/check-documents.ts railway.json timetable.json
    ```
-   Either argument alone is fine; without a railway only the timetable's
+   JSON or YAML; either argument alone is fine; without a railway only the timetable's
    structural half is checked. Exits non-zero when something is wrong.
-6. **Type-check the generator** if it is going to be kept:
+6. **Import a RailOS railway and timetable** (`.rly` + `.ttb`) as YAML with
+   `scripts/import-railos.ts <in.rly> <in.ttb> <railway.yaml> <timetable.yaml>`,
+   run through `run.sh` like any generator. It reports anything it could not
+   translate, then the railway's problems and the timetable's issues. The
+   conversion itself is `convertRailosRailway` / `convertRailosTimetable` in
+   `packages/shared/src/railway/railos/`, which the app's footer "Import from
+   RailOS" dialog also uses — fix converter bugs there, not in the script.
+7. **Type-check the generator** if it is going to be kept:
    `pnpm exec tsc -p .claude/skills/railway-author/tsconfig.json`.
 
 Keep the generator script. It is the readable source of a layout that is
@@ -77,13 +84,14 @@ rather than a hand-patch.
   horizontal track, LEFT/RIGHT on vertical. The map ignores a mismatch; the
   `platform` helper turns that silence into an error.
 - **A service is exactly one start action, then intermediates, then exactly one
-  finish action**, in time order. A start that creates a train (`startNew`)
-  needs a `train` spec; one that takes over an existing train must not have one.
+  finish action**, in time order. A start that creates a train (`startNew`,
+  `startNewShuttle`) needs a `train` spec; one that takes over an existing
+  train must not have one.
 - **Links between services are matched from both ends.** `finishNewService` →
   `startNewService`, `frontSplit`/`rearSplit` → `startFromSplit`, `joinedBy` →
-  `finishJoin`, each naming the other, at the same time.
-- **Shuttle kinds are not supported yet.** The validator rejects them; do not
-  write them.
+  `finishJoin`, and shuttle links (`finishToShuttle` → `startShuttle`,
+  shuttle start `otherRef` ↔ shuttle finish `otherRef`,
+  `finishShuttleNewService` → `startFromShuttle`), each naming the other.
 
 ## Reference
 

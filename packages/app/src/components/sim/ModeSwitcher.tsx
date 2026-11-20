@@ -1,4 +1,4 @@
-import { Clock, Path } from "@phosphor-icons/react";
+import { Clock, Path, Train } from "@phosphor-icons/react";
 import { Button } from "#/components/ui/button";
 import { KbdGroup } from "#/components/ui/kbd";
 import {
@@ -8,10 +8,9 @@ import {
 } from "#/components/ui/tooltip";
 import { useShortcutKeys } from "#/hooks/useShortcutDisplay";
 import type { ShortcutId } from "#/lib/shortcuts";
-import { useEditorStore } from "#/store/editor-store";
 import {
 	type AppMode,
-	timetableBlockedReason,
+	useBlockedReasons,
 	useModeStore,
 } from "#/store/mode-store";
 
@@ -28,21 +27,24 @@ const MODES: {
 		Icon: Clock,
 		shortcut: "modeTimetable",
 	},
+	{ mode: "operate", label: "Operate", Icon: Train, shortcut: "modeOperate" },
 ];
 
 /**
  * The segmented control at the top of the canvas that says which document is
  * being edited, and switches it.
  *
- * Timetable is disabled until the railway is complete, with the reason in the
- * tooltip. A disabled `<button>` swallows pointer events, so it is wrapped in a
- * focusable span while disabled to keep that tooltip firing — the same
- * arrangement as the direction tool in the toolbar.
+ * Timetable is locked until the railway is complete, and Operate until there
+ * is also a timetable without errors, with the reason in the tooltip. A locked
+ * mode is `aria-disabled` rather than `disabled`: it stays focusable, so the
+ * tooltip fires on hover and focus without a wrapper, and a click still
+ * reaches `setMode`, which refuses it and raises the notice saying why — a
+ * dead button explains nothing to someone who did not hover it.
  */
 export function ModeSwitcher() {
 	const mode = useModeStore((s) => s.mode);
 	const setMode = useModeStore((s) => s.setMode);
-	const blocked = useEditorStore((s) => timetableBlockedReason(s.trackStatus));
+	const blocked = useBlockedReasons();
 
 	return (
 		<div
@@ -52,14 +54,15 @@ export function ModeSwitcher() {
 		>
 			{MODES.map(({ mode: m, label, Icon, shortcut }) => {
 				const active = mode === m;
-				const reason = m === "timetable" && !active ? blocked : null;
+				const reason = active ? null : blocked[m];
 				const button = (
 					<Button
 						role="radio"
 						aria-checked={active}
 						variant={active ? "secondary" : "ghost"}
 						size="sm"
-						disabled={reason !== null}
+						aria-disabled={reason !== null}
+						className="aria-disabled:opacity-50"
 						onClick={() => setMode(m)}
 					>
 						<Icon />
@@ -68,10 +71,12 @@ export function ModeSwitcher() {
 				);
 				return (
 					<Tooltip key={m}>
-						<TooltipTrigger asChild>
-							{reason ? <span tabIndex={-1}>{button}</span> : button}
-						</TooltipTrigger>
-						<ModeTip shortcut={reason ? undefined : shortcut}>
+						<TooltipTrigger asChild>{button}</TooltipTrigger>
+						{/* No badge while operating: the mode keys are off there, so
+						    a slip can't end the session. */}
+						<ModeTip
+							shortcut={reason || mode === "operate" ? undefined : shortcut}
+						>
 							{reason ?? `${label} mode`}
 						</ModeTip>
 					</Tooltip>

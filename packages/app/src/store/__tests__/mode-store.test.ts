@@ -1,6 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
-import { timetableBlockedReason, useModeStore } from "#/store/mode-store";
+import {
+	blockedReason,
+	operateBlockedReason,
+	timetableBlockedReason,
+	useModeStore,
+} from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
 const mode = () => useModeStore.getState();
@@ -19,7 +25,7 @@ const status = (over: Partial<TrackStatus>): TrackStatus => ({
 });
 
 beforeEach(() => {
-	useModeStore.setState({ mode: "railway" });
+	useModeStore.setState({ mode: "railway", blockedNotice: null });
 	useEditorStore.setState({
 		tool: "select",
 		selectedKind: null,
@@ -111,5 +117,135 @@ describe("setMode", () => {
 		expect(
 			useTimetableStore.getState().timetable.services.map((s) => s.ref),
 		).toContain(ref);
+	});
+});
+
+describe("operate mode", () => {
+	const service = {
+		ref: "1A01",
+		actions: [{ kind: "finishRemainHere" as const }],
+	};
+
+	beforeEach(() => {
+		useTimetableStore.setState({
+			timetable: { version: 1, startTime: 0, services: [service] },
+			issues: [],
+		});
+		useOperateStore.getState().reset();
+		useModeStore.setState({ confirmLeaveOperate: () => true });
+	});
+
+	it("needs services in the timetable", () => {
+		useTimetableStore.setState({
+			timetable: { version: 1, startTime: 0, services: [] },
+		});
+		expect(blockedReason("operate")).toBe("Write a timetable first");
+		expect(mode().setMode("operate")).toBe(false);
+	});
+
+	it("needs a timetable without errors", () => {
+		useTimetableStore.setState({
+			issues: [{ severity: "error", code: "x", message: "bad" }],
+		});
+		expect(blockedReason("operate")).toBe("Fix the timetable's errors first");
+	});
+
+	it("needs a complete railway first of all", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		expect(blockedReason("operate")).toMatch(/Finish the railway/);
+	});
+
+	it("enters when everything is ready", () => {
+		expect(mode().setMode("operate")).toBe(true);
+		expect(mode().mode).toBe("operate");
+	});
+
+	it("asks before throwing away a session that has run", () => {
+		mode().setMode("operate");
+		useOperateStore.setState({ view: { run: "running" } as never });
+		useModeStore.setState({ confirmLeaveOperate: () => false });
+		expect(mode().setMode("railway")).toBe(false);
+		useModeStore.setState({ confirmLeaveOperate: () => true });
+		expect(mode().setMode("railway")).toBe(true);
+	});
+
+	it("leaves a session that never started without asking", () => {
+		mode().setMode("operate");
+		useOperateStore.setState({ view: { run: "prestart" } as never });
+		useModeStore.setState({ confirmLeaveOperate: () => false });
+		expect(mode().setMode("timetable")).toBe(true);
+	});
+});
+
+describe("operateBlockedReason", () => {
+	const tt = (services: number) => ({
+		version: 1 as const,
+		startTime: 0,
+		services: Array.from({ length: services }, (_, i) => ({
+			ref: `1A0${i}`,
+			actions: [{ kind: "finishRemainHere" as const }],
+		})),
+	});
+
+	it("passes a complete railway with a clean timetable", () => {
+		expect(operateBlockedReason(status({}), tt(1), [])).toBeNull();
+	});
+
+	it("puts the railway first, then the services, then the errors", () => {
+		expect(operateBlockedReason(null, tt(0), [])).toBe("Build a railway first");
+		expect(operateBlockedReason(status({}), tt(0), [])).toBe(
+			"Write a timetable first",
+		);
+		const warning = { severity: "warning" as const, code: "w", message: "w" };
+		expect(operateBlockedReason(status({}), tt(1), [warning])).toBeNull();
+	});
+});
+
+describe("blockedNotice", () => {
+	it("records the mode a gate refused", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		expect(mode().setMode("timetable")).toBe(false);
+		expect(mode().blockedNotice).toBe("timetable");
+	});
+
+	it("clears on any successful switch", () => {
+		useEditorStore.setState({ trackStatus: status({ complete: false }) });
+		mode().setMode("operate");
+		expect(mode().blockedNotice).toBe("operate");
+		useEditorStore.setState({ trackStatus: status({}) });
+		expect(mode().setMode("timetable")).toBe(true);
+		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("can be dismissed", () => {
+		useEditorStore.setState({ trackStatus: null });
+		mode().setMode("timetable");
+		mode().dismissBlockedNotice();
+		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("is not raised when the user declines to leave operate mode", () => {
+		useModeStore.setState({
+			mode: "operate",
+			confirmLeaveOperate: () => false,
+		});
+		useOperateStore.setState({
+			status: "ready",
+			view: { run: "running" } as never,
+		});
+		expect(mode().setMode("railway")).toBe(false);
+		expect(mode().blockedNotice).toBeNull();
+	});
+
+	it("does not ask to confirm leaving a session that errored", () => {
+		const confirm = vi.fn(() => false);
+		useModeStore.setState({ mode: "operate", confirmLeaveOperate: confirm });
+		useOperateStore.setState({
+			status: "error",
+			error: "boom",
+			view: { run: "running" } as never,
+		});
+		expect(mode().setMode("railway")).toBe(true);
+		expect(confirm).not.toHaveBeenCalled();
 	});
 });

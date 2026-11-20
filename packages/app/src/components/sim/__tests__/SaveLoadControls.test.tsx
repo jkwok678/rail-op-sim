@@ -26,7 +26,9 @@ describe("SaveLoadControls", () => {
 			screen.getByRole("button", { name: "Save map as YAML" }),
 		).toBeDefined();
 		expect(
-			screen.getByRole("button", { name: "Load map from JSON or YAML" }),
+			screen.getByRole("button", {
+				name: "Load railway and/or timetable from JSON or YAML (select both to load together)",
+			}),
 		).toBeDefined();
 	});
 
@@ -44,5 +46,36 @@ describe("SaveLoadControls", () => {
 		fireEvent.click(screen.getByRole("button", { name: /^Load/ }));
 		expect(saveDocument).toHaveBeenCalledOnce();
 		expect(loadDocument).toHaveBeenCalledOnce();
+	});
+
+	it("has no separate timetable upload button", () => {
+		render(<SaveLoadControls />);
+		expect(
+			screen.queryByRole("button", {
+				name: "Upload timetable from JSON or YAML",
+			}),
+		).toBeNull();
+	});
+
+	it("disables save and load while operating and explains why on hover", () => {
+		useModeStore.setState({ mode: "operate" });
+		render(<SaveLoadControls />);
+
+		const saveButton = screen.getByRole("button", { name: /^Save/ });
+		const loadButton = screen.getByRole("button", { name: /^Load/ });
+		expect(saveButton.hasAttribute("disabled")).toBe(true);
+		expect(loadButton.hasAttribute("disabled")).toBe(true);
+
+		expect(saveButton.parentElement?.getAttribute("title")).toBe(
+			"Save — leave operate mode to save the railway or timetable",
+		);
+		expect(loadButton.parentElement?.getAttribute("title")).toBe(
+			"Load — leave operate mode to load a railway or timetable",
+		);
+
+		fireEvent.click(saveButton);
+		fireEvent.click(loadButton);
+		expect(saveDocument).not.toHaveBeenCalled();
+		expect(loadDocument).not.toHaveBeenCalled();
 	});
 });

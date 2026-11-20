@@ -290,10 +290,6 @@ export function createDirectionLayer(): DirectionLayer {
 						: GESTURE_PREVIEW_COLOR,
 				);
 			}
-			debugLog(
-				"directionLayer",
-				`route preview (${outlines.isErasing() ? "erase" : "set"}) — ${drawn}/${path.length} legs to (${end.gx},${end.gy})`,
-			);
 		}
 	}
 

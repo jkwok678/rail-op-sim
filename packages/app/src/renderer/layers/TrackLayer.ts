@@ -1,4 +1,4 @@
-import type { Map as Map_ } from "@rail-op-sim/shared";
+import type { Map as Map_, Track } from "@rail-op-sim/shared";
 import {
 	getTrackColorState,
 	TRACK_COLOR_BOTH,
@@ -60,6 +60,13 @@ export interface TrackLayer {
 	clear(): void;
 	/** Apply/remove speed-length colour tints to all track sprites. */
 	syncColors(map: Map_, active: boolean): void;
+	/**
+	 * Draw these cells (keyed `"x,y"`) with the listed `public/graphics/`
+	 * files, bottom to top, in place of their usual art — operate mode's
+	 * signal aspects and point lies. Cells left out, or whose files aren't
+	 * preloaded, show their usual art. Pass an empty map to restore all.
+	 */
+	setOverrides(overrides: ReadonlyMap<string, readonly string[]>): void;
 	destroy(): void;
 }
 
@@ -71,17 +78,23 @@ export interface TrackLayer {
 export function createTrackLayer(textures: TextureCache): TrackLayer {
 	const container = new Container();
 	container.label = "track-layer";
+	/** One sprite per placed track. */
+	const tiles = new Container();
+	/** Operate-mode art, drawn over cells whose tile is hidden. */
+	const overlay = new Container();
+	overlay.label = "track-overrides";
+	container.addChild(tiles, overlay);
 
 	const entries = new Map<string, Entry>();
+	/** Override sprites per cell, with the file list they were built from. */
+	const overridden = new Map<string, { files: string; sprites: Sprite[] }>();
+	/** The overrides last asked for, re-applied after a rebuild. */
+	let requested: ReadonlyMap<string, readonly string[]> = new Map();
 
 	let colorModeActive = false;
 
 	const removeEntry = (key: string, entry: Entry) => {
-		debugLog(
-			"trackLayer",
-			`remove sprite at (${key}) — lookupKey=${entry.lookupKey}`,
-		);
-		container.removeChild(entry.sprite);
+		tiles.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		entries.delete(key);
 	};
@@ -102,11 +115,84 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			return;
 		}
 		const lk = entryKey(subtype, aspect);
-		debugLog("trackLayer", `addSprite at (${key}) — lookupKey=${lk}`);
 		const sprite = makeTrackSprite(texture, gx, gy);
 		sprite.label = `track-${key}`;
-		container.addChild(sprite);
+		sprite.visible = !overridden.has(key);
+		tiles.addChild(sprite);
 		entries.set(key, { sprite, lookupKey: lk, subtype, aspect });
+	};
+
+	const dropOverride = (key: string) => {
+		const existing = overridden.get(key);
+		if (!existing) return;
+		for (const sprite of existing.sprites) {
+			overlay.removeChild(sprite);
+			sprite.destroy();
+		}
+		overridden.delete(key);
+		const entry = entries.get(key);
+		if (entry) entry.sprite.visible = true;
+	};
+
+	const mountOverrideSprites = (key: string, baked: Texture[]): Sprite[] => {
+		const [gxStr, gyStr] = key.split(",");
+		const entry = entries.get(key);
+		if (entry) entry.sprite.visible = false;
+		return baked.map((t) => {
+			const sprite = makeTrackSprite(t, Number(gxStr), Number(gyStr));
+			sprite.label = `track-override-${key}`;
+			overlay.addChild(sprite);
+			return sprite;
+		});
+	};
+
+	const syncOverride = (key: string, files: readonly string[]) => {
+		const id = files.join("+");
+		if (overridden.get(key)?.files === id) return;
+		dropOverride(key);
+		const baked = files.map((f) => textures.getFile(f));
+		if (!baked.every((t): t is Texture => t !== null)) return;
+		overridden.set(key, {
+			files: id,
+			sprites: mountOverrideSprites(key, baked),
+		});
+	};
+
+	const applyOverrides = () => {
+		for (const key of [...overridden.keys()]) {
+			if (!requested.has(key)) dropOverride(key);
+		}
+		for (const [key, files] of requested) syncOverride(key, files);
+	};
+
+	// Bridge / Underpass and linked tracks use Unset variants until named/paired.
+	const UNSET_CHECK: Partial<
+		Record<Track["data"]["kind"], (t: Track) => boolean>
+	> = {
+		bridgeUnderpass: (t) => !t.getNamed(),
+		linked: (t) => !t.isLinked(),
+	};
+
+	const trackDisplaySubtype = (track: Track): string => {
+		const check = UNSET_CHECK[track.data.kind];
+		return check?.(track) ? `${track.data.subtype}_UNSET` : track.data.subtype;
+	};
+
+	const needsRebuild = (key: string, lookupKey: string): boolean => {
+		const existing = entries.get(key);
+		if (existing?.lookupKey === lookupKey) return false;
+		if (existing) removeEntry(key, existing);
+		return true;
+	};
+
+	const syncTrack = (track: Track, seen: Set<string>) => {
+		const key = track.locationToString();
+		const subtype = trackDisplaySubtype(track);
+		const aspect = track.getAspect() >= 0 ? track.getAspect() : undefined;
+		seen.add(key);
+
+		if (!needsRebuild(key, entryKey(subtype, aspect))) return;
+		addSprite(key, subtype, track.getLocationX(), track.getLocationY(), aspect);
 	};
 
 	return {
@@ -118,36 +204,7 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 
 			map.forEachTrack((track) => {
 				trackCount++;
-				const key = track.locationToString();
-				let subtype: string = track.data.subtype;
-				const aspect = track.getAspect() >= 0 ? track.getAspect() : undefined;
-
-				// Bridge / Underpass: use Unset variant when not named,
-				// mirroring how Concourse and NamedLocation behave.
-				if (track.data.kind === "bridgeUnderpass" && !track.getNamed()) {
-					subtype = `${subtype}_UNSET`;
-				}
-
-				// Linked tracks: use Unset variant when not paired
-				if (track.data.kind === "linked" && !track.isLinked()) {
-					subtype = `${subtype}_UNSET`;
-				}
-
-				seen.add(key);
-
-				const lookupKey = entryKey(subtype, aspect);
-				const existing = entries.get(key);
-				if (existing) {
-					if (existing.lookupKey === lookupKey) return; // unchanged
-					removeEntry(key, existing); // subtype or aspect changed — rebuild
-				}
-				addSprite(
-					key,
-					subtype,
-					track.getLocationX(),
-					track.getLocationY(),
-					aspect,
-				);
+				syncTrack(track, seen);
 			});
 
 			let removed = 0;
@@ -166,6 +223,8 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			// Re-apply colour tints if the section colour mode is active
 			// (sync may have rebuilt sprites, losing previous tints).
 			if (colorModeActive) this.syncColors(map, true);
+			// …and operate art, which clear() drops with its textures.
+			applyOverrides();
 		},
 
 		upsertCell(subtype, gx, gy, aspect) {
@@ -203,6 +262,8 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		},
 
 		clear() {
+			// Keep `requested`: the next sync rebuilds the overrides too.
+			for (const key of [...overridden.keys()]) dropOverride(key);
 			for (const [key, entry] of entries) removeEntry(key, entry);
 		},
 
@@ -241,7 +302,13 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 			}
 		},
 
+		setOverrides(overrides) {
+			requested = overrides;
+			applyOverrides();
+		},
+
 		destroy() {
+			requested = new Map();
 			this.clear();
 			container.destroy({ children: true });
 		},

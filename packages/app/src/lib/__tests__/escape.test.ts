@@ -88,4 +88,23 @@ describe("resolveEscape", () => {
 	it("stops at select rather than cycling", () => {
 		expect(resolveEscape(at({ tool: "select" }))).toEqual({ type: "none" });
 	});
+
+	it("closes an open train menu before cancelling routes, and yields to open train dialogs", () => {
+		expect(
+			resolveEscape(
+				at({
+					operateTrainMenuOpen: true,
+					operateRouteStart: { gx: 1, gy: 0 },
+				}),
+			),
+		).toEqual({ type: "closeTrainMenu" });
+		expect(
+			resolveEscape(
+				at({
+					operateTrainDialogOpen: true,
+					operateTrainMenuOpen: true,
+				}),
+			),
+		).toEqual({ type: "none" });
+	});
 });

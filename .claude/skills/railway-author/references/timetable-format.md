@@ -84,9 +84,9 @@ non-decreasing time order. Any action may carry `"warning": true` (RailOS's
 | `startNew` | `time`, `rear`, `front`, `signallerControl?` | A new train appears, rear and front on two joined cells (the pair is which way it faces). Needs a `train`. |
 | `startNewService` | `time`, `fromRef` | Takes over the train a finished service left. |
 | `startFromSplit` | `time`, `fromRef` | This service is the portion another split off. |
-| `startNewShuttle` | `time`, `rear`, `front`, `otherRef` | **Unsupported** — rejected by the validator. |
-| `startShuttle` | `time`, `fromRef` | **Unsupported.** |
-| `startFromShuttle` | `time`, `fromRef` | **Unsupported.** |
+| `startNewShuttle` | `time`, `rear`, `front`, `otherRef` | Creates a train at rest (`startSpeedKmh: 0`) that shuttles back and forth with `otherRef`. Needs a `train` and `repeat`. |
+| `startShuttle` | `time`, `fromRef`, `otherRef` | Starts a repeating shuttle taking over from feeder `fromRef` (`finishToShuttle`) and alternating with `otherRef`. Needs a `repeat`. |
+| `startFromShuttle` | `time`, `fromRef` | Non-repeating tail service taking the train from finished shuttle `fromRef` (`finishShuttleNewService`). |
 
 ### Intermediate — any number
 
@@ -107,20 +107,24 @@ non-decreasing time order. Any action may carry `"warning": true` (RailOS's
 | `finishNewService` | `time`, `nextRef` | Hand the train to `nextRef`. |
 | `finishJoin` | `time`, `otherRef` | Couple onto `otherRef`, which is waiting with a `joinedBy`. |
 | `finishRemainHere` | — | Stay put under signaller control. The only action with no time. |
+| `finishToShuttle` | `time`, `nextRef` | Non-repeating feeder handing its train over to repeating shuttle `nextRef` (`startShuttle`). |
 | `finishExit` | `time`, `exits` | Leave the map. `exits` is a non-empty list of cells, each an `exit` track; any one will do, so a diverted train still finishes. |
-| `finishShuttleRemainHere` | `otherRef` | **Unsupported.** |
-| `finishShuttleNewService` | `time`, `nextRef`, `otherRef` | **Unsupported.** |
+| `finishShuttleRemainHere` | `time`, `otherRef` | End a shuttle leg back into `otherRef`, or terminate under signaller control after the final repeat. |
+| `finishShuttleNewService` | `time`, `nextRef`, `otherRef` | End a shuttle leg back into `otherRef`, or hand over to non-repeating tail `nextRef` (`startFromShuttle`) after the final repeat. |
 
 ## Links between services
 
-Three kinds of link, each matched from both ends, exactly once, at the **same
-time**:
+Non-shuttle links match from both ends, exactly once, at the **same time**,
+while shuttle links pair the repeating legs, feeder, and tail:
 
 | One service | The other |
 | --- | --- |
 | `finishNewService` → `nextRef` | `startNewService` ← `fromRef` |
 | `frontSplit` / `rearSplit` → `newRef` | `startFromSplit` ← `fromRef` |
 | `joinedBy` → `otherRef` | `finishJoin` ← `otherRef` |
+| `startNewShuttle` / `startShuttle` → `otherRef` | `finishShuttleRemainHere` / `finishShuttleNewService` ← `otherRef` |
+| `finishToShuttle` → `nextRef` | `startShuttle` ← `fromRef` |
+| `finishShuttleNewService` → `nextRef` | `startFromShuttle` ← `fromRef` |
 
 Each side must name the other, the named service must exist, and no service
 may name itself. A one-sided link is `unmatched-reference`; two services
@@ -133,9 +137,9 @@ Checked only when a map is supplied (`validateTimetable(tt, map)`):
 
 - every `stop` / `pass` location must be a label on the railway
   (`getLocationNames`) — trimmed, exact, case-sensitive;
-- a `startNew` pair must be two different cells, both track, adjacent *and*
-  joined by reciprocal links, with the front not on an exit and neither on a
-  level crossing;
+- a `startNew` or `startNewShuttle` pair must be two different cells, both
+  track, adjacent *and* joined by reciprocal links, with the front not on an
+  exit and neither on a level crossing;
 - every `finishExit` cell must be an `exit` track.
 
 `getStartableCells(map)` and `getExitCells(map)` list the legal cells for the

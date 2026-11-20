@@ -4,11 +4,6 @@ import { formatSimTime, parseSimTime } from "@rail-op-sim/shared";
 /**
  * What the editor can add to a service, and what a fresh one of each looks
  * like.
- *
- * The shuttle kinds are absent on purpose. They exist in the model so the union
- * is complete and a `.ttb` importer has somewhere to put them, but neither the
- * editor nor the engine handles them yet — and the validator says so, so a
- * timetable that acquires one some other way is reported rather than run.
  */
 
 /** An action kind the editor offers, with the label the picker shows. */
@@ -27,6 +22,17 @@ export const ACTION_KIND_OPTIONS: ActionKindOption[] = [
 		group: "Start",
 	},
 	{ kind: "startFromSplit", label: "Start as a split portion", group: "Start" },
+	{
+		kind: "startNewShuttle",
+		label: "Start a new shuttle train",
+		group: "Start",
+	},
+	{ kind: "startShuttle", label: "Start shuttle from feeder", group: "Start" },
+	{
+		kind: "startFromShuttle",
+		label: "Take over from a shuttle",
+		group: "Start",
+	},
 
 	{ kind: "stop", label: "Stop at a location", group: "Along the way" },
 	{ kind: "pass", label: "Pass a location", group: "Along the way" },
@@ -57,6 +63,21 @@ export const ACTION_KIND_OPTIONS: ActionKindOption[] = [
 	{ kind: "finishJoin", label: "Join another train", group: "Finish" },
 	{ kind: "finishExit", label: "Leave the map", group: "Finish" },
 	{ kind: "finishRemainHere", label: "Remain here", group: "Finish" },
+	{
+		kind: "finishToShuttle",
+		label: "Hand over to a shuttle",
+		group: "Finish",
+	},
+	{
+		kind: "finishShuttleRemainHere",
+		label: "Repeat shuttle or remain here",
+		group: "Finish",
+	},
+	{
+		kind: "finishShuttleNewService",
+		label: "Repeat shuttle or hand over",
+		group: "Finish",
+	},
 ];
 
 /** The groups in the order the picker shows them. */
@@ -66,7 +87,7 @@ export const ACTION_KIND_GROUPS: ActionKindOption["group"][] = [
 	"Finish",
 ];
 
-/** The picker's label for a kind, falling back to the raw kind for shuttles. */
+/** The picker's label for a kind, falling back to the raw kind. */
 export function actionKindLabel(kind: Action["kind"]): string {
 	return ACTION_KIND_OPTIONS.find((o) => o.kind === kind)?.label ?? kind;
 }
@@ -106,6 +127,7 @@ const SEEDS: { [K in Action["kind"]]: (s: ActionSeed) => ActionOf<K> } = {
 		kind: "startShuttle",
 		time,
 		fromRef: ref,
+		otherRef: ref,
 	}),
 	startFromShuttle: ({ time, ref }) => ({
 		kind: "startFromShuttle",
@@ -146,10 +168,16 @@ const SEEDS: { [K in Action["kind"]]: (s: ActionSeed) => ActionOf<K> } = {
 		time,
 		nextRef: ref,
 	}),
+	finishToShuttle: ({ time, ref }) => ({
+		kind: "finishToShuttle",
+		time,
+		nextRef: ref,
+	}),
 	finishExit: ({ time }) => ({ kind: "finishExit", time, exits: [] }),
 	finishRemainHere: () => ({ kind: "finishRemainHere" }),
-	finishShuttleRemainHere: ({ ref }) => ({
+	finishShuttleRemainHere: ({ time, ref }) => ({
 		kind: "finishShuttleRemainHere",
+		time,
 		otherRef: ref,
 	}),
 	finishShuttleNewService: ({ time, ref }) => ({
@@ -191,8 +219,7 @@ const timed = (time: number, text: string): string =>
 	`${formatSimTime(time)} ${text}`;
 
 /**
- * Each kind's list-row summary. Partial on purpose: the shuttle kinds have no
- * summary of their own and fall back to their label.
+ * Each kind's list-row summary.
  */
 const DESCRIBERS: { [K in Action["kind"]]?: (a: ActionOf<K>) => string } = {
 	stop: (a) => {
@@ -206,17 +233,26 @@ const DESCRIBERS: { [K in Action["kind"]]?: (a: ActionOf<K>) => string } = {
 	startNew: (a) => timed(a.time, `new train at (${a.rear.gx}, ${a.rear.gy})`),
 	startNewService: (a) => timed(a.time, `from ${a.fromRef || "—"}`),
 	startFromSplit: (a) => timed(a.time, `from ${a.fromRef || "—"}`),
+	startNewShuttle: (a) => timed(a.time, `shuttle ↔ ${a.otherRef || "—"}`),
+	startShuttle: (a) =>
+		timed(a.time, `shuttle from ${a.fromRef || "—"} ↔ ${a.otherRef || "—"}`),
+	startFromShuttle: (a) => timed(a.time, `from shuttle ${a.fromRef || "—"}`),
 	frontSplit: (a) => timed(a.time, `split → ${a.newRef || "—"}`),
 	rearSplit: (a) => timed(a.time, `split → ${a.newRef || "—"}`),
 	joinedBy: (a) => timed(a.time, `joined by ${a.otherRef || "—"}`),
 	finishJoin: (a) => timed(a.time, `join ${a.otherRef || "—"}`),
 	finishNewService: (a) => timed(a.time, `→ ${a.nextRef || "—"}`),
+	finishToShuttle: (a) => timed(a.time, `→ shuttle ${a.nextRef || "—"}`),
 	finishExit: (a) =>
 		timed(
 			a.time,
 			`exit ${a.exits.map((c) => `(${c.gx}, ${c.gy})`).join(" or ") || "—"}`,
 		),
 	finishRemainHere: () => "remain here",
+	finishShuttleRemainHere: (a) =>
+		timed(a.time, `shuttle ↔ ${a.otherRef || "—"}`),
+	finishShuttleNewService: (a) =>
+		timed(a.time, `shuttle ↔ ${a.otherRef || "—"} → ${a.nextRef || "—"}`),
 	changeDescription: (a) => timed(a.time, `"${a.description}"`),
 	changeMaxSpeed: (a) => timed(a.time, `max ${a.maxSpeedKmh} km/h`),
 };

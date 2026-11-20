@@ -16,6 +16,11 @@ const reset = () => {
 		directionHint: null,
 		directionMode: "set",
 		showShortcuts: false,
+		showTrackInfo: false,
+		showTrainInfo: false,
+		showTrainTimetable: false,
+		hoveredTrackInfo: null,
+		hoveredTrainInfo: null,
 		saveFormat: "json",
 		canUndo: false,
 		canRedo: false,
@@ -173,5 +178,39 @@ describe("saveFormat", () => {
 	it("remembers YAML for the next save", () => {
 		useEditorStore.getState().setSaveFormat("yaml");
 		expect(useEditorStore.getState().saveFormat).toBe("yaml");
+	});
+});
+
+describe("showTrainInfo and showTrainTimetable", () => {
+	beforeEach(reset);
+
+	it("start off and clear hoveredTrainInfo only when both are turned off", () => {
+		expect(useEditorStore.getState().showTrainInfo).toBe(false);
+		expect(useEditorStore.getState().showTrainTimetable).toBe(false);
+
+		useEditorStore.getState().toggleShowTrainInfo();
+		useEditorStore.getState().toggleShowTrainTimetable();
+		expect(useEditorStore.getState().showTrainInfo).toBe(true);
+		expect(useEditorStore.getState().showTrainTimetable).toBe(true);
+
+		useEditorStore.getState().setHoveredTrainInfo({
+			headcode: "1A01",
+			description: null,
+			statusLabel: "60 km/h",
+			next: null,
+			signallerControl: false,
+			reminder: null,
+			timetable: [],
+			screenX: 10,
+			screenY: 20,
+		});
+
+		useEditorStore.getState().toggleShowTrainInfo();
+		expect(useEditorStore.getState().showTrainInfo).toBe(false);
+		expect(useEditorStore.getState().hoveredTrainInfo).not.toBeNull();
+
+		useEditorStore.getState().toggleShowTrainTimetable();
+		expect(useEditorStore.getState().showTrainTimetable).toBe(false);
+		expect(useEditorStore.getState().hoveredTrainInfo).toBeNull();
 	});
 });

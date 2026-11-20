@@ -14,12 +14,18 @@ const SAVE_FORMATS: { format: MapFileFormat; label: string }[] = [
 
 /**
  * Small settings popover anchored to a gear button in the footer. Holds
- * toggles ("Show track info", "Show grid") and the save encoding; more
- * settings can be added as rows.
+ * toggles ("Show track info", "Show train info", "Show train timetable",
+ * "Show grid") and the save encoding; more settings can be added as rows.
  */
 export function SettingsMenu() {
 	const showTrackInfo = useEditorStore((s) => s.showTrackInfo);
 	const toggleShowTrackInfo = useEditorStore((s) => s.toggleShowTrackInfo);
+	const showTrainInfo = useEditorStore((s) => s.showTrainInfo);
+	const toggleShowTrainInfo = useEditorStore((s) => s.toggleShowTrainInfo);
+	const showTrainTimetable = useEditorStore((s) => s.showTrainTimetable);
+	const toggleShowTrainTimetable = useEditorStore(
+		(s) => s.toggleShowTrainTimetable,
+	);
 	const showGrid = useEditorStore((s) => s.showGrid);
 	const toggleShowGrid = useEditorStore((s) => s.toggleShowGrid);
 	const saveFormat = useEditorStore((s) => s.saveFormat);
@@ -40,7 +46,7 @@ export function SettingsMenu() {
 					side="top"
 					align="end"
 					sideOffset={4}
-					className="z-50 w-52 origin-(--radix-popover-content-transform-origin) rounded-none bg-popover p-1 text-xs text-popover-foreground ring-1 ring-foreground/10 shadow-md duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+					className="z-50 w-56 origin-(--radix-popover-content-transform-origin) rounded-none bg-popover p-1 text-xs text-popover-foreground ring-1 ring-foreground/10 shadow-md duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
 				>
 					<button
 						type="button"
@@ -55,6 +61,36 @@ export function SettingsMenu() {
 						</span>
 						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
 							{showTrackInfo ? <Check weight="bold" /> : null}
+						</span>
+					</button>
+					<button
+						type="button"
+						role="menuitemcheckbox"
+						aria-checked={showTrainInfo}
+						onClick={toggleShowTrainInfo}
+						className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-muted hover:text-foreground"
+					>
+						<span className="inline-flex items-center gap-1.5">
+							Show train info
+							<KbdGroup keys={shortcutKeys("toggleTrainInfo")} />
+						</span>
+						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
+							{showTrainInfo ? <Check weight="bold" /> : null}
+						</span>
+					</button>
+					<button
+						type="button"
+						role="menuitemcheckbox"
+						aria-checked={showTrainTimetable}
+						onClick={toggleShowTrainTimetable}
+						className="flex w-full items-center justify-between gap-2 px-2 py-1.5 hover:bg-muted hover:text-foreground"
+					>
+						<span className="inline-flex items-center gap-1.5">
+							Show train timetable
+							<KbdGroup keys={shortcutKeys("toggleTrainTimetable")} />
+						</span>
+						<span className="flex size-4 items-center justify-center border border-border [&_svg]:size-3">
+							{showTrainTimetable ? <Check weight="bold" /> : null}
 						</span>
 					</button>
 					<button

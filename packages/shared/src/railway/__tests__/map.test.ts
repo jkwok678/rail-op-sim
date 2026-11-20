@@ -703,7 +703,7 @@ describe("deleteElement", () => {
 		expect(b.isLinked()).toBe(false);
 	});
 
-	it("deleting a NamedLocation restores the track it displaced", () => {
+	it("a NamedLocation rides on its track without displacing it", () => {
 		const map = new Map_();
 		map.addTrack(
 			{
@@ -718,19 +718,46 @@ describe("deleteElement", () => {
 		);
 		const track = map.getTrackAt(0, 0)!;
 		map.createAddNamedLocation(0, 0);
-		// The NamedLocation takes the coordinate slot while the track stays in
-		// tracksByKind, so the track is unreachable by coordinate until deleted.
-		expect(map.getNamedLocationAt(0, 0)).not.toBeNull();
-		expect(map.getTrackAt(0, 0)).toBeNull();
+		// Both are reachable at the cell: the track for its neighbours, the
+		// named location for naming and deletion.
+		const nl = map.getNamedLocationAt(0, 0);
+		expect(nl).not.toBeNull();
+		expect(map.getTrackAt(0, 0)).toBe(track);
+		expect(track.getLinkedNamedLocation()).toBe(nl);
+		expect(map.getNamedElementAt(0, 0)).toBe(nl);
+		expect(map.hasElementExcludingTrack(0, 0)).toBe(true);
+		// A second one cannot stack on the same track.
+		map.createAddNamedLocation(0, 0);
+		expect(map.getNamedLocationList()).toHaveLength(1);
+	});
+
+	it("deleting a NamedLocation on a track leaves the track", () => {
+		const map = new Map_();
+		map.addTrack(
+			{
+				kind: "straight",
+				subtype: StraightType.STRAIGHTH,
+				platform1: false,
+				platform2: false,
+				levelCrossing: false,
+			},
+			0,
+			0,
+		);
+		const track = map.getTrackAt(0, 0)!;
+		map.createAddNamedLocation(0, 0);
 
 		expect(map.deleteElement(0, 0)).toBe(true);
 
 		expect(map.getNamedLocationAt(0, 0)).toBeNull();
 		expect(map.getNamedLocationList()).toHaveLength(0);
-		// The same object, back in the spatial index — not orphaned in tracksByKind.
 		expect(map.getTrackAt(0, 0)).toBe(track);
 		expect(map.getTotalTrack()).toBe(1);
 		expect(track.getLinkedNamedLocation()).toBeNull();
+
+		// The next delete takes the track itself.
+		expect(map.deleteElement(0, 0)).toBe(true);
+		expect(map.getTrackAt(0, 0)).toBeNull();
 	});
 
 	it("deleteElement cascades text cleanup for named tracks", () => {

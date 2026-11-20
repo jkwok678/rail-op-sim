@@ -62,6 +62,46 @@ describe("parseTimetable — round trips", () => {
 		expect(roundTrip(original)).toEqual(original);
 	});
 
+	it("keeps a shuttle's partner, feeder and finish time", () => {
+		const original = timetable([
+			{
+				ref: "1A01",
+				train: { ...TRAIN },
+				actions: [
+					{
+						kind: "startNew",
+						time: parseSimTime("06:00"),
+						rear: { gx: 0, gy: 0 },
+						front: { gx: 1, gy: 0 },
+					},
+					{
+						kind: "finishToShuttle",
+						time: parseSimTime("06:05"),
+						nextRef: "1A02",
+					},
+				],
+			},
+			{
+				ref: "1A02",
+				repeat: { intervalMinutes: 30, headcodeIncrement: 1, count: 2 },
+				actions: [
+					{
+						kind: "startShuttle",
+						time: parseSimTime("06:05"),
+						fromRef: "1A01",
+						otherRef: "1A02",
+					},
+					{
+						kind: "finishShuttleRemainHere",
+						time: parseSimTime("06:35"),
+						otherRef: "1A02",
+					},
+				],
+			},
+		]);
+		expect(roundTrip(original)).toEqual(original);
+	});
+
 	it("keeps every optional field that was set", () => {
 		const original: Timetable = {
 			version: 1,

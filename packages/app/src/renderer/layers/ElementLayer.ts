@@ -80,6 +80,9 @@ function cellKey(gx: number, gy: number): string {
 	return `${gx},${gy}`;
 }
 
+/** Suffix of a level crossing's sprite key, after its cell key. */
+const LC_SUFFIX = ":lc";
+
 /** Create a PixiJS Sprite at the given grid cell, same conventions as TrackLayer. */
 function makeElementSprite(texture: Texture, gx: number, gy: number): Sprite {
 	const sprite = new Sprite(texture);
@@ -99,6 +102,8 @@ interface SpriteEntry {
 	sprite: Sprite;
 	/** Key for change detection (e.g. "NAMEDLOCATION_SET"). */
 	lookupKey: string;
+	/** The container the sprite sits in — {@link ElementLayer.underlay} or the main one. */
+	parent: Container;
 }
 
 // ============================================================================
@@ -107,12 +112,25 @@ interface SpriteEntry {
 
 export interface ElementLayer {
 	container: Container;
+	/**
+	 * Goes below TrackLayer. Holds named locations that ride on a track: their
+	 * sprite fills the cell, so drawn above it would hide the track, while
+	 * RailOS paints the location behind the line.
+	 */
+	underlay: Container;
 	/** Full reconcile against the map. */
 	sync(map: Map_): void;
 	/** Add or update a single element cell. */
 	upsertElement(lookupKey: string, gx: number, gy: number): void;
 	/** Remove all sprites at a cell. */
 	removeCell(gx: number, gy: number): void;
+	/**
+	 * Draw these level-crossing cells (keyed `"x,y"`) with the given
+	 * `public/graphics/` file in place of their usual crossing art — operate
+	 * mode's lowered barriers. Cells left out, or whose file isn't preloaded,
+	 * show the usual art. Pass an empty map to restore all.
+	 */
+	setLevelCrossingArt(art: ReadonlyMap<string, string>): void;
 	/** Drop everything so the next sync rebuilds. */
 	clear(): void;
 	destroy(): void;
@@ -121,24 +139,54 @@ export interface ElementLayer {
 /**
  * Renders non-track elements (NamedLocation, Concourse, Parapet), platform
  * overlays, bridge/underpass Set/Unset variants, and level crossing icons.
- * Lives above TrackLayer in the scene graph.
+ * Lives above TrackLayer in the scene graph, apart from its underlay.
  */
 export function createElementLayer(textures: TextureCache): ElementLayer {
 	const container = new Container();
 	container.label = "element-layer";
+	const underlay = new Container();
+	underlay.label = "element-underlay";
 
 	const spriteEntries = new Map<string, SpriteEntry>();
+	/** Level-crossing art last asked for, re-applied after a rebuild. */
+	let crossingArt: ReadonlyMap<string, string> = new Map();
+
+	const resolveCrossingTexture = (key: string, entry: SpriteEntry) => {
+		const file = crossingArt.get(key.slice(0, -LC_SUFFIX.length));
+		const override = file ? textures.getFile(file) : null;
+		return override ?? textures.get(entry.lookupKey);
+	};
+
+	const syncCrossingSprite = (key: string, entry: SpriteEntry) => {
+		const texture = resolveCrossingTexture(key, entry);
+		if (!texture || entry.sprite.texture === texture) return;
+		entry.sprite.texture = texture;
+		entry.sprite.width = CELL_SIZE;
+		entry.sprite.height = CELL_SIZE;
+	};
+
+	/** Point each crossing sprite at its operate art, or back at its usual art. */
+	const applyCrossingArt = () => {
+		for (const [key, entry] of spriteEntries) {
+			if (key.endsWith(LC_SUFFIX)) syncCrossingSprite(key, entry);
+		}
+	};
 
 	/** Remove a sprite entry and its display object. */
 	const removeSpriteEntry = (key: string, entry: SpriteEntry) => {
-		debugLog(
-			"trackLayer",
-			`elementLayer removeSprite at (${key}) — lookupKey=${entry.lookupKey}`,
-		);
-		container.removeChild(entry.sprite);
+		entry.parent.removeChild(entry.sprite);
 		entry.sprite.destroy();
 		spriteEntries.delete(key);
 	};
+
+	const matchesEntry = (
+		existing: SpriteEntry | undefined,
+		lookupKey: string,
+		parent: Container,
+	): boolean =>
+		existing !== undefined &&
+		existing.lookupKey === lookupKey &&
+		existing.parent === parent;
 
 	/** Add or update a sprite at a cell, keyed by composite key. */
 	const upsertSprite = (
@@ -146,6 +194,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		lookupKey: string,
 		gx: number,
 		gy: number,
+		parent: Container = container,
 	) => {
 		const texture = textures.get(lookupKey);
 		if (!texture) {
@@ -156,22 +205,17 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 			return;
 		}
 		const existing = spriteEntries.get(compositeKey);
-		if (existing) {
-			if (existing.lookupKey === lookupKey) return; // unchanged
-			removeSpriteEntry(compositeKey, existing);
-		}
+		if (matchesEntry(existing, lookupKey, parent)) return;
+		if (existing) removeSpriteEntry(compositeKey, existing);
 		const sprite = makeElementSprite(texture, gx, gy);
 		sprite.label = `element-${compositeKey}`;
-		container.addChild(sprite);
-		spriteEntries.set(compositeKey, { sprite, lookupKey });
-		debugLog(
-			"trackLayer",
-			`elementLayer upsertSprite at (${compositeKey}) — lookupKey=${lookupKey}`,
-		);
+		parent.addChild(sprite);
+		spriteEntries.set(compositeKey, { sprite, lookupKey, parent });
 	};
 
 	return {
 		container,
+		underlay,
 
 		sync(map) {
 			const seenSpriteKeys = new Set<string>();
@@ -184,7 +228,8 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				const isNamed = nl.getNamed();
 				const lookupKey = isNamed ? "NAMEDLOCATION_SET" : "NAMEDLOCATION_UNSET";
 				seenSpriteKeys.add(key);
-				upsertSprite(key, lookupKey, gx, gy);
+				const parent = map.getTrackAt(gx, gy) ? underlay : container;
+				upsertSprite(key, lookupKey, gx, gy, parent);
 			}
 
 			// ── 2. Concourses ──
@@ -253,7 +298,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 							: subtype === "STRAIGHTV"
 								? "LEVELCROSSING_V"
 								: "LEVELCROSSING";
-					const key = cellKey(gx, gy) + ":lc";
+					const key = cellKey(gx, gy) + LC_SUFFIX;
 					seenSpriteKeys.add(key);
 					upsertSprite(key, lcKey, gx, gy);
 				}
@@ -267,6 +312,8 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 					removed++;
 				}
 			}
+			// Rebuilt crossing sprites start on their usual art.
+			applyCrossingArt();
 
 			debugLog(
 				"trackLayer",
@@ -285,12 +332,18 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 			if (existing) removeSpriteEntry(key, existing);
 		},
 
+		setLevelCrossingArt(art) {
+			crossingArt = art;
+			applyCrossingArt();
+		},
+
 		clear() {
 			for (const [key, entry] of spriteEntries) removeSpriteEntry(key, entry);
 		},
 
 		destroy() {
 			this.clear();
+			underlay.destroy({ children: true });
 			container.destroy({ children: true });
 		},
 	};

@@ -1,0 +1,1965 @@
+{
+  "communities": {
+    "0": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/ViewportController.ts",
+      "engine_placementcontroller",
+      "engine_placementcontroller_placementcontroller",
+      "engine_placementcontroller_placementcontroller_applycursor",
+      "engine_placementcontroller_placementcontroller_attach",
+      "engine_placementcontroller_placementcontroller_clearghostsprite",
+      "engine_placementcontroller_placementcontroller_constructor",
+      "engine_placementcontroller_placementcontroller_detach",
+      "engine_placementcontroller_placementcontroller_handleelementplacement",
+      "engine_placementcontroller_placementcontroller_nameelementat",
+      "engine_placementcontroller_placementcontroller_namenamedlocation",
+      "engine_placementcontroller_placementcontroller_onpointercancel",
+      "engine_placementcontroller_placementcontroller_onpointerdown",
+      "engine_placementcontroller_placementcontroller_onpointerleave",
+      "engine_placementcontroller_placementcontroller_onpointermove",
+      "engine_placementcontroller_placementcontroller_onpointerup",
+      "engine_placementcontroller_placementcontroller_placetext",
+      "engine_placementcontroller_placementcontroller_publishtrackstatus",
+      "engine_placementcontroller_placementcontroller_refreshghost",
+      "engine_placementcontroller_placementcontroller_refreshghostsprite",
+      "engine_placementcontroller_placementcontroller_screentogrid",
+      "engine_placementcontroller_placementcontroller_screentoworld",
+      "engine_placementcontroller_placementcontrolleroptions",
+      "engine_placementcontroller_platformsubtypetoside",
+      "hooks_usepixiapp",
+      "hooks_usepixiapp_themekey",
+      "hooks_usepixiapp_usepixiapp",
+      "hooks_usepixiapp_usepixiappreturn",
+      "layers_elementlayer",
+      "layers_elementlayer_cellkey",
+      "layers_elementlayer_createelementlayer",
+      "layers_elementlayer_elementlayer",
+      "layers_elementlayer_makeelementsprite",
+      "layers_elementlayer_platform_side_map",
+      "layers_elementlayer_platformsidemapping",
+      "layers_elementlayer_platformsvgkey",
+      "layers_elementlayer_spriteentry",
+      "layers_linkhighlightlayer",
+      "layers_linkhighlightlayer_createlinkhighlightlayer",
+      "layers_linkhighlightlayer_linkhighlightlayer",
+      "layers_textlayer",
+      "layers_textlayer_createtextlayer",
+      "layers_textlayer_textlayer",
+      "layers_tracklayer",
+      "layers_tracklayer_cellkey",
+      "layers_tracklayer_createtracklayer",
+      "layers_tracklayer_entry",
+      "layers_tracklayer_entrykey",
+      "layers_tracklayer_maketracksprite",
+      "layers_tracklayer_tracklayer",
+      "lib_debuglogger",
+      "lib_debuglogger_debuglog",
+      "lib_debuglogger_subsystem",
+      "lib_grid",
+      "lib_grid_gridtoworld",
+      "lib_grid_worldtogrid",
+      "renderer_texturecache_texturecache",
+      "sim_simcanvas",
+      "sim_simcanvas_simcanvas",
+      "store_editor_store",
+      "store_editor_store_addkind",
+      "store_editor_store_editorstate",
+      "store_editor_store_elementkind",
+      "store_editor_store_istrackkind",
+      "store_editor_store_nameablekind"
+    ],
+    "1": [
+      "class:Track",
+      "concept:link-grid-layout",
+      "concept:link-state-svgs",
+      "const:KIND_META",
+      "entity:/packages/app/public/graphics/switchTight1.svg",
+      "entity:/packages/app/public/graphics/switchTight2.svg",
+      "entity:/packages/app/public/graphics/switchTight3.svg",
+      "entity:/packages/app/public/graphics/switchTight4.svg",
+      "entity:/packages/app/public/graphics/switchTight5.svg",
+      "entity:/packages/app/public/graphics/switchTight6.svg",
+      "entity:/packages/app/public/graphics/switchTight7.svg",
+      "entity:/packages/app/public/graphics/switchTight8.svg",
+      "entity:/packages/app/public/graphics/tightCurve1.svg",
+      "entity:/packages/app/public/graphics/tightCurve2.svg",
+      "entity:/packages/app/public/graphics/tightCurve3.svg",
+      "entity:/packages/app/public/graphics/tightCurve4.svg",
+      "entity:/packages/shared/src/railway/__tests__/track.test.ts",
+      "entity:/packages/shared/src/railway/track/track-data.ts",
+      "entity:/packages/shared/src/railway/track/track.ts",
+      "file:packages/shared/src/railway/track/index.ts",
+      "file:packages/shared/src/railway/track/track-data.ts",
+      "file:packages/shared/src/railway/track/track.ts",
+      "func:KIND_META",
+      "func:getLinksForSubtype",
+      "func:hasSecondaryPath",
+      "func:kindToLabel",
+      "func:subtypeToCode",
+      "func:supportsLevelCrossing",
+      "func:supportsPlatforms",
+      "struct:CROSSOVER_LINKS",
+      "struct:CURVED_LINKS",
+      "struct:DIRECTED_LINKS",
+      "struct:FLYOVER_LINKS",
+      "struct:LINK_TABLES",
+      "struct:STRAIGHT_LINKS",
+      "struct:SWITCH_LINKS",
+      "svg:levelCrossingH",
+      "svg:levelCrossingV",
+      "svg:linkDownSet",
+      "svg:linkLeftDownSet",
+      "svg:linkLeftSet",
+      "svg:linkLeftUnset",
+      "svg:linkRightSet",
+      "svg:linkRightUnset",
+      "svg:linkUpSet",
+      "svg:linkUpUnset",
+      "type:TrackData",
+      "type:TrackKind",
+      "type:TrackKindMeta"
+    ],
+    "2": [
+      "railway_element",
+      "railway_element_concourse",
+      "railway_element_concourse_constructor",
+      "railway_element_concourse_tosavestring",
+      "railway_element_concourse_tostring",
+      "railway_element_element",
+      "railway_element_element_constructor",
+      "railway_element_element_getlocationx",
+      "railway_element_element_getlocationy",
+      "railway_element_element_locationtostring",
+      "railway_element_element_setlocationx",
+      "railway_element_element_setlocationy",
+      "railway_element_namedelement",
+      "railway_element_namedelement_constructor",
+      "railway_element_namedelement_getnamed",
+      "railway_element_namedelement_gettext",
+      "railway_element_namedelement_settext",
+      "railway_element_namedelement_tostring",
+      "railway_element_namedlocation",
+      "railway_element_namedlocation_constructor",
+      "railway_element_namedlocation_tosavestring",
+      "railway_element_namedlocation_tostring",
+      "railway_element_parapet",
+      "railway_element_parapet_constructor",
+      "railway_element_parapet_getparapettype",
+      "railway_element_parapet_parapettypetostring",
+      "railway_element_parapet_setparapettype",
+      "railway_element_parapet_tosavestring",
+      "railway_element_parapet_tostring",
+      "railway_element_text_getreadabletext",
+      "railway_enums_parapettype",
+      "tests_element_test",
+      "tests_element_test_testelement",
+      "tests_element_test_testelement_tosavestring",
+      "tests_element_test_testelement_tostring",
+      "tests_element_test_testfont",
+      "tests_element_test_testnamedelement",
+      "tests_element_test_testnamedelement_tosavestring",
+      "track_track_track_getlinkednamedlocation",
+      "track_track_track_setlinkednamedlocation"
+    ],
+    "3": [
+      "railway_enums",
+      "railway_enums_bridgeunderpasstype",
+      "railway_enums_buffertype",
+      "railway_enums_crossovertype",
+      "railway_enums_curvedtype",
+      "railway_enums_directedtype",
+      "railway_enums_exittype",
+      "railway_enums_flyovertype",
+      "railway_enums_linkedtype",
+      "railway_enums_signaltype",
+      "railway_enums_straighttype",
+      "railway_enums_switchtype",
+      "railway_index",
+      "sim_addpalette",
+      "sim_addpalette_all_labels",
+      "sim_addpalette_aspect_options",
+      "sim_addpalette_categories",
+      "sim_addpalette_category_labels",
+      "sim_addpalette_element_labels",
+      "sim_addpalette_element_types",
+      "sim_addpalette_sentinel_subtype",
+      "sim_addpalette_subtype_values",
+      "src_index",
+      "tests_enums_test",
+      "tests_map_test",
+      "tests_map_test_testfont",
+      "tests_track_factory_test",
+      "tests_track_factory_test_all_kinds",
+      "tests_track_factory_test_sample_subtype",
+      "tests_track_test",
+      "tests_track_test_testfont",
+      "tests_track_test_truelinks",
+      "track_signal_aspects",
+      "track_signal_aspects_signalaspect",
+      "track_signal_aspects_signalaspectvalue",
+      "track_track_data_isvalidsubtype",
+      "track_track_data_kind_meta",
+      "track_track_data_trackkind",
+      "track_track_factory",
+      "track_track_factory_createtrackdata"
+    ],
+    "4": [
+      "lib_svgcolors",
+      "lib_svgcolors_builddomcolormap",
+      "lib_svgcolors_buildthemecolormap",
+      "lib_svgcolors_colormap",
+      "lib_svgcolors_escaperegexp",
+      "lib_svgcolors_normalizecsscolor",
+      "lib_svgcolors_normalizedcache",
+      "lib_svgcolors_recolorsvg",
+      "lib_svgcolors_rgbtohex",
+      "lib_svgcolors_source_fills",
+      "lib_svgmap",
+      "lib_svgmap_aspect_svg_map",
+      "lib_svgmap_loadrawsvg",
+      "lib_svgmap_loadrawsvgbyfilename",
+      "lib_svgmap_numbered",
+      "lib_svgmap_rawcache",
+      "lib_svgmap_shunt_svg_map",
+      "lib_svgmap_svg_map",
+      "lib_svgmap_svgfilenameforsignal",
+      "lib_svgmap_svgurlfor",
+      "lib_svgtocanvas",
+      "lib_svgtocanvas_canvascache",
+      "lib_svgtocanvas_svgtocanvas",
+      "renderer_texturecache",
+      "renderer_texturecache_createtexturecache",
+      "sim_aspectpreview",
+      "sim_aspectpreview_aspectpreview",
+      "sim_aspectpreview_dom_color_map",
+      "sim_aspectpreview_sanitizesvg",
+      "sim_trackpreview",
+      "sim_trackpreview_dom_color_map",
+      "sim_trackpreview_sanitizesvg",
+      "sim_trackpreview_trackpreview",
+      "tests_svgmap_test",
+      "tests_svgmap_test_all_track_subtypes",
+      "tests_svgmap_test_element_keys",
+      "tests_svgmap_test_graphics_dir",
+      "tests_svgmap_test_track_enums"
+    ],
+    "5": [
+      "map_map_map",
+      "map_map_map_addlevelcrossing",
+      "map_map_map_addplatform",
+      "map_map_map_changedeletetext",
+      "map_map_map_checkalllinkedtracklinked",
+      "map_map_map_checkalltracksconnected",
+      "map_map_map_concourselisttosavestring",
+      "map_map_map_constructor",
+      "map_map_map_findalllinkedtracks",
+      "map_map_map_findunpairedlinkedtracks",
+      "map_map_map_foreachtrack",
+      "map_map_map_getconcourselist",
+      "map_map_map_getimagesize",
+      "map_map_map_getlinkedtrack1",
+      "map_map_map_getlinkedtrack2",
+      "map_map_map_getnamedlocationlist",
+      "map_map_map_getonmessage",
+      "map_map_map_getparapetlist",
+      "map_map_map_gettextlist",
+      "map_map_map_gettextselectionprompt",
+      "map_map_map_gettexttomove",
+      "map_map_map_gettotaltrack",
+      "map_map_map_gettracklist",
+      "map_map_map_gettracksofkind",
+      "map_map_map_maketracklist",
+      "map_map_map_movetext",
+      "map_map_map_namedlocationlisttosavestring",
+      "map_map_map_parapetlisttosavestring",
+      "map_map_map_setimagesize",
+      "map_map_map_setlinkedtrack1",
+      "map_map_map_setlinkedtrack2",
+      "map_map_map_settextlist",
+      "map_map_map_settotaltrack",
+      "map_map_map_settracklist",
+      "map_map_map_textlisttosavestring",
+      "map_map_map_trackstosavestrings"
+    ],
+    "6": [
+      "plan_implementation_milestones",
+      "plan_milestone_10_train_placement_rendering",
+      "plan_milestone_11_train_control",
+      "plan_milestone_12_block_occupancy",
+      "plan_milestone_13_signal_placement_data_model",
+      "plan_milestone_14_signal_rendering",
+      "plan_milestone_15_signal_aspect_propagation",
+      "plan_milestone_16_train_responds_to_signals",
+      "plan_milestone_17_interlocking_route_setting_engine",
+      "plan_milestone_18_pathfinding",
+      "plan_milestone_19_route_panel_ui",
+      "plan_milestone_1_pixijs_on_screen",
+      "plan_milestone_20_timetable_editor",
+      "plan_milestone_21_timetable_engine_basic_dispatch",
+      "plan_milestone_22_timetable_engine_stops_dwell",
+      "plan_milestone_23_timetable_engine_advanced_operations",
+      "plan_milestone_24_train_graph_visualization",
+      "plan_milestone_25_failures_system",
+      "plan_milestone_26_temporary_speed_restrictions",
+      "plan_milestone_27_unrouted_operation",
+      "plan_milestone_28_direction_management",
+      "plan_milestone_29_undo_redo",
+      "plan_milestone_2_track_graph_data_model_only",
+      "plan_milestone_30_copy_paste_area_operations",
+      "plan_milestone_31_labels_text_system",
+      "plan_milestone_32_session_recording_replay",
+      "plan_milestone_33_performance_optimization",
+      "plan_milestone_34_production_polish",
+      "plan_milestone_3_track_rendering",
+      "plan_milestone_4_track_building_tools",
+      "plan_milestone_5_selection_property_editing",
+      "plan_milestone_6_save_load",
+      "plan_milestone_7_transport_architecture_worker_shell",
+      "plan_milestone_8_simulation_loop_state_container",
+      "plan_milestone_9_train_physics"
+    ],
+    "7": [
+      "plan",
+      "plan_1_rendering_engine_pixijs_v8_decided",
+      "plan_2_meta_framework_tanstack_start_already_scaffolded",
+      "plan_3_state_management_ui_zustand",
+      "plan_4_worker_communication_raw_postmessage",
+      "plan_5_schema_validation_valibot",
+      "plan_6_indexeddb_wrapper_dexie_js",
+      "plan_7_table_component_tanstack_react_table",
+      "plan_8_css_ui_components_tailwind_v4_shadcn_ui_already_configured",
+      "plan_9_what_we_re_not_using_and_why",
+      "plan_adapter_implementations",
+      "plan_architecture_overview",
+      "plan_context",
+      "plan_data_model_core_types",
+      "plan_how_the_engine_boots_host_agnostic",
+      "plan_key_architectural_decisions",
+      "plan_key_dependencies_to_add",
+      "plan_layer_z_order",
+      "plan_multiplayer_mode_future_engine_code_unchanged",
+      "plan_multiplayer_readiness_built_in_from_day_1",
+      "plan_project_structure",
+      "plan_rail_ops_sim_architecture_implementation_plan",
+      "plan_rendering_pipeline_detail",
+      "plan_single_player_mode_what_we_build_first",
+      "plan_technology_evaluation",
+      "plan_transport_protocol_engine_host",
+      "plan_verification_plan",
+      "plan_what_changes_for_multiplayer_later_not_now",
+      "plan_what_multiplayer_ready_means_here",
+      "plan_what_we_do_now_to_enable_this"
+    ],
+    "8": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch1.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch10.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch11.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch12.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch13.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch14.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch15.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch16.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch2.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch3.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch4.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch5.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch6.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch7.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch8.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switch9.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit1.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit2.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit3.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit4.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit5.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit6.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit7.svg",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/switchSplit8.svg",
+      "concept:railway_switch_sprites",
+      "group:split_switches",
+      "group:standard_switches"
+    ],
+    "9": [
+      "track_track_data",
+      "track_track_data_bridge_underpass_codes",
+      "track_track_data_bridge_underpass_links",
+      "track_track_data_buffer_codes",
+      "track_track_data_buffer_links",
+      "track_track_data_code_tables",
+      "track_track_data_crossover_codes",
+      "track_track_data_crossover_links",
+      "track_track_data_curved_codes",
+      "track_track_data_curved_links",
+      "track_track_data_directed_codes",
+      "track_track_data_directed_links",
+      "track_track_data_exit_codes",
+      "track_track_data_exit_links",
+      "track_track_data_flyover_codes",
+      "track_track_data_flyover_links",
+      "track_track_data_kind_labels",
+      "track_track_data_link_tables",
+      "track_track_data_linked_codes",
+      "track_track_data_linked_links",
+      "track_track_data_signal_codes",
+      "track_track_data_signal_links",
+      "track_track_data_straight_codes",
+      "track_track_data_straight_links",
+      "track_track_data_subtypekey",
+      "track_track_data_switch_codes",
+      "track_track_data_switch_links"
+    ],
+    "10": [
+      "biome",
+      "biome_actions_source",
+      "biome_assist",
+      "biome_assist_actions",
+      "biome_files",
+      "biome_files_ignoreunknown",
+      "biome_files_includes",
+      "biome_formatter",
+      "biome_formatter_enabled",
+      "biome_formatter_indentstyle",
+      "biome_formatter_quotestyle",
+      "biome_javascript",
+      "biome_javascript_formatter",
+      "biome_linter",
+      "biome_linter_enabled",
+      "biome_linter_rules",
+      "biome_rules_recommended",
+      "biome_schema",
+      "biome_source_organizeimports",
+      "biome_vcs",
+      "biome_vcs_clientkind",
+      "biome_vcs_enabled",
+      "biome_vcs_useignorefile"
+    ],
+    "11": [
+      "app_components",
+      "app_components_aliases",
+      "app_components_aliases_components",
+      "app_components_aliases_hooks",
+      "app_components_aliases_lib",
+      "app_components_aliases_ui",
+      "app_components_aliases_utils",
+      "app_components_iconlibrary",
+      "app_components_menuaccent",
+      "app_components_menucolor",
+      "app_components_registries",
+      "app_components_rsc",
+      "app_components_rtl",
+      "app_components_schema",
+      "app_components_style",
+      "app_components_tailwind",
+      "app_components_tailwind_basecolor",
+      "app_components_tailwind_config",
+      "app_components_tailwind_css",
+      "app_components_tailwind_cssvariables",
+      "app_components_tailwind_prefix",
+      "app_components_tsx"
+    ],
+    "12": [
+      "app_package_dependencies",
+      "app_package_dependencies_class_variance_authority",
+      "app_package_dependencies_clsx",
+      "app_package_dependencies_fontsource_variable_jetbrains_mono",
+      "app_package_dependencies_phosphor_icons_react",
+      "app_package_dependencies_pixi_js",
+      "app_package_dependencies_radix_ui",
+      "app_package_dependencies_rail_op_sim_shared",
+      "app_package_dependencies_react",
+      "app_package_dependencies_react_dom",
+      "app_package_dependencies_shadcn",
+      "app_package_dependencies_tailwind_merge",
+      "app_package_dependencies_tailwindcss",
+      "app_package_dependencies_tailwindcss_vite",
+      "app_package_dependencies_tanstack_react_devtools",
+      "app_package_dependencies_tanstack_react_router",
+      "app_package_dependencies_tanstack_react_router_devtools",
+      "app_package_dependencies_tanstack_react_router_ssr_query",
+      "app_package_dependencies_tanstack_react_start",
+      "app_package_dependencies_tanstack_router_plugin",
+      "app_package_dependencies_tw_animate_css",
+      "app_package_dependencies_zustand"
+    ],
+    "13": [
+      "namedlocation_plan",
+      "namedlocation_plan_0_phasing_per_your_framing",
+      "namedlocation_plan_1_key_finding_the_adjacency_spread_is_already_implemented",
+      "namedlocation_plan_2_phase_0_prerequisite_coordinate_unit_mismatch_must_fix",
+      "namedlocation_plan_3_phase_2_the_name_tool",
+      "namedlocation_plan_3a_store_new_tool_pending_target",
+      "namedlocation_plan_3b_click_dispatch",
+      "namedlocation_plan_3c_dialog_set_change_delete",
+      "namedlocation_plan_3d_toolbar_button",
+      "namedlocation_plan_3e_render_check",
+      "namedlocation_plan_4_tests_verification",
+      "namedlocation_plan_5_suggested_order",
+      "namedlocation_plan_6_gap_analysis_railwaybuilder_breakdown_rail_op_sim_status",
+      "namedlocation_plan_7_known_gap_unchanged_out_of_scope_file_save_load",
+      "namedlocation_plan_8_risk_watch_list",
+      "namedlocation_plan_adjacency_spread",
+      "namedlocation_plan_coordinate_fix",
+      "namedlocation_plan_name_tool",
+      "namedlocation_plan_namedlocation",
+      "namedlocation_plan_namedlocation_in_rail_op_sim_implementation_plan_v2",
+      "namedlocation_plan_recommended_fix_minimal_localized",
+      "namedlocation_plan_validation_required_because_it_s_shared"
+    ],
+    "14": [
+      "track_track_track",
+      "track_track_track_addlevelcrossing",
+      "track_track_track_aspecttostring",
+      "track_track_track_getaspect",
+      "track_track_track_getfound",
+      "track_track_track_getlinkat",
+      "track_track_track_getotherlinkedtrack",
+      "track_track_track_getplatform1",
+      "track_track_track_getplatform2",
+      "track_track_track_haslevelcrossing",
+      "track_track_track_haslinkednamedlocation",
+      "track_track_track_hasplatform",
+      "track_track_track_levelcrossingtostring",
+      "track_track_track_platformdata",
+      "track_track_track_platformstostring",
+      "track_track_track_removelevelcrossing",
+      "track_track_track_removeotherlinkedtrack",
+      "track_track_track_secondaryspeedlengthtostring",
+      "track_track_track_setfound",
+      "track_track_track_setotherlinkedtrack",
+      "track_track_track_setplatform1",
+      "track_track_track_setplatform2"
+    ],
+    "15": [
+      "updated_plan",
+      "updated_plan_1_1_what_exists",
+      "updated_plan_1_2_data_model_grid_based_not_graph_based",
+      "updated_plan_1_current_state",
+      "updated_plan_2_scope_railway_builder_only",
+      "updated_plan_3_editor_milestones",
+      "updated_plan_4_files_to_create_summary",
+      "updated_plan_5_dependencies_to_add",
+      "updated_plan_6_rendering_detail_how_each_track_kind_draws",
+      "updated_plan_7_verification_plan",
+      "updated_plan_cell_geometry",
+      "updated_plan_e1_track_rendering",
+      "updated_plan_e2_building_tools",
+      "updated_plan_e3_selection_property_editing",
+      "updated_plan_e4_save_load",
+      "updated_plan_files_to_modify",
+      "updated_plan_kind_specific_details",
+      "updated_plan_link_pixel_edge_mapping",
+      "updated_plan_platform_indicators",
+      "updated_plan_rail_ops_sim_updated_plan_railway_builder_focus",
+      "updated_plan_rail_rendering",
+      "updated_plan_theme_support"
+    ],
+    "16": [
+      "engine_viewportcontroller",
+      "engine_viewportcontroller_viewportcontroller",
+      "engine_viewportcontroller_viewportcontroller_applyzoom",
+      "engine_viewportcontroller_viewportcontroller_attach",
+      "engine_viewportcontroller_viewportcontroller_constructor",
+      "engine_viewportcontroller_viewportcontroller_detach",
+      "engine_viewportcontroller_viewportcontroller_fittoview",
+      "engine_viewportcontroller_viewportcontroller_handlekeydown",
+      "engine_viewportcontroller_viewportcontroller_handlekeyup",
+      "engine_viewportcontroller_viewportcontroller_handlepointerdown",
+      "engine_viewportcontroller_viewportcontroller_handlepointermove",
+      "engine_viewportcontroller_viewportcontroller_handlepointerup",
+      "engine_viewportcontroller_viewportcontroller_handlewheel",
+      "engine_viewportcontroller_viewportcontroller_ispanning",
+      "engine_viewportcontroller_viewportcontroller_notify",
+      "engine_viewportcontroller_viewportcontroller_panto",
+      "engine_viewportcontroller_viewportcontroller_state",
+      "engine_viewportcontroller_viewportcontroller_updatecursor",
+      "engine_viewportcontroller_viewportcontroller_zoomto",
+      "engine_viewportcontroller_viewportcontrolleroptions",
+      "engine_viewportcontroller_viewportstate"
+    ],
+    "17": [
+      "sim_nameelementdialog",
+      "sim_nameelementdialog_getelementat",
+      "sim_nameelementdialog_kind_titles",
+      "sim_nameelementdialog_nameelementdialogprops",
+      "sim_textinputdialog",
+      "sim_textinputdialog_textinputdialog",
+      "sim_textinputdialog_textinputdialogprops",
+      "ui_button",
+      "ui_button_button",
+      "ui_button_buttonvariants",
+      "ui_dialog",
+      "ui_dialog_dialog",
+      "ui_dialog_dialogclose",
+      "ui_dialog_dialogcontent",
+      "ui_dialog_dialogdescription",
+      "ui_dialog_dialogfooter",
+      "ui_dialog_dialogheader",
+      "ui_dialog_dialogoverlay",
+      "ui_dialog_dialogportal",
+      "ui_dialog_dialogtitle",
+      "ui_dialog_dialogtrigger"
+    ],
+    "18": [
+      "dir:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownSet.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformDownUnset.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftSet.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformLeftUnset.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightSet.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformRightUnset.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpSet.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/platformUpUnset.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/select1.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/select2.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/select3.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntDownRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntLeftDownRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntLeftRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntLeftUpRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntRightDownRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntRightRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntRightUpRed.svg",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/shuntUpRed.svg"
+    ],
+    "19": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimCanvas.tsx",
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/button.tsx",
+      "hooks_usetheme",
+      "hooks_usetheme_applytheme",
+      "hooks_usetheme_getinitial",
+      "hooks_usetheme_usetheme",
+      "routes_index",
+      "routes_index_home",
+      "sim_addpalette_addpalette",
+      "sim_nameelementdialog_nameelementdialog",
+      "sim_simlayout",
+      "sim_simlayout_simlayout",
+      "sim_toolbar",
+      "sim_toolbar_toolbar",
+      "sim_toolbar_tools",
+      "store_editor_store_tool",
+      "store_editor_store_useeditorstore"
+    ],
+    "20": [
+      "app_package_devdependencies",
+      "app_package_devdependencies_babel_plugin_react_compiler",
+      "app_package_devdependencies_biomejs_biome",
+      "app_package_devdependencies_jsdom",
+      "app_package_devdependencies_rolldown_plugin_babel",
+      "app_package_devdependencies_tailwindcss_typography",
+      "app_package_devdependencies_tanstack_devtools_vite",
+      "app_package_devdependencies_tanstack_router_cli",
+      "app_package_devdependencies_testing_library_dom",
+      "app_package_devdependencies_testing_library_react",
+      "app_package_devdependencies_types_node",
+      "app_package_devdependencies_types_react",
+      "app_package_devdependencies_types_react_dom",
+      "app_package_devdependencies_typescript",
+      "app_package_devdependencies_vite",
+      "app_package_devdependencies_vitejs_plugin_react",
+      "app_package_devdependencies_vitest"
+    ],
+    "21": [
+      "lib_utils",
+      "lib_utils_cn",
+      "ui_input",
+      "ui_input_input",
+      "ui_select",
+      "ui_select_select",
+      "ui_select_selectcontent",
+      "ui_select_selectgroup",
+      "ui_select_selectitem",
+      "ui_select_selectlabel",
+      "ui_select_selectscrolldownbutton",
+      "ui_select_selectscrollupbutton",
+      "ui_select_selectseparator",
+      "ui_select_selecttrigger",
+      "ui_select_selectvalue",
+      "ui_separator",
+      "ui_separator_separator"
+    ],
+    "22": [
+      "map_index",
+      "map_map_platform",
+      "map_map_platform_addlevelcrossing",
+      "map_map_platform_addplatform",
+      "map_map_text_linking",
+      "map_map_text_linking_changedeletetext",
+      "map_map_text_linking_collectneighbourtexts",
+      "map_map_text_linking_deletetextfromallelements",
+      "map_map_text_linking_linklocaltext",
+      "map_map_text_linking_linknewelementtotext",
+      "map_map_text_linking_neighbor_offsets",
+      "map_map_text_linking_trylinknamedlocationneighbor",
+      "map_map_text_linking_trylinktrackorconcourseorbridge",
+      "railway_enums_platform",
+      "tests_map_platform_test",
+      "tests_map_text_linking_test",
+      "tests_map_text_linking_test_testfont"
+    ],
+    "23": [
+      "package",
+      "package_devdependencies",
+      "package_devdependencies_biomejs_biome",
+      "package_devdependencies_fallow",
+      "package_devdependencies_pngjs",
+      "package_devdependencies_typescript",
+      "package_name",
+      "package_pnpm",
+      "package_pnpm_onlybuiltdependencies",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_check",
+      "package_scripts_dev",
+      "package_scripts_format",
+      "package_scripts_lint",
+      "package_scripts_test"
+    ],
+    "24": [
+      "readme",
+      "readme_adding_a_route",
+      "readme_adding_links",
+      "readme_api_routes",
+      "readme_building_for_production",
+      "readme_data_fetching",
+      "readme_demo_files",
+      "readme_getting_started",
+      "readme_learn_more",
+      "readme_linting_formatting",
+      "readme_removing_tailwind_css",
+      "readme_routing",
+      "readme_server_functions",
+      "readme_shadcn",
+      "readme_styling",
+      "readme_testing",
+      "readme_using_a_layout"
+    ],
+    "25": [
+      "concept:railway-graphics",
+      "concept:signal-graphics",
+      "concept:track-graphics",
+      "file:packages/app/public/graphics/signalDown.svg",
+      "file:packages/app/public/graphics/signalLeft.svg",
+      "file:packages/app/public/graphics/signalLeftDown.svg",
+      "file:packages/app/public/graphics/signalLeftUp.svg",
+      "file:packages/app/public/graphics/signalRight.svg",
+      "file:packages/app/public/graphics/signalRightDown.svg",
+      "file:packages/app/public/graphics/signalRightUp.svg",
+      "file:packages/app/public/graphics/signalUp.svg",
+      "file:packages/app/public/graphics/straightH.svg",
+      "file:packages/app/public/graphics/straightLeftUp.svg",
+      "file:packages/app/public/graphics/straightRightUp.svg",
+      "file:packages/app/public/graphics/straightV.svg"
+    ],
+    "26": [
+      "routes_index_route",
+      "routes_root_route",
+      "src_router",
+      "src_router_getrouter",
+      "src_router_register",
+      "src_routetree_gen",
+      "src_routetree_gen_fileroutesbyfullpath",
+      "src_routetree_gen_fileroutesbyid",
+      "src_routetree_gen_fileroutesbypath",
+      "src_routetree_gen_fileroutesbyto",
+      "src_routetree_gen_fileroutetypes",
+      "src_routetree_gen_indexroute",
+      "src_routetree_gen_register",
+      "src_routetree_gen_rootroutechildren",
+      "src_routetree_gen_routetree"
+    ],
+    "27": [
+      "tsconfig",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowimportingtsextensions",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_nofallthroughcasesinswitch",
+      "tsconfig_compileroptions_nouncheckedsideeffectimports",
+      "tsconfig_compileroptions_nounusedlocals",
+      "tsconfig_compileroptions_nounusedparameters",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target",
+      "tsconfig_compileroptions_verbatimmodulesyntax"
+    ],
+    "28": [
+      "class:Map_",
+      "file:packages/shared/src/railway/__tests__/map-platform.test.ts",
+      "file:packages/shared/src/railway/__tests__/map.test.ts",
+      "file:packages/shared/src/railway/map/map-platform.ts",
+      "function:addLevelCrossing",
+      "function:addPlatform",
+      "symbol:Map_.addLevelCrossing",
+      "symbol:Map_.addNamedLocation",
+      "symbol:Map_.addPlatform",
+      "symbol:Map_.addTrack",
+      "symbol:Map_.checkAllLinkedTrackLinked",
+      "symbol:Map_.checkCanAddNamedLocation",
+      "symbol:Map_.connectTwoLinkedTracks",
+      "symbol:Map_.deleteElement"
+    ],
+    "29": [
+      "enum:BridgeUnderpassType",
+      "enum:BufferType",
+      "enum:CrossoverType",
+      "enum:CurvedType",
+      "enum:DirectedType",
+      "enum:ExitType",
+      "enum:FlyoverType",
+      "enum:LinkedType",
+      "enum:ParapetType",
+      "enum:Platform",
+      "enum:SignalType",
+      "enum:StraightType",
+      "enum:SwitchType",
+      "file:packages/shared/src/railway/enums.ts"
+    ],
+    "30": [
+      "map_map",
+      "map_map_connectivity",
+      "map_map_connectivity_checkalltracksconnected",
+      "map_map_connectivity_findalllinkedtracks",
+      "map_map_connectivity_findunpairedlinkedtracks",
+      "map_map_connectivity_getlinkedtrackpairs",
+      "map_map_connectivity_getlinkedtrackreport",
+      "map_map_connectivity_link_offsets",
+      "map_map_connectivity_linkedtrackpair",
+      "map_map_connectivity_linkedtrackreport",
+      "map_map_map_debug",
+      "map_map_map_getlinkedtrackpairs",
+      "map_map_map_getlinkedtrackreport",
+      "tests_map_connectivity_test"
+    ],
+    "31": [
+      "railway_element_text",
+      "railway_element_text_constructor",
+      "railway_element_text_geteditablex",
+      "railway_element_text_geteditabley",
+      "railway_element_text_getfont",
+      "railway_element_text_getfontsize",
+      "railway_element_text_seteditablex",
+      "railway_element_text_seteditabley",
+      "railway_element_text_setfont",
+      "railway_element_text_setfontsize",
+      "railway_element_text_setreadabletext",
+      "railway_element_text_tosavestring",
+      "railway_element_text_tostring",
+      "railway_types_fontinfo"
+    ],
+    "32": [
+      "railway_errors",
+      "railway_errors_elementalreadyexistserror",
+      "railway_errors_elementalreadyexistserror_constructor",
+      "railway_errors_elementnotfounderror",
+      "railway_errors_elementnotfounderror_constructor",
+      "railway_errors_linkedtrackerror",
+      "railway_errors_linkedtrackerror_constructor",
+      "railway_errors_railwayerror",
+      "railway_errors_railwayerror_constructor",
+      "railway_errors_tracknotconnectederror",
+      "railway_errors_tracknotconnectederror_constructor",
+      "railway_errors_zerotrackerror",
+      "railway_errors_zerotrackerror_constructor",
+      "tests_errors_test"
+    ],
+    "33": [
+      "track_track_track_escapecsv",
+      "track_track_track_gettrackmainlength",
+      "track_track_track_gettrackmainspeed",
+      "track_track_track_gettracksecondarylength",
+      "track_track_track_gettracksecondaryspeed",
+      "track_track_track_islinked",
+      "track_track_track_kindlabel",
+      "track_track_track_mainspeedlengthtostring",
+      "track_track_track_otherlinkedtracktosavestring",
+      "track_track_track_otherlinkedtracktostring",
+      "track_track_track_serializefieldgroups",
+      "track_track_track_subtypecode",
+      "track_track_track_tosavestring",
+      "track_track_track_tostring"
+    ],
+    "34": [
+      "map_map_coordkey",
+      "map_map_map_checkconcourseat",
+      "map_map_map_checknamedlocationat",
+      "map_map_map_checkparapetat",
+      "map_map_map_checktrackconcourseparapetexists",
+      "map_map_map_getconcourseat",
+      "map_map_map_getelementat",
+      "map_map_map_getelementexcludingtrackat",
+      "map_map_map_getnamedelementat",
+      "map_map_map_getnamedlocationat",
+      "map_map_map_getparapetat",
+      "map_map_map_haselementat",
+      "map_map_map_hastrackat"
+    ],
+    "35": [
+      "shared_package",
+      "shared_package_devdependencies",
+      "shared_package_devdependencies_typescript",
+      "shared_package_devdependencies_vitest",
+      "shared_package_main",
+      "shared_package_name",
+      "shared_package_private",
+      "shared_package_scripts",
+      "shared_package_scripts_build",
+      "shared_package_scripts_dev",
+      "shared_package_scripts_test",
+      "shared_package_type",
+      "shared_package_version"
+    ],
+    "36": [
+      "track_index",
+      "track_track",
+      "track_track_data_getlinksforsubtype",
+      "track_track_data_hassecondarypath",
+      "track_track_data_kindtolabel",
+      "track_track_data_subtypetocode",
+      "track_track_data_supportslevelcrossing",
+      "track_track_data_supportsplatforms",
+      "track_track_data_trackdata",
+      "track_track_data_trackkindmeta",
+      "track_track_factory_createtrackdataoptions",
+      "track_track_track_constructor"
+    ],
+    "37": [
+      "app_package_scripts",
+      "app_package_scripts_build",
+      "app_package_scripts_check",
+      "app_package_scripts_dev",
+      "app_package_scripts_format",
+      "app_package_scripts_generate_routes",
+      "app_package_scripts_lint",
+      "app_package_scripts_preview",
+      "app_package_scripts_test"
+    ],
+    "38": [
+      "app_tsconfig",
+      "app_tsconfig_compileroptions",
+      "app_tsconfig_compileroptions_jsx",
+      "app_tsconfig_compileroptions_paths",
+      "app_tsconfig_compileroptions_types",
+      "app_tsconfig_extends",
+      "app_tsconfig_include",
+      "app_tsconfig_paths",
+      "app_tsconfig_paths_rail_op_sim_shared"
+    ],
+    "39": [
+      "claude_md_knowledge_graph",
+      "plan_md_milestones",
+      "plan_md_rail_ops_sim",
+      "updated_plan_md_grid_based_model",
+      "updated_plan_md_map_class",
+      "updated_plan_md_railway_builder",
+      "updated_plan_md_shared_model_complete",
+      "updated_plan_md_shared_railway_package",
+      "updated_plan_md_track_kinds"
+    ],
+    "40": [
+      "file:packages/shared/src/railway/__tests__/map-text-linking.test.ts",
+      "file:packages/shared/src/railway/map/map-text-linking.ts",
+      "file:packages/shared/src/railway/map/map.ts",
+      "function:changeDeleteText",
+      "function:deleteTextFromAllElements",
+      "function:linkLocalText",
+      "function:linkNewElementToText",
+      "symbol:Map_.deleteTextFromAllElements",
+      "symbol:Map_.linkLocalText"
+    ],
+    "41": [
+      "class:Concourse",
+      "class:Element",
+      "class:NamedElement",
+      "class:NamedLocation",
+      "class:Parapet",
+      "class:Text",
+      "file:packages/shared/src/railway/__tests__/element.test.ts",
+      "file:packages/shared/src/railway/element.ts"
+    ],
+    "42": [
+      "entity:packages/shared/src/railway/__tests__/element.test.ts/class/TestElement",
+      "entity:packages/shared/src/railway/__tests__/element.test.ts/class/TestNamedElement",
+      "entity:packages/shared/src/railway/element.ts/class/Concourse",
+      "entity:packages/shared/src/railway/element.ts/class/Element",
+      "entity:packages/shared/src/railway/element.ts/class/NamedElement",
+      "entity:packages/shared/src/railway/element.ts/class/NamedLocation",
+      "entity:packages/shared/src/railway/element.ts/class/Parapet",
+      "entity:packages/shared/src/railway/element.ts/class/Text"
+    ],
+    "43": [
+      "map_map_map_addconcourse",
+      "map_map_map_addparapet",
+      "map_map_map_addtrack",
+      "map_map_map_checkelementexists",
+      "map_map_map_createaddparapet",
+      "map_map_map_getorcreatekindarray",
+      "map_map_map_indexelement",
+      "map_map_mapdebug"
+    ],
+    "44": [
+      "map_map_map_addnamedlocation",
+      "map_map_map_checkcanaddnamedlocation",
+      "map_map_map_createaddconcourse",
+      "map_map_map_createaddnamedlocation",
+      "map_map_map_gettrackat",
+      "map_map_map_gettrackhasplatformat",
+      "map_map_map_haselementexcludingtrack",
+      "map_map_map_linknewelementtotext"
+    ],
+    "45": [
+      "map_map_map_connectlinkedtrack",
+      "map_map_map_connecttwolinkedtracks",
+      "map_map_map_deleteelement",
+      "map_map_map_deletetext",
+      "map_map_map_deletetextfromallelements",
+      "map_map_map_disconnectlinkedtrack",
+      "map_map_map_resetconnectlinkedtrack",
+      "map_map_map_unindexelement"
+    ],
+    "46": [
+      "public_manifest",
+      "public_manifest_background_color",
+      "public_manifest_display",
+      "public_manifest_icons",
+      "public_manifest_name",
+      "public_manifest_short_name",
+      "public_manifest_start_url",
+      "public_manifest_theme_color"
+    ],
+    "47": [
+      "class:ElementAlreadyExistsError",
+      "class:ElementNotFoundError",
+      "class:LinkedTrackError",
+      "class:RailwayError",
+      "class:TrackNotConnectedError",
+      "class:ZeroTrackError",
+      "file:packages/shared/src/railway/errors.ts"
+    ],
+    "48": [
+      "engine_groundlayer",
+      "engine_groundlayer_creategroundlayer",
+      "engine_groundlayer_defaults",
+      "engine_groundlayer_groundlayer",
+      "engine_groundlayer_groundlayeroptions",
+      "engine_groundlayer_nicespacing",
+      "engine_groundlayer_resolve"
+    ],
+    "49": [
+      "plan_md_multiplayer_readiness",
+      "plan_md_pixijs_v8",
+      "plan_md_renderer_ui_separation",
+      "plan_md_simulation_engine",
+      "plan_md_transport_adapter",
+      "updated_plan_md_editor_milestones",
+      "updated_plan_md_m1_pixijs_complete"
+    ],
+    "50": [
+      "routes_root",
+      "routes_root_rootdocument",
+      "ui_tooltip",
+      "ui_tooltip_tooltip",
+      "ui_tooltip_tooltipcontent",
+      "ui_tooltip_tooltipprovider",
+      "ui_tooltip_tooltiptrigger"
+    ],
+    "51": [
+      "entity:/packages/shared/src/railway/types.ts",
+      "file:packages/shared/src/railway/types.ts",
+      "type:FontInfo",
+      "type:MessageCallback",
+      "type:Point",
+      "type:TextSelectionPrompt"
+    ],
+    "52": [
+      "scripts_png_to_svg",
+      "scripts_png_to_svg_encoderow",
+      "scripts_png_to_svg_mergeruns",
+      "scripts_png_to_svg_pngfiles",
+      "scripts_png_to_svg_pngtosvg",
+      "scripts_png_to_svg_rgbtohex"
+    ],
+    "53": [
+      "app_package",
+      "app_package_imports",
+      "app_package_name",
+      "app_package_private",
+      "app_package_type"
+    ],
+    "54": [
+      "entity:/packages/app/src/components/ui/tooltip.tsx",
+      "func:Tooltip",
+      "func:TooltipContent",
+      "func:TooltipProvider",
+      "func:TooltipTrigger"
+    ],
+    "55": [
+      "file:packages/app/src/components/ui/input.tsx",
+      "file:packages/app/src/routes/index.tsx",
+      "func:Input",
+      "module:app"
+    ],
+    "56": [
+      "file:packages/shared/src/index.ts",
+      "file:packages/shared/src/railway/index.ts",
+      "file:packages/shared/src/railway/map/index.ts",
+      "module:shared"
+    ],
+    "57": [
+      "file:packages/shared/src/railway/__tests__/map-connectivity.test.ts",
+      "file:packages/shared/src/railway/map/map-connectivity.ts",
+      "function:checkAllTracksConnected",
+      "symbol:Map_.checkAllTracksConnected"
+    ],
+    "58": [
+      "map_map_map_addtext",
+      "map_map_map_createaddlinktext",
+      "map_map_map_createaddtext",
+      "map_map_map_linklocaltext"
+    ],
+    "59": [
+      "railway_types",
+      "railway_types_messagecallback",
+      "railway_types_point",
+      "railway_types_textselectionprompt"
+    ],
+    "60": [
+      "engine_pixiapp",
+      "engine_pixiapp_createpixiapp",
+      "engine_pixiapp_default_options"
+    ],
+    "61": [
+      "entity:/packages/app/tsconfig.json",
+      "entity:/packages/shared/tsconfig.json",
+      "entity:/tsconfig.json"
+    ],
+    "62": [
+      "file:/Users/jonathankwok/projects/rail-op-sim/.vscode/settings.json",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routeTree.gen.ts",
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/router.tsx"
+    ],
+    "63": [
+      "file:package.json",
+      "file:packages/app/package.json",
+      "file:packages/shared/package.json"
+    ],
+    "64": [
+      "file:packages/app/public/graphics/parapet25.svg",
+      "file:packages/app/public/graphics/parapet26.svg",
+      "file:packages/app/public/graphics/parapet27.svg"
+    ],
+    "65": [
+      "file:packages/app/public/graphics/parapet7.svg",
+      "file:packages/app/public/graphics/parapet8.svg",
+      "file:packages/app/public/graphics/parapet9.svg"
+    ],
+    "66": [
+      "map_map_map_checktextexists",
+      "map_map_map_gettextat",
+      "map_map_map_settexttomove"
+    ],
+    "67": [
+      "shared_tsconfig",
+      "shared_tsconfig_extends",
+      "shared_tsconfig_include"
+    ],
+    "68": [
+      "app_vite_config",
+      "app_vite_config_config"
+    ],
+    "69": [
+      "claude",
+      "claude_graphify"
+    ],
+    "70": [
+      "file:packages/app/public/graphics/parapet1.svg",
+      "file:packages/app/public/graphics/parapet11.svg"
+    ],
+    "71": [
+      "file:packages/app/public/graphics/parapet10.svg",
+      "file:packages/app/public/graphics/parapet16.svg"
+    ],
+    "72": [
+      "file:packages/app/public/graphics/parapet12.svg",
+      "file:packages/app/public/graphics/parapet13.svg"
+    ],
+    "73": [
+      "file:packages/app/public/graphics/parapet14.svg",
+      "file:packages/app/public/graphics/parapet15.svg"
+    ],
+    "74": [
+      "file:packages/app/public/graphics/parapet17.svg",
+      "file:packages/app/public/graphics/parapet18.svg"
+    ],
+    "75": [
+      "file:packages/app/public/graphics/parapet2.svg",
+      "file:packages/app/public/graphics/parapet6.svg"
+    ],
+    "76": [
+      "file:packages/app/public/graphics/parapet21.svg",
+      "file:packages/app/public/graphics/parapet24.svg"
+    ],
+    "77": [
+      "file:packages/app/public/graphics/parapet22.svg",
+      "file:packages/app/public/graphics/parapet23.svg"
+    ],
+    "78": [
+      "file:packages/app/public/graphics/parapet3.svg",
+      "file:packages/app/public/graphics/parapet5.svg"
+    ],
+    "79": [
+      "/Users/jonathankwok/projects/rail-op-sim/.cta.json"
+    ],
+    "80": [
+      "/Users/jonathankwok/projects/rail-op-sim/biome.json"
+    ],
+    "81": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/components.json"
+    ],
+    "82": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bridgeSet1.svg"
+    ],
+    "83": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bridgeSet2.svg"
+    ],
+    "84": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bridgeUnset1.svg"
+    ],
+    "85": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bridgeUnset2.svg"
+    ],
+    "86": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferDown.svg"
+    ],
+    "87": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferLeft.svg"
+    ],
+    "88": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferLeftDown.svg"
+    ],
+    "89": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferLeftUp.svg"
+    ],
+    "90": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferRight.svg"
+    ],
+    "91": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferRightDown.svg"
+    ],
+    "92": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferRightUp.svg"
+    ],
+    "93": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/bufferUp.svg"
+    ],
+    "94": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/concourseSet.svg"
+    ],
+    "95": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/public/graphics/concourseUnset.svg"
+    ],
+    "96": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/sim/SimLayout.tsx"
+    ],
+    "97": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/GroundLayer.ts"
+    ],
+    "98": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/engine/PixiApp.ts"
+    ],
+    "99": [
+      "/Users/jonathankwok/projects/rail-op-sim/packages/app/src/routes/__root.tsx"
+    ],
+    "100": [
+      "BridgeUnderpassType"
+    ],
+    "101": [
+      "BufferType"
+    ],
+    "102": [
+      "Button"
+    ],
+    "103": [
+      "CrossoverType"
+    ],
+    "104": [
+      "CurvedType"
+    ],
+    "105": [
+      "DirectedType"
+    ],
+    "106": [
+      "ElementAlreadyExistsError"
+    ],
+    "107": [
+      "ElementNotFoundError"
+    ],
+    "108": [
+      "ExitType"
+    ],
+    "109": [
+      "FlyoverType"
+    ],
+    "110": [
+      "GroundLayer"
+    ],
+    "111": [
+      "GroundLayerOptions"
+    ],
+    "112": [
+      "LinkedTrackError"
+    ],
+    "113": [
+      "LinkedType"
+    ],
+    "114": [
+      "ParapetType"
+    ],
+    "115": [
+      "Platform"
+    ],
+    "116": [
+      "RailwayError"
+    ],
+    "117": [
+      "RootDocument"
+    ],
+    "118": [
+      "Route"
+    ],
+    "119": [
+      "SignalType"
+    ],
+    "120": [
+      "SimCanvas"
+    ],
+    "121": [
+      "SimLayout"
+    ],
+    "122": [
+      "StraightType"
+    ],
+    "123": [
+      "SwitchType"
+    ],
+    "124": [
+      "TooltipProvider"
+    ],
+    "125": [
+      "TrackNotConnectedError"
+    ],
+    "126": [
+      "ViewportController"
+    ],
+    "127": [
+      "ViewportState"
+    ],
+    "128": [
+      "ZeroTrackError"
+    ],
+    "129": [
+      "buttonVariants"
+    ],
+    "130": [
+      "createGroundLayer"
+    ],
+    "131": [
+      "createPixiApp"
+    ],
+    "132": [
+      "entity:/packages/app/public/graphics/underpassSet1.svg"
+    ],
+    "133": [
+      "entity:/packages/app/public/graphics/underpassSet2.svg"
+    ],
+    "134": [
+      "entity:/packages/app/public/graphics/underpassUnset1.svg"
+    ],
+    "135": [
+      "entity:/packages/app/public/graphics/underpassUnset2.svg"
+    ],
+    "136": [
+      "entity:/packages/app/tsr.config.json"
+    ],
+    "137": [
+      "entity:packages/app/src/components/ui/dialog.tsx/import/Button"
+    ],
+    "138": [
+      "entity:packages/app/src/components/ui/dialog.tsx/import/DialogPrimitive"
+    ],
+    "139": [
+      "entity:packages/app/src/components/ui/dialog.tsx/import/XIcon"
+    ],
+    "140": [
+      "entity:packages/app/src/components/ui/dialog.tsx/import/cn"
+    ],
+    "141": [
+      "entity:packages/shared/src/railway/element.ts/import/FontInfo"
+    ],
+    "142": [
+      "entity:packages/shared/src/railway/element.ts/import/ParapetType"
+    ],
+    "143": [
+      "enums.test.ts"
+    ],
+    "144": [
+      "enums.ts"
+    ],
+    "145": [
+      "errors.test.ts"
+    ],
+    "146": [
+      "errors.ts"
+    ],
+    "147": [
+      "exitDown.svg"
+    ],
+    "148": [
+      "exitLeft.svg"
+    ],
+    "149": [
+      "exitLeftDown.svg"
+    ],
+    "150": [
+      "exitLeftUp.svg"
+    ],
+    "151": [
+      "exitRight.svg"
+    ],
+    "152": [
+      "exitRightDown.svg"
+    ],
+    "153": [
+      "exitRightUp.svg"
+    ],
+    "154": [
+      "exitUp.svg"
+    ],
+    "155": [
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/select.tsx"
+    ],
+    "156": [
+      "file:/Users/jonathankwok/projects/rail-op-sim/packages/app/src/components/ui/separator.tsx"
+    ],
+    "157": [
+      "file:/Users/jonathankwok/projects/rail-op-sim/scripts/png-to-svg.mjs"
+    ],
+    "158": [
+      "file:packages/app/public/graphics/crossover1.svg"
+    ],
+    "159": [
+      "file:packages/app/public/graphics/crossover2.svg"
+    ],
+    "160": [
+      "file:packages/app/public/graphics/crossover3.svg"
+    ],
+    "161": [
+      "file:packages/app/public/graphics/crossover4.svg"
+    ],
+    "162": [
+      "file:packages/app/public/graphics/crossover5.svg"
+    ],
+    "163": [
+      "file:packages/app/public/graphics/crossover6.svg"
+    ],
+    "164": [
+      "file:packages/app/public/graphics/curve1.svg"
+    ],
+    "165": [
+      "file:packages/app/public/graphics/curve2.svg"
+    ],
+    "166": [
+      "file:packages/app/public/graphics/curve3.svg"
+    ],
+    "167": [
+      "file:packages/app/public/graphics/curve4.svg"
+    ],
+    "168": [
+      "file:packages/app/public/graphics/curve5.svg"
+    ],
+    "169": [
+      "file:packages/app/public/graphics/curve6.svg"
+    ],
+    "170": [
+      "file:packages/app/public/graphics/curve7.svg"
+    ],
+    "171": [
+      "file:packages/app/public/graphics/curve8.svg"
+    ],
+    "172": [
+      "file:packages/app/public/graphics/directDown.svg"
+    ],
+    "173": [
+      "file:packages/app/public/graphics/directLeft.svg"
+    ],
+    "174": [
+      "file:packages/app/public/graphics/directLeftDown.svg"
+    ],
+    "175": [
+      "file:packages/app/public/graphics/directLeftUp.svg"
+    ],
+    "176": [
+      "file:packages/app/public/graphics/directRight.svg"
+    ],
+    "177": [
+      "file:packages/app/public/graphics/directRightDown.svg"
+    ],
+    "178": [
+      "file:packages/app/public/graphics/directRightUp.svg"
+    ],
+    "179": [
+      "file:packages/app/public/graphics/directUp.svg"
+    ],
+    "180": [
+      "file:packages/app/public/graphics/namedLocationSet.svg"
+    ],
+    "181": [
+      "file:packages/app/public/graphics/namedLocationUnset.svg"
+    ],
+    "182": [
+      "file:packages/app/public/graphics/parapet19.svg"
+    ],
+    "183": [
+      "file:packages/app/public/graphics/parapet20.svg"
+    ],
+    "184": [
+      "file:packages/app/public/graphics/parapet28.svg"
+    ],
+    "185": [
+      "file:packages/app/public/graphics/parapet4.svg"
+    ],
+    "186": [
+      "file:packages/app/public/manifest.json"
+    ],
+    "187": [
+      "file:packages/app/src/components/ui/dialog.tsx"
+    ],
+    "188": [
+      "flyover1.svg"
+    ],
+    "189": [
+      "flyover10.svg"
+    ],
+    "190": [
+      "flyover11.svg"
+    ],
+    "191": [
+      "flyover12.svg"
+    ],
+    "192": [
+      "flyover2.svg"
+    ],
+    "193": [
+      "flyover3.svg"
+    ],
+    "194": [
+      "flyover4.svg"
+    ],
+    "195": [
+      "flyover5.svg"
+    ],
+    "196": [
+      "flyover6.svg"
+    ],
+    "197": [
+      "flyover7.svg"
+    ],
+    "198": [
+      "flyover8.svg"
+    ],
+    "199": [
+      "flyover9.svg"
+    ],
+    "200": [
+      "graphics_aspect2_twospect"
+    ],
+    "201": [
+      "graphics_aspect3_threespect"
+    ],
+    "202": [
+      "graphics_aspect4_fouraspect"
+    ],
+    "203": [
+      "graphics_aspectshunt_shunt"
+    ],
+    "204": [
+      "niceSpacing"
+    ],
+    "205": [
+      "pnpm_workspace_yaml_config"
+    ],
+    "206": [
+      "svg:levelCrossingIcon"
+    ],
+    "207": [
+      "symbol:Map_.constructor"
+    ],
+    "208": [
+      "usePixiApp"
+    ],
+    "209": [
+      "useTheme"
+    ]
+  },
+  "cohesion": {
+    "0": 0.05384615384615385,
+    "1": 0.06207482993197279,
+    "2": 0.09358974358974359,
+    "3": 0.16153846153846155,
+    "4": 0.08250355618776671,
+    "5": 0.05714285714285714,
+    "6": 0.05714285714285714,
+    "7": 0.06666666666666667,
+    "8": 0.1349206349206349,
+    "9": 0.07407407407407407,
+    "10": 0.08695652173913043,
+    "11": 0.09090909090909091,
+    "12": 0.09090909090909091,
+    "13": 0.10822510822510822,
+    "14": 0.12554112554112554,
+    "15": 0.09090909090909091,
+    "16": 0.14285714285714285,
+    "17": 0.1619047619047619,
+    "18": 0.1,
+    "19": 0.17647058823529413,
+    "20": 0.11764705882352941,
+    "21": 0.21323529411764705,
+    "22": 0.25,
+    "23": 0.11764705882352941,
+    "24": 0.11764705882352941,
+    "25": 0.13333333333333333,
+    "26": 0.19047619047619047,
+    "27": 0.13333333333333333,
+    "28": 0.16483516483516483,
+    "29": 0.14285714285714285,
+    "30": 0.32967032967032966,
+    "31": 0.17582417582417584,
+    "32": 0.26373626373626374,
+    "33": 0.2087912087912088,
+    "34": 0.15384615384615385,
+    "35": 0.15384615384615385,
+    "36": 0.30303030303030304,
+    "37": 0.2222222222222222,
+    "38": 0.2222222222222222,
+    "39": 0.2222222222222222,
+    "40": 0.2777777777777778,
+    "41": 0.42857142857142855,
+    "42": 0.25,
+    "43": 0.32142857142857145,
+    "44": 0.2857142857142857,
+    "45": 0.25,
+    "46": 0.25,
+    "47": 0.5238095238095238,
+    "48": 0.2857142857142857,
+    "49": 0.2857142857142857,
+    "50": 0.3333333333333333,
+    "51": 0.5333333333333333,
+    "52": 0.4,
+    "53": 0.4,
+    "54": 0.4,
+    "55": 0.5,
+    "56": 0.5,
+    "57": 0.5,
+    "58": 0.5,
+    "59": 0.5,
+    "60": 0.6666666666666666,
+    "61": 0.6666666666666666,
+    "62": 0.6666666666666666,
+    "63": 1.0,
+    "64": 0.6666666666666666,
+    "65": 0.6666666666666666,
+    "66": 1.0,
+    "67": 0.6666666666666666,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0,
+    "118": 1.0,
+    "119": 1.0,
+    "120": 1.0,
+    "121": 1.0,
+    "122": 1.0,
+    "123": 1.0,
+    "124": 1.0,
+    "125": 1.0,
+    "126": 1.0,
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "130": 1.0,
+    "131": 1.0,
+    "132": 1.0,
+    "133": 1.0,
+    "134": 1.0,
+    "135": 1.0,
+    "136": 1.0,
+    "137": 1.0,
+    "138": 1.0,
+    "139": 1.0,
+    "140": 1.0,
+    "141": 1.0,
+    "142": 1.0,
+    "143": 1.0,
+    "144": 1.0,
+    "145": 1.0,
+    "146": 1.0,
+    "147": 1.0,
+    "148": 1.0,
+    "149": 1.0,
+    "150": 1.0,
+    "151": 1.0,
+    "152": 1.0,
+    "153": 1.0,
+    "154": 1.0,
+    "155": 1.0,
+    "156": 1.0,
+    "157": 1.0,
+    "158": 1.0,
+    "159": 1.0,
+    "160": 1.0,
+    "161": 1.0,
+    "162": 1.0,
+    "163": 1.0,
+    "164": 1.0,
+    "165": 1.0,
+    "166": 1.0,
+    "167": 1.0,
+    "168": 1.0,
+    "169": 1.0,
+    "170": 1.0,
+    "171": 1.0,
+    "172": 1.0,
+    "173": 1.0,
+    "174": 1.0,
+    "175": 1.0,
+    "176": 1.0,
+    "177": 1.0,
+    "178": 1.0,
+    "179": 1.0,
+    "180": 1.0,
+    "181": 1.0,
+    "182": 1.0,
+    "183": 1.0,
+    "184": 1.0,
+    "185": 1.0,
+    "186": 1.0,
+    "187": 1.0,
+    "188": 1.0,
+    "189": 1.0,
+    "190": 1.0,
+    "191": 1.0,
+    "192": 1.0,
+    "193": 1.0,
+    "194": 1.0,
+    "195": 1.0,
+    "196": 1.0,
+    "197": 1.0,
+    "198": 1.0,
+    "199": 1.0,
+    "200": 1.0,
+    "201": 1.0,
+    "202": 1.0,
+    "203": 1.0,
+    "204": 1.0,
+    "205": 1.0,
+    "206": 1.0,
+    "207": 1.0,
+    "208": 1.0,
+    "209": 1.0
+  },
+  "gods": [
+    {
+      "id": "map_map_map",
+      "label": "Map_",
+      "degree": 89
+    },
+    {
+      "id": "track_track_track",
+      "label": "Track",
+      "degree": 48
+    },
+    {
+      "id": "plan_implementation_milestones",
+      "label": "Implementation Milestones",
+      "degree": 35
+    },
+    {
+      "id": "engine_placementcontroller_placementcontroller",
+      "label": "PlacementController",
+      "degree": 26
+    },
+    {
+      "id": "lib_utils_cn",
+      "label": "cn()",
+      "degree": 25
+    },
+    {
+      "id": "railway_element_text",
+      "label": "Text",
+      "degree": 23
+    },
+    {
+      "id": "engine_viewportcontroller_viewportcontroller",
+      "label": "ViewportController",
+      "degree": 20
+    },
+    {
+      "id": "railway_element_namedelement",
+      "label": "NamedElement",
+      "degree": 16
+    },
+    {
+      "id": "railway_element_element",
+      "label": "Element",
+      "degree": 15
+    },
+    {
+      "id": "map_map_coordkey",
+      "label": "coordKey()",
+      "degree": 15
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Knowledge Graph Project Rules",
+      "target": "Rail Ops Sim",
+      "source_files": [
+        "CLAUDE.md",
+        "PLAN.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "references",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "Grid-Based Tile Data Model",
+      "target": "Rail Ops Sim",
+      "source_files": [
+        "UPDATED_PLAN.md",
+        "PLAN.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "Railway Builder Scope Update",
+      "target": "Rail Ops Sim",
+      "source_files": [
+        "UPDATED_PLAN.md",
+        "PLAN.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "DialogOverlay()",
+      "target": "cn()",
+      "source_files": [
+        "packages/app/src/components/ui/dialog.tsx",
+        "packages/app/src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities; peripheral node `DialogOverlay()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "DialogDescription()",
+      "target": "cn()",
+      "source_files": [
+        "packages/app/src/components/ui/dialog.tsx",
+        "packages/app/src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities; peripheral node `DialogDescription()` unexpectedly reaches hub `cn()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `Map_` connect `Community 5` to `Community 0`, `Community 34`, `Community 66`, `Community 3`, `Community 43`, `Community 44`, `Community 45`, `Community 22`, `Community 58`, `Community 30`?",
+      "why": "High betweenness centrality (0.052) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Track` connect `Community 14` to `Community 0`, `Community 33`, `Community 2`, `Community 3`, `Community 36`, `Community 30`?",
+      "why": "High betweenness centrality (0.043) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `ViewportController` connect `Community 16` to `Community 0`?",
+      "why": "High betweenness centrality (0.024) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `$schema`, `enabled`, `clientKind` to the rest of the system?",
+      "why": "321 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05384615384615385 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06207482993197279 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.09358974358974359 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

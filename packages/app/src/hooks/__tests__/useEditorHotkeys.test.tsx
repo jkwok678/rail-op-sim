@@ -6,12 +6,18 @@ import {
 	type TimetableIssue,
 } from "@rail-op-sim/shared";
 import { cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEditorHotkeys } from "#/hooks/useEditorHotkeys";
-import { SHORTCUTS } from "#/lib/shortcuts";
+import { loadDocument, saveDocument } from "#/lib/documentActions";
+import { SHORTCUTS, shortcutDisplay } from "#/lib/shortcuts";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
+
+vi.mock("#/lib/documentActions", () => ({
+	saveDocument: vi.fn(),
+	loadDocument: vi.fn(async () => {}),
+}));
 
 /**
  * Exercises the bindings end to end against a real DOM, because the things most
@@ -60,15 +66,21 @@ const reset = () => {
 
 /** Press a key on the document, the way the manager hears it. */
 const press = (key: string, init: KeyboardEventInit = {}) => {
-	document.dispatchEvent(
-		new KeyboardEvent("keydown", {
-			key,
-			bubbles: true,
-			cancelable: true,
-			...init,
-		}),
-	);
+	const event = new KeyboardEvent("keydown", {
+		key,
+		bubbles: true,
+		cancelable: true,
+		...init,
+	});
+	document.dispatchEvent(event);
+	return event;
 };
+
+/** Modifier flags matching `Mod` on whatever platform jsdom reports. */
+const modInit = (): KeyboardEventInit =>
+	shortcutDisplay("save").startsWith("⌘")
+		? { metaKey: true }
+		: { ctrlKey: true };
 
 describe("useEditorHotkeys", () => {
 	beforeEach(reset);
@@ -79,6 +91,7 @@ describe("useEditorHotkeys", () => {
 	// won't toggle.
 	afterEach(() => {
 		cleanup();
+		vi.clearAllMocks();
 		document.body.innerHTML = "";
 	});
 
@@ -214,6 +227,25 @@ describe("useEditorHotkeys", () => {
 		press(String(SHORTCUTS.toggleGrid.hotkey));
 		expect(useEditorStore.getState().showGrid).toBe(false);
 	});
+
+	it("suppresses save and load hotkeys in operate mode without letting browser defaults through", () => {
+		const { rerender } = render(<Harness />);
+		press("s", modInit());
+		press("o", modInit());
+		expect(saveDocument).toHaveBeenCalledOnce();
+		expect(loadDocument).toHaveBeenCalledOnce();
+
+		vi.clearAllMocks();
+		useModeStore.setState({ mode: "operate" });
+		rerender(<Harness />);
+
+		const saveEvent = press("s", modInit());
+		const loadEvent = press("o", modInit());
+		expect(saveDocument).not.toHaveBeenCalled();
+		expect(loadDocument).not.toHaveBeenCalled();
+		expect(saveEvent.defaultPrevented).toBe(true);
+		expect(loadEvent.defaultPrevented).toBe(true);
+	});
 });
 
 const twoServices = (): Timetable => ({
@@ -253,6 +285,7 @@ describe("timetable list keys", () => {
 	beforeEach(reset);
 	afterEach(() => {
 		cleanup();
+		vi.clearAllMocks();
 		document.body.innerHTML = "";
 	});
 

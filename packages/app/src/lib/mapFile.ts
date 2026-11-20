@@ -9,7 +9,6 @@ import {
 	encodeDocument,
 	inferDocumentFormat,
 	type LoadedDocument,
-	pickAndReadDocument,
 } from "#/lib/documentFile";
 
 /**
@@ -79,7 +78,9 @@ export function downloadMap(
 }
 
 /** Minimal structural check that a parsed object is a supported SerializedMap. */
-function assertSerializedMap(value: unknown): asserts value is SerializedMap {
+export function assertSerializedMap(
+	value: unknown,
+): asserts value is SerializedMap {
 	if (typeof value !== "object" || value === null) {
 		throw new InvalidMapFileError("File is not a valid map (not an object).");
 	}
@@ -98,13 +99,4 @@ function assertSerializedMap(value: unknown): asserts value is SerializedMap {
 	) {
 		throw new InvalidMapFileError("File is missing required map sections.");
 	}
-}
-
-/**
- * Open a file picker and resolve with the parsed {@link SerializedMap} plus the
- * encoding it used. Rejects with an {@link InvalidMapFileError} if the chosen
- * file is malformed. Resolves `null` if the user cancels the picker.
- */
-export function pickAndReadMapFile(): Promise<LoadedMapFile | null> {
-	return pickAndReadDocument(parseMapText);
 }

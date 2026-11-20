@@ -1,3 +1,4 @@
+import { MinHeap } from "../../util/min-heap";
 import { Concourse, type NamedElement, NamedLocation } from "../element";
 import { type PreferredDirection, Track } from "../track/track";
 import { getDirectedFlow, isTraversableLinkPair } from "../track/track-data";
@@ -304,16 +305,22 @@ export interface PathOptions {
 	respectOneWay?: boolean;
 }
 
-/** A BFS node: a track reached through a given entry link (null for `start`). */
+/** A search node: a track reached through a given entry link (null for `start`). */
 interface PathNode {
 	track: Track;
 	/** Link index the track was entered by, or `null` for the start track. */
 	entry: number | null;
 	prev: PathNode | null;
+	/** Tracks stepped onto so far. */
+	steps: number;
+	/** Tracks so far run through other than straight across. */
+	bends: number;
 }
 
 /**
- * Find the shortest path between two tracks using BFS.
+ * Find the shortest path between two tracks: the fewest tracks, and of paths
+ * as short, the one with fewest bends — so it runs straight through points
+ * rather than round a loop or over a crossover and back.
  * Returns the path as an array of tracks (inclusive of start and end),
  * or `null` if the tracks are in disconnected components.
  *
@@ -349,17 +356,17 @@ export function findPathBetween(
 	for (const t of trackList) t.setFound(false);
 
 	/** Entry links already expanded per track (`-1` = the start track). */
-	const visited = new Map<Track, Set<number>>();
-	const markVisited = (track: Track, entry: number | null): boolean => {
-		let entries = visited.get(track);
+	const settled = new Map<Track, Set<number>>();
+	const settle = (node: PathNode): boolean => {
+		let entries = settled.get(node.track);
 		if (entries === undefined) {
 			entries = new Set();
-			visited.set(track, entries);
+			settled.set(node.track, entries);
 		}
-		const key = entry ?? -1;
+		const key = node.entry ?? -1;
 		if (entries.has(key)) return false;
 		entries.add(key);
-		track.setFound(true);
+		node.track.setFound(true);
 		return true;
 	};
 
@@ -377,6 +384,32 @@ export function findPathBetween(
 		return flow === null || entry === flow.entry;
 	};
 
+	/** Whether `node` may be left by `exit`. */
+	const canLeave = (node: PathNode, exit: number): boolean =>
+		node.entry === null ||
+		isTraversableLinkPair(
+			node.track.data.kind,
+			node.track.data.subtype,
+			node.entry,
+			exit,
+			opts.respectOneWay,
+		);
+
+	/** The node for stepping off `from` by `exit` onto `track` by `entry`. */
+	const stepTo = (
+		from: PathNode,
+		exit: number,
+		track: Track,
+		entry: number,
+	): PathNode => ({
+		track,
+		entry,
+		prev: from,
+		steps: from.steps + 1,
+		bends:
+			from.bends + (from.entry === null || from.entry + exit === 8 ? 0 : 1),
+	});
+
 	// A one-way start track can only be left by its arrow, so seed the search
 	// with the arrow's entry edge instead of leaving it unconstrained.
 	const startEntry =
@@ -385,81 +418,54 @@ export function findPathBetween(
 			: null;
 
 	const step = map.getImageSize();
-	const queue: PathNode[] = [{ track: start, entry: startEntry, prev: null }];
-	markVisited(start, startEntry);
+	const queue = new MinHeap<PathNode>((a, b) =>
+		a.steps !== b.steps ? a.steps < b.steps : a.bends < b.bends,
+	);
+	queue.push({
+		track: start,
+		entry: startEntry,
+		prev: null,
+		steps: 0,
+		bends: 0,
+	});
 	let goal: PathNode | null = null;
 
-	while (queue.length > 0 && goal === null) {
-		const current = queue.shift()!;
+	while (queue.size > 0) {
+		const current = queue.pop() as PathNode;
+		if (current.track === end) {
+			goal = current;
+			break;
+		}
+		if (!settle(current)) continue;
 		const cx = current.track.getLocationX();
 		const cy = current.track.getLocationY();
 
-		for (let link = 0; link <= 8 && goal === null; link++) {
+		for (let link = 0; link <= 8; link++) {
 			if (link === 4) continue;
-			if (!current.track.getLinkAt(link)) continue;
-			if (
-				current.entry !== null &&
-				!isTraversableLinkPair(
-					current.track.data.kind,
-					current.track.data.subtype,
-					current.entry,
-					link,
-					opts.respectOneWay,
-				)
-			) {
-				continue;
-			}
-
+			if (!current.track.getLinkAt(link) || !canLeave(current, link)) continue;
 			const [dx, dy] = LINK_OFFSETS[link];
 			const neighbor = map.getTrackAt(cx + dx * step, cy + dy * step);
-			if (!neighbor) continue;
-
 			// The neighbour is entered by its opposite link.
-			const entry = 8 - link;
-			if (!canEnter(neighbor, entry)) continue;
-			if (!markVisited(neighbor, entry)) continue;
-
-			const node: PathNode = { track: neighbor, entry, prev: current };
-			if (neighbor === end) {
-				goal = node;
-			} else {
-				queue.push(node);
-			}
+			if (!neighbor || !canEnter(neighbor, 8 - link)) continue;
+			if (settled.get(neighbor)?.has(8 - link)) continue;
+			queue.push(stepTo(current, link, neighbor, 8 - link));
 		}
 
 		// Hop through a paired portal: leave via this cell's mouth, arrive
 		// via the partner's mouth. A U-turn back through the same mouth is
 		// rejected by isTraversableLinkPair (entry === exit).
-		if (goal === null) {
-			const partner = current.track.getOtherLinkedTrack();
-			const mouth = portalMouthLink(current.track);
-			const partnerMouth = partner ? portalMouthLink(partner) : null;
-			if (
-				partner &&
-				mouth !== null &&
-				partnerMouth !== null &&
-				(current.entry === null ||
-					isTraversableLinkPair(
-						current.track.data.kind,
-						current.track.data.subtype,
-						current.entry,
-						mouth,
-						opts.respectOneWay,
-					)) &&
-				canEnter(partner, partnerMouth) &&
-				markVisited(partner, partnerMouth)
-			) {
-				const node: PathNode = {
-					track: partner,
-					entry: partnerMouth,
-					prev: current,
-				};
-				if (partner === end) {
-					goal = node;
-				} else {
-					queue.push(node);
-				}
-			}
+		const partner = current.track.getOtherLinkedTrack();
+		const mouth = portalMouthLink(current.track);
+		const partnerMouth = partner ? portalMouthLink(partner) : null;
+		if (
+			partner &&
+			mouth !== null &&
+			partnerMouth !== null &&
+			canLeave(current, mouth) &&
+			canEnter(partner, partnerMouth) &&
+			!settled.get(partner)?.has(partnerMouth)
+		) {
+			queue.push(stepTo(current, mouth, partner, partnerMouth));
 		}
 	}
 
@@ -740,7 +746,7 @@ export function portalMouthLink(track: Track): number | null {
 }
 
 /** Grid neighbour through an active link, or the portal partner through a mouth. */
-function neighborThroughLink(
+export function neighborThroughLink(
 	map: Map_,
 	track: Track,
 	link: number,
@@ -757,7 +763,7 @@ function neighborThroughLink(
 }
 
 /** Entry link the neighbour must expose to receive travel leaving via `link`. */
-function expectedEntryOnNeighbor(
+export function expectedEntryOnNeighbor(
 	track: Track,
 	link: number,
 	neighbor: Track,
@@ -773,7 +779,9 @@ function expectedEntryOnNeighbor(
  * when the pair is locally legal and continues (or is allowed to stop).
  *
  * Incomplete routes — a neighbour with no preferred directions of its own —
- * are not issues. A portal mouth, though, must continue on the partner:
+ * are not issues, nor is one direction of a two-way cell ending against a
+ * one-way neighbour while the other direction crosses (RailOS lays out
+ * reversible stretches that way). A portal mouth, though, must continue on the partner:
  * that is the only way a route crosses the hop.
  */
 export function preferredDirectionIssue(
@@ -815,16 +823,26 @@ export function preferredDirectionIssue(
 		if (!neighbor) return "no-neighbor";
 		const recip = expectedEntryOnNeighbor(track, link, neighbor);
 		if (recip === null || !neighbor.getLinkAt(recip)) return "no-reciprocal";
-		if (
-			neighbor.hasPreferredDirection() &&
-			!neighbor
+		if (!neighbor.hasPreferredDirection()) continue;
+		// Does the neighbour carry travel across this link in the given sense?
+		const carries = (leaving: boolean): boolean =>
+			neighbor
 				.getPreferredDirections()
-				.some((p) =>
-					link === pair.exit ? p.entry === recip : p.exit === recip,
-				)
-		) {
-			return "no-continuation";
-		}
+				.some((p) => (leaving ? p.entry === recip : p.exit === recip));
+		if (carries(link === pair.exit)) continue;
+		// A two-way stretch may end where the line turns one-way: the pair
+		// against the one-way flow stops here, as long as another pair on this
+		// cell crosses the same link and carries on. Without one, nothing
+		// crosses the boundary and the neighbours contradict each other.
+		const crossed = track
+			.getPreferredDirections()
+			.some(
+				(q) =>
+					(q.entry !== pair.entry || q.exit !== pair.exit) &&
+					((q.exit === link && carries(true)) ||
+						(q.entry === link && carries(false))),
+			);
+		if (!crossed) return "no-continuation";
 	}
 	return null;
 }

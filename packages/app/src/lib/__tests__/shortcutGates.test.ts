@@ -9,7 +9,6 @@ const state = (
 	canUndo: true,
 	canRedo: true,
 	railwayConnected: true,
-	timetableBlocked: false,
 	editDialogOpen: false,
 	shortcutsOpen: false,
 	timetableCanStep: false,
@@ -50,10 +49,10 @@ describe("liveShortcuts", () => {
 		);
 	});
 
-	it("follows the switcher in refusing an incomplete railway's timetable", () => {
-		expect(liveShortcuts(state({ timetableBlocked: true })).modeTimetable).toBe(
-			false,
-		);
+	it("leaves a gated mode's key live so the refusal reaches the notice", () => {
+		const live = liveShortcuts(state());
+		expect(live.modeTimetable).toBe(true);
+		expect(live.modeOperate).toBe(true);
 	});
 
 	it("silences single keys behind the shortcuts overlay, except the one that closes it", () => {
@@ -113,5 +112,66 @@ describe("liveShortcuts", () => {
 		expect(
 			liveShortcuts(state({ ...ready, shortcutsOpen: true })).moveActionDown,
 		).toBe(false);
+	});
+});
+
+describe("liveShortcuts — operate mode", () => {
+	const operateKeys = [
+		"operateRunPause",
+		"operateSlower",
+		"operateFaster",
+		"routeAuto",
+		"routeAutoAll",
+		"routePreferred",
+		"routeUnrestricted",
+		"routeCancel",
+		"operateLog",
+	] as const;
+
+	it("arms the signalling keys only in operate mode", () => {
+		const operating = liveShortcuts(state({ mode: "operate" }));
+		const editing = liveShortcuts(state());
+		for (const id of operateKeys) {
+			expect(operating[id], id).toBe(true);
+			expect(editing[id], id).toBe(false);
+		}
+	});
+
+	it("leaves the railway tools and undo dead while operating", () => {
+		const live = liveShortcuts(state({ mode: "operate" }));
+		expect(live.toolAdd).toBe(false);
+		expect(live.undo).toBe(false);
+	});
+
+	it("kills the keys for the other modes while operating", () => {
+		const live = liveShortcuts(state({ mode: "operate" }));
+		expect(live.modeRailway).toBe(false);
+		expect(live.modeTimetable).toBe(false);
+		const editing = liveShortcuts(state({ mode: "timetable" }));
+		expect(editing.modeRailway).toBe(true);
+		expect(editing.modeOperate).toBe(true);
+	});
+
+	it("disables save and load while operating", () => {
+		const operating = liveShortcuts(state({ mode: "operate" }));
+		expect(operating.save).toBe(false);
+		expect(operating.load).toBe(false);
+
+		for (const mode of ["railway", "timetable"] as const) {
+			const editing = liveShortcuts(state({ mode }));
+			expect(editing.save, mode).toBe(true);
+			expect(editing.load, mode).toBe(true);
+		}
+	});
+
+	it("keeps operate keys quiet behind an overlay or open train dialog", () => {
+		const live = liveShortcuts(state({ mode: "operate", shortcutsOpen: true }));
+		expect(live.operateRunPause).toBe(false);
+		const dialog = liveShortcuts(
+			state({ mode: "operate", trainDialogOpen: true }),
+		);
+		expect(dialog.operateRunPause).toBe(false);
+		expect(dialog.help).toBe(false);
+		expect(dialog.escape).toBe(true);
 	});
 });

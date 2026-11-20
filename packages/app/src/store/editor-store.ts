@@ -2,6 +2,7 @@ import {
 	SignalAspect,
 	type SignalAspectValue,
 	type TrackKind,
+	type TrainTimetableEntry,
 } from "@rail-op-sim/shared";
 import { create } from "zustand";
 import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
@@ -67,6 +68,29 @@ export type HoveredTrackInfo = {
 	aspectLabel: string | null;
 	gx: number;
 	gy: number;
+	/** Viewport coordinates of the pointer (for fixed-position rendering). */
+	screenX: number;
+	screenY: number;
+};
+
+/**
+ * Plain-data snapshot of the train under the pointer, pushed by the placement
+ * controller when "show train info" or "show train timetable" is enabled. Kept
+ * serialisable (no pixi/model references) so it can live in the store and be
+ * read by the tooltip.
+ */
+export type HoveredTrainInfo = {
+	headcode: string;
+	description: string | null;
+	/** Present when "Show train info" is enabled; null when only "Show train timetable" is enabled. */
+	statusLabel: string | null;
+	next: string | null;
+	/** True when "Show train info" is enabled and train is under signaller control. */
+	signallerControl: boolean;
+	/** Reminder text when "Show train info" is enabled and a reminder is set. */
+	reminder: string | null;
+	/** Present when "Show train timetable" is enabled; null when only "Show train info" is enabled. */
+	timetable: TrainTimetableEntry[] | null;
 	/** Viewport coordinates of the pointer (for fixed-position rendering). */
 	screenX: number;
 	screenY: number;
@@ -154,6 +178,12 @@ export interface EditorState {
 	/** Whether hovering the canvas shows a floating track-info tooltip. */
 	showTrackInfo: boolean;
 
+	/** Whether hovering a train on the canvas shows a floating train-info tooltip. */
+	showTrainInfo: boolean;
+
+	/** Whether hovering a train on the canvas shows its timetable in the tooltip. */
+	showTrainTimetable: boolean;
+
 	/** Whether the graph-paper grid behind the tracks is visible. */
 	showGrid: boolean;
 
@@ -162,6 +192,16 @@ export interface EditorState {
 	 * YAML map isn't rewritten as JSON on the next Cmd+S). JSON is the default.
 	 */
 	saveFormat: MapFileFormat;
+
+	/**
+	 * Counts every history publish — each undoable map commit, undo, redo and
+	 * load. `canUndo` and the labels often stay the same across commits, so this
+	 * is what autosave watches to know the map changed.
+	 */
+	historyRevision: number;
+
+	/** When the session was last autosaved, and whether the latest attempt failed. */
+	autosave: { lastSavedAt: number | null; error: boolean };
 
 	/**
 	 * Whether the keyboard-shortcut reference overlay is open. Lives in the store
@@ -175,6 +215,12 @@ export interface EditorState {
 	 * the pointer isn't over a track (or the feature is disabled).
 	 */
 	hoveredTrackInfo: HoveredTrackInfo | null;
+
+	/**
+	 * Plain-data snapshot of the train currently under the pointer, or null when
+	 * the pointer isn't over a train (or the feature is disabled).
+	 */
+	hoveredTrainInfo: HoveredTrainInfo | null;
 
 	/**
 	 * Track connectivity summary, recomputed by the (pixi-owning) placement
@@ -217,6 +263,10 @@ export interface EditorState {
 	toggleShowDirections: () => void;
 	/** Toggle the hover track-info tooltip on/off (clears any hover when off). */
 	toggleShowTrackInfo: () => void;
+	/** Toggle the hover train-info tooltip on/off (clears hover when neither train toggle is on). */
+	toggleShowTrainInfo: () => void;
+	/** Toggle the hover train-timetable tooltip on/off (clears hover when neither train toggle is on). */
+	toggleShowTrainTimetable: () => void;
 	/** Toggle the ground grid on/off. */
 	toggleShowGrid: () => void;
 	/** Choose JSON or YAML for the next Save. */
@@ -225,8 +275,15 @@ export interface EditorState {
 	toggleShortcuts: () => void;
 	/** Open or close the keyboard-shortcut reference overlay. */
 	setShortcuts: (open: boolean) => void;
+	/** Record the outcome of an autosave attempt. */
+	setAutosave: (autosave: {
+		lastSavedAt: number | null;
+		error: boolean;
+	}) => void;
 	/** Push (or clear) the track-info snapshot for the tooltip to render. */
 	setHoveredTrackInfo: (info: HoveredTrackInfo | null) => void;
+	/** Push (or clear) the train-info snapshot for the tooltip to render. */
+	setHoveredTrainInfo: (info: HoveredTrainInfo | null) => void;
 	/** Push a freshly-computed track connectivity summary for the UI to read. */
 	setTrackStatus: (status: TrackStatus | null) => void;
 	/** Push a fresh undo/redo summary for the toolbar to read. */
@@ -304,11 +361,16 @@ export const useEditorStore = create<EditorState>((set) => ({
 	showLinkHighlights: false,
 	showDirections: false,
 	showTrackInfo: false,
+	showTrainInfo: false,
+	showTrainTimetable: false,
 	showGrid: true,
 	saveFormat: "json",
+	autosave: { lastSavedAt: null, error: false },
 	showShortcuts: false,
 	hoveredTrackInfo: null,
+	hoveredTrainInfo: null,
 	trackStatus: null,
+	historyRevision: 0,
 	canUndo: false,
 	canRedo: false,
 	undoLabel: null,
@@ -397,16 +459,36 @@ export const useEditorStore = create<EditorState>((set) => ({
 			showTrackInfo: !s.showTrackInfo,
 			hoveredTrackInfo: s.showTrackInfo ? null : s.hoveredTrackInfo,
 		})),
+	toggleShowTrainInfo: () =>
+		set((s) => {
+			const next = !s.showTrainInfo;
+			return {
+				showTrainInfo: next,
+				hoveredTrainInfo:
+					!next && !s.showTrainTimetable ? null : s.hoveredTrainInfo,
+			};
+		}),
+	toggleShowTrainTimetable: () =>
+		set((s) => {
+			const next = !s.showTrainTimetable;
+			return {
+				showTrainTimetable: next,
+				hoveredTrainInfo: !next && !s.showTrainInfo ? null : s.hoveredTrainInfo,
+			};
+		}),
 	toggleShowGrid: () => set((s) => ({ showGrid: !s.showGrid })),
 	setSaveFormat: (format) => {
 		debugLog("store", `setSaveFormat: ${format}`);
 		set({ saveFormat: format });
 	},
+	setAutosave: (autosave) => set({ autosave }),
 	toggleShortcuts: () => set((s) => ({ showShortcuts: !s.showShortcuts })),
 	setShortcuts: (open) => set({ showShortcuts: open }),
 	setHoveredTrackInfo: (info) => set({ hoveredTrackInfo: info }),
+	setHoveredTrainInfo: (info) => set({ hoveredTrainInfo: info }),
 	setTrackStatus: (status) => set({ trackStatus: status }),
-	setHistoryState: (state) => set(state),
+	setHistoryState: (state) =>
+		set((s) => ({ ...state, historyRevision: s.historyRevision + 1 })),
 	setZoom: (z) => set({ zoom: z }),
 	setToolbarPos: (pos) => set({ toolbarPos: pos }),
 

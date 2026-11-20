@@ -135,3 +135,54 @@ export function pickAndReadDocument<T>(
 		input.click();
 	});
 }
+
+/** A {@link LoadedDocument} that also remembers which file it came from. */
+export interface PickedDocument<T> extends LoadedDocument<T> {
+	name: string;
+}
+
+/**
+ * Like {@link pickAndReadDocument}, but the picker allows several files and
+ * every one is read and parsed. Resolves with the documents in the order the
+ * browser listed them, or `null` if the user cancels.
+ *
+ * A file `parse` rejects rejects the whole pick, with the file's name in the
+ * message — the caller gets all the files or none, so it can refuse a bad set
+ * without having half-applied it.
+ */
+export function pickAndReadDocuments<T>(
+	parse: (text: string, format: DocumentFileFormat) => T,
+): Promise<PickedDocument<T>[] | null> {
+	return new Promise((resolve, reject) => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.accept = DOCUMENT_FILE_ACCEPT;
+		input.multiple = true;
+
+		input.addEventListener("cancel", () => resolve(null));
+
+		input.addEventListener("change", () => {
+			const files = Array.from(input.files ?? []);
+			if (files.length === 0) {
+				resolve(null);
+				return;
+			}
+			Promise.all(
+				files.map(async (file) => {
+					const text = await file.text();
+					const format = inferDocumentFormat(file.name, text);
+					try {
+						return { name: file.name, data: parse(text, format), format };
+					} catch (err) {
+						const reason = err instanceof Error ? err.message : String(err);
+						throw new Error(`${file.name}: ${reason}`);
+					}
+				}),
+			)
+				.then(resolve)
+				.catch(reject);
+		});
+
+		input.click();
+	});
+}

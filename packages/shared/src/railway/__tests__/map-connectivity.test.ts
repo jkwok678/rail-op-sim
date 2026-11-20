@@ -26,6 +26,8 @@ import {
 	revalidatePreferredDirections,
 	setPreferredDirectionsAlongPath,
 } from "../map/map-connectivity";
+import type { TrackKind } from "../track/track-data";
+import { createTrackData } from "../track/track-factory";
 
 // ============================================================================
 // checkAllTracksConnected
@@ -726,6 +728,28 @@ describe("findPathBetween", () => {
 		expect(path!.length).toBe(2);
 		expect(path![0]).toBe(start);
 		expect(path![1]).toBe(end);
+	});
+
+	it("runs straight through points rather than round a loop as short", () => {
+		// row 1:        (3,1)╱‾(4,1)╲
+		// row 0: -(0) -(1) SW(2) -(3) -(4) SW(5) -(6)
+		const map = new Map_();
+		const put = (gx: number, gy: number, kind: TrackKind, subtype: string) =>
+			map.addTrack(createTrackData(kind, subtype), gx * 16, gy * 16);
+		for (const gx of [0, 1, 3, 4, 6]) put(gx, 0, "straight", "STRAIGHTH");
+		put(2, 0, "switch", "SWITCH1");
+		put(5, 0, "switch", "SWITCH2");
+		put(3, 1, "curved", "CURVE1");
+		put(4, 1, "curved", "CURVE2");
+		map.makeTrackList();
+		const at = (gx: number) => map.getTrackAt(gx * 16, 0)!;
+		for (const [from, to] of [
+			[0, 6],
+			[6, 0],
+		]) {
+			const path = findPathBetween(map, at(from), at(to));
+			expect(path?.map((t) => t.getLocationY())).toEqual(Array(7).fill(0));
+		}
 	});
 
 	it("finds path through a linear chain of tracks", () => {
@@ -1824,5 +1848,23 @@ describe("revalidatePreferredDirections", () => {
 		).toBe(true);
 		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 		expect(b.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
+	});
+
+	it("lets a two-way stretch end against a one-way neighbour", () => {
+		const map = new Map_();
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITLEFT }, -16, 0);
+		straightH(map, 0);
+		straightH(map, 16);
+		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
+		const twoWay = map.getTrackAt(0, 0)!;
+		const oneWay = map.getTrackAt(16, 0)!;
+		// Westbound starts at the boundary; eastbound crosses it and carries on.
+		twoWay.addPreferredDirection(3, 5);
+		twoWay.addPreferredDirection(5, 3);
+		oneWay.addPreferredDirection(3, 5);
+
+		expect(getConnectivityReport(map).brokenRoutes).toEqual([]);
+		expect(revalidatePreferredDirections(map)).toBe(0);
+		expect(twoWay.getPreferredDirections()).toHaveLength(2);
 	});
 });

@@ -53,4 +53,17 @@ describe("loadTimetable", () => {
 		pick.mockRejectedValue("nope");
 		expect(await loadTimetable()).toBe("That file is not a timetable.");
 	});
+
+	it("says why a loaded timetable cannot be operated", async () => {
+		const service = { ref: "1A01", actions: [] };
+		pick.mockResolvedValue({
+			data: { ...createEmptyTimetable(), services: [service, service] },
+			format: "json",
+		});
+
+		const message = await loadTimetable();
+		expect(message).toContain("Operate is unavailable");
+		const [first] = useTimetableStore.getState().issues;
+		expect(message).toContain(first.message);
+	});
 });

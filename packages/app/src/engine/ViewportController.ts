@@ -149,6 +149,16 @@ export class ViewportController {
 		this.notify();
 	}
 
+	/** Pan so the world point `(wx, wy)` sits in the middle of the screen. */
+	centreOn(wx: number, wy: number): void {
+		const scale = this.world.scale.x;
+		this.world.position.set(
+			this.app.screen.width / 2 - wx * scale,
+			this.app.screen.height / 2 - wy * scale,
+		);
+		this.notify();
+	}
+
 	/** Nudge the view by a screen-pixel delta. */
 	panBy(dx: number, dy: number): void {
 		this.world.position.x += dx;
