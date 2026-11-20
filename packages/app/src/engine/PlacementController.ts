@@ -17,6 +17,7 @@ import {
 	serializeMap,
 	setPreferredDirectionsAlongPath,
 	type Text,
+	type Track,
 	undoEntries,
 } from "@rail-op-sim/shared";
 import {
@@ -1393,6 +1394,27 @@ export class PlacementController {
 		this.nameElementAt(gx, gy, content, "namedLocation");
 	}
 
+	/** Apply a mutation to every track in the selected section and refresh layers. */
+	private mutateSelectedSection(
+		label: string,
+		mutate: (track: Track) => void,
+	): number {
+		const { sectionTracks } = useEditorStore.getState();
+		this.commit(label, { track: true, trackColor: true, status: true }, () => {
+			for (const coord of sectionTracks) {
+				const track = this.map.getTrackAt(coord.gx, coord.gy);
+				if (track) mutate(track);
+			}
+		});
+		this.trackLayer.sync(this.map);
+		this.trackColorLayer.show(this.map);
+		// Drop the purple route tint (keeping the endpoint outlines) so the
+		// speed/length colours just applied are visible rather than covered.
+		this.linkHighlightLayer.setSectionRouteVisible(false);
+		this.publishTrackStatus();
+		return sectionTracks.length;
+	}
+
 	/**
 	 * Apply speed/length edits from the section panel to every track in the
 	 * selected section.
@@ -1403,35 +1425,20 @@ export class PlacementController {
 		secondarySpeed?: number;
 		secondaryLength?: number;
 	}): void {
-		const { sectionTracks } = useEditorStore.getState();
-		this.commit(
+		const count = this.mutateSelectedSection(
 			"Change speed & length",
-			{ track: true, trackColor: true, status: true },
-			() => {
-				for (const coord of sectionTracks) {
-					const track = this.map.getTrackAt(coord.gx, coord.gy);
-					if (!track) continue;
-					track.setTrackMainSpeed(values.mainSpeed);
-					track.setTrackMainLength(values.mainLength);
-					if (values.secondarySpeed !== undefined) {
-						track.setTrackSecondarySpeed(values.secondarySpeed);
-					}
-					if (values.secondaryLength !== undefined) {
-						track.setTrackSecondaryLength(values.secondaryLength);
-					}
+			(track) => {
+				track.setTrackMainSpeed(values.mainSpeed);
+				track.setTrackMainLength(values.mainLength);
+				if (values.secondarySpeed !== undefined) {
+					track.setTrackSecondarySpeed(values.secondarySpeed);
+				}
+				if (values.secondaryLength !== undefined) {
+					track.setTrackSecondaryLength(values.secondaryLength);
 				}
 			},
 		);
-		this.trackLayer.sync(this.map);
-		this.trackColorLayer.show(this.map);
-		// Drop the purple route tint (keeping the endpoint outlines) so the
-		// speed/length colours just applied are visible rather than covered.
-		this.linkHighlightLayer.setSectionRouteVisible(false);
-		this.publishTrackStatus();
-		debugLog(
-			"placement",
-			`applySectionEdit — ${sectionTracks.length} tracks updated`,
-		);
+		debugLog("placement", `applySectionEdit — ${count} tracks updated`);
 	}
 
 	/** Clear the section highlight overlay (public for SectionEditPanel). */
@@ -1441,26 +1448,13 @@ export class PlacementController {
 
 	/** Restore defaults for all tracks in the selected section. */
 	restoreSection(): void {
-		const { sectionTracks } = useEditorStore.getState();
-		this.commit(
+		const count = this.mutateSelectedSection(
 			"Restore section defaults",
-			{ track: true, trackColor: true, status: true },
-			() => {
-				for (const coord of sectionTracks) {
-					const track = this.map.getTrackAt(coord.gx, coord.gy);
-					if (!track) continue;
-					track.restoreDefaults();
-				}
+			(track) => {
+				track.restoreDefaults();
 			},
 		);
-		this.trackLayer.sync(this.map);
-		this.trackColorLayer.show(this.map);
-		this.linkHighlightLayer.setSectionRouteVisible(false);
-		this.publishTrackStatus();
-		debugLog(
-			"placement",
-			`restoreSection — ${sectionTracks.length} tracks reset to defaults`,
-		);
+		debugLog("placement", `restoreSection — ${count} tracks reset to defaults`);
 	}
 
 	// ── Save / load ─────────────────────────────────────────────────────

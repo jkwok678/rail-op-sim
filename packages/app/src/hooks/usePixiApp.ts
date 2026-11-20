@@ -212,6 +212,15 @@ export function usePixiApp(): UsePixiAppReturn {
 			world.addChild(placement.ghost);
 			placement.attach();
 
+			const syncAllLayers = () => {
+				trackLayer.sync(placement.map);
+				trackColorLayer.sync(placement.map);
+				elementLayer.sync(placement.map);
+				textLayer.sync(placement.map);
+				directionLayer.sync(placement.map);
+				placement.refreshGhost();
+			};
+
 			// Preload all track art and operate mode's signal and point art,
 			// then backfill anything placed (or operated) meanwhile.
 			const allSubtypes = Object.keys(SVG_MAP);
@@ -221,12 +230,7 @@ export function usePixiApp(): UsePixiAppReturn {
 			])
 				.then(() => {
 					if (destroyed) return;
-					trackLayer.sync(placement.map);
-					trackColorLayer.sync(placement.map);
-					elementLayer.sync(placement.map);
-					textLayer.sync(placement.map);
-					directionLayer.sync(placement.map);
-					placement.refreshGhost();
+					syncAllLayers();
 					debugLog("pixi", "init complete — ready for interaction");
 				})
 				// The canvas works without the art (pieces appear as it loads or
@@ -244,12 +248,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				trackLayer.clear();
 				elementLayer.clear();
 				textLayer.clear();
-				trackLayer.sync(placement.map);
-				trackColorLayer.sync(placement.map);
-				elementLayer.sync(placement.map);
-				textLayer.sync(placement.map);
-				directionLayer.sync(placement.map);
-				placement.refreshGhost();
+				syncAllLayers();
 				redrawGrid();
 			});
 			themeObserver.observe(document.documentElement, {

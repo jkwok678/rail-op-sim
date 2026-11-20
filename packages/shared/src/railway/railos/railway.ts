@@ -19,12 +19,14 @@ import {
 	getRails,
 	signalFacingExit,
 	type TrackData,
+	type TrackKind,
 } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
 import {
 	LINKS,
 	linkOf,
 	linksOf,
+	type Piece,
 	pairKey,
 	pieceOf,
 	SIGNAL_END,
@@ -289,59 +291,9 @@ class RailwayBuilder {
 
 	private trackDataFor(el: ActiveElement): TrackData | null {
 		const links = linksOf(el.tag);
-		switch (pieceOf(el.tag)) {
-			case "simple": {
-				const straight = subtypeByLinks("straight", links);
-				if (straight) return createTrackData("straight", straight);
-				const curve = subtypeByLinks("curved", links);
-				return curve ? createTrackData("curved", curve) : null;
-			}
-			case "arrow":
-				return this.arrowData(el, links);
-			case "points": {
-				const s = switchSubtype(el.tag);
-				return s ? createTrackData("switch", s) : null;
-			}
-			case "crossover": {
-				const s = subtypeByLinks("crossover", links);
-				return s ? createTrackData("crossover", s) : null;
-			}
-			case "bridge": {
-				const s = subtypeByLinks("flyover", links);
-				return s ? createTrackData("flyover", s) : null;
-			}
-			case "buffers": {
-				const s = subtypeByLinks("buffer", [links[1]]);
-				return s ? createTrackData("buffer", s) : null;
-			}
-			case "continuation": {
-				const s = subtypeByLinks("exit", [links[1]]);
-				return s ? createTrackData("exit", s) : null;
-			}
-			case "gap": {
-				const s = subtypeByLinks("linked", [links[1]]);
-				return s ? createTrackData("linked", s) : null;
-			}
-			case "signal": {
-				const exit = links[SIGNAL_END[el.tag]];
-				const s = SUBTYPES.signal.find(
-					(st) => signalFacingExit(st as never) === exit,
-				);
-				return s
-					? createTrackData("signal", s, { aspect: signalAspect(el.marker) })
-					: null;
-			}
-			case "footbridge": {
-				const over = el.tag === 129 || el.tag === 130;
-				const vertical = el.tag === 130 || el.tag === 146;
-				return createTrackData(
-					"bridgeUnderpass",
-					`${over ? "BRIDGE" : "UNDERPASS"}${vertical ? 2 : 1}`,
-				);
-			}
-			default:
-				return null;
-		}
+		const piece = pieceOf(el.tag);
+		if (piece === "arrow") return this.arrowData(el, links);
+		return TRACK_BUILDERS[piece]?.(el, links) ?? null;
 	}
 
 	/**
@@ -427,21 +379,32 @@ class RailwayBuilder {
 			return text;
 		};
 
+		this.nameInactive(textFor);
+		this.nameActive(textFor);
+
+		// The rest of RailOS's labels stand on their own.
+		for (const t of this.rly.texts) if (!used.has(t)) map.addText(freeText(t));
+	}
+
+	private nameInactive(textFor: (name: string, fallback: Cell) => Text): void {
 		for (const el of this.rly.inactive) {
 			const piece = pieceOf(el.tag);
 			if (!el.name || (piece !== "named" && piece !== "concourse")) continue;
 			const cell = railosCell(el.h, el.v);
 			const target =
 				piece === "named"
-					? map.getNamedLocationAt(cell.gx, cell.gy)
-					: map.getElementAt(cell.gx, cell.gy);
+					? this.map.getNamedLocationAt(cell.gx, cell.gy)
+					: this.map.getElementAt(cell.gx, cell.gy);
 			(target as { setText?: (t: Text) => void } | null)?.setText?.(
 				textFor(el.name, cell),
 			);
 		}
+	}
+
+	private nameActive(textFor: (name: string, fallback: Cell) => Text): void {
 		for (const el of this.rly.active) {
 			const cell = railosCell(el.h, el.v);
-			const track = map.getTrackAt(cell.gx, cell.gy);
+			const track = this.map.getTrackAt(cell.gx, cell.gy);
 			if (!track) continue;
 			const bridge = track.data.kind === "bridgeUnderpass";
 			if (!track.hasPlatform() && !track.hasLinkedNamedLocation() && !bridge)
@@ -452,11 +415,46 @@ class RailwayBuilder {
 				(bridge ? `Footbridge (${cell.gx}, ${cell.gy})` : "");
 			if (name) track.setText(textFor(name, cell));
 		}
-
-		// The rest of RailOS's labels stand on their own.
-		for (const t of this.rly.texts) if (!used.has(t)) map.addText(freeText(t));
 	}
 }
+
+function byLinks(kind: TrackKind, links: number[]): TrackData | null {
+	const subtype = subtypeByLinks(kind, links);
+	return subtype ? createTrackData(kind, subtype) : null;
+}
+
+const TRACK_BUILDERS: Partial<
+	Record<Piece, (el: ActiveElement, links: number[]) => TrackData | null>
+> = {
+	simple: (_el, links) =>
+		byLinks("straight", links) ?? byLinks("curved", links),
+	points: (el) => {
+		const s = switchSubtype(el.tag);
+		return s ? createTrackData("switch", s) : null;
+	},
+	crossover: (_el, links) => byLinks("crossover", links),
+	bridge: (_el, links) => byLinks("flyover", links),
+	buffers: (_el, links) => byLinks("buffer", [links[1]]),
+	continuation: (_el, links) => byLinks("exit", [links[1]]),
+	gap: (_el, links) => byLinks("linked", [links[1]]),
+	signal: (el, links) => {
+		const exit = links[SIGNAL_END[el.tag]];
+		const s = SUBTYPES.signal.find(
+			(st) => signalFacingExit(st as never) === exit,
+		);
+		return s
+			? createTrackData("signal", s, { aspect: signalAspect(el.marker) })
+			: null;
+	},
+	footbridge: (el) => {
+		const over = el.tag === 129 || el.tag === 130;
+		const vertical = el.tag === 130 || el.tag === 146;
+		return createTrackData(
+			"bridgeUnderpass",
+			`${over ? "BRIDGE" : "UNDERPASS"}${vertical ? 2 : 1}`,
+		);
+	},
+};
 
 function freeText(t: RlyText): Text {
 	return new Text(t.x / RAILOS_CELL_PIXELS, -t.y / RAILOS_CELL_PIXELS, t.text, {

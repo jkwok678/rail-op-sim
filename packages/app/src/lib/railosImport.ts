@@ -53,7 +53,7 @@ const extensionOf = (name: string): string =>
 	name.slice(name.lastIndexOf(".") + 1).toLowerCase();
 
 /** The file's name without its extension, for titles and download names. */
-export const baseName = (name: string): string => name.replace(/\.[^.]*$/, "");
+const baseName = (name: string): string => name.replace(/\.[^.]*$/, "");
 
 const plural = (n: number, word: string) =>
 	`${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`;

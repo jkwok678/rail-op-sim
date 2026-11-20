@@ -95,6 +95,133 @@ function startCells(ids: string): { rear: Cell; front: Cell } {
 	return { rear: cellFromId(rear), front: cellFromId(front) };
 }
 
+type CommandParser = (
+	time: SimTime,
+	third: string,
+	fourth: string,
+	w: { warning?: true },
+) => Action;
+
+const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
+	Snt: (time, third, fourth, w) => ({
+		kind: "startNew",
+		time,
+		...startCells(third),
+		...(fourth === "S" ? { signallerControl: true } : {}),
+		...w,
+	}),
+	Sns: (time, third, _fourth, w) => ({
+		kind: "startNewService",
+		time,
+		fromRef: third,
+		...w,
+	}),
+	Sfs: (time, third, _fourth, w) => ({
+		kind: "startFromSplit",
+		time,
+		fromRef: third,
+		...w,
+	}),
+	pas: (time, third, _fourth, w) => ({
+		kind: "pass",
+		time,
+		location: third,
+		...w,
+	}),
+	cdt: (time, _third, _fourth, w) => ({
+		kind: "changeDirection",
+		time,
+		...w,
+	}),
+	dsc: (time, third, _fourth, w) => ({
+		kind: "changeDescription",
+		time,
+		description: third,
+		...w,
+	}),
+	cms: (time, third, _fourth, w) => ({
+		kind: "changeMaxSpeed",
+		time,
+		maxSpeedKmh: Number(third),
+		...w,
+	}),
+	fsp: (time, third, _fourth, w) => ({
+		kind: "frontSplit",
+		time,
+		newRef: third,
+		...w,
+	}),
+	rsp: (time, third, _fourth, w) => ({
+		kind: "rearSplit",
+		time,
+		newRef: third,
+		...w,
+	}),
+	jbo: (time, third, _fourth, w) => ({
+		kind: "joinedBy",
+		time,
+		otherRef: third,
+		...w,
+	}),
+	"Snt-sh": (time, third, fourth, w) => ({
+		kind: "startNewShuttle",
+		time,
+		...startCells(third),
+		otherRef: fourth,
+		...w,
+	}),
+	"Sns-sh": (time, third, fourth, w) => ({
+		kind: "startShuttle",
+		time,
+		fromRef: fourth,
+		otherRef: third,
+		...w,
+	}),
+	"Sns-fsh": (time, third, _fourth, w) => ({
+		kind: "startFromShuttle",
+		time,
+		fromRef: third,
+		...w,
+	}),
+	"F-nshs": (time, third, _fourth, w) => ({
+		kind: "finishToShuttle",
+		time,
+		nextRef: third,
+		...w,
+	}),
+	Fns: (time, third, _fourth, w) => ({
+		kind: "finishNewService",
+		time,
+		nextRef: third,
+		...w,
+	}),
+	Fjo: (time, third, _fourth, w) => ({
+		kind: "finishJoin",
+		time,
+		otherRef: third,
+		...w,
+	}),
+	Fer: (time, third, _fourth, w) => ({
+		kind: "finishExit",
+		time,
+		exits: third.split(" ").filter(Boolean).map(cellFromId),
+		...w,
+	}),
+	"Frh-sh": (time, third, _fourth, w) => ({
+		kind: "finishShuttleRemainHere",
+		time,
+		otherRef: third,
+		...w,
+	}),
+	"Fns-sh": (time, third, fourth, w) => ({
+		kind: "finishShuttleNewService",
+		time,
+		otherRef: third,
+		nextRef: fourth,
+		...w,
+	}),
+};
+
 function parseCommand(
 	word: string,
 	time: SimTime,
@@ -102,77 +229,9 @@ function parseCommand(
 	fourth: string,
 	w: { warning?: true },
 ): Action {
-	switch (word) {
-		case "Snt":
-			return {
-				kind: "startNew",
-				time,
-				...startCells(third),
-				...(fourth === "S" ? { signallerControl: true } : {}),
-				...w,
-			};
-		case "Sns":
-			return { kind: "startNewService", time, fromRef: third, ...w };
-		case "Sfs":
-			return { kind: "startFromSplit", time, fromRef: third, ...w };
-		case "pas":
-			return { kind: "pass", time, location: third, ...w };
-		case "cdt":
-			return { kind: "changeDirection", time, ...w };
-		case "dsc":
-			return { kind: "changeDescription", time, description: third, ...w };
-		case "cms":
-			return { kind: "changeMaxSpeed", time, maxSpeedKmh: Number(third), ...w };
-		case "fsp":
-			return { kind: "frontSplit", time, newRef: third, ...w };
-		case "rsp":
-			return { kind: "rearSplit", time, newRef: third, ...w };
-		case "jbo":
-			return { kind: "joinedBy", time, otherRef: third, ...w };
-		case "Snt-sh":
-			return {
-				kind: "startNewShuttle",
-				time,
-				...startCells(third),
-				otherRef: fourth,
-				...w,
-			};
-		case "Sns-sh":
-			return {
-				kind: "startShuttle",
-				time,
-				fromRef: fourth,
-				otherRef: third,
-				...w,
-			};
-		case "Sns-fsh":
-			return { kind: "startFromShuttle", time, fromRef: third, ...w };
-		case "F-nshs":
-			return { kind: "finishToShuttle", time, nextRef: third, ...w };
-		case "Fns":
-			return { kind: "finishNewService", time, nextRef: third, ...w };
-		case "Fjo":
-			return { kind: "finishJoin", time, otherRef: third, ...w };
-		case "Fer":
-			return {
-				kind: "finishExit",
-				time,
-				exits: third.split(" ").filter(Boolean).map(cellFromId),
-				...w,
-			};
-		case "Frh-sh":
-			return { kind: "finishShuttleRemainHere", time, otherRef: third, ...w };
-		case "Fns-sh":
-			return {
-				kind: "finishShuttleNewService",
-				time,
-				otherRef: third,
-				nextRef: fourth,
-				...w,
-			};
-		default:
-			throw new Error(`Unsupported timetable action "${word}"`);
-	}
+	const parser = COMMAND_PARSERS[word];
+	if (!parser) throw new Error(`Unsupported timetable action "${word}"`);
+	return parser(time, third, fourth, w);
 }
 
 function parseAction(field: string, seenLocation: boolean): Action {

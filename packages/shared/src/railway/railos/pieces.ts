@@ -70,28 +70,34 @@ export type Piece =
 	| "levelCrossing"
 	| "unused";
 
+const PIECE_RANGES: readonly (readonly [number, number, Piece])[] = [
+	[1, 6, "simple"],
+	[7, 14, "points"],
+	[15, 16, "crossover"],
+	[18, 27, "simple"],
+	[28, 43, "points"],
+	[44, 47, "crossover"],
+	[48, 59, "bridge"],
+	[60, 67, "buffers"],
+	[68, 75, "signal"],
+	[76, 79, "platform"],
+	[80, 87, "continuation"],
+	[88, 95, "gap"],
+	[96, 96, "concourse"],
+	[97, 124, "parapet"],
+	[125, 128, "arrow"],
+	[129, 130, "footbridge"],
+	[131, 131, "named"],
+	[132, 139, "points"],
+	[140, 143, "arrow"],
+	[144, 144, "levelCrossing"],
+	[145, 146, "footbridge"],
+];
+
 export function pieceOf(tag: number): Piece {
-	if (tag >= 1 && tag <= 6) return "simple";
-	if (tag >= 7 && tag <= 14) return "points";
-	if (tag === 15 || tag === 16) return "crossover";
-	if (tag >= 18 && tag <= 27) return "simple";
-	if (tag >= 28 && tag <= 43) return "points";
-	if (tag >= 44 && tag <= 47) return "crossover";
-	if (tag >= 48 && tag <= 59) return "bridge";
-	if (tag >= 60 && tag <= 67) return "buffers";
-	if (tag >= 68 && tag <= 75) return "signal";
-	if (tag >= 76 && tag <= 79) return "platform";
-	if (tag >= 80 && tag <= 87) return "continuation";
-	if (tag >= 88 && tag <= 95) return "gap";
-	if (tag === 96) return "concourse";
-	if (tag >= 97 && tag <= 124) return "parapet";
-	if (tag >= 125 && tag <= 128) return "arrow";
-	if (tag === 129 || tag === 130 || tag === 145 || tag === 146)
-		return "footbridge";
-	if (tag === 131) return "named";
-	if (tag >= 132 && tag <= 139) return "points";
-	if (tag >= 140 && tag <= 143) return "arrow";
-	if (tag === 144) return "levelCrossing";
+	for (const [lo, hi, piece] of PIECE_RANGES) {
+		if (tag >= lo && tag <= hi) return piece;
+	}
 	return "unused";
 }
 
