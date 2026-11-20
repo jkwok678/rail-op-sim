@@ -11,7 +11,7 @@ import {
 	type PickedDocument,
 	pickAndReadDocuments,
 } from "#/lib/documentFile";
-import { applyLoadedMap, loadMap, saveMap } from "#/lib/mapActions";
+import { applyLoadedMap, saveMap } from "#/lib/mapActions";
 import { parseMapText } from "#/lib/mapFile";
 import {
 	applyLoadedTimetable,
@@ -24,17 +24,28 @@ import { useTimetableStore } from "#/store/timetable-store";
 
 /**
  * Save and load whichever document the current mode is editing — the railway
- * in railway mode, the timetable in timetable mode. The footer buttons and the
- * Mod+S / Mod+O hotkeys both come through here, so one key never means two
- * things depending on which path reached it.
+ * in railway mode, the timetable in timetable mode. Both are no-ops in operate
+ * mode, where neither document is being edited and a worker session owns the
+ * canvas. The footer buttons and the Mod+S / Mod+O hotkeys both come through
+ * here, so one key never means two things depending on which path reached it.
  */
 
 export function saveDocument(): void {
-	if (useModeStore.getState().mode === "timetable") saveTimetable();
-	else saveMap();
+	switch (useModeStore.getState().mode) {
+		case "railway":
+			saveMap();
+			break;
+		case "timetable":
+			saveTimetable();
+			break;
+		case "operate":
+			// Operate edits neither document, and mid-run session saving is not
+			// implemented yet — do not silently download the static map.
+			break;
+	}
 }
 
-export async function loadTimetableDocument(): Promise<void> {
+async function loadTimetableDocument(): Promise<void> {
 	// The editor (and railway mode) shows a rejected file's reason until it is
 	// dismissed; a successful load (or a cancelled picker) clears any earlier one.
 	const error = await loadTimetable();
@@ -131,13 +142,17 @@ function applyRailwayPick(
 }
 
 export async function loadDocument(): Promise<void> {
-	const { mode } = useModeStore.getState();
-	if (mode === "timetable") {
-		await loadTimetableDocument();
-	} else if (mode === "railway") {
-		await loadRailwayOrTimetable();
-	} else {
-		await loadMap();
+	switch (useModeStore.getState().mode) {
+		case "railway":
+			await loadRailwayOrTimetable();
+			break;
+		case "timetable":
+			await loadTimetableDocument();
+			break;
+		case "operate":
+			// Operate runs a worker snapshot of the railway and timetable; loading
+			// here would replace the canvas map underneath the running session.
+			break;
 	}
 }
 

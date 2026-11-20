@@ -31,6 +31,68 @@ export interface ShortcutGateState {
 }
 
 /**
+ * Railway tools and undo/redo — the map is read-only outside railway mode, so
+ * nothing that edits it can be reachable by key while its toolbar is off screen.
+ */
+function railwayExceptions(
+	state: ShortcutGateState,
+	overlayOpen: boolean,
+): Partial<Record<ShortcutId, boolean>> {
+	const editingRailway = state.mode === "railway";
+	const toolsLive = !overlayOpen && editingRailway;
+	return {
+		toolSelect: toolsLive,
+		toolAdd: toolsLive,
+		toolText: toolsLive,
+		toolLink: toolsLive,
+		toolSection: toolsLive,
+		toolDirection: toolsLive && state.railwayConnected,
+		toggleEraseMode: toolsLive && state.tool === "direction",
+		undo: editingRailway && state.canUndo,
+		redo: editingRailway && state.canRedo,
+	};
+}
+
+/** Signalling keys — live only while the operate panel is on screen. */
+function operateExceptions(
+	state: ShortcutGateState,
+	overlayOpen: boolean,
+): Partial<Record<ShortcutId, boolean>> {
+	const operateLive = !overlayOpen && state.mode === "operate";
+	return {
+		operateRunPause: operateLive,
+		operateSlower: operateLive,
+		operateFaster: operateLive,
+		routeAuto: operateLive,
+		routeAutoAll: operateLive,
+		routePreferred: operateLive,
+		routeUnrestricted: operateLive,
+		routeCallOn: operateLive && Boolean(state.canCallOn),
+		routeCancel: operateLive,
+		operateLog: operateLive,
+	};
+}
+
+/**
+ * Timetable list keys — live only while the docked editor is on screen and
+ * never during a cell-pick, where Escape cancels the gesture.
+ */
+function timetableExceptions(
+	state: ShortcutGateState,
+	overlayOpen: boolean,
+): Partial<Record<ShortcutId, boolean>> {
+	const timetableLive =
+		!overlayOpen && state.mode === "timetable" && !state.timetablePicking;
+	return {
+		prevService: timetableLive && state.timetableCanStep,
+		nextService: timetableLive && state.timetableCanStep,
+		nextIssue: timetableLive && state.timetableCanNextIssue,
+		moveActionUp: timetableLive && state.timetableCanMoveUp,
+		moveActionDown: timetableLive && state.timetableCanMoveDown,
+	};
+}
+
+/**
  * Which shortcuts are live right now. Mirrors the toolbar's own disabled states
  * so a key is never able to do what its button refuses to.
  *
@@ -47,18 +109,6 @@ export function liveShortcuts(
 	const typingDialogOpen =
 		state.editDialogOpen || Boolean(state.trainDialogOpen);
 	const overlayOpen = typingDialogOpen || state.shortcutsOpen;
-	// The map is read-only outside railway mode, so nothing that edits it — a
-	// tool, erase mode, the map's undo history — can be reachable by key while
-	// the toolbar that offers them is off screen.
-	const editingRailway = state.mode === "railway";
-	const toolsLive = !overlayOpen && editingRailway;
-	// The timetable keys drive the docked editor. They exist only while that
-	// editor is the mode on screen, and never during a cell-pick — Escape is
-	// how that gesture is cancelled.
-	const timetableLive =
-		!overlayOpen && state.mode === "timetable" && !state.timetablePicking;
-	// The operate keys work the signalling panel, so only while it is on screen.
-	const operateLive = !overlayOpen && state.mode === "operate";
 	// Leaving a session throws it away, so the keys that switch mode are dead
 	// while operating: R and T sit among the signalling keys, and a slip would
 	// end the session. The switcher's buttons remain the way out.
@@ -66,44 +116,25 @@ export function liveShortcuts(
 
 	/** Where a shortcut differs from the default of "not behind an overlay". */
 	const exceptions: Partial<Record<ShortcutId, boolean>> = {
-		toolSelect: toolsLive,
-		toolAdd: toolsLive,
-		toolText: toolsLive,
-		toolLink: toolsLive,
-		toolSection: toolsLive,
-		toolDirection: toolsLive && state.railwayConnected,
-		toggleEraseMode: toolsLive && state.tool === "direction",
+		...railwayExceptions(state, overlayOpen),
+		...operateExceptions(state, overlayOpen),
+		...timetableExceptions(state, overlayOpen),
 		// A gated mode's key stays live: `setMode` refuses it and raises the
 		// switcher's notice saying why, where a dead key would just do nothing.
 		modeRailway: modeKeysLive,
 		modeTimetable: modeKeysLive,
 		modeOperate: !overlayOpen,
-		operateRunPause: operateLive,
-		operateSlower: operateLive,
-		operateFaster: operateLive,
-		routeAuto: operateLive,
-		routeAutoAll: operateLive,
-		routePreferred: operateLive,
-		routeUnrestricted: operateLive,
-		routeCallOn: operateLive && Boolean(state.canCallOn),
-		routeCancel: operateLive,
-		operateLog: operateLive,
-		prevService: timetableLive && state.timetableCanStep,
-		nextService: timetableLive && state.timetableCanStep,
-		nextIssue: timetableLive && state.timetableCanNextIssue,
-		moveActionUp: timetableLive && state.timetableCanMoveUp,
-		moveActionDown: timetableLive && state.timetableCanMoveDown,
-		undo: editingRailway && state.canUndo,
-		redo: editingRailway && state.canRedo,
 		// The key that opens the reference has to close it again, so it can't be
 		// gated on the overlay it controls — only on the edit dialogs, where the
 		// user is typing.
 		help: !typingDialogOpen,
-		// Escape has to work *because* an overlay is open, and the modified
-		// shortcuts are unambiguous enough to leave live.
+		// Escape has to work *because* an overlay is open. Save and load are
+		// modified combos so they stay live behind overlays, except while
+		// operating — where neither document is being edited and loading would
+		// swap the map underneath the running worker session.
 		escape: true,
-		save: true,
-		load: true,
+		save: state.mode !== "operate",
+		load: state.mode !== "operate",
 	};
 
 	return Object.fromEntries(

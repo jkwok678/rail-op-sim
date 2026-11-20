@@ -17,7 +17,6 @@ vi.mock("#/lib/documentFile", async (importActual) => ({
 }));
 vi.mock("#/lib/mapActions", () => ({
 	applyLoadedMap: vi.fn(),
-	loadMap: vi.fn(),
 	saveMap: vi.fn(),
 }));
 // A map file is any object with `tracks`; the real parser needs a full map.

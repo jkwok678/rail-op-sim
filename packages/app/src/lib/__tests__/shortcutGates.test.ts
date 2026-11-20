@@ -152,6 +152,18 @@ describe("liveShortcuts — operate mode", () => {
 		expect(editing.modeOperate).toBe(true);
 	});
 
+	it("disables save and load while operating", () => {
+		const operating = liveShortcuts(state({ mode: "operate" }));
+		expect(operating.save).toBe(false);
+		expect(operating.load).toBe(false);
+
+		for (const mode of ["railway", "timetable"] as const) {
+			const editing = liveShortcuts(state({ mode }));
+			expect(editing.save, mode).toBe(true);
+			expect(editing.load, mode).toBe(true);
+		}
+	});
+
 	it("keeps operate keys quiet behind an overlay or open train dialog", () => {
 		const live = liveShortcuts(state({ mode: "operate", shortcutsOpen: true }));
 		expect(live.operateRunPause).toBe(false);

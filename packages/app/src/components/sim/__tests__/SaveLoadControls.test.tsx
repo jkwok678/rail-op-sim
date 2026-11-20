@@ -56,4 +56,26 @@ describe("SaveLoadControls", () => {
 			}),
 		).toBeNull();
 	});
+
+	it("disables save and load while operating and explains why on hover", () => {
+		useModeStore.setState({ mode: "operate" });
+		render(<SaveLoadControls />);
+
+		const saveButton = screen.getByRole("button", { name: /^Save/ });
+		const loadButton = screen.getByRole("button", { name: /^Load/ });
+		expect(saveButton.hasAttribute("disabled")).toBe(true);
+		expect(loadButton.hasAttribute("disabled")).toBe(true);
+
+		expect(saveButton.parentElement?.getAttribute("title")).toBe(
+			"Save — leave operate mode to save the railway or timetable",
+		);
+		expect(loadButton.parentElement?.getAttribute("title")).toBe(
+			"Load — leave operate mode to load a railway or timetable",
+		);
+
+		fireEvent.click(saveButton);
+		fireEvent.click(loadButton);
+		expect(saveDocument).not.toHaveBeenCalled();
+		expect(loadDocument).not.toHaveBeenCalled();
+	});
 });

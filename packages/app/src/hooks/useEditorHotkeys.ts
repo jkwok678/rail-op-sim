@@ -1,7 +1,7 @@
 import { type UseHotkeyDefinition, useHotkeys } from "@tanstack/react-hotkeys";
 import { PlacementController } from "#/engine/PlacementController";
 import { loadDocument, saveDocument } from "#/lib/documentActions";
-import { resolveEscape } from "#/lib/escape";
+import { type EscapeAction, resolveEscape } from "#/lib/escape";
 import {
 	changeSpeed,
 	chooseRouteKind,
@@ -11,7 +11,7 @@ import {
 	toggleLog,
 	toggleRouteCancel,
 } from "#/lib/operateActions";
-import { liveShortcuts } from "#/lib/shortcutGates";
+import { liveShortcuts, type ShortcutGateState } from "#/lib/shortcutGates";
 import { SHORTCUT_ORDER, SHORTCUTS, type ShortcutId } from "#/lib/shortcuts";
 import { moveActionTo, nextIssueTarget, stepService } from "#/lib/timetableNav";
 import { fitToView, zoomIn, zoomOut } from "#/lib/viewportActions";
@@ -19,6 +19,23 @@ import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 import { useTimetableStore } from "#/store/timetable-store";
+
+const applyEscape: Record<EscapeAction["type"], () => void> = {
+	closeTrainMenu: () => useOperateStore.getState().closeTrainMenu(),
+	abandonRoute: () => useOperateStore.getState().setRouteStart(null),
+	disarmRouteCancel: () => useOperateStore.getState().setCancelArmed(false),
+	cancelCellPick: () => useTimetableStore.getState().cancelCellPick(),
+	cancelSection: () => {
+		// Both halves: the store action alone leaves the pixi highlight on
+		// screen, which is why the panel's Cancel button does the same pair.
+		useEditorStore.getState().clearSectionSelection();
+		PlacementController.instance?.clearSectionHighlight();
+	},
+	cancelDirection: () => useEditorStore.getState().setDirectionStart(null),
+	paletteBack: () => useEditorStore.getState().selectKind(null),
+	resetTool: () => useEditorStore.getState().setTool("select"),
+	none: () => {},
+};
 
 /** Escape's target depends on state; `resolveEscape` decides, this applies. */
 function runEscape(): void {
@@ -33,37 +50,7 @@ function runEscape(): void {
 		operateTrainMenuOpen: operate.trainMenu !== null,
 		operateTrainDialogOpen: operate.trainDialog !== null,
 	});
-	switch (action.type) {
-		case "closeTrainMenu":
-			operate.closeTrainMenu();
-			break;
-		case "abandonRoute":
-			operate.setRouteStart(null);
-			break;
-		case "disarmRouteCancel":
-			operate.setCancelArmed(false);
-			break;
-		case "cancelCellPick":
-			timetable.cancelCellPick();
-			break;
-		case "cancelSection":
-			// Both halves: the store action alone leaves the pixi highlight on
-			// screen, which is why the panel's Cancel button does the same pair.
-			state.clearSectionSelection();
-			PlacementController.instance?.clearSectionHighlight();
-			break;
-		case "cancelDirection":
-			state.setDirectionStart(null);
-			break;
-		case "paletteBack":
-			state.selectKind(null);
-			break;
-		case "resetTool":
-			state.setTool("select");
-			break;
-		case "none":
-			break;
-	}
+	applyEscape[action.type]();
 }
 
 /** `[` / `]` — wrap through the service list. */
@@ -189,7 +176,8 @@ const run: Record<ShortcutId, () => void> = {
  * move for nothing. The timetable list keys subscribe to selection for the same
  * reason: whether `]` or Alt+Down can fire depends on it.
  */
-export function useEditorHotkeys(): void {
+/** Timetable selection and issue state that gates the list shortcuts. */
+function useTimetableGateState() {
 	const services = useTimetableStore((s) => s.timetable.services);
 	const selectedServiceRef = useTimetableStore((s) => s.selectedServiceRef);
 	const selectedActionIndex = useTimetableStore((s) => s.selectedActionIndex);
@@ -199,17 +187,7 @@ export function useEditorHotkeys(): void {
 		services.find((service) => service.ref === selectedServiceRef)?.actions
 			.length ?? 0;
 	const serviceRefs = services.map((service) => service.ref);
-
-	const enabled = liveShortcuts({
-		mode: useModeStore((s) => s.mode),
-		tool: useEditorStore((s) => s.tool),
-		canUndo: useEditorStore((s) => s.canUndo),
-		canRedo: useEditorStore((s) => s.canRedo),
-		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
-		editDialogOpen: useEditorStore((s) =>
-			Boolean(s.pendingText || s.pendingNameTarget),
-		),
-		shortcutsOpen: useEditorStore((s) => s.showShortcuts),
+	return {
 		timetableCanStep:
 			stepService(serviceRefs, selectedServiceRef, 1) !== null ||
 			stepService(serviceRefs, selectedServiceRef, -1) !== null,
@@ -220,11 +198,32 @@ export function useEditorHotkeys(): void {
 		timetableCanNextIssue:
 			nextIssueTarget(issues, selectedServiceRef, selectedActionIndex) !== null,
 		timetablePicking,
+	};
+}
+
+/** Subscribe only to the store slices that gate a shortcut binding. */
+function useShortcutGateState(): ShortcutGateState {
+	const timetable = useTimetableGateState();
+	return {
+		mode: useModeStore((s) => s.mode),
+		tool: useEditorStore((s) => s.tool),
+		canUndo: useEditorStore((s) => s.canUndo),
+		canRedo: useEditorStore((s) => s.canRedo),
+		railwayConnected: useEditorStore((s) => Boolean(s.trackStatus?.connected)),
+		editDialogOpen: useEditorStore((s) =>
+			Boolean(s.pendingText || s.pendingNameTarget),
+		),
+		shortcutsOpen: useEditorStore((s) => s.showShortcuts),
+		...timetable,
 		canCallOn: useOperateStore(
 			(s) => s.view?.trains.some((t) => t.callingOnAllowed) ?? false,
 		),
 		trainDialogOpen: useOperateStore((s) => s.trainDialog !== null),
-	});
+	};
+}
+
+export function useEditorHotkeys(): void {
+	const enabled = liveShortcuts(useShortcutGateState());
 
 	// One row per registry entry, always, in registry order: `useHotkeys` keys
 	// registrations by array index, so a row that disappears would re-register
@@ -243,6 +242,9 @@ export function useEditorHotkeys(): void {
 				// input to cancel the gesture the input belongs to.
 				ignoreInputs: id !== "escape",
 				enabled: enabled[id],
+				// Keep Mod+S / Mod+O from falling through to the browser's native
+				// "Save Page" / "Open File" dialogs while disabled in operate mode.
+				preventDefault: id === "save" || id === "load" ? "always" : true,
 				meta: { name: shortcut.label, description: shortcut.label },
 			},
 		};

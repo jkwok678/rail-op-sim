@@ -9,7 +9,6 @@ import {
 	encodeDocument,
 	inferDocumentFormat,
 	type LoadedDocument,
-	pickAndReadDocument,
 } from "#/lib/documentFile";
 
 /**
@@ -100,13 +99,4 @@ export function assertSerializedMap(
 	) {
 		throw new InvalidMapFileError("File is missing required map sections.");
 	}
-}
-
-/**
- * Open a file picker and resolve with the parsed {@link SerializedMap} plus the
- * encoding it used. Rejects with an {@link InvalidMapFileError} if the chosen
- * file is malformed. Resolves `null` if the user cancels the picker.
- */
-export function pickAndReadMapFile(): Promise<LoadedMapFile | null> {
-	return pickAndReadDocument(parseMapText);
 }
