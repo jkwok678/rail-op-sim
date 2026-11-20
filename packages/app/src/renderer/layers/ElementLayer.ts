@@ -151,18 +151,24 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 	/** Level-crossing art last asked for, re-applied after a rebuild. */
 	let crossingArt: ReadonlyMap<string, string> = new Map();
 
+	const resolveCrossingTexture = (key: string, entry: SpriteEntry) => {
+		const file = crossingArt.get(key.slice(0, -LC_SUFFIX.length));
+		const override = file ? textures.getFile(file) : null;
+		return override ?? textures.get(entry.lookupKey);
+	};
+
+	const syncCrossingSprite = (key: string, entry: SpriteEntry) => {
+		const texture = resolveCrossingTexture(key, entry);
+		if (!texture || entry.sprite.texture === texture) return;
+		entry.sprite.texture = texture;
+		entry.sprite.width = CELL_SIZE;
+		entry.sprite.height = CELL_SIZE;
+	};
+
 	/** Point each crossing sprite at its operate art, or back at its usual art. */
 	const applyCrossingArt = () => {
 		for (const [key, entry] of spriteEntries) {
-			if (!key.endsWith(LC_SUFFIX)) continue;
-			const file = crossingArt.get(key.slice(0, -LC_SUFFIX.length));
-			const texture =
-				(file && textures.getFile(file)) || textures.get(entry.lookupKey);
-			if (texture && entry.sprite.texture !== texture) {
-				entry.sprite.texture = texture;
-				entry.sprite.width = CELL_SIZE;
-				entry.sprite.height = CELL_SIZE;
-			}
+			if (key.endsWith(LC_SUFFIX)) syncCrossingSprite(key, entry);
 		}
 	};
 
@@ -172,6 +178,15 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		entry.sprite.destroy();
 		spriteEntries.delete(key);
 	};
+
+	const matchesEntry = (
+		existing: SpriteEntry | undefined,
+		lookupKey: string,
+		parent: Container,
+	): boolean =>
+		existing !== undefined &&
+		existing.lookupKey === lookupKey &&
+		existing.parent === parent;
 
 	/** Add or update a sprite at a cell, keyed by composite key. */
 	const upsertSprite = (
@@ -190,11 +205,8 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 			return;
 		}
 		const existing = spriteEntries.get(compositeKey);
-		if (existing) {
-			if (existing.lookupKey === lookupKey && existing.parent === parent)
-				return; // unchanged
-			removeSpriteEntry(compositeKey, existing);
-		}
+		if (matchesEntry(existing, lookupKey, parent)) return;
+		if (existing) removeSpriteEntry(compositeKey, existing);
 		const sprite = makeElementSprite(texture, gx, gy);
 		sprite.label = `element-${compositeKey}`;
 		parent.addChild(sprite);

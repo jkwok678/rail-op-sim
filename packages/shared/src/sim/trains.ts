@@ -61,7 +61,7 @@ interface Ahead {
 const planningBrake = (train: Train): number => train.brakeRate / 2;
 
 /** Maximum speed (m/s) the train may run at under its current control mode. */
-export function effectiveMaxSpeed(train: Train): number {
+function effectiveMaxSpeed(train: Train): number {
 	const base =
 		train.control.mode === "signaller" && train.signallerMaxSpeed !== null
 			? Math.min(train.maxSpeed, train.signallerMaxSpeed)
@@ -256,6 +256,97 @@ function nextSpeed(train: Train, ahead: Ahead, dt: number): number {
 	return Math.min(target, v + accel * dt);
 }
 
+function applySignallerOrder(train: Train, ahead: Ahead): Ahead {
+	if (train.control.mode !== "signaller") return ahead;
+	if (train.control.order.kind === "stop") {
+		return { authority: ahead.authority, reason: ahead.reason, limit: 0 };
+	}
+	if (train.control.order.kind === "step") {
+		const stepDist = train.control.order.remainingM;
+		return {
+			authority: Math.min(ahead.authority, stepDist),
+			reason: stepDist <= ahead.authority ? "signaller" : ahead.reason,
+			limit: Math.min(ahead.limit, STEP_SPEED_MS),
+		};
+	}
+	return ahead;
+}
+
+function canStopAtBoundary(train: Train, authority: number): boolean {
+	return (
+		train.speed <= CREEP_SPEED ||
+		train.speed * train.speed <= 2 * train.brakeRate * authority + 0.5
+	);
+}
+
+function stopTrainAtBoundary(
+	train: Train,
+	ahead: Ahead,
+	wasMoving: boolean,
+	isStopping: boolean,
+	events: MoveEvent[],
+): number {
+	if (wasMoving || (train.wait === null && ahead.reason === "station")) {
+		events.push({ type: "stopped", train, reason: ahead.reason });
+	}
+	train.speed = 0;
+	train.status = "waiting";
+	train.wait = ahead.reason ?? (isStopping ? "signaller" : null);
+	if (
+		train.control.mode === "signaller" &&
+		train.control.order.kind === "step"
+	) {
+		train.control.order = { kind: "stop" };
+		train.wait = ahead.reason ?? "signaller";
+	}
+	return ahead.authority;
+}
+
+function settleTrainMotion(
+	train: Train,
+	ahead: Ahead,
+	move: number,
+	wasMoving: boolean,
+	isStopping: boolean,
+	events: MoveEvent[],
+): number {
+	const reachesStop =
+		move >= ahead.authority - 1e-6 &&
+		(canStopAtBoundary(train, ahead.authority) || ahead.reason !== "signal");
+	if (reachesStop) {
+		return stopTrainAtBoundary(train, ahead, wasMoving, isStopping, events);
+	}
+	if (move > 0) {
+		train.status = "running";
+		train.wait = null;
+	} else if (isStopping && train.speed === 0) {
+		train.status = "waiting";
+		train.wait =
+			ahead.authority <= 1.0 && ahead.reason !== null
+				? ahead.reason
+				: "signaller";
+	}
+	return move;
+}
+
+function advanceStepOrder(train: Train, move: number): void {
+	if (
+		train.control.mode !== "signaller" ||
+		train.control.order.kind !== "step"
+	) {
+		return;
+	}
+	const remaining = Math.max(0, train.control.order.remainingM - move);
+	if (remaining <= SNAP_M) {
+		train.control.order = { kind: "stop" };
+		train.speed = 0;
+		train.status = "waiting";
+		train.wait = "signaller";
+	} else {
+		train.control.order = { kind: "step", remainingM: remaining };
+	}
+}
+
 /**
  * Move one train one step. Trains not running (dwelling, crashed, finished)
  * stand still. `stopAt` is the location the train is next due to stop at.
@@ -274,77 +365,72 @@ export function moveTrain(
 		graph,
 		state.trains.filter((t) => t !== train),
 	);
-	let ahead = lookAhead(graph, state, train, others, stopAt);
-
+	const ahead = applySignallerOrder(
+		train,
+		lookAhead(graph, state, train, others, stopAt),
+	);
 	const isStopping =
 		train.control.mode === "signaller" && train.control.order.kind === "stop";
-	if (isStopping) {
-		ahead = {
-			authority: ahead.authority,
-			reason: ahead.reason,
-			limit: 0,
-		};
-	} else if (
-		train.control.mode === "signaller" &&
-		train.control.order.kind === "step"
-	) {
-		const stepDist = train.control.order.remainingM;
-		ahead = {
-			authority: Math.min(ahead.authority, stepDist),
-			reason: stepDist <= ahead.authority ? "signaller" : ahead.reason,
-			limit: Math.min(ahead.limit, STEP_SPEED_MS),
-		};
-	}
 
 	const wasMoving = train.speed > 0;
 	train.speed = nextSpeed(train, ahead, dt);
-	let move = train.speed * dt;
-	const canStop =
-		train.speed <= CREEP_SPEED ||
-		train.speed * train.speed <= 2 * train.brakeRate * ahead.authority + 0.5;
-	if (
-		move >= ahead.authority - 1e-6 &&
-		(canStop || ahead.reason !== "signal")
-	) {
-		move = ahead.authority;
-		if (wasMoving || (train.wait === null && ahead.reason === "station"))
-			events.push({ type: "stopped", train, reason: ahead.reason });
-		train.speed = 0;
-		train.status = "waiting";
-		train.wait = ahead.reason ?? (isStopping ? "signaller" : null);
-		if (
-			train.control.mode === "signaller" &&
-			train.control.order.kind === "step"
-		) {
-			train.control.order = { kind: "stop" };
-			train.wait = ahead.reason ?? "signaller";
-		}
-	} else if (move > 0) {
-		train.status = "running";
-		train.wait = null;
-	} else if (isStopping && train.speed === 0) {
-		train.status = "waiting";
-		train.wait =
-			ahead.authority <= 1.0 && ahead.reason !== null
-				? ahead.reason
-				: "signaller";
-	}
+	const move = settleTrainMotion(
+		train,
+		ahead,
+		train.speed * dt,
+		wasMoving,
+		isStopping,
+		events,
+	);
 	advanceFront(graph, state, train, move, events);
-	if (
-		train.control.mode === "signaller" &&
-		train.control.order.kind === "step"
-	) {
-		const remaining = Math.max(0, train.control.order.remainingM - move);
-		if (remaining <= SNAP_M) {
-			train.control.order = { kind: "stop" };
-			train.speed = 0;
-			train.status = "waiting";
-			train.wait = "signaller";
-		} else {
-			train.control.order = { kind: "step", remainingM: remaining };
-		}
-	}
+	advanceStepOrder(train, move);
 	dropRear(graph, train, events);
+}
+
+function consumeRedSignalAuthority(
+	state: SimState,
+	train: Train,
+	node: number,
+): boolean {
+	const wasSignallerAllowed =
+		train.control.mode === "signaller" &&
+		train.control.allowedRedSignalNode === node;
+	if (wasSignallerAllowed && train.control.mode === "signaller") {
+		train.control.allowedRedSignalNode = null;
+	}
+	const wasCallOnAllowed = train.allowedCallOnNode === node;
+	if (wasCallOnAllowed) {
+		train.allowedCallOnNode = null;
+		clearCallingOnSignal(state, node);
+	}
+	return wasSignallerAllowed || wasCallOnAllowed;
+}
+
+function recordEntryHazards(
+	graph: RailGraph,
+	state: SimState,
+	train: Train,
+	next: Seg,
+	wasAllowed: boolean,
+	events: MoveEvent[],
+): void {
+	if (
+		!wasAllowed &&
+		isFacingSignal(graph, next) &&
+		state.aspects[next.node] === 0
+	) {
+		events.push({ type: "spad", train, seg: next });
+	}
+	// RailOS (TrainUnit.cpp:903): faster than a crawl onto a crossing
+	// whose barriers are not down, and the train hits road traffic.
+	if (hitsRoadTraffic(graph, state, next, train.speed)) {
+		events.push({ type: "crossingCrash", train, seg: next });
+	}
+	const nextKey = occKeyOf(graph, next);
+	const hit = state.trains.find(
+		(t) => t !== train && t.segs.some((s) => occKeyOf(graph, s) === nextKey),
+	);
+	if (hit) events.push({ type: "crash", train, other: hit });
 }
 
 function advanceFront(
@@ -367,36 +453,8 @@ function advanceFront(
 		train.frontM -= len;
 		train.segs.push(next);
 		events.push({ type: "entered", train, seg: next, from: current });
-		const wasSignallerAllowed =
-			train.control.mode === "signaller" &&
-			train.control.allowedRedSignalNode === next.node;
-		const wasCallOnAllowed = train.allowedCallOnNode === next.node;
-		const wasAllowed = wasSignallerAllowed || wasCallOnAllowed;
-		if (wasSignallerAllowed && train.control.mode === "signaller") {
-			train.control.allowedRedSignalNode = null;
-		}
-		if (wasCallOnAllowed) {
-			train.allowedCallOnNode = null;
-			clearCallingOnSignal(state, next.node);
-		}
-		if (
-			!wasAllowed &&
-			isFacingSignal(graph, next) &&
-			state.aspects[next.node] === 0
-		) {
-			events.push({ type: "spad", train, seg: next });
-		}
-		// RailOS (TrainUnit.cpp:903): faster than a crawl onto a crossing
-		// whose barriers are not down, and the train hits road traffic.
-		if (hitsRoadTraffic(graph, state, next, train.speed)) {
-			events.push({ type: "crossingCrash", train, seg: next });
-		}
-		const hit = state.trains.find(
-			(t) =>
-				t !== train &&
-				t.segs.some((s) => occKeyOf(graph, s) === occKeyOf(graph, next)),
-		);
-		if (hit) events.push({ type: "crash", train, other: hit });
+		const wasAllowed = consumeRedSignalAuthority(state, train, next.node);
+		recordEntryHazards(graph, state, train, next, wasAllowed, events);
 	}
 }
 

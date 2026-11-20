@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// fallow-ignore-file unused-file
 
 /**
  * Imports railway-dot-exe (RailOS) graphics into public/graphics under our
@@ -123,61 +124,88 @@ function buildMapping() {
 
 // ── SVG re-encoding ──────────────────────────────────────────────────────
 
+function parseAttr(svg, name) {
+	const match = new RegExp(`${name}="(\\d+)"`).exec(svg);
+	if (!match) throw new Error(`no ${name}`);
+	return Number(match[1]);
+}
+
+function paintRect(px, x, y, rw, rh, value) {
+	for (let j = 0; j < rh; j++) {
+		for (let i = 0; i < rw; i++) px[y + j][x + i] = value;
+	}
+}
+
 function readPixels(svg) {
-	const w = Number(svg.match(/width="(\d+)"/)?.[1]);
-	const h = Number(svg.match(/height="(\d+)"/)?.[1]);
-	if (!w || !h) throw new Error("no width/height");
+	const w = parseAttr(svg, "width");
+	const h = parseAttr(svg, "height");
 	const px = Array.from({ length: h }, () => Array(w).fill(null));
 	const rectRe =
 		/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)" fill="(#[0-9a-fA-F]{6})"\s*\/>/g;
 	for (const [, x, y, rw, rh, fill] of svg.matchAll(rectRe)) {
 		const colour = fill.toLowerCase();
-		for (let j = 0; j < Number(rh); j++) {
-			for (let i = 0; i < Number(rw); i++) {
-				px[Number(y) + j][Number(x) + i] = colour === BACKGROUND ? null : colour;
-			}
-		}
+		paintRect(
+			px,
+			Number(x),
+			Number(y),
+			Number(rw),
+			Number(rh),
+			colour === BACKGROUND ? null : colour,
+		);
 	}
 	return { w, h, px };
+}
+
+function appendRun(map, key, item) {
+	const list = map.get(key);
+	if (list) list.push(item);
+	else map.set(key, [item]);
+}
+
+function runEnd(row, start, w, colour) {
+	let x = start;
+	while (x < w && row[x] === colour) x++;
+	return x;
+}
+
+function collectRowRuns(row, y, w, byColour) {
+	let x = 0;
+	while (x < w) {
+		const colour = row[x];
+		if (!colour) {
+			x++;
+			continue;
+		}
+		const end = runEnd(row, x, w, colour);
+		appendRun(byColour, colour, { x, y, w: end - x });
+		x = end;
+	}
+}
+
+function mergeGroupRuns(group, colour, rects) {
+	let cur = { ...group[0], h: 1 };
+	for (const next of group.slice(1)) {
+		if (next.y === cur.y + cur.h) cur.h++;
+		else {
+			rects.push({ ...cur, colour });
+			cur = { ...next, h: 1 };
+		}
+	}
+	rects.push({ ...cur, colour });
+}
+
+function mergeColourRuns(colour, runs, rects) {
+	const groups = new Map();
+	for (const r of runs) appendRun(groups, `${r.x}|${r.w}`, r);
+	for (const group of groups.values()) mergeGroupRuns(group, colour, rects);
 }
 
 /** Same encoding as png-to-svg.mjs: row runs, grouped by colour, merged down. */
 function encode({ w, h, px }) {
 	const byColour = new Map();
-	for (let y = 0; y < h; y++) {
-		let x = 0;
-		while (x < w) {
-			const colour = px[y][x];
-			if (!colour) {
-				x++;
-				continue;
-			}
-			const start = x;
-			while (x < w && px[y][x] === colour) x++;
-			if (!byColour.has(colour)) byColour.set(colour, []);
-			byColour.get(colour).push({ x: start, y, w: x - start });
-		}
-	}
+	for (let y = 0; y < h; y++) collectRowRuns(px[y], y, w, byColour);
 	const rects = [];
-	for (const [colour, runs] of byColour) {
-		const groups = new Map();
-		for (const r of runs) {
-			const key = `${r.x}|${r.w}`;
-			if (!groups.has(key)) groups.set(key, []);
-			groups.get(key).push(r);
-		}
-		for (const group of groups.values()) {
-			let cur = { ...group[0], h: 1 };
-			for (const next of group.slice(1)) {
-				if (next.y === cur.y + cur.h) cur.h++;
-				else {
-					rects.push({ ...cur, colour });
-					cur = { ...next, h: 1 };
-				}
-			}
-			rects.push({ ...cur, colour });
-		}
-	}
+	for (const [colour, runs] of byColour) mergeColourRuns(colour, runs, rects);
 	return (
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" shape-rendering="crispEdges">\n` +
 		rects

@@ -1699,6 +1699,52 @@ export class PlacementController {
 		this.ghost.visible = true;
 	};
 
+	private findHoveredTrain(hoverCell: { gx: number; gy: number } | null) {
+		if (!hoverCell || useModeStore.getState().mode !== "operate") return null;
+		const trains = useOperateStore.getState().view?.trains ?? [];
+		return findTrainAt(trains, hoverCell.gx, hoverCell.gy);
+	}
+
+	private updateTrainHoverTooltip(
+		train: ReturnType<typeof findTrainAt>,
+		clientX: number,
+		clientY: number,
+		showTrainInfo: boolean,
+		showTrainTimetable: boolean,
+	): void {
+		const info = train
+			? buildHoveredTrainInfo(train, clientX, clientY, {
+					showBasic: showTrainInfo,
+					showTimetable: showTrainTimetable,
+					timetableRows: useOperateStore.getState().timetables[train.id],
+				})
+			: null;
+		useEditorStore.getState().setHoveredTrainInfo(info);
+	}
+
+	private updateTrackHoverTooltip(
+		hoverCell: { gx: number; gy: number } | null,
+		blockedByTrain: boolean,
+		clientX: number,
+		clientY: number,
+	): void {
+		const track =
+			!blockedByTrain && hoverCell
+				? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
+				: null;
+		const info =
+			track && hoverCell
+				? buildHoveredTrackInfo(
+						track,
+						hoverCell.gx,
+						hoverCell.gy,
+						clientX,
+						clientY,
+					)
+				: null;
+		useEditorStore.getState().setHoveredTrackInfo(info);
+	}
+
 	private updateHoverTooltips(clientX: number, clientY: number): void {
 		const { showTrackInfo, showTrainInfo, showTrainTimetable } =
 			useEditorStore.getState();
@@ -1706,48 +1752,18 @@ export class PlacementController {
 		if (!showTrackInfo && !wantTrainHover) return;
 
 		const hoverCell = this.screenToGrid(clientX, clientY);
-		const train =
-			wantTrainHover && hoverCell && useModeStore.getState().mode === "operate"
-				? findTrainAt(
-						useOperateStore.getState().view?.trains ?? [],
-						hoverCell.gx,
-						hoverCell.gy,
-					)
-				: null;
-
+		const train = wantTrainHover ? this.findHoveredTrain(hoverCell) : null;
 		if (wantTrainHover) {
-			const timetableRows = train
-				? useOperateStore.getState().timetables[train.id]
-				: undefined;
-			useEditorStore.getState().setHoveredTrainInfo(
-				train
-					? buildHoveredTrainInfo(train, clientX, clientY, {
-							showBasic: showTrainInfo,
-							showTimetable: showTrainTimetable,
-							timetableRows,
-						})
-					: null,
+			this.updateTrainHoverTooltip(
+				train,
+				clientX,
+				clientY,
+				showTrainInfo,
+				showTrainTimetable,
 			);
 		}
-
 		if (showTrackInfo) {
-			const track =
-				!train && hoverCell
-					? this.map.getTrackAt(hoverCell.gx, hoverCell.gy)
-					: null;
-			useEditorStore
-				.getState()
-				.setHoveredTrackInfo(
-					track && hoverCell
-						? buildHoveredTrackInfo(
-								track,
-								hoverCell.gx,
-								hoverCell.gy,
-								clientX,
-								clientY,
-							)
-						: null,
-				);
+			this.updateTrackHoverTooltip(hoverCell, train !== null, clientX, clientY);
 		}
 	}
 

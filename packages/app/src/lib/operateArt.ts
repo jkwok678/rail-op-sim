@@ -251,7 +251,7 @@ export function pointsArt(
 }
 
 /** Grid cell key, as the track layer keys its sprites. */
-export const cellKey = (gx: number, gy: number): string => `${gx},${gy}`;
+const cellKey = (gx: number, gy: number): string => `${gx},${gy}`;
 
 /**
  * The art every signal and set of points shows in `view`, keyed by cell.
@@ -335,25 +335,37 @@ export const crossingsChanging = (view: SimView | null): boolean =>
 		(lc) => lc.barriers === "lowering" || lc.barriers === "raising",
 	) ?? false;
 
-/** Every file {@link operateArt} can ask for, to preload before operating. */
-export const OPERATE_ART_FILES: readonly string[] = (() => {
-	const files = new Set<string>();
-	for (const subtype of Object.keys(SHUNT_SVG_MAP)) {
-		for (const capability of [1, 2, 3, 4]) {
-			for (let aspect = 0; aspect <= 3; aspect++) {
-				for (const co of [false, true]) {
-					for (const f of signalArt(subtype, aspect, capability, co) ?? []) {
-						files.add(f);
-					}
-				}
+function addSignalVariants(
+	files: Set<string>,
+	subtype: string,
+	capability: number,
+): void {
+	for (let aspect = 0; aspect <= 3; aspect++) {
+		for (const co of [false, true]) {
+			for (const f of signalArt(subtype, aspect, capability, co) ?? []) {
+				files.add(f);
 			}
 		}
 	}
+}
+
+function collectSignalArtFiles(files: Set<string>): void {
+	for (const subtype of Object.keys(SHUNT_SVG_MAP)) {
+		for (const capability of [1, 2, 3, 4]) {
+			addSignalVariants(files, subtype, capability);
+		}
+	}
+}
+
+function collectPointArtFiles(files: Set<string>): void {
 	for (const subtype of Object.keys(FILLET_LINKS)) {
 		for (const r of getRails("switch", subtype as never)) {
 			for (const f of pointsArt(subtype, r.a, r.b) ?? []) files.add(f);
 		}
 	}
+}
+
+function collectCrossingArtFiles(files: Set<string>): void {
 	for (const subtype of ["STRAIGHTH", "STRAIGHTV"]) {
 		for (const [i, n] of [
 			[0, 1],
@@ -365,5 +377,13 @@ export const OPERATE_ART_FILES: readonly string[] = (() => {
 			if (f) files.add(f);
 		}
 	}
+}
+
+/** Every file {@link operateArt} can ask for, to preload before operating. */
+export const OPERATE_ART_FILES: readonly string[] = (() => {
+	const files = new Set<string>();
+	collectSignalArtFiles(files);
+	collectPointArtFiles(files);
+	collectCrossingArtFiles(files);
 	return [...files];
 })();

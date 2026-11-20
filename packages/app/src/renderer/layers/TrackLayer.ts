@@ -1,4 +1,4 @@
-import type { Map as Map_ } from "@rail-op-sim/shared";
+import type { Map as Map_, Track } from "@rail-op-sim/shared";
 import {
 	getTrackColorState,
 	TRACK_COLOR_BOTH,
@@ -134,27 +134,65 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 		if (entry) entry.sprite.visible = true;
 	};
 
+	const mountOverrideSprites = (key: string, baked: Texture[]): Sprite[] => {
+		const [gxStr, gyStr] = key.split(",");
+		const entry = entries.get(key);
+		if (entry) entry.sprite.visible = false;
+		return baked.map((t) => {
+			const sprite = makeTrackSprite(t, Number(gxStr), Number(gyStr));
+			sprite.label = `track-override-${key}`;
+			overlay.addChild(sprite);
+			return sprite;
+		});
+	};
+
+	const syncOverride = (key: string, files: readonly string[]) => {
+		const id = files.join("+");
+		if (overridden.get(key)?.files === id) return;
+		dropOverride(key);
+		const baked = files.map((f) => textures.getFile(f));
+		if (!baked.every((t): t is Texture => t !== null)) return;
+		overridden.set(key, {
+			files: id,
+			sprites: mountOverrideSprites(key, baked),
+		});
+	};
+
 	const applyOverrides = () => {
 		for (const key of [...overridden.keys()]) {
 			if (!requested.has(key)) dropOverride(key);
 		}
-		for (const [key, files] of requested) {
-			const id = files.join("+");
-			if (overridden.get(key)?.files === id) continue;
-			dropOverride(key);
-			const baked = files.map((f) => textures.getFile(f));
-			if (!baked.every((t): t is Texture => t !== null)) continue;
-			const [gxStr, gyStr] = key.split(",");
-			const sprites = baked.map((t) => {
-				const sprite = makeTrackSprite(t, Number(gxStr), Number(gyStr));
-				sprite.label = `track-override-${key}`;
-				overlay.addChild(sprite);
-				return sprite;
-			});
-			overridden.set(key, { files: id, sprites });
-			const entry = entries.get(key);
-			if (entry) entry.sprite.visible = false;
-		}
+		for (const [key, files] of requested) syncOverride(key, files);
+	};
+
+	// Bridge / Underpass and linked tracks use Unset variants until named/paired.
+	const UNSET_CHECK: Partial<
+		Record<Track["data"]["kind"], (t: Track) => boolean>
+	> = {
+		bridgeUnderpass: (t) => !t.getNamed(),
+		linked: (t) => !t.isLinked(),
+	};
+
+	const trackDisplaySubtype = (track: Track): string => {
+		const check = UNSET_CHECK[track.data.kind];
+		return check?.(track) ? `${track.data.subtype}_UNSET` : track.data.subtype;
+	};
+
+	const needsRebuild = (key: string, lookupKey: string): boolean => {
+		const existing = entries.get(key);
+		if (existing?.lookupKey === lookupKey) return false;
+		if (existing) removeEntry(key, existing);
+		return true;
+	};
+
+	const syncTrack = (track: Track, seen: Set<string>) => {
+		const key = track.locationToString();
+		const subtype = trackDisplaySubtype(track);
+		const aspect = track.getAspect() >= 0 ? track.getAspect() : undefined;
+		seen.add(key);
+
+		if (!needsRebuild(key, entryKey(subtype, aspect))) return;
+		addSprite(key, subtype, track.getLocationX(), track.getLocationY(), aspect);
 	};
 
 	return {
@@ -166,36 +204,7 @@ export function createTrackLayer(textures: TextureCache): TrackLayer {
 
 			map.forEachTrack((track) => {
 				trackCount++;
-				const key = track.locationToString();
-				let subtype: string = track.data.subtype;
-				const aspect = track.getAspect() >= 0 ? track.getAspect() : undefined;
-
-				// Bridge / Underpass: use Unset variant when not named,
-				// mirroring how Concourse and NamedLocation behave.
-				if (track.data.kind === "bridgeUnderpass" && !track.getNamed()) {
-					subtype = `${subtype}_UNSET`;
-				}
-
-				// Linked tracks: use Unset variant when not paired
-				if (track.data.kind === "linked" && !track.isLinked()) {
-					subtype = `${subtype}_UNSET`;
-				}
-
-				seen.add(key);
-
-				const lookupKey = entryKey(subtype, aspect);
-				const existing = entries.get(key);
-				if (existing) {
-					if (existing.lookupKey === lookupKey) return; // unchanged
-					removeEntry(key, existing); // subtype or aspect changed — rebuild
-				}
-				addSprite(
-					key,
-					subtype,
-					track.getLocationX(),
-					track.getLocationY(),
-					aspect,
-				);
+				syncTrack(track, seen);
 			});
 
 			let removed = 0;

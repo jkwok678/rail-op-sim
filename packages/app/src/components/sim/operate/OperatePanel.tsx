@@ -135,7 +135,20 @@ function ClockControls() {
 	);
 }
 
-function RouteControls() {
+function routeControlsHint(
+	callOnArmed: boolean,
+	cancelArmed: boolean,
+	hasRouteStart: boolean,
+): string {
+	if (callOnArmed) return "Click the stop signal to call the waiting train on.";
+	if (cancelArmed) return "Right-click a route to cancel it.";
+	if (hasRouteStart) {
+		return "Click where the route ends — right-click to abandon.";
+	}
+	return "Click a signal to start a route; click points to change them.";
+}
+
+function useRouteControlState() {
 	const errored = useErrored();
 	const routeKind = useOperateStore((s) => s.routeKind);
 	const cancelArmed = useOperateStore((s) => s.cancelArmed);
@@ -145,6 +158,31 @@ function RouteControls() {
 	const canCallOn = useOperateStore(
 		(s) => s.view?.trains.some((t) => t.callingOnAllowed) ?? false,
 	);
+	const actionDisabled = errored || !run || run === "paused";
+	return {
+		errored,
+		routeKind,
+		cancelArmed,
+		callOnArmed,
+		actionDisabled,
+		callOnDisabled: actionDisabled || !canCallOn,
+		hint: routeControlsHint(callOnArmed, cancelArmed, routeStart !== null),
+	};
+}
+
+function RouteControls() {
+	const {
+		errored,
+		routeKind,
+		cancelArmed,
+		callOnArmed,
+		actionDisabled,
+		callOnDisabled,
+		hint,
+	} = useRouteControlState();
+	const kindActive = (kind: RouteKind) =>
+		routeKind === kind && !cancelArmed && !callOnArmed;
+
 	return (
 		<div className="flex flex-col gap-1.5 border-b border-border px-3 py-2">
 			<div
@@ -152,24 +190,23 @@ function RouteControls() {
 				aria-label="Route kind"
 				className="flex flex-wrap gap-1"
 			>
-				{ROUTE_KINDS.map(({ kind, label, swatch }) => (
-					<Button
-						key={kind}
-						role="radio"
-						aria-checked={routeKind === kind && !cancelArmed && !callOnArmed}
-						variant={
-							routeKind === kind && !cancelArmed && !callOnArmed
-								? "secondary"
-								: "ghost"
-						}
-						size="xs"
-						disabled={errored}
-						onClick={() => chooseRouteKind(kind)}
-					>
-						<span className={`size-2 rounded-full ${swatch}`} />
-						{label}
-					</Button>
-				))}
+				{ROUTE_KINDS.map(({ kind, label, swatch }) => {
+					const active = kindActive(kind);
+					return (
+						<Button
+							key={kind}
+							role="radio"
+							aria-checked={active}
+							variant={active ? "secondary" : "ghost"}
+							size="xs"
+							disabled={errored}
+							onClick={() => chooseRouteKind(kind)}
+						>
+							<span className={`size-2 rounded-full ${swatch}`} />
+							{label}
+						</Button>
+					);
+				})}
 				<Button
 					aria-pressed={cancelArmed}
 					variant={cancelArmed ? "destructive" : "ghost"}
@@ -185,7 +222,7 @@ function RouteControls() {
 				<Button
 					variant="outline"
 					size="xs"
-					disabled={errored || !run || run === "paused"}
+					disabled={actionDisabled}
 					title="Set an automatic route on every plain section between signals"
 					onClick={() => void setAllAutoRoutes()}
 				>
@@ -196,7 +233,7 @@ function RouteControls() {
 					variant={callOnArmed ? "secondary" : "outline"}
 					size="xs"
 					aria-pressed={callOnArmed}
-					disabled={errored || !canCallOn || !run || run === "paused"}
+					disabled={callOnDisabled}
 					title="Call a train standing at red onto an occupied platform (Shift+O)"
 					onClick={toggleCallOn}
 				>
@@ -204,15 +241,7 @@ function RouteControls() {
 					Calling-on
 				</Button>
 			</div>
-			<p className="text-[10px] text-muted-foreground">
-				{callOnArmed
-					? "Click the stop signal to call the waiting train on."
-					: cancelArmed
-						? "Right-click a route to cancel it."
-						: routeStart
-							? "Click where the route ends — right-click to abandon."
-							: "Click a signal to start a route; click points to change them."}
-			</p>
+			<p className="text-[10px] text-muted-foreground">{hint}</p>
 		</div>
 	);
 }

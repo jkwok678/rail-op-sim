@@ -45,6 +45,9 @@ const train = (over: Partial<TrainView> = {}): TrainView => ({
 const byId = (items: ReturnType<typeof trainMenuItems>, id: string) =>
 	items.find((item) => item.id === id);
 
+const isEnabled = (items: ReturnType<typeof trainMenuItems>, id: string) =>
+	byId(items, id)?.enabled;
+
 beforeEach(() => {
 	sent.length = 0;
 	useOperateStore.getState().reset();
@@ -54,15 +57,15 @@ afterEach(cleanup);
 describe("trainMenuItems", () => {
 	it("enables takeControl and disables movement, join, skip, and remove while running in timetable control", () => {
 		const items = trainMenuItems(train(), 4);
-		expect(byId(items, "takeControl")?.enabled).toBe(true);
-		expect(byId(items, "restoreTimetable")?.enabled).toBe(false);
-		expect(byId(items, "moveForwards")?.enabled).toBe(false);
-		expect(byId(items, "stop")?.enabled).toBe(false);
-		expect(byId(items, "signallerJoin")?.enabled).toBe(false);
-		expect(byId(items, "skipActions")?.enabled).toBe(false);
-		expect(byId(items, "becomeNewService")?.enabled).toBe(false);
-		expect(byId(items, "setReminder")?.enabled).toBe(true);
-		expect(byId(items, "removeTrain")?.enabled).toBe(false);
+		expect(isEnabled(items, "takeControl")).toBe(true);
+		expect(isEnabled(items, "restoreTimetable")).toBe(false);
+		expect(isEnabled(items, "moveForwards")).toBe(false);
+		expect(isEnabled(items, "stop")).toBe(false);
+		expect(isEnabled(items, "signallerJoin")).toBe(false);
+		expect(isEnabled(items, "skipActions")).toBe(false);
+		expect(isEnabled(items, "becomeNewService")).toBe(false);
+		expect(isEnabled(items, "setReminder")).toBe(true);
+		expect(isEnabled(items, "removeTrain")).toBe(false);
 	});
 
 	it("enables skipActions and becomeNewService only when stopped in timetable mode with valid targets", () => {
@@ -73,8 +76,8 @@ describe("trainMenuItems", () => {
 			followOnServiceRef: "2B99",
 		});
 		const items = trainMenuItems(atStop, 4);
-		expect(byId(items, "skipActions")?.enabled).toBe(true);
-		expect(byId(items, "becomeNewService")?.enabled).toBe(true);
+		expect(isEnabled(items, "skipActions")).toBe(true);
+		expect(isEnabled(items, "becomeNewService")).toBe(true);
 		expect(byId(items, "becomeNewService")?.label).toBe("Become 2B99 Early…");
 
 		// Index 2 of 4 rows only has row 3 (the finish row) after it, so skipActions is disabled.
@@ -82,7 +85,7 @@ describe("trainMenuItems", () => {
 			train({ status: "dwelling", speedKmh: 0, timetableIndex: 2 }),
 			4,
 		);
-		expect(byId(beforeFinish, "skipActions")?.enabled).toBe(false);
+		expect(isEnabled(beforeFinish, "skipActions")).toBe(false);
 	});
 
 	it("enables passRed, signallerJoin, restoreTimetable, and removeTrain according to signaller state", () => {
@@ -95,13 +98,13 @@ describe("trainMenuItems", () => {
 			canRestoreTimetable: true,
 		});
 		const items = trainMenuItems(atRed, 4);
-		expect(byId(items, "restoreTimetable")?.enabled).toBe(true);
-		expect(byId(items, "passRed")?.enabled).toBe(true);
-		expect(byId(items, "stepForward")?.enabled).toBe(false);
-		expect(byId(items, "changeDirection")?.enabled).toBe(true);
-		expect(byId(items, "moveForwards")?.enabled).toBe(true);
-		expect(byId(items, "removeTrain")?.enabled).toBe(true);
-		expect(byId(items, "skipActions")?.enabled).toBe(false);
+		expect(isEnabled(items, "restoreTimetable")).toBe(true);
+		expect(isEnabled(items, "passRed")).toBe(true);
+		expect(isEnabled(items, "stepForward")).toBe(false);
+		expect(isEnabled(items, "changeDirection")).toBe(true);
+		expect(isEnabled(items, "moveForwards")).toBe(true);
+		expect(isEnabled(items, "removeTrain")).toBe(true);
+		expect(isEnabled(items, "skipActions")).toBe(false);
 
 		const awayFromRestore = train({
 			status: "waiting",
@@ -112,12 +115,12 @@ describe("trainMenuItems", () => {
 			canRestoreTimetable: false,
 		});
 		const joinItems = trainMenuItems(awayFromRestore, 4);
-		expect(byId(joinItems, "signallerJoin")?.enabled).toBe(true);
-		expect(byId(joinItems, "restoreTimetable")?.enabled).toBe(false);
+		expect(isEnabled(joinItems, "signallerJoin")).toBe(true);
+		expect(isEnabled(joinItems, "restoreTimetable")).toBe(false);
 
 		// Crashed trains can always be removed even without signaller control.
 		const crashed = train({ status: "crashed", speedKmh: 0 });
-		expect(byId(trainMenuItems(crashed, 4), "removeTrain")?.enabled).toBe(true);
+		expect(isEnabled(trainMenuItems(crashed, 4), "removeTrain")).toBe(true);
 	});
 });
 

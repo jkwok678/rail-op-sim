@@ -294,116 +294,129 @@ function describeAction(a: Action, at: string | null, offset: number): string {
 	return [verb, actionLocation(a), when].filter(Boolean).join(" ");
 }
 
+function formatStopAction(
+	a: ActionOf<"stop">,
+	offset: number,
+): Pick<TrainTimetableEntry, "time" | "label"> {
+	if (a.arrive !== undefined && a.depart !== undefined) {
+		return {
+			time: `${formatSimTime(a.arrive + offset)}–${formatSimTime(a.depart + offset)}`,
+			label: a.location,
+		};
+	}
+	if (a.arrive !== undefined) {
+		return {
+			time: formatSimTime(a.arrive + offset),
+			label: `arr ${a.location}`,
+		};
+	}
+	if (a.depart !== undefined) {
+		return {
+			time: formatSimTime(a.depart + offset),
+			label: `dep ${a.location}`,
+		};
+	}
+	return { time: null, label: a.location };
+}
+
+type TimetableActionFormatters = {
+	[K in Action["kind"]]: (
+		a: ActionOf<K>,
+		offset: number,
+	) => Pick<TrainTimetableEntry, "time" | "label">;
+};
+
+const TIMETABLE_ACTION_FORMATTERS: TimetableActionFormatters = {
+	startNew: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: "start",
+	}),
+	startNewService: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `from ${a.fromRef}`,
+	}),
+	startFromSplit: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `split from ${a.fromRef}`,
+	}),
+	stop: formatStopAction,
+	pass: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `pass ${a.location}`,
+	}),
+	changeDirection: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: "reverse",
+	}),
+	changeDescription: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `rename "${a.description}"`,
+	}),
+	changeMaxSpeed: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `max ${a.maxSpeedKmh} km/h`,
+	}),
+	frontSplit: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `split → ${a.newRef}`,
+	}),
+	rearSplit: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `split → ${a.newRef}`,
+	}),
+	joinedBy: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `joined by ${a.otherRef}`,
+	}),
+	finishNewService: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `→ ${a.nextRef}`,
+	}),
+	finishJoin: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `join ${a.otherRef}`,
+	}),
+	finishToShuttle: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `→ shuttle ${a.nextRef}`,
+	}),
+	finishExit: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: "exit",
+	}),
+	finishRemainHere: () => ({ time: null, label: "terminates" }),
+	startNewShuttle: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `shuttle ↔ ${a.otherRef}`,
+	}),
+	startShuttle: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `shuttle from ${a.fromRef}`,
+	}),
+	startFromShuttle: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `from shuttle ${a.fromRef}`,
+	}),
+	finishShuttleRemainHere: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `shuttle ↔ ${a.otherRef}`,
+	}),
+	finishShuttleNewService: (a, offset) => ({
+		time: formatSimTime(a.time + offset),
+		label: `shuttle ↔ ${a.otherRef} → ${a.nextRef}`,
+	}),
+};
+
 function formatTimetableAction(
 	a: Action,
 	offset: number,
 ): Pick<TrainTimetableEntry, "time" | "label"> {
-	switch (a.kind) {
-		case "startNew":
-			return { time: formatSimTime(a.time + offset), label: "start" };
-		case "startNewService":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `from ${a.fromRef}`,
-			};
-		case "startFromSplit":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `split from ${a.fromRef}`,
-			};
-		case "stop":
-			if (a.arrive !== undefined && a.depart !== undefined) {
-				return {
-					time: `${formatSimTime(a.arrive + offset)}–${formatSimTime(a.depart + offset)}`,
-					label: a.location,
-				};
-			}
-			if (a.arrive !== undefined) {
-				return {
-					time: formatSimTime(a.arrive + offset),
-					label: `arr ${a.location}`,
-				};
-			}
-			if (a.depart !== undefined) {
-				return {
-					time: formatSimTime(a.depart + offset),
-					label: `dep ${a.location}`,
-				};
-			}
-			return { time: null, label: a.location };
-		case "pass":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `pass ${a.location}`,
-			};
-		case "changeDirection":
-			return { time: formatSimTime(a.time + offset), label: "reverse" };
-		case "changeDescription":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `rename "${a.description}"`,
-			};
-		case "changeMaxSpeed":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `max ${a.maxSpeedKmh} km/h`,
-			};
-		case "frontSplit":
-		case "rearSplit":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `split → ${a.newRef}`,
-			};
-		case "joinedBy":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `joined by ${a.otherRef}`,
-			};
-		case "finishNewService":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `→ ${a.nextRef}`,
-			};
-		case "finishJoin":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `join ${a.otherRef}`,
-			};
-		case "finishToShuttle":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `→ shuttle ${a.nextRef}`,
-			};
-		case "finishExit":
-			return { time: formatSimTime(a.time + offset), label: "exit" };
-		case "finishRemainHere":
-			return { time: null, label: "terminates" };
-		case "startNewShuttle":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `shuttle ↔ ${a.otherRef}`,
-			};
-		case "startShuttle":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `shuttle from ${a.fromRef}`,
-			};
-		case "startFromShuttle":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `from shuttle ${a.fromRef}`,
-			};
-		case "finishShuttleRemainHere":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `shuttle ↔ ${a.otherRef}`,
-			};
-		case "finishShuttleNewService":
-			return {
-				time: formatSimTime(a.time + offset),
-				label: `shuttle ↔ ${a.otherRef} → ${a.nextRef}`,
-			};
-	}
+	return (
+		TIMETABLE_ACTION_FORMATTERS[a.kind] as (
+			action: Action,
+			offset: number,
+		) => Pick<TrainTimetableEntry, "time" | "label">
+	)(a, offset);
 }
 
 /** Booked timetable rows for `train`'s working, formatted once with repeat offsets applied. */
@@ -749,6 +762,87 @@ interface SplitEnds {
 	check: Walked[];
 }
 
+interface SplitWalks {
+	mid: Seg;
+	lead: Seg;
+	fwd1: Walked | null;
+	fwd2: Walked | null;
+	rwd1: Walked | null;
+	rwd2: Walked | null;
+	numFwd: number;
+	numFwdNamed: number;
+	numRwd: number;
+	numRwdNamed: number;
+}
+
+function countWalkReach(
+	first: Walked | null,
+	second: Walked | null,
+	isNamed: (w: Walked) => boolean,
+	baseCount: number,
+	baseNamed: number,
+): { count: number; named: number } {
+	if (!first) return { count: baseCount, named: baseNamed };
+	let count = baseCount + 1;
+	let named = isNamed(first) ? baseCount + 1 : baseNamed;
+	if (second) {
+		count = baseCount + 2;
+		if (isNamed(second)) named = baseCount + 2;
+	}
+	return { count, named };
+}
+
+function tryNamedSplit(w: SplitWalks): SplitEnds | null {
+	const { mid, lead, fwd1, fwd2, rwd1, rwd2 } = w;
+	if (w.numFwdNamed === 2 && fwd1 && fwd2) {
+		return {
+			rear: [mid, lead],
+			front: [fwd1.seg, fwd2.seg],
+			check: [fwd1, fwd2],
+		};
+	}
+	if (
+		w.numFwdNamed === 1 &&
+		w.numRwdNamed >= 1 &&
+		w.numRwd >= 2 &&
+		fwd1 &&
+		rwd1
+	) {
+		return {
+			rear: [rwd1.seg, mid],
+			front: [lead, fwd1.seg],
+			check: [fwd1, rwd1],
+		};
+	}
+	if (w.numRwdNamed >= 2 && w.numRwd === 3 && rwd1 && rwd2) {
+		return {
+			rear: [rwd2.seg, rwd1.seg],
+			front: [mid, lead],
+			check: [rwd1, rwd2],
+		};
+	}
+	return null;
+}
+
+function tryOverhangSplit(w: SplitWalks): SplitEnds | null {
+	const { mid, lead, fwd1, fwd2, rwd1 } = w;
+	if (w.numFwdNamed === 1 && w.numFwd === 2 && fwd1 && fwd2) {
+		return {
+			rear: [mid, lead],
+			front: [fwd1.seg, fwd2.seg],
+			check: [fwd1, fwd2],
+		};
+	}
+	if (w.numFwd >= 1 && w.numRwdNamed >= 1 && w.numRwd >= 2 && fwd1 && rwd1) {
+		return {
+			rear: [rwd1.seg, mid],
+			front: [lead, fwd1.seg],
+			check: [fwd1, rwd1],
+		};
+	}
+	return null;
+}
+
 /**
  * Four cells for a split, preferring the front portion on the named location.
  * The order is RailOS's `ThisLocationLongEnoughForSplit`: two cells ahead,
@@ -768,69 +862,39 @@ function splitEnds(
 	const fwd2 = fwd1 ? walk(ctx, fwd1.seg, 1) : null;
 	const rwd1 = walk(ctx, mid, -1);
 	const rwd2 = rwd1 ? walk(ctx, rwd1.seg, -1) : null;
-
-	const named = (w: Walked | null): boolean =>
-		w !== null && ctx.graph.nodes[w.seg.node].location === location;
-
-	let numFwd = 0;
-	let numFwdNamed = 0;
-	if (fwd1) {
-		numFwd = 1;
-		if (named(fwd1)) numFwdNamed = 1;
-		if (fwd2) {
-			numFwd = 2;
-			if (named(fwd2)) numFwdNamed = 2;
-		}
-	}
-	let numRwd = 1;
-	let numRwdNamed = ctx.graph.nodes[mid.node].location === location ? 1 : 0;
-	if (rwd1) {
-		numRwd = 2;
-		if (named(rwd1)) numRwdNamed = 2;
-		if (rwd2) {
-			numRwd = 3;
-			if (named(rwd2)) numRwdNamed = 3;
-		}
-	}
-
-	const ahead: SplitEnds = {
-		rear: [mid, lead],
-		front: [fwd1?.seg ?? lead, fwd2?.seg ?? lead],
-		check: [fwd1, fwd2].filter((w): w is Walked => w !== null),
-	};
-	const straddle: SplitEnds = {
-		rear: [rwd1?.seg ?? mid, mid],
-		front: [lead, fwd1?.seg ?? lead],
-		check: [fwd1, rwd1].filter((w): w is Walked => w !== null),
-	};
-	const behind: SplitEnds = {
-		rear: [rwd2?.seg ?? mid, rwd1?.seg ?? mid],
-		front: [mid, lead],
-		check: [rwd1, rwd2].filter((w): w is Walked => w !== null),
+	const isNamed = (w: Walked) =>
+		ctx.graph.nodes[w.seg.node].location === location;
+	const fwd = countWalkReach(fwd1, fwd2, isNamed, 0, 0);
+	const rwd = countWalkReach(
+		rwd1,
+		rwd2,
+		isNamed,
+		1,
+		ctx.graph.nodes[mid.node].location === location ? 1 : 0,
+	);
+	const walks: SplitWalks = {
+		mid,
+		lead,
+		fwd1,
+		fwd2,
+		rwd1,
+		rwd2,
+		numFwd: fwd.count,
+		numFwdNamed: fwd.named,
+		numRwd: rwd.count,
+		numRwdNamed: rwd.named,
 	};
 
-	let chosen: SplitEnds | null = null;
-	if (numFwdNamed === 2 && fwd1 && fwd2) chosen = ahead;
-	else if (numFwdNamed === 1 && numRwdNamed >= 1 && numRwd >= 2 && fwd1 && rwd1)
-		chosen = straddle;
-	else if (numRwdNamed >= 2 && numRwd === 3 && rwd1 && rwd2) chosen = behind;
-	else if (numFwdNamed === 1 && numFwd === 2 && fwd1 && fwd2) chosen = ahead;
-	else if (numFwd >= 1 && numRwdNamed >= 1 && numRwd >= 2 && fwd1 && rwd1)
-		chosen = straddle;
+	const chosen = tryNamedSplit(walks) ?? tryOverhangSplit(walks);
 	if (!chosen) return "short";
-
 	if (chosen.check.some((w) => w.derail)) return "points";
-	if (
-		segsOccupied(
-			ctx.graph,
-			ctx.state.trains,
-			chosen.check.map((w) => w.seg),
-			train,
-		)
-	) {
-		return "train";
-	}
-	return chosen;
+	const occupied = segsOccupied(
+		ctx.graph,
+		ctx.state.trains,
+		chosen.check.map((w) => w.seg),
+		train,
+	);
+	return occupied ? "train" : chosen;
 }
 
 /** Stand on two cells with the front at the far edge of the second. */
@@ -1295,32 +1359,27 @@ function missBetween(
 	}
 }
 
+const MISSED_EVENT_PHRASE: Partial<Record<Action["kind"], string>> = {
+	pass: "missed passing",
+	frontSplit: "failed to split at",
+	rearSplit: "failed to split at",
+	joinedBy: "failed to be joined by another train at",
+	finishJoin: "failed to join another train at",
+	finishNewService: "failed to form a new service at",
+	finishToShuttle: "failed to form a new service at",
+	finishShuttleRemainHere: "failed to form a new service at",
+	finishShuttleNewService: "failed to form a new service at",
+	finishRemainHere: "failed to terminate at",
+};
+
 /** RailOS's wording for an action a train ran past, or null when it is not counted. */
 function missedEvent(
 	headcode: string,
 	a: Action,
 	where: string,
 ): string | null {
-	switch (a.kind) {
-		case "pass":
-			return `${headcode} missed passing ${where}`;
-		case "frontSplit":
-		case "rearSplit":
-			return `${headcode} failed to split at ${where}`;
-		case "joinedBy":
-			return `${headcode} failed to be joined by another train at ${where}`;
-		case "finishJoin":
-			return `${headcode} failed to join another train at ${where}`;
-		case "finishNewService":
-		case "finishToShuttle":
-		case "finishShuttleRemainHere":
-		case "finishShuttleNewService":
-			return `${headcode} failed to form a new service at ${where}`;
-		case "finishRemainHere":
-			return `${headcode} failed to terminate at ${where}`;
-		default:
-			return null;
-	}
+	const phrase = MISSED_EVENT_PHRASE[a.kind];
+	return phrase ? `${headcode} ${phrase} ${where}` : null;
 }
 
 /**

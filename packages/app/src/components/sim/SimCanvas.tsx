@@ -7,6 +7,21 @@ import { CanvasState } from "./CanvasState";
 import { PanControls } from "./PanControls";
 import { ZoomSlider } from "./ZoomSlider";
 
+function CanvasOverlayState({
+	status,
+	error,
+	showEmpty,
+}: {
+	status: ReturnType<typeof usePixiApp>["status"];
+	error: string | null;
+	showEmpty: boolean;
+}) {
+	if (status === "loading") return <CanvasState variant="loading" />;
+	if (status === "error")
+		return <CanvasState variant="error" message={error} />;
+	return showEmpty ? <CanvasState variant="empty" /> : null;
+}
+
 /**
  * Thin wrapper that owns the PixiJS canvas lifecycle via usePixiApp.
  * Renders a full-size div that the hook fills with the canvas element, and
@@ -19,8 +34,8 @@ import { ZoomSlider } from "./ZoomSlider";
 export function SimCanvas() {
 	const { containerRef, viewportRef, status, error } = usePixiApp();
 	useAutoSave(status === "ready");
-	const mode = useModeStore((s) => s.mode);
-	const trackCount = useEditorStore((s) => s.trackStatus?.total ?? 0);
+	const railwayMode = useModeStore((s) => s.mode === "railway");
+	const isEmpty = useEditorStore((s) => (s.trackStatus?.total ?? 0) === 0);
 
 	return (
 		<div className="size-full relative overflow-hidden bg-background">
@@ -31,13 +46,11 @@ export function SimCanvas() {
 			<ErrorBoundary name="Zoom slider" fallback={() => null}>
 				<ZoomSlider viewportRef={viewportRef} />
 			</ErrorBoundary>
-			{status === "loading" ? <CanvasState variant="loading" /> : null}
-			{status === "error" ? (
-				<CanvasState variant="error" message={error} />
-			) : null}
-			{status === "ready" && mode === "railway" && trackCount === 0 ? (
-				<CanvasState variant="empty" />
-			) : null}
+			<CanvasOverlayState
+				status={status}
+				error={error}
+				showEmpty={railwayMode && isEmpty}
+			/>
 		</div>
 	);
 }

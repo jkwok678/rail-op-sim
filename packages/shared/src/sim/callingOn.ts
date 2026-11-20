@@ -26,8 +26,10 @@ import {
 	sameSeg,
 	trainKeys,
 } from "./occupancy";
-import { serviceByRef } from "./timetable";
 import type { CommandResult, Route, SimState, Train } from "./types";
+
+const serviceByRef = (tt: Timetable, ref: string) =>
+	tt.services.find((s) => s.ref === ref);
 
 /** Maximum look-ahead distance past the protecting signal (RailOS: 4 km). */
 const CALL_ON_RANGE_M = 4000;
@@ -43,7 +45,7 @@ const ALLOWED_FACING_ACTIONS = new Set([
 	"finishRemainHere",
 ]);
 
-export interface CallingOnMatch {
+interface CallingOnMatch {
 	signalNode: NodeId;
 	routeSegs: Seg[];
 }
@@ -114,43 +116,88 @@ function routeConflicts(state: SimState, graph: RailGraph, seg: Seg): boolean {
 
 const segKey = (seg: Seg): number => (seg.node * 9 + seg.entry) * 9 + seg.exit;
 
-/**
- * Determine whether `train` qualifies for calling-on (§5.13), and if so return
- * the protecting signal node and the unrestricted route segments to the first
- * platform element.
- */
-export function callingOnCheck(
-	graph: RailGraph,
-	state: SimState,
-	timetable: Timetable,
-	train: Train,
-): CallingOnMatch | null {
-	if (state.pending) return null;
-	if (train.control.mode !== "timetable" || train.working.done) return null;
+function isEligibleForCallingOn(state: SimState, train: Train): boolean {
+	if (state.pending) return false;
+	if (train.control.mode !== "timetable" || train.working.done) return false;
 	if (
 		train.status !== "waiting" ||
 		train.wait !== "signal" ||
 		train.speed > 0
 	) {
-		return null;
+		return false;
 	}
-	if (train.working.at !== null || train.segs.length === 0) return null;
+	return train.working.at === null && train.segs.length > 0;
+}
 
-	const stops = upcomingStopsBeforeReversal(timetable, train);
-	if (stops.size === 0) return null;
-
-	const lead = train.segs[train.segs.length - 1];
-	const leadStation = graph.nodes[lead.node].location;
+function protectingRedSignal(
+	graph: RailGraph,
+	state: SimState,
+	lead: Seg,
+): Seg | null {
 	const firstAhead = nextSeg(graph, state.lies, lead);
-	if (
-		!firstAhead ||
-		!isFacingSignal(graph, firstAhead) ||
-		state.aspects[firstAhead.node] !== 0 ||
-		state.callingOnSignals.includes(firstAhead.node)
-	) {
-		return null;
-	}
+	if (!firstAhead || !isFacingSignal(graph, firstAhead)) return null;
+	if (state.aspects[firstAhead.node] !== 0) return null;
+	if (state.callingOnSignals.includes(firstAhead.node)) return null;
+	return firstAhead;
+}
 
+function isTargetPlatformCell(
+	graph: RailGraph,
+	cur: Seg,
+	leadStation: string | null,
+	stops: ReadonlySet<string>,
+): boolean {
+	const node = graph.nodes[cur.node];
+	if (
+		!node.location ||
+		node.location === leadStation ||
+		!stops.has(node.location)
+	) {
+		return false;
+	}
+	return node.kind !== "switch" || pathOf(graph, cur)?.rail === 0;
+}
+
+function isStepBlocked(
+	graph: RailGraph,
+	state: SimState,
+	cur: Seg,
+	stepNum: number,
+	platformIndex: number,
+): boolean {
+	if (stepNum <= 1) return false;
+	if (leavesMap(graph, cur) || endsAtBuffers(graph, cur)) return true;
+	if (isFacingSignal(graph, cur)) return true;
+	return platformIndex < 0 && routeConflicts(state, graph, cur);
+}
+
+function matchBlockingPlatform(
+	graph: RailGraph,
+	timetable: Timetable,
+	blocking: Train,
+	cur: Seg,
+	path: readonly Seg[],
+	platformIndex: number,
+): Seg[] | null {
+	if (platformIndex < 0) return null;
+	if (!canAcceptBlockingTrain(graph, timetable, blocking, cur)) return null;
+	return path.slice(0, platformIndex + 1);
+}
+
+function stepDistanceM(graph: RailGraph, cur: Seg, stepNum: number): number {
+	return stepNum === 1 ? 0 : (pathOf(graph, cur)?.lengthM ?? 0);
+}
+
+function walkCallingOnRoute(
+	graph: RailGraph,
+	state: SimState,
+	timetable: Timetable,
+	train: Train,
+	firstAhead: Seg,
+	stops: ReadonlySet<string>,
+): Seg[] | null {
+	const leadStation =
+		graph.nodes[train.segs[train.segs.length - 1].node].location;
 	const others = trainOccupancyMap(graph, state.trains, train);
 	const seen = new Set<number>();
 	const path: Seg[] = [];
@@ -159,54 +206,71 @@ export function callingOnCheck(
 	let stepNum = 1;
 	let distance = 0;
 	let platformIndex = -1;
-	let foundBlockingTrain = false;
 
 	while (cur && distance <= CALL_ON_RANGE_M) {
 		const sk = segKey(cur);
-		if (seen.has(sk)) return null;
+		if (seen.has(sk) || liesAgainst(graph, state.lies, cur)) return null;
 		seen.add(sk);
-
-		if (liesAgainst(graph, state.lies, cur)) return null;
 
 		const blocking = others.get(occKeyOf(graph, cur));
 		if (blocking) {
-			if (platformIndex < 0) return null;
-			if (!canAcceptBlockingTrain(graph, timetable, blocking, cur)) return null;
-			foundBlockingTrain = true;
-			break;
+			return matchBlockingPlatform(
+				graph,
+				timetable,
+				blocking,
+				cur,
+				path,
+				platformIndex,
+			);
 		}
-
-		if (stepNum > 1) {
-			if (leavesMap(graph, cur) || endsAtBuffers(graph, cur)) return null;
-			if (isFacingSignal(graph, cur)) return null;
-			if (platformIndex < 0 && routeConflicts(state, graph, cur)) return null;
-		}
-
-		const node = graph.nodes[cur.node];
+		if (isStepBlocked(graph, state, cur, stepNum, platformIndex)) return null;
 		if (
-			node.location &&
-			node.location !== leadStation &&
-			stops.has(node.location) &&
-			(node.kind !== "switch" || pathOf(graph, cur)?.rail === 0)
+			platformIndex < 0 &&
+			isTargetPlatformCell(graph, cur, leadStation, stops)
 		) {
-			if (platformIndex < 0) {
-				platformIndex = path.length;
-				if (stepNum > 1 && routeConflicts(state, graph, cur)) return null;
-			}
+			platformIndex = path.length;
 		}
 
 		path.push(cur);
-		distance += stepNum === 1 ? 0 : (pathOf(graph, cur)?.lengthM ?? 0);
+		distance += stepDistanceM(graph, cur, stepNum);
 		cur = nextSeg(graph, state.lies, cur);
 		stepNum++;
 	}
+	return null;
+}
 
-	if (platformIndex < 0 || !foundBlockingTrain) return null;
+/**
+ * Determine whether `train` qualifies for calling-on (§5.13), and if so return
+ * the protecting signal node and the unrestricted route segments to the first
+ * platform element.
+ */
+function callingOnCheck(
+	graph: RailGraph,
+	state: SimState,
+	timetable: Timetable,
+	train: Train,
+): CallingOnMatch | null {
+	if (!isEligibleForCallingOn(state, train)) return null;
 
-	return {
-		signalNode: firstAhead.node,
-		routeSegs: path.slice(0, platformIndex + 1),
-	};
+	const stops = upcomingStopsBeforeReversal(timetable, train);
+	if (stops.size === 0) return null;
+
+	const firstAhead = protectingRedSignal(
+		graph,
+		state,
+		train.segs[train.segs.length - 1],
+	);
+	if (!firstAhead) return null;
+
+	const routeSegs = walkCallingOnRoute(
+		graph,
+		state,
+		timetable,
+		train,
+		firstAhead,
+		stops,
+	);
+	return routeSegs ? { signalNode: firstAhead.node, routeSegs } : null;
 }
 
 /** Recompute `callingOnAllowed` for every live train. */

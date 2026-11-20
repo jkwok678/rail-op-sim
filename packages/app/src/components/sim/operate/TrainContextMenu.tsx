@@ -30,20 +30,21 @@ const MENU_WIDTH = 224;
 const DEFAULT_MENU_HEIGHT = 380;
 const EDGE_MARGIN = 8;
 
-/** Compute every action for the right-click train popup menu and whether it is available. */
-export function trainMenuItems(
-	train: TrainView,
-	timetableRowCount: number,
-): TrainMenuItem[] {
-	const alive = train.status !== "crashed";
-	const stopped = train.speedKmh < 0.01;
-	const controlled = train.signallerControl;
-	const blockedBySignalling =
-		train.wait === "signal" ||
-		train.wait === "train" ||
-		train.wait === "points" ||
-		train.wait === "buffers";
+const BLOCKED_WAITS = new Set(["signal", "train", "points", "buffers"]);
 
+interface TrainMenuContext {
+	train: TrainView;
+	alive: boolean;
+	stopped: boolean;
+	controlled: boolean;
+	timetableRowCount: number;
+}
+
+function controlMenuItems({
+	train,
+	alive,
+	controlled,
+}: TrainMenuContext): TrainMenuItem[] {
 	return [
 		{
 			id: "takeControl",
@@ -57,59 +58,73 @@ export function trainMenuItems(
 			enabled: alive && controlled && train.canRestoreTimetable,
 			group: 1,
 		},
+	];
+}
+
+function movementMenuItems({
+	train,
+	alive,
+	stopped,
+	controlled,
+}: TrainMenuContext): TrainMenuItem[] {
+	const canMove = alive && controlled;
+	const canStopAction = canMove && stopped;
+	const waitingFor = train.status === "waiting" ? train.wait : null;
+	const blocked = train.wait !== null && BLOCKED_WAITS.has(train.wait);
+	return [
 		{
 			id: "moveForwards",
 			label: "Move Forwards",
-			enabled: alive && controlled && train.signallerMode !== "move",
+			enabled: canMove && train.signallerMode !== "move",
 			group: 2,
 		},
 		{
 			id: "changeDirection",
 			label: "Change Direction",
-			enabled: alive && controlled && stopped,
+			enabled: canStopAction,
 			group: 2,
 		},
 		{
 			id: "passRed",
 			label: "Pass Red Signal",
-			enabled:
-				alive &&
-				controlled &&
-				stopped &&
-				train.status === "waiting" &&
-				train.wait === "signal",
+			enabled: canStopAction && waitingFor === "signal",
 			group: 2,
 		},
 		{
 			id: "stepForward",
 			label: "Step Forward",
-			enabled: alive && controlled && stopped && !blockedBySignalling,
+			enabled: canStopAction && !blocked,
 			group: 2,
 		},
 		{
 			id: "stop",
 			label: "Stop",
-			enabled:
-				alive && controlled && (train.signallerMode !== "stop" || !stopped),
+			enabled: canMove && (train.signallerMode !== "stop" || !stopped),
 			group: 2,
 		},
 		{
 			id: "signallerJoin",
 			label: "Signaller Join",
-			enabled:
-				alive &&
-				controlled &&
-				stopped &&
-				train.status === "waiting" &&
-				train.wait === "train",
+			enabled: canStopAction && waitingFor === "train",
 			group: 2,
 		},
+	];
+}
+
+function timetableMenuItems({
+	train,
+	alive,
+	stopped,
+	controlled,
+	timetableRowCount,
+}: TrainMenuContext): TrainMenuItem[] {
+	const inTimetable = alive && !controlled;
+	return [
 		{
 			id: "skipActions",
 			label: "Skip Timetabled Actions…",
 			enabled:
-				alive &&
-				!controlled &&
+				inTimetable &&
 				stopped &&
 				!train.workingDone &&
 				train.timetableIndex + 2 < timetableRowCount,
@@ -120,7 +135,7 @@ export function trainMenuItems(
 			label: train.followOnServiceRef
 				? `Become ${train.followOnServiceRef} Early…`
 				: "Become New Service Early…",
-			enabled: alive && !controlled && train.followOnServiceRef !== null,
+			enabled: inTimetable && train.followOnServiceRef !== null,
 			group: 3,
 		},
 		{
@@ -139,7 +154,26 @@ export function trainMenuItems(
 	];
 }
 
-export function clampMenuPosition(
+/** Compute every action for the right-click train popup menu and whether it is available. */
+export function trainMenuItems(
+	train: TrainView,
+	timetableRowCount: number,
+): TrainMenuItem[] {
+	const ctx: TrainMenuContext = {
+		train,
+		alive: train.status !== "crashed",
+		stopped: train.speedKmh < 0.01,
+		controlled: train.signallerControl,
+		timetableRowCount,
+	};
+	return [
+		...controlMenuItems(ctx),
+		...movementMenuItems(ctx),
+		...timetableMenuItems(ctx),
+	];
+}
+
+function clampMenuPosition(
 	screenX: number,
 	screenY: number,
 	viewportWidth: number,
@@ -155,6 +189,49 @@ export function clampMenuPosition(
 		Math.min(screenY, viewportHeight - menuHeight - EDGE_MARGIN),
 	);
 	return { left, top };
+}
+
+const DIRECT_COMMANDS = new Set<TrainMenuItemId>([
+	"takeControl",
+	"restoreTimetable",
+	"moveForwards",
+	"changeDirection",
+	"passRed",
+	"stepForward",
+	"stop",
+	"signallerJoin",
+]);
+
+function dispatchTrainMenuItem(
+	id: TrainMenuItemId,
+	train: TrainView,
+	openTrainDialog: ReturnType<
+		typeof useOperateStore.getState
+	>["openTrainDialog"],
+): void {
+	if (
+		DIRECT_COMMANDS.has(id) ||
+		(id === "removeTrain" && train.status === "crashed")
+	) {
+		void simCommand({
+			type: id as
+				| "takeControl"
+				| "restoreTimetable"
+				| "moveForwards"
+				| "changeDirection"
+				| "passRed"
+				| "stepForward"
+				| "stop"
+				| "signallerJoin"
+				| "removeTrain",
+			trainId: train.id,
+		});
+		return;
+	}
+	openTrainDialog(
+		id as "removeTrain" | "skipActions" | "becomeNewService" | "setReminder",
+		train.id,
+	);
 }
 
 export function TrainContextMenu() {
@@ -200,48 +277,7 @@ export function TrainContextMenu() {
 
 	const runItem = (id: TrainMenuItemId) => {
 		closeTrainMenu();
-		switch (id) {
-			case "takeControl":
-				void simCommand({ type: "takeControl", trainId: train.id });
-				return;
-			case "restoreTimetable":
-				void simCommand({ type: "restoreTimetable", trainId: train.id });
-				return;
-			case "moveForwards":
-				void simCommand({ type: "moveForwards", trainId: train.id });
-				return;
-			case "changeDirection":
-				void simCommand({ type: "changeDirection", trainId: train.id });
-				return;
-			case "passRed":
-				void simCommand({ type: "passRed", trainId: train.id });
-				return;
-			case "stepForward":
-				void simCommand({ type: "stepForward", trainId: train.id });
-				return;
-			case "stop":
-				void simCommand({ type: "stop", trainId: train.id });
-				return;
-			case "signallerJoin":
-				void simCommand({ type: "signallerJoin", trainId: train.id });
-				return;
-			case "removeTrain":
-				if (train.status === "crashed") {
-					void simCommand({ type: "removeTrain", trainId: train.id });
-				} else {
-					openTrainDialog("removeTrain", train.id);
-				}
-				return;
-			case "skipActions":
-				openTrainDialog("skipActions", train.id);
-				return;
-			case "becomeNewService":
-				openTrainDialog("becomeNewService", train.id);
-				return;
-			case "setReminder":
-				openTrainDialog("setReminder", train.id);
-				return;
-		}
+		dispatchTrainMenuItem(id, train, openTrainDialog);
 	};
 
 	const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

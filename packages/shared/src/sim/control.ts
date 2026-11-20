@@ -348,6 +348,42 @@ function changeDirection(ctx: RunnerContext, trainId: number): CommandResult {
 	return ok();
 }
 
+function stepDistanceAhead(
+	ctx: RunnerContext,
+	train: Train,
+	front: Seg,
+	frontLen: number,
+	rem: number,
+): number | string {
+	const { graph, state } = ctx;
+	const next = nextSeg(graph, state.lies, front);
+	if (!next) {
+		return leavesMap(graph, front) ? frontLen : "Train is at buffer stops.";
+	}
+	const allowedRed =
+		train.control.mode === "signaller"
+			? train.control.allowedRedSignalNode
+			: null;
+	if (
+		isFacingSignal(graph, next) &&
+		state.aspects[next.node] === 0 &&
+		next.node !== allowedRed
+	) {
+		return "Cannot step forward past a red signal.";
+	}
+	const others = trainKeys(
+		graph,
+		state.trains.filter((t) => t !== train),
+	);
+	if (others.has(occKeyOf(graph, next))) {
+		return "Track ahead is occupied by another train.";
+	}
+	if (liesAgainst(graph, state.lies, next)) {
+		return "Points ahead are set against the train.";
+	}
+	return rem + segLength(graph, next);
+}
+
 function stepForward(ctx: RunnerContext, trainId: number): CommandResult {
 	const train = findTrain(ctx, trainId);
 	if (!train) return fail("Train not found.");
@@ -359,38 +395,12 @@ function stepForward(ctx: RunnerContext, trainId: number): CommandResult {
 		return fail("Train must be stopped before stepping forward.");
 	if (train.segs.length === 0) return fail("Train is not on the railway.");
 
-	const { graph, state } = ctx;
 	const front = frontSeg(train);
-	const frontLen = segLength(graph, front);
+	const frontLen = segLength(ctx.graph, front);
 	const rem = Math.max(0, frontLen - train.frontM);
-	let dist = rem;
-
-	if (rem <= 0.05) {
-		const next = nextSeg(graph, state.lies, front);
-		if (!next) {
-			if (!leavesMap(graph, front)) return fail("Train is at buffer stops.");
-			dist = frontLen;
-		} else {
-			if (
-				isFacingSignal(graph, next) &&
-				state.aspects[next.node] === 0 &&
-				next.node !== train.control.allowedRedSignalNode
-			) {
-				return fail("Cannot step forward past a red signal.");
-			}
-			const others = trainKeys(
-				graph,
-				state.trains.filter((t) => t !== train),
-			);
-			if (others.has(occKeyOf(graph, next))) {
-				return fail("Track ahead is occupied by another train.");
-			}
-			if (liesAgainst(graph, state.lies, next)) {
-				return fail("Points ahead are set against the train.");
-			}
-			dist = rem + segLength(graph, next);
-		}
-	}
+	const dist =
+		rem <= 0.05 ? stepDistanceAhead(ctx, train, front, frontLen, rem) : rem;
+	if (typeof dist === "string") return fail(dist);
 
 	train.control.order = { kind: "step", remainingM: dist };
 	train.status = "waiting";
