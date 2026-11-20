@@ -49,7 +49,10 @@ of that, and `writeDocuments` refuses to save anything the validator rejects.
 6. **Import a RailOS railway and timetable** (`.rly` + `.ttb`) as YAML with
    `scripts/import-railos.ts <in.rly> <in.ttb> <railway.yaml> <timetable.yaml>`,
    run through `run.sh` like any generator. It reports anything it could not
-   translate, then the railway's problems and the timetable's issues.
+   translate, then the railway's problems and the timetable's issues. The
+   conversion itself is `convertRailosRailway` / `convertRailosTimetable` in
+   `packages/shared/src/railway/railos/`, which the app's footer "Import from
+   RailOS" dialog also uses — fix converter bugs there, not in the script.
 7. **Type-check the generator** if it is going to be kept:
    `pnpm exec tsc -p .claude/skills/railway-author/tsconfig.json`.
 

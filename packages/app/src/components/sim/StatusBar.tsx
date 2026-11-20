@@ -9,6 +9,7 @@ import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
 import { NewDocumentControl } from "./NewDocumentControl";
+import { RailosImportControl } from "./RailosImportControl";
 import { SaveLoadControls } from "./SaveLoadControls";
 import { SettingsMenu } from "./SettingsMenu";
 
@@ -65,6 +66,7 @@ export function StatusBar() {
 				</Button>
 				<NewDocumentControl />
 				<SaveLoadControls />
+				<RailosImportControl />
 				<SettingsMenu />
 				<Button
 					variant="ghost"

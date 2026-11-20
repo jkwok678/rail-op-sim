@@ -86,6 +86,14 @@ export {
 	SERIALIZED_MAP_VERSION,
 	serializeMap,
 } from "./map/map-serialization";
+// Import from RailOS (.rly / .ttb)
+export {
+	convertRailosRailway,
+	convertRailosTimetable,
+	InvalidRailosFileError,
+	type RailosRailwayResult,
+	type RailosTimetableResult,
+} from "./railos";
 // Timetable — locations a service can be booked to
 export {
 	cellToLocation,

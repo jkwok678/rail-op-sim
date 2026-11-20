@@ -23,6 +23,15 @@ fi
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
 JITI="$REPO_ROOT/packages/shared/node_modules/.bin/jiti"
+if [ ! -x "$JITI" ]; then
+	# Newer pnpm no longer links jiti's bin into the package; use the store copy.
+	CLI="$(find "$REPO_ROOT/node_modules/.pnpm" -maxdepth 5 -path '*/jiti/lib/jiti-cli.mjs' 2>/dev/null | sort | tail -1)"
+	if [ -n "$CLI" ]; then
+		JITI="$(mktemp -t jiti)"
+		printf '#!/bin/sh\nexec node "%s" "$@"\n' "$CLI" >"$JITI"
+		chmod +x "$JITI"
+	fi
+fi
 
 if [ ! -x "$JITI" ]; then
 	echo "run.sh: no jiti at $JITI — run 'pnpm install', or run the script with any TypeScript runner you have." >&2
