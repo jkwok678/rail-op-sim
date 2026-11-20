@@ -728,6 +728,11 @@ Each milestone delivers a visible, testable increment. Milestones are ordered by
   - Edge cost = `edge.length` (prefer shorter paths)
   - Edge validity checks: wrong direction (unless bi-di), electrification mismatch, gauge restriction
   - Heuristic = straight-line distance from current vertex to target
+- Note: built as Dijkstra in `sim/routes.ts` rather than A* — linked-track hops
+  break a straight-line heuristic. Cost is compared in order: length in metres,
+  then diverging legs of points, then points that must move, so a route runs
+  straight where that is as short. The editor's `findPathBetween` likewise
+  prefers fewest tracks, then fewest bends.
 - [ ] Path post-processing: the raw A* result is a list of edges → convert to `RouteSegment[]` with required point positions
 - [ ] Handle "no path exists" — return structured error (dead end, wrong electrification, etc.)
 - [ ] Unit tests: find path through junction, verify blocked path returns no result

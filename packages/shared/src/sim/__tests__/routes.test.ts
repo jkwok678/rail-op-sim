@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { nodeAt } from "../graph";
 import {
 	addTrain,
+	CELL,
 	cell,
 	engineFor,
 	line,
@@ -180,6 +181,51 @@ describe("points", () => {
 
 	const routeCells = (engine: ReturnType<typeof engineFor>) =>
 		engine.state.routes[0].segs.map((s) => engine.graph.nodes[s.node].cell);
+
+	it("runs straight along the main line rather than round a loop as short", () => {
+		for (const [from, to, kind] of [
+			[cell(0), cell(7), "preferred"],
+			[cell(7), cell(0), "preferred"],
+			[cell(1), cell(6), "unrestricted"],
+			[cell(6), cell(1), "unrestricted"],
+		] as const) {
+			const engine = engineFor(passingLoop());
+			expect(engine.handle({ type: "setRoute", from, to, kind })).toEqual({
+				ok: true,
+			});
+			expect(routeCells(engine).every((c) => c.gy === 0)).toBe(true);
+		}
+	});
+
+	it("takes the shorter way in metres, not in cells", () => {
+		const map = passingLoop();
+		// The main line between the points is made far longer than the loop.
+		for (const gx of [3, 4])
+			map.getTrackAt(gx * CELL, 0)?.setTrackMainLength(1000);
+		const engine = engineFor(map);
+		engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(routeCells(engine)).toContainEqual({ gx: 3, gy: 1 });
+	});
+
+	it("runs straight even when that means throwing points lying for the loop", () => {
+		const engine = engineFor(passingLoop());
+		const sw = nodeAt(engine.graph, cell(2)) as number;
+		const main = engine.state.lies[sw];
+		engine.handle({ type: "togglePoints", at: cell(2) });
+		engine.handle({
+			type: "setRoute",
+			from: cell(0),
+			to: cell(7),
+			kind: "preferred",
+		});
+		expect(routeCells(engine).every((c) => c.gy === 0)).toBe(true);
+		expect(engine.state.lies[sw]).toBe(main);
+	});
 
 	it("routes over either leg of facing points, setting them to match", () => {
 		const lies: number[] = [];

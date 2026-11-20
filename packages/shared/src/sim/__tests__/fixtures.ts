@@ -260,8 +260,7 @@ export function signalledLoop({ loopPreferred = true } = {}): Map_ {
 		if (!track) throw new Error(`no track at (${gx}, ${gy})`);
 		return track;
 	};
-	// Set by hand: a path search would pick the loop and leave the main line
-	// without preferred directions.
+	// Set by hand, main line both ways and the loop (below) one way only.
 	for (let gx = 0; gx <= 8; gx++) {
 		at(gx, 0).addPreferredDirection(3, 5);
 		at(gx, 0).addPreferredDirection(5, 3);

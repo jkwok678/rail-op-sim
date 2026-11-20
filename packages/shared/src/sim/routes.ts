@@ -13,6 +13,7 @@
  */
 
 import type { Cell } from "../railway/timetable/types";
+import { MinHeap } from "../util/min-heap";
 import { clearCallingOnSignal } from "./callingOn";
 import { crossingChanging, lowerCrossingsOn } from "./crossings";
 import {
@@ -153,7 +154,7 @@ function unwind(found: SearchNode | null): Seg[] {
 }
 
 /**
- * Breadth-first search for the shortest route of `kind` from `from` to `to`.
+ * Search for the shortest route of `kind` from `from` to `to` (see {@link search}).
  * Each step must be free of trains and other routes; preferred routes follow
  * preferred directions, through any signals on the way, and stop short of an
  * end signal.
@@ -186,9 +187,12 @@ function findRoute(
 	if (open.length === 0) {
 		return failed(blockedReason(graph, state, starts[0]) ?? "");
 	}
-	const segs = search(graph, kind, open, endId, free);
+	const segs = search(graph, state.lies, kind, open, endId, free);
 	if (segs) return withLies(graph, state, segs);
-	if (kind === "auto" && search(graph, kind, open, endId, free, true)) {
+	if (
+		kind === "auto" &&
+		search(graph, state.lies, kind, open, endId, free, true)
+	) {
 		return failed(
 			"An automatic signals route cannot pass over a level crossing.",
 		);
@@ -201,12 +205,50 @@ function findRoute(
 }
 
 /**
- * Breadth-first from `starts` until `end` is reached, or null. `overCrossings`
+ * How costly a route is, compared in order: its length in metres, then the
+ * number of diverging legs of points it takes, then the number of points it
+ * has to move. The shortest route wins, and of routes as short, the
+ * straightest, then the one that disturbs least.
+ */
+type Cost = readonly [lengthM: number, diverging: number, moves: number];
+
+const cheaper = (a: Cost, b: Cost): boolean =>
+	a[0] !== b[0] ? a[0] < b[0] : a[1] !== b[1] ? a[1] < b[1] : a[2] < b[2];
+
+/** The cost of running along `seg`, given how the points lie now. */
+function segCost(graph: RailGraph, lies: readonly number[], seg: Seg): Cost {
+	const node = graph.nodes[seg.node];
+	const path = pathOf(graph, seg);
+	// A cell with no length set still counts, so nothing is free to run over.
+	const length = Math.max(path?.lengthM ?? 0, 1);
+	if (node.kind !== "switch" || !path || path.rail < 0) return [length, 0, 0];
+	const diverging = node.rails[path.rail]?.secondary ? 1 : 0;
+	return [length, diverging, lies[seg.node] === path.rail ? 0 : 1];
+}
+
+const plus = (a: Cost, b: Cost): Cost => [
+	a[0] + b[0],
+	a[1] + b[1],
+	a[2] + b[2],
+];
+
+/** A searched route so far; `done` once it has arrived. */
+interface Candidate {
+	at: SearchNode;
+	cost: Cost;
+	done: boolean;
+}
+
+/**
+ * Cheapest-first (Dijkstra) from `starts` until `end` is reached, or null —
+ * see {@link Cost}. A route counts as found only when it is the cheapest left,
+ * so a longer one that happens to arrive first does not win. `overCrossings`
  * lets an automatic route over level crossings, to tell whether they are all
  * that stand in its way.
  */
 function search(
 	graph: RailGraph,
+	lies: readonly number[],
 	kind: RouteKind,
 	starts: Seg[],
 	end: NodeId,
@@ -215,52 +257,59 @@ function search(
 ): Seg[] | null {
 	// The exit counts too: facing points have two legs from one node and entry.
 	const key = (seg: Seg): number => (seg.node * 9 + seg.entry) * 9 + seg.exit;
-	const queue: SearchNode[] = starts.map((seg) => ({ seg, parent: null }));
-	const seen = new Set<number>(starts.map(key));
-	const enqueue = (node: SearchNode): void => {
-		if (seen.has(key(node.seg))) return;
-		seen.add(key(node.seg));
-		queue.push(node);
+	const queue = new MinHeap<Candidate>((a, b) => cheaper(a.cost, b.cost));
+	const best = new Map<number, Cost>();
+	const settled = new Set<number>();
+	const offer = (at: SearchNode, cost: Cost, done = false): void => {
+		if (!done) {
+			const k = key(at.seg);
+			const known = best.get(k);
+			if (settled.has(k) || (known && !cheaper(cost, known))) return;
+			best.set(k, cost);
+		}
+		queue.push({ at, cost, done });
 	};
-	for (let head = 0; head < queue.length && head < SEARCH_LIMIT; head++) {
-		const found = expand(
-			graph,
-			kind,
-			queue[head],
-			end,
-			free,
-			enqueue,
-			overCrossings,
-		);
-		if (found) return found;
+	for (const seg of starts)
+		offer({ seg, parent: null }, segCost(graph, lies, seg));
+
+	for (let looked = 0; queue.size > 0 && looked < SEARCH_LIMIT; looked++) {
+		const next = queue.pop() as Candidate;
+		if (next.done) return unwind(next.at);
+		const k = key(next.at.seg);
+		if (settled.has(k)) continue;
+		settled.add(k);
+		expand(graph, lies, kind, next, end, free, offer, overCrossings);
 	}
 	return null;
 }
 
-/** Look one step on from `current`: the route if it arrives, else queue the ways on. */
+/** Look one step on from `current`, offering each way on — or its arrival. */
 function expand(
 	graph: RailGraph,
+	lies: readonly number[],
 	kind: RouteKind,
-	current: SearchNode,
+	current: Candidate,
 	end: NodeId,
 	free: (seg: Seg) => boolean,
-	enqueue: (node: SearchNode) => void,
+	offer: (at: SearchNode, cost: Cost, done?: boolean) => void,
 	overCrossings: boolean,
-): Seg[] | null {
-	const step = stepFrom(graph, current.seg.node, current.seg.exit);
-	if (!step) return null;
+): void {
+	const step = stepFrom(graph, current.at.seg.node, current.at.seg.exit);
+	if (!step) return;
 	for (const path of pathsFrom(graph, step.node, step.entry)) {
 		const seg = { node: step.node, entry: path.entry, exit: path.exit };
 		const reached = arrival(graph, kind, seg, end);
-		if (reached === "before") return unwind(current);
-		if (reached === "include" && free(seg)) {
-			return unwind({ seg, parent: current });
+		if (reached === "before") {
+			offer(current.at, current.cost, true);
+			continue;
 		}
-		if (canExtend(graph, kind, seg, overCrossings) && free(seg)) {
-			enqueue({ seg, parent: current });
+		const cost = plus(current.cost, segCost(graph, lies, seg));
+		const at = { seg, parent: current.at };
+		if (reached === "include" && free(seg)) offer(at, cost, true);
+		else if (canExtend(graph, kind, seg, overCrossings) && free(seg)) {
+			offer(at, cost);
 		}
 	}
-	return null;
 }
 
 /** Whether a route of `kind` may carry on through `seg`. */
