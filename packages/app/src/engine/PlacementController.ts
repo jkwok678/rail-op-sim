@@ -414,7 +414,7 @@ export class PlacementController {
 
 				// Entering section tool — show colour overlay immediately for all tracks
 				if (state.tool === "section" && prevState.tool !== "section") {
-					this.trackColorLayer.sync(this.map);
+					this.trackColorLayer.show(this.map);
 				}
 
 				// Leaving section tool — clear section highlight & hide colour overlay
@@ -839,8 +839,7 @@ export class PlacementController {
 						{ gx: cell.gx, gy: cell.gy },
 					);
 					this.linkHighlightLayer.container.visible = true;
-					this.trackColorLayer.sync(this.map);
-					this.trackColorLayer.container.visible = true;
+					this.trackColorLayer.show(this.map);
 					this.sectionHoverKey = null;
 					debugLog(
 						"placement",
@@ -1424,7 +1423,7 @@ export class PlacementController {
 			},
 		);
 		this.trackLayer.sync(this.map);
-		this.trackColorLayer.sync(this.map);
+		this.trackColorLayer.show(this.map);
 		// Drop the purple route tint (keeping the endpoint outlines) so the
 		// speed/length colours just applied are visible rather than covered.
 		this.linkHighlightLayer.setSectionRouteVisible(false);
@@ -1455,7 +1454,7 @@ export class PlacementController {
 			},
 		);
 		this.trackLayer.sync(this.map);
-		this.trackColorLayer.sync(this.map);
+		this.trackColorLayer.show(this.map);
 		this.linkHighlightLayer.setSectionRouteVisible(false);
 		this.publishTrackStatus();
 		debugLog(

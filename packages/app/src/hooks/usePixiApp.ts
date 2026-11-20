@@ -221,8 +221,8 @@ export function usePixiApp(): UsePixiAppReturn {
 			])
 				.then(() => {
 					if (destroyed) return;
-					trackColorLayer.sync(placement.map);
 					trackLayer.sync(placement.map);
+					trackColorLayer.sync(placement.map);
 					elementLayer.sync(placement.map);
 					textLayer.sync(placement.map);
 					directionLayer.sync(placement.map);
