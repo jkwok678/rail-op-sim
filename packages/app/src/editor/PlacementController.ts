@@ -68,20 +68,19 @@ export interface PlacementControllerOptions {
 	viewport: ViewportController;
 }
 
+/** Platform enum for each platform subtype string the palette uses. */
+const PLATFORM_SIDES: Readonly<Partial<Record<string, Platform>>> = {
+	PLATFORM_LEFT_SET: Platform.LEFT,
+	PLATFORM_RIGHT_SET: Platform.RIGHT,
+	PLATFORM_UP_SET: Platform.UP,
+	PLATFORM_DOWN_SET: Platform.DOWN,
+};
+
 /** Map a platform subtype string from the palette to the Platform enum. */
 function platformSubtypeToSide(subtype: string): Platform | null {
-	switch (subtype) {
-		case "PLATFORM_LEFT_SET":
-			return Platform.LEFT;
-		case "PLATFORM_RIGHT_SET":
-			return Platform.RIGHT;
-		case "PLATFORM_UP_SET":
-			return Platform.UP;
-		case "PLATFORM_DOWN_SET":
-			return Platform.DOWN;
-		default:
-			return null;
-	}
+	return Object.hasOwn(PLATFORM_SIDES, subtype)
+		? (PLATFORM_SIDES[subtype] ?? null)
+		: null;
 }
 
 /** Undo labels for the non-track elements the Add palette can place. */
