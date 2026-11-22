@@ -22,7 +22,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { useShortcutKeys } from "#/hooks/useShortcutDisplay";
 import type { ShortcutId } from "#/lib/shortcuts";
 import { type Tool, useEditorStore } from "#/store/editor-store";

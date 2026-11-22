@@ -33,5 +33,44 @@
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["packages/shared/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["react", "react/**", "react-dom", "react-dom/**"],
+										"message": "packages/shared is engine code and must stay runtime-agnostic. PLAN.md (Multiplayer Readiness: \"Engine modules never import from react, pixi.js, or any browser API\") forbids React here. Put UI code in packages/app."
+									},
+									{
+										"group": ["pixi.js", "pixi.js/**", "@pixi/**"],
+										"message": "packages/shared is engine code and must stay runtime-agnostic. PLAN.md (Multiplayer Readiness: \"Engine modules never import from react, pixi.js, or any browser API\") forbids PixiJS here. Put rendering code in packages/app/src/renderer or src/editor."
+									},
+									{
+										"group": ["zustand", "zustand/**"],
+										"message": "packages/shared is engine code and must stay runtime-agnostic. PLAN.md (Multiplayer Readiness) keeps UI state out of the engine; the engine talks to the page only through SimTransport. Put stores in packages/app/src/store."
+									},
+									{
+										"group": [
+											"#/**",
+											"@/**",
+											"@rail-op-sim/app",
+											"@rail-op-sim/app/**"
+										],
+										"message": "packages/shared must not import from packages/app (#/*, @/* or @rail-op-sim/app). PLAN.md (Multiplayer Readiness) requires the engine to run with no app code. Move the shared logic into packages/shared instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	]
 }

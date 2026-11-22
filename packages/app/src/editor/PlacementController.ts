@@ -25,8 +25,8 @@ import {
 	Container,
 	type Sprite as SpriteType,
 } from "pixi.js";
-import { EditHistory, type RefreshFlags } from "#/engine/EditHistory";
-import type { ViewportController } from "#/engine/ViewportController";
+import { EditHistory, type RefreshFlags } from "#/editor/EditHistory";
+import type { ViewportController } from "#/editor/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE, gridToWorld, worldToGrid } from "#/lib/grid";
 import { applyOperateIntent } from "#/lib/operateActions";

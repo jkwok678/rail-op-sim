@@ -1,5 +1,5 @@
 import { type UseHotkeyDefinition, useHotkeys } from "@tanstack/react-hotkeys";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { loadDocument, saveDocument } from "#/lib/documentActions";
 import { type EscapeAction, resolveEscape } from "#/lib/escape";
 import {

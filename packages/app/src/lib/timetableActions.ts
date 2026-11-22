@@ -1,5 +1,5 @@
 import { hasErrors } from "@rail-op-sim/shared";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import {
 	downloadTimetable,

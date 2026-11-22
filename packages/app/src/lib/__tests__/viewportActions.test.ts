@@ -3,7 +3,7 @@ import {
 	DEFAULT_MAX_ZOOM,
 	DEFAULT_MIN_ZOOM,
 	ZOOM_BUTTON_STEP,
-} from "#/engine/zoomConstants";
+} from "#/editor/zoomConstants";
 import {
 	FIT_EXTENT,
 	FIT_PADDING,

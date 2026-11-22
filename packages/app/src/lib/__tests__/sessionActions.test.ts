@@ -7,7 +7,7 @@ import {
 	type SerializedMap,
 } from "@rail-op-sim/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import {
 	AUTOSAVE_SESSION_ID,
 	deleteSession,

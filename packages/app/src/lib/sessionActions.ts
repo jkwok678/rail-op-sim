@@ -1,5 +1,5 @@
 import { parseTimetable } from "@rail-op-sim/shared";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import {
 	AUTOSAVE_SESSION_ID,
 	deleteSession,

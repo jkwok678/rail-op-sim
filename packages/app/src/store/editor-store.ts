@@ -5,7 +5,7 @@ import {
 	type TrainTimetableEntry,
 } from "@rail-op-sim/shared";
 import { create } from "zustand";
-import { DEFAULT_ZOOM } from "#/engine/zoomConstants";
+import { DEFAULT_ZOOM } from "#/editor/zoomConstants";
 import { debugLog } from "#/lib/debugLogger";
 import type { MapFileFormat } from "#/lib/mapFile";
 

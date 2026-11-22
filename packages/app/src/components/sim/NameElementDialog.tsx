@@ -9,7 +9,7 @@ import {
 	DialogTitle,
 } from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import type { NameableKind } from "#/store/editor-store";
 import { useEditorStore } from "#/store/editor-store";
 

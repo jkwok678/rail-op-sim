@@ -17,8 +17,8 @@ This project is based on [**AlbertBall/railway-dot-exe**](https://github.com/Alb
 
 ## Project Structure
 
-- `packages/app` (`@rail-op-sim/app`) — TanStack Start frontend application, PixiJS viewport/placement engine (`src/engine`), renderer (`src/renderer`), Zustand store (`src/store`), and simulation/editor UI (`src/components/sim`).
-- `packages/shared` (`@rail-op-sim/shared`) — Shared TypeScript railway domain library (`src/railway`), including track elements, signal aspects, map connectivity/serialization, and timetable parsing, validation, and serialization.
+- `packages/app` (`@rail-op-sim/app`) — TanStack Start frontend application, PixiJS viewport and placement editor (`src/editor`), renderer (`src/renderer`), Zustand store (`src/store`), and simulation/editor UI (`src/components/sim`).
+- `packages/shared` (`@rail-op-sim/shared`) — Shared TypeScript railway domain library (`src/railway`), including track elements, signal aspects, map connectivity/serialization, timetable parsing, validation, and serialization, and the Operate-mode simulation engine (`src/sim`). This package must stay runtime-agnostic: no DOM, `react`, `pixi.js` or `zustand` (see PLAN.md); `tsc` and Biome both check this.
 - `scripts/` — Repository utility scripts (`merge-coverage.mjs`, `png-to-svg.mjs`).
 
 ## Getting Started
