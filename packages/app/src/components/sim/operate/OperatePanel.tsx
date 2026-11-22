@@ -7,7 +7,7 @@ import {
 import { Fragment, useEffect, useMemo, useRef } from "react";
 import { Button } from "#/components/ui/button";
 import { Spinner } from "#/components/ui/spinner";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { gridToWorld } from "#/lib/grid";
 import {
 	changeSpeed,

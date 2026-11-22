@@ -3,7 +3,7 @@ import {
 	Map as Map_,
 	serializeMap,
 } from "@rail-op-sim/shared";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import {
 	decodeDocument,

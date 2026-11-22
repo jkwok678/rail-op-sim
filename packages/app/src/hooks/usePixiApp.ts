@@ -1,8 +1,8 @@
 import type { Application } from "pixi.js";
 import { useEffect, useRef, useState } from "react";
-import { guardTicker } from "#/engine/guardTicker";
-import type { PlacementController } from "#/engine/PlacementController";
-import type { ViewportController } from "#/engine/ViewportController";
+import { guardTicker } from "#/editor/guardTicker";
+import type { PlacementController } from "#/editor/PlacementController";
+import type { ViewportController } from "#/editor/ViewportController";
 import { debugLog } from "#/lib/debugLogger";
 import { CELL_SIZE } from "#/lib/grid";
 import { OPERATE_ART_FILES } from "#/lib/operateArt";
@@ -79,9 +79,9 @@ export function usePixiApp(): UsePixiAppReturn {
 				{ createTextureCache },
 				{ PlacementController: PC },
 			] = await Promise.all([
-				import("#/engine/PixiApp"),
-				import("#/engine/GroundLayer"),
-				import("#/engine/ViewportController"),
+				import("#/editor/PixiApp"),
+				import("#/editor/GroundLayer"),
+				import("#/editor/ViewportController"),
 				import("pixi.js"),
 				import("#/renderer/layers/TrackLayer"),
 				import("#/renderer/layers/ElementLayer"),
@@ -91,7 +91,7 @@ export function usePixiApp(): UsePixiAppReturn {
 				import("#/renderer/layers/DirectionLayer"),
 				import("#/renderer/operateLayers"),
 				import("#/renderer/textureCache"),
-				import("#/engine/PlacementController"),
+				import("#/editor/PlacementController"),
 			]);
 
 			if (destroyed) return;

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { KbdGroup } from "#/components/ui/kbd";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { SHORTCUTS, shortcutKeys } from "#/lib/shortcuts";
 import { useEditorStore } from "#/store/editor-store";
 

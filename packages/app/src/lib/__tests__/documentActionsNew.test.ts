@@ -5,7 +5,7 @@ import {
 	type Service,
 } from "@rail-op-sim/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { clearTimetable, newRailway } from "#/lib/documentActions";
 import { useTimetableStore } from "#/store/timetable-store";
 

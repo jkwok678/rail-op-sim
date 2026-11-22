@@ -1,6 +1,6 @@
 import { serializeMap } from "@rail-op-sim/shared";
 import { useEffect } from "react";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { useModeStore } from "#/store/mode-store";
 import { closeSimSession, openSimSession } from "#/store/sim-bridge";
 import { useTimetableStore } from "#/store/timetable-store";

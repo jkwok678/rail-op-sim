@@ -26,7 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select";
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { useEditorStore } from "#/store/editor-store";
 import {
 	type PendingCellPick,

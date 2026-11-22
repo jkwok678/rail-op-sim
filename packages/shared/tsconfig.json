@@ -1,4 +1,11 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    // PLAN.md: engine modules never use a browser API. Dropping DOM from the
+    // root's lib (and auto-loaded @types such as node) makes the compiler
+    // enforce that. Runtime-agnostic globals go in src/runtime-globals.d.ts.
+    "lib": ["ES2022"],
+    "types": []
+  }
 }

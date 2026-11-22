@@ -5,8 +5,8 @@ import {
 	CaretUp,
 } from "@phosphor-icons/react";
 import type React from "react";
-import { PAN_BUTTON_STEP } from "#/engine/panConstants";
-import type { ViewportController } from "#/engine/ViewportController";
+import { PAN_BUTTON_STEP } from "#/editor/panConstants";
+import type { ViewportController } from "#/editor/ViewportController";
 import { Button } from "../ui/button";
 
 interface PanControlsProps {

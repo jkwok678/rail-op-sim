@@ -12,9 +12,9 @@
 
 | File | Purpose |
 |------|---------|
-| `packages/app/src/engine/PixiApp.ts` | PixiJS v8 `Application` factory, antialiasing, auto-density |
-| `packages/app/src/engine/GroundLayer.ts` | Dynamic graph-paper grid, redraws on zoom/pan, theme-aware |
-| `packages/app/src/engine/ViewportController.ts` | Pan (middle-mouse or Space+LMB), zoom (scroll, 0.05x–20x), `fitToView()` |
+| `packages/app/src/editor/PixiApp.ts` | PixiJS v8 `Application` factory, antialiasing, auto-density |
+| `packages/app/src/editor/GroundLayer.ts` | Dynamic graph-paper grid, redraws on zoom/pan, theme-aware |
+| `packages/app/src/editor/ViewportController.ts` | Pan (middle-mouse or Space+LMB), zoom (scroll, 0.05x–20x), `fitToView()` |
 | `packages/app/src/hooks/usePixiApp.ts` | React hook: SSR-safe dynamic imports, scene graph (`stage → world → ground`), ResizeObserver, theme MutationObserver |
 | `packages/app/src/components/sim/SimCanvas.tsx` | Thin wrapper div hosting PixiJS canvas |
 | `packages/app/src/components/sim/SimLayout.tsx` | Full-screen `[1fr_auto]` grid: canvas + status bar |

@@ -1,11 +1,11 @@
 import { Minus, Plus } from "@phosphor-icons/react";
 import type React from "react";
-import type { ViewportController } from "#/engine/ViewportController";
+import type { ViewportController } from "#/editor/ViewportController";
 import {
 	DEFAULT_MAX_ZOOM,
 	DEFAULT_MIN_ZOOM,
 	ZOOM_SLIDER_STEP,
-} from "#/engine/zoomConstants";
+} from "#/editor/zoomConstants";
 import { shortcutDisplay } from "#/lib/shortcuts";
 import { zoomIn, zoomOut } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";

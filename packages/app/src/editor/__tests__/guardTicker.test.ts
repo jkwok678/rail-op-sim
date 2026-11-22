@@ -1,6 +1,6 @@
 import { Ticker } from "pixi.js";
 import { describe, expect, it, vi } from "vitest";
-import { guardTicker } from "#/engine/guardTicker";
+import { guardTicker } from "#/editor/guardTicker";
 
 describe("guardTicker", () => {
 	it("passes a normal frame through", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type EditCommand, EditHistory } from "#/engine/EditHistory";
+import { type EditCommand, EditHistory } from "#/editor/EditHistory";
 
 /** Commands are opaque to the history, so an empty journal is fine here. */
 const cmd = (label: string): EditCommand => ({

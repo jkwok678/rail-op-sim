@@ -115,7 +115,7 @@ rail-op-sim's store-driven architecture.
 
 ### 3b. Click dispatch
 
-`packages/app/src/engine/PlacementController.ts` — `onPointerUp` tool switch
+`packages/app/src/editor/PlacementController.ts` — `onPointerUp` tool switch
 (`:200`/`:232`):
 
 ```ts

@@ -1,4 +1,4 @@
-import { PlacementController } from "#/engine/PlacementController";
+import { PlacementController } from "#/editor/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import { downloadMap, type LoadedMapFile } from "#/lib/mapFile";
 import { useEditorStore } from "#/store/editor-store";
