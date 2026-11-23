@@ -9,7 +9,6 @@
 
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
-import { firstOf, itemAt, lastOf } from "../util/checked";
 import { callOn, refreshCallingOnFlags } from "./callingOn";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
 import {
@@ -158,9 +157,10 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 
 	const refreshAspects = (): void => {
 		const occupied = trainKeys(graph, state.trains);
-		state.aspects = computeAspects(graph, state, (route, i) =>
-			occupied.has(occKeyOf(graph, itemAt(route.segs, i, "segment"))),
-		);
+		state.aspects = computeAspects(graph, state, (route, i) => {
+			const seg = route.segs[i];
+			return seg !== undefined && occupied.has(occKeyOf(graph, seg));
+		});
 	};
 
 	const locationOf = (seg: Seg): string | null =>
@@ -234,7 +234,8 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const arrived = (train: Train, reason: WaitReason): void => {
 		if (train.control.mode === "signaller") return;
 		const target = stopTarget(ctx, train);
-		const here = locationOf(lastOf(train.segs, "segment"));
+		const front = train.segs.at(-1);
+		const here = front ? locationOf(front) : null;
 		const shortOf = reason === "signal" || reason === "train";
 		if (target && here === target && (reason === "station" || shortOf)) {
 			onStationStop(ctx, train, target);
@@ -345,25 +346,26 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					.map((n) => ({
 						...n.cell,
 						subtype: n.subtype,
-						aspect: itemAt(state.aspects, n.id, "aspect"),
+						aspect: state.aspects[n.id] ?? 0,
 						aspects: n.signalAspects,
 						callingOn: state.callingOnSignals.includes(n.id),
 					})),
 				points: graph.nodes
 					.filter((n) => n.kind === "switch")
-					.map((n) => {
-						const rail = itemAt(
-							n.rails,
-							itemAt(state.lies, n.id, "lie"),
-							"rail",
-						);
-						return { ...n.cell, subtype: n.subtype, a: rail.a, b: rail.b };
+					.flatMap((n) => {
+						const rail = n.rails[state.lies[n.id] ?? 0];
+						return rail
+							? [{ ...n.cell, subtype: n.subtype, a: rail.a, b: rail.b }]
+							: [];
 					}),
-				levelCrossings: graph.crossings.map((lc, i) => ({
-					subtype: nodeOf(graph, firstOf(lc.nodes, "crossing node")).subtype,
-					cells: lc.nodes.map((id) => ({ ...nodeOf(graph, id).cell })),
-					barriers: itemAt(state.crossings, i, "crossing").barriers,
-				})),
+				levelCrossings: graph.crossings.map((lc, i) => {
+					const members = lc.nodes.map((id) => nodeOf(graph, id));
+					return {
+						subtype: members[0]?.subtype ?? "",
+						cells: members.map((n) => ({ ...n.cell })),
+						barriers: state.crossings[i]?.barriers ?? "up",
+					};
+				}),
 				routes: state.routes.map((r) => ({
 					id: r.id,
 					kind: r.kind,

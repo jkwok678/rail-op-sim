@@ -7,7 +7,6 @@
  */
 
 import type { Cell, Timetable } from "../railway/timetable/types";
-import { itemAt, lastOf } from "../util/checked";
 import { lowerCrossingsOn } from "./crossings";
 import {
 	endsAtBuffers,
@@ -59,8 +58,7 @@ function upcomingStopsBeforeReversal(
 	const stops = new Set<string>();
 	const service = serviceByRef(timetable, train.working.ref);
 	if (!service) return stops;
-	for (let i = train.working.index; i < service.actions.length; i++) {
-		const a = itemAt(service.actions, i, "action");
+	for (const a of service.actions.slice(train.working.index)) {
 		if (a.kind === "changeDirection") break;
 		if (a.kind === "stop") stops.add(a.location);
 	}
@@ -83,8 +81,8 @@ function trainOccupancyMap(
 }
 
 function isFacingOtherTrain(graph: RailGraph, other: Train, seg: Seg): boolean {
-	if (other.segs.length === 0) return false;
-	const front = lastOf(other.segs, "segment");
+	const front = other.segs.at(-1);
+	if (!front) return false;
 	return (
 		occKeyOf(graph, front) === occKeyOf(graph, seg) && !sameSeg(front, seg)
 	);
@@ -198,10 +196,9 @@ function walkCallingOnRoute(
 	firstAhead: Seg,
 	stops: ReadonlySet<string>,
 ): Seg[] | null {
-	const leadStation = nodeOf(
-		graph,
-		lastOf(train.segs, "segment").node,
-	).location;
+	const lead = train.segs.at(-1);
+	if (!lead) return null;
+	const leadStation = nodeOf(graph, lead.node).location;
 	const others = trainOccupancyMap(graph, state.trains, train);
 	const seen = new Set<number>();
 	const path: Seg[] = [];
@@ -259,11 +256,8 @@ function callingOnCheck(
 	const stops = upcomingStopsBeforeReversal(timetable, train);
 	if (stops.size === 0) return null;
 
-	const firstAhead = protectingRedSignal(
-		graph,
-		state,
-		lastOf(train.segs, "segment"),
-	);
+	const front = train.segs.at(-1);
+	const firstAhead = front && protectingRedSignal(graph, state, front);
 	if (!firstAhead) return null;
 
 	const routeSegs = walkCallingOnRoute(

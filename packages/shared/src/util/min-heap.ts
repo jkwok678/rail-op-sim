@@ -1,4 +1,3 @@
-import { itemAt } from "./checked";
 /** A binary min-heap ordered by `before`: what comes out first. */
 export class MinHeap<T> {
 	private readonly items: T[] = [];
@@ -11,17 +10,16 @@ export class MinHeap<T> {
 
 	push(item: T): void {
 		const items = this.items;
-		items.push(item);
-		let i = items.length - 1;
+		let i = items.push(item) - 1;
+		// Move parents down into the hole until `item` fits.
 		while (i > 0) {
 			const parent = (i - 1) >> 1;
-			const child = itemAt(items, i);
-			const up = itemAt(items, parent);
-			if (!this.before(child, up)) break;
+			const up = items[parent];
+			if (up === undefined || !this.before(item, up)) break;
 			items[i] = up;
-			items[parent] = child;
 			i = parent;
 		}
+		items[i] = item;
 	}
 
 	pop(): T | undefined {
@@ -29,27 +27,26 @@ export class MinHeap<T> {
 		const top = items[0];
 		const last = items.pop();
 		if (items.length === 0 || last === undefined) return top;
-		items[0] = last;
-		for (let i = 0; ; ) {
+		// Sift `last` down from the root, moving the smaller child up each step.
+		let i = 0;
+		for (;;) {
 			const l = i * 2 + 1;
-			const r = l + 1;
-			let best = i;
+			const left = items[l];
+			const right = items[l + 1];
+			let child = l;
+			let best = left;
 			if (
-				l < items.length &&
-				this.before(itemAt(items, l), itemAt(items, best))
-			)
-				best = l;
-			if (
-				r < items.length &&
-				this.before(itemAt(items, r), itemAt(items, best))
-			)
-				best = r;
-			if (best === i) break;
-			const down = itemAt(items, i);
-			items[i] = itemAt(items, best);
-			items[best] = down;
-			i = best;
+				right !== undefined &&
+				(best === undefined || this.before(right, best))
+			) {
+				child = l + 1;
+				best = right;
+			}
+			if (best === undefined || !this.before(best, last)) break;
+			items[i] = best;
+			i = child;
 		}
+		items[i] = last;
 		return top;
 	}
 }
