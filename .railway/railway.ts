@@ -1,7 +1,10 @@
 import { defineRailway, github, project, service } from "railway/iac";
 
 export default defineRailway(() => {
-	const app = service("app", {
+	// Railway matches services by name: this must stay "ros", the live
+	// service's name. Any other name plans a delete of "ros" (its domain,
+	// variables and deployments) and the create of a new, empty service.
+	const app = service("ros", {
 		source: github("jkwok678/rail-op-sim", { branch: "master" }),
 		build: {
 			buildCommand: "pnpm --filter @rail-op-sim/app build",
