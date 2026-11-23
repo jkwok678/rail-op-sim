@@ -13,7 +13,7 @@
  */
 
 import type { Cell } from "../railway/timetable/types";
-import { firstOf, itemAt, lastOf } from "../util/checked";
+import { firstOf, itemAt, lastOf, soleItem } from "../util/checked";
 import { MinHeap } from "../util/min-heap";
 import { clearCallingOnSignal } from "./callingOn";
 import { crossingChanging, lowerCrossingsOn } from "./crossings";
@@ -94,6 +94,11 @@ function startSegs(node: GraphNode, kind: RouteKind): [Seg, ...Seg[]] | string {
 		return [{ node: node.id, entry: dead, exit: 8 - dead }];
 	}
 	if (isJunction(node)) return "A route cannot start on points or a crossing.";
+	return throughSegs(node);
+}
+
+/** Every way through `node`, or why there is none. */
+function throughSegs(node: GraphNode): [Seg, ...Seg[]] | string {
 	const [first, ...rest] = node.paths.map((p) => ({
 		node: node.id,
 		entry: p.entry,
@@ -475,8 +480,8 @@ function plainAutoRoute(
 		const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
 			prefers(nodeOf(graph, step.node), p),
 		);
-		const [way] = ways;
-		if (ways.length !== 1 || !way) return null;
+		const way = soleItem(ways);
+		if (!way) return null;
 		const next = { node: step.node, entry: way.entry, exit: way.exit };
 		if (isFacingSignal(graph, next)) return segs;
 		if (seen.has(next.node) || !plainSeg(graph, next, free)) return null;

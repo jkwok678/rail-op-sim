@@ -18,6 +18,7 @@ import type { Track } from "../track/track";
 import {
 	getDirectedFlow,
 	getRails,
+	type Rail,
 	signalFacingExit,
 	type TrackData,
 	type TrackKind,
@@ -475,19 +476,19 @@ function signalAspect(marker: string): number {
 	return m === "3" ? 3 : m === "2" ? 2 : m === "G" ? 1 : 4;
 }
 
+/** Which of a two-rail track's rails RailOS's first link pair is: 0 main, 1 secondary. */
+function mainRailOf(rails: readonly Rail[], tag: number): 0 | 1 {
+	const [a, b] = linksOfTag(tag).slice(0, 2).map(linkOf);
+	if (a === undefined || b === undefined) return 1;
+	const first = rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
+	return first && !first.secondary ? 0 : 1;
+}
+
 /** RailOS lengths/speeds onto our main and secondary paths. */
 function applyFigures(track: Track, el: ActiveElement): void {
 	const clampSpeed = (s: number) => Math.max(10, Math.min(400, s));
 	const rails = getRails(track.data.kind, track.data.subtype);
-	let main: 0 | 1 = 0;
-	if (rails.length === 2) {
-		const [a, b] = linksOfTag(el.tag).slice(0, 2).map(linkOf);
-		const first =
-			a === undefined || b === undefined
-				? undefined
-				: rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
-		main = first && !first.secondary ? 0 : 1;
-	}
+	const main = rails.length === 2 ? mainRailOf(rails, el.tag) : 0;
 	if (el.lengths[main] > 0) track.setTrackMainLength(el.lengths[main]);
 	if (el.speeds[main] > 0) track.setTrackMainSpeed(clampSpeed(el.speeds[main]));
 	if (rails.length === 2) {

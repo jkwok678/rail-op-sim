@@ -33,6 +33,11 @@ export function lastOf<T>(items: readonly T[], what = "item"): T {
 	return itemAt(items, items.length - 1, what);
 }
 
+/** The only element of `items`, or undefined when there are none or several. */
+export function soleItem<T>(items: readonly T[]): T | undefined {
+	return items.length === 1 ? items[0] : undefined;
+}
+
 /** `value`, throwing when it is undefined. */
 export function defined<T>(value: T | undefined, what: string): T {
 	if (value === undefined) throw new Error(`missing ${what}`);

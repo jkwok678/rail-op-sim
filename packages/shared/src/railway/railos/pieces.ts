@@ -12,7 +12,7 @@ import { getLinksForSubtype, getRails } from "../track/track-data";
 
 /** Links per SpeedTag, as compass codes (1 NW … 9 SE, 5 unused). */
 // biome-ignore format: rows follow RailOS's TFixedTrackArray groups
-export const LINKS: readonly (readonly number[])[] = [
+const LINKS: readonly (readonly number[])[] = [
 	[-1, -1, -1, -1],
 	[4, 6, -1, -1], [2, 8, -1, -1], [6, 8, -1, -1], [4, 8, -1, -1], [2, 6, -1, -1], [2, 4, -1, -1],
 	[4, 6, 4, 2], [6, 4, 6, 2], [4, 6, 4, 8], [6, 4, 6, 8], [8, 2, 8, 4], [8, 2, 8, 6], [2, 8, 2, 4], [2, 8, 2, 6],

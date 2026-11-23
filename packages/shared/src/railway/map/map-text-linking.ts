@@ -186,6 +186,20 @@ function collectNeighbourTexts(
 }
 
 /**
+ * The text a new element should take from `texts`: the only one, or the one
+ * the user picks when there are several. Null when they pick none.
+ */
+function chooseText(map: Map_, texts: readonly Text[]): Text | null {
+	if (texts.length === 1) return texts[0] ?? null;
+	const chosen =
+		map.getTextSelectionPrompt()?.(texts.map((t) => t.getReadableText())) ?? "";
+	// The last match wins, as it always has when two texts read the same.
+	return (
+		[...texts].reverse().find((t) => t.getReadableText() === chosen) ?? null
+	);
+}
+
+/**
  * Link a newly placed element to text from neighbors.
  */
 export function linkNewElementToText(
@@ -202,19 +216,7 @@ export function linkNewElementToText(
 	);
 
 	if (surroundingTextList.length > 0) {
-		let textToLink: Text | null = null;
-
-		if (surroundingTextList.length > 1) {
-			const options = surroundingTextList.map((t) => t.getReadableText());
-			const chosen = map.getTextSelectionPrompt()?.(options) ?? "";
-			for (const t of surroundingTextList) {
-				if (t.getReadableText() === chosen) {
-					textToLink = t;
-				}
-			}
-		} else {
-			textToLink = surroundingTextList[0] ?? null;
-		}
+		const textToLink = chooseText(map, surroundingTextList);
 
 		if (textToLink === null) {
 			for (const t of surroundingTextList) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defined, firstOf, itemAt, lastOf } from "../checked";
+import { defined, firstOf, itemAt, lastOf, soleItem } from "../checked";
 
 describe("checked access", () => {
 	it("returns the element when the index is in range", () => {
@@ -23,5 +23,13 @@ describe("checked access", () => {
 
 	it("throws when a value is missing", () => {
 		expect(() => defined(undefined, "location")).toThrow("missing location");
+	});
+});
+
+describe("soleItem", () => {
+	it("returns the only element, and undefined for none or several", () => {
+		expect(soleItem([7])).toBe(7);
+		expect(soleItem([])).toBeUndefined();
+		expect(soleItem([1, 2])).toBeUndefined();
 	});
 });

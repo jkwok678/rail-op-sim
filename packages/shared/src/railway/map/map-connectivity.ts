@@ -1,4 +1,4 @@
-import { firstOf, itemAt, lastOf } from "../../util/checked";
+import { firstOf, itemAt, lastOf, soleItem } from "../../util/checked";
 import { MinHeap } from "../../util/min-heap";
 import { Concourse, type NamedElement, NamedLocation } from "../element";
 import { type PreferredDirection, Track } from "../track/track";
@@ -540,7 +540,7 @@ function endpointOtherLink(track: Track, known: number): number | null {
 			l !== known &&
 			isTraversableLinkPair(track.data.kind, track.data.subtype, known, l),
 	);
-	return partners.length === 1 ? (partners[0] ?? null) : null;
+	return soleItem(partners) ?? null;
 }
 
 /** Outcome of {@link setPreferredDirectionsAlongPath}. */

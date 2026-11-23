@@ -24,7 +24,7 @@ import {
 	signalFacingExit,
 	type TrackKind,
 } from "../railway/track/track-data";
-import { itemAt } from "../util/checked";
+import { itemAt, soleItem } from "../util/checked";
 
 /** Index of a track in {@link RailGraph.nodes}. */
 export type NodeId = number;
@@ -294,8 +294,8 @@ function buildNode(track: Track, id: NodeId, cell: Cell): GraphNode {
 
 function deadEndOf(track: Track): number | null {
 	const links = getLinksForSubtype(track.data.kind, track.data.subtype);
-	const [link] = links;
-	if (links.length !== 1 || link === undefined) return null;
+	const link = soleItem(links);
+	if (link === undefined) return null;
 	return track.isTerminusDeadEnd(8 - link) ? 8 - link : null;
 }
 
