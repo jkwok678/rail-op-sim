@@ -269,11 +269,9 @@ export function createDirectionLayer(): DirectionLayer {
 				map,
 				path,
 			);
-			let drawn = 0;
 			for (let i = 0; i < path.length; i++) {
 				const leg = legs[i];
 				if (!leg) continue;
-				drawn++;
 				const track = path[i];
 				const { x, y } = gridToWorld(
 					track.getLocationX(),

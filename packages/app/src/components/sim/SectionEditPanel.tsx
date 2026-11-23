@@ -289,8 +289,8 @@ export function SectionEditPanel() {
 					selected — total {totalLength} m
 				</div>
 				<div>
-					Start ({sectionStart!.gx}, {sectionStart!.gy}) → End ({sectionEnd!.gx}
-					, {sectionEnd!.gy})
+					Start ({sectionStart.gx}, {sectionStart.gy}) → End ({sectionEnd.gx},{" "}
+					{sectionEnd.gy})
 				</div>
 			</div>
 

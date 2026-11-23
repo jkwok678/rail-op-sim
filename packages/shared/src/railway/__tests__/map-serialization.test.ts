@@ -11,6 +11,7 @@ import { Map_ } from "../map";
 import { deserializeMap, serializeMap } from "../map/map-serialization";
 import { SignalAspect } from "../track/signal-aspects";
 import type { FontInfo } from "../types";
+import { defined, trackAt } from "./test-helpers";
 
 const font: FontInfo = { family: "JetBrains Mono", pointSize: 12 };
 
@@ -104,9 +105,13 @@ function buildSampleMap(): Map_ {
 	// Named location + concourse (both named). Attach labels via the Text API so
 	// the element→text reference (round-tripped by index) is exercised.
 	map.createAddNamedLocation(5, 0);
-	map.getNamedLocationAt(5, 0)!.setText(map.createAddText(5, 0, "Depot", font));
+	defined(map.getNamedLocationAt(5, 0)).setText(
+		map.createAddText(5, 0, "Depot", font),
+	);
 	map.createAddConcourse(0, 2);
-	map.getConcourseAt(0, 2)!.setText(map.createAddText(0, 2, "Main Hall", font));
+	defined(map.getConcourseAt(0, 2)).setText(
+		map.createAddText(0, 2, "Main Hall", font),
+	);
 
 	// A parapet, and a standalone (unlinked) text.
 	map.createAddParapet(ParapetType.PARAPET1, 1, 2);
@@ -152,14 +157,14 @@ describe("map serialization round-trip", () => {
 		});
 
 		// ── Untouched track kept its defaults verbatim ──
-		const def = restored.getTrackAt(2, 0)!;
-		const origDef = original.getTrackAt(2, 0)!;
+		const def = trackAt(restored, 2, 0);
+		const origDef = trackAt(original, 2, 0);
 		expect(def.getTrackMainSpeed()).toBe(origDef.getTrackMainSpeed());
 		expect(def.getTrackMainLength()).toBe(origDef.getTrackMainLength());
 
 		// ── Linked pair wired both directions ──
-		const a = restored.getTrackAt(0, 1)!;
-		const b = restored.getTrackAt(1, 1)!;
+		const a = trackAt(restored, 0, 1);
+		const b = trackAt(restored, 1, 1);
 		expect(a.isLinked()).toBe(true);
 		expect(b.isLinked()).toBe(true);
 		expect(a.getOtherLinkedTrack()).toBe(b);

@@ -264,8 +264,8 @@ export function getLinkedTrackPairs(map: Map_): LinkedTrackPair[] {
 	for (const t of linked) t.setFound(false);
 	for (const t of linked) {
 		if (t.getFound()) continue;
-		if (t.isLinked()) {
-			const partner = t.getOtherLinkedTrack()!;
+		const partner = t.getOtherLinkedTrack();
+		if (partner) {
 			pairs.push({ a: t, b: partner });
 			t.setFound(true);
 			partner.setFound(true);

@@ -276,7 +276,7 @@ function buildNode(track: Track, id: NodeId, cell: Cell): GraphNode {
 		paths,
 		defaultLie: Math.max(0, main),
 		signalExit: kind === "signal" ? signalFacingExit(subtype) : null,
-		signalAspects: track.getAspect() > 0 ? track.getAspect() : 0,
+		signalAspects: Math.max(0, track.getAspect()),
 		deadEnd,
 		location: locationOf(track),
 		preferred: track.getPreferredDirections(),

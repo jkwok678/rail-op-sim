@@ -15,6 +15,7 @@ import {
 	removeLevelCrossing,
 	removePlatform,
 } from "../map/map-platform";
+import { trackAt } from "./test-helpers";
 
 const FONT = { family: "JetBrains Mono", pointSize: 12 };
 
@@ -38,7 +39,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.UP, 0, 0);
-			const track = map.getTrackAt(0, 0)!;
+			const track = trackAt(map, 0, 0);
 			expect(track.getPlatform1()).toBe(true);
 			expect(track.getPlatform2()).toBe(false);
 		});
@@ -57,7 +58,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.DOWN, 0, 0);
-			const track = map.getTrackAt(0, 0)!;
+			const track = trackAt(map, 0, 0);
 			expect(track.getPlatform1()).toBe(false);
 			expect(track.getPlatform2()).toBe(true);
 		});
@@ -76,7 +77,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.LEFT, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 
 		it("STRAIGHTV + Platform.RIGHT sets platform2", () => {
@@ -93,7 +94,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.RIGHT, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform2()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform2()).toBe(true);
 		});
 
 		it("angled straight (SLU/SRU) rejected", () => {
@@ -110,7 +111,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.UP, 0, 0);
-			expect(map.getTrackAt(0, 0)!.hasPlatform()).toBe(false);
+			expect(trackAt(map, 0, 0).hasPlatform()).toBe(false);
 		});
 
 		it("rejected when track has level crossing", () => {
@@ -126,9 +127,9 @@ describe("addPlatform", () => {
 				0,
 				0,
 			);
-			map.getTrackAt(0, 0)!.addLevelCrossing();
+			trackAt(map, 0, 0).addLevelCrossing();
 			addPlatform(map, Platform.UP, 0, 0);
-			expect(map.getTrackAt(0, 0)!.hasPlatform()).toBe(false);
+			expect(trackAt(map, 0, 0).hasPlatform()).toBe(false);
 		});
 	});
 
@@ -146,7 +147,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.UP, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 
 		it("DIRECTEDLEFT + Platform.DOWN sets platform2", () => {
@@ -162,7 +163,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.DOWN, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform2()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform2()).toBe(true);
 		});
 
 		it("DIRECTEDUP + Platform.LEFT sets platform1", () => {
@@ -178,7 +179,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.LEFT, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 	});
 
@@ -196,7 +197,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.UP, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 
 		it("BUFFERUP + Platform.LEFT sets platform1", () => {
@@ -212,7 +213,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.LEFT, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 	});
 
@@ -230,7 +231,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.DOWN, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform2()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform2()).toBe(true);
 		});
 
 		it("SWITCHTIGHT3 + Platform.UP sets platform1", () => {
@@ -246,7 +247,7 @@ describe("addPlatform", () => {
 				0,
 			);
 			addPlatform(map, Platform.UP, 0, 0);
-			expect(map.getTrackAt(0, 0)!.getPlatform1()).toBe(true);
+			expect(trackAt(map, 0, 0).getPlatform1()).toBe(true);
 		});
 	});
 
@@ -277,7 +278,7 @@ describe("addLevelCrossing", () => {
 			0,
 		);
 		addLevelCrossing(map, 0, 0);
-		expect(map.getTrackAt(0, 0)!.hasLevelCrossing()).toBe(true);
+		expect(trackAt(map, 0, 0).hasLevelCrossing()).toBe(true);
 	});
 
 	it("rejected when track already has a platform", () => {
@@ -293,9 +294,9 @@ describe("addLevelCrossing", () => {
 			0,
 			0,
 		);
-		map.getTrackAt(0, 0)!.setPlatform1(true);
+		trackAt(map, 0, 0).setPlatform1(true);
 		addLevelCrossing(map, 0, 0);
-		expect(map.getTrackAt(0, 0)!.hasLevelCrossing()).toBe(false);
+		expect(trackAt(map, 0, 0).hasLevelCrossing()).toBe(false);
 	});
 
 	it("rejected when track already has a level crossing", () => {
@@ -311,9 +312,9 @@ describe("addLevelCrossing", () => {
 			0,
 			0,
 		);
-		map.getTrackAt(0, 0)!.addLevelCrossing();
+		trackAt(map, 0, 0).addLevelCrossing();
 		addLevelCrossing(map, 0, 0); // already has one
-		expect(map.getTrackAt(0, 0)!.hasLevelCrossing()).toBe(true);
+		expect(trackAt(map, 0, 0).hasLevelCrossing()).toBe(true);
 	});
 
 	it("does nothing on non-StraightTrack (e.g., CurvedTrack)", () => {
@@ -351,7 +352,7 @@ describe("removePlatform", () => {
 	it("clears both platforms and returns true", () => {
 		const map = new Map_();
 		addStraightH(map, 0, 0);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		track.setPlatform1(true);
 		track.setPlatform2(true);
 		expect(removePlatform(map, 0, 0)).toBe(true);
@@ -375,18 +376,18 @@ describe("removePlatform", () => {
 		map.setImageSize(1); // match integer-grid storage for neighbor propagation
 		addStraightH(map, 0, 0);
 		addStraightH(map, 1, 0);
-		map.getTrackAt(0, 0)!.setPlatform1(true);
-		map.getTrackAt(1, 0)!.setPlatform1(true);
+		trackAt(map, 0, 0).setPlatform1(true);
+		trackAt(map, 1, 0).setPlatform1(true);
 		// Names (0,0) and flood-fills to the adjacent platform track (1,0).
 		map.createAddLinkText(0, 0, "Platform A", true, FONT);
-		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
-		expect(map.getTrackAt(1, 0)!.getNamed()).toBe(true);
+		expect(trackAt(map, 0, 0).getNamed()).toBe(true);
+		expect(trackAt(map, 1, 0).getNamed()).toBe(true);
 
 		expect(removePlatform(map, 0, 0)).toBe(true);
-		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(false);
+		expect(trackAt(map, 0, 0).getNamed()).toBe(false);
 		// The Text survives (still referenced by the adjacent sharer).
 		expect(map.getTextList().length).toBe(1);
-		expect(map.getTrackAt(1, 0)!.getNamed()).toBe(true);
+		expect(trackAt(map, 1, 0).getNamed()).toBe(true);
 	});
 
 	it("keeps text on a named bridge/underpass after removePlatform", () => {
@@ -403,11 +404,11 @@ describe("removePlatform", () => {
 		);
 		addPlatform(map, Platform.LEFT, 0, 0);
 		map.createAddLinkText(0, 0, "Bridge", true, FONT);
-		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
+		expect(trackAt(map, 0, 0).getNamed()).toBe(true);
 
 		expect(removePlatform(map, 0, 0)).toBe(true);
 		// Bridge naming isn't platform-gated, so the text stays linked.
-		expect(map.getTrackAt(0, 0)!.getNamed()).toBe(true);
+		expect(trackAt(map, 0, 0).getNamed()).toBe(true);
 	});
 });
 
@@ -419,9 +420,9 @@ describe("removeLevelCrossing", () => {
 	it("removes an existing level crossing and returns true", () => {
 		const map = new Map_();
 		addStraightH(map, 0, 0);
-		map.getTrackAt(0, 0)!.addLevelCrossing();
+		trackAt(map, 0, 0).addLevelCrossing();
 		expect(removeLevelCrossing(map, 0, 0)).toBe(true);
-		expect(map.getTrackAt(0, 0)!.hasLevelCrossing()).toBe(false);
+		expect(trackAt(map, 0, 0).hasLevelCrossing()).toBe(false);
 	});
 
 	it("returns false when there is no level crossing", () => {
