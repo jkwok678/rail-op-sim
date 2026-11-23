@@ -78,6 +78,8 @@ export function serializeMap(map: Map_): SerializedMap {
 	textList.forEach((t, i) => {
 		indexOfText.set(t, i);
 	});
+	const textIndexOf = (label: Text | null): number | undefined =>
+		label ? indexOfText.get(label) : undefined;
 
 	const texts: SerializedText[] = textList.map((t) => ({
 		x: t.getLocationX(),
@@ -106,8 +108,8 @@ export function serializeMap(map: Map_): SerializedMap {
 				exit: p.exit,
 			}));
 		}
-		const label = t.getText();
-		if (label) entry.textIndex = indexOfText.get(label);
+		const textIndex = textIndexOf(t.getText());
+		if (textIndex !== undefined) entry.textIndex = textIndex;
 		tracks.push(entry);
 	});
 
@@ -118,8 +120,8 @@ export function serializeMap(map: Map_): SerializedMap {
 			x: el.getLocationX(),
 			y: el.getLocationY(),
 		};
-		const label = el.getText();
-		if (label) e.textIndex = indexOfText.get(label);
+		const textIndex = textIndexOf(el.getText());
+		if (textIndex !== undefined) e.textIndex = textIndex;
 		return e;
 	};
 

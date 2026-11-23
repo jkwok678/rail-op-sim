@@ -16,6 +16,7 @@ import {
 	type Service,
 	type Timetable,
 } from "../railway/timetable/types";
+import { applyPatch } from "../util/patch";
 import { clearCallingOnSignal } from "./callingOn";
 import { cellKey, type GraphNode, type RailGraph, type Seg } from "./graph";
 import type { PerformanceLog } from "./log";
@@ -749,7 +750,7 @@ function linkedHeadcode(ctx: RunnerContext, train: Train, ref: string): string {
 	if (!service) return ref.slice(-4);
 	const parent = serviceByRef(ctx.timetable, train.working.ref);
 	return repeatHeadcode(
-		{ ...service, repeat: parent?.repeat ?? service.repeat },
+		applyPatch(service, { repeat: parent?.repeat ?? service.repeat }),
 		train.working.repeat,
 	);
 }

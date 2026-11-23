@@ -20,7 +20,7 @@ export function TrackPreview({
 }: {
 	subtype: string;
 	/** Signal aspect — when SHUNT, loads the shunt SVG variant. */
-	aspect?: number;
+	aspect?: number | undefined;
 }) {
 	const [markup, setMarkup] = useState<string | null>(null);
 

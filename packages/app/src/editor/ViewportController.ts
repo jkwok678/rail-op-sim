@@ -30,7 +30,7 @@ export class ViewportController {
 	private world: Container;
 	private app: Application;
 	private canvas: HTMLCanvasElement;
-	private onChange?: () => void;
+	private onChange: (() => void) | undefined;
 	private minZoom: number;
 	private maxZoom: number;
 

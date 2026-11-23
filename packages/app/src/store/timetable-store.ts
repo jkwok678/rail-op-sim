@@ -1,7 +1,9 @@
 import {
 	type Action,
+	applyPatch,
 	createEmptyTimetable,
 	type Map as Map_,
+	type Patch,
 	type Service,
 	type ServiceRef,
 	type Timetable,
@@ -36,7 +38,7 @@ export interface PendingCellPick {
 	 * Which entry of `finishExit.exits` to replace; appended when past the end.
 	 * Ignored for `rear` and `front`.
 	 */
-	exitIndex?: number;
+	exitIndex?: number | undefined;
 }
 
 export interface TimetableState {
@@ -64,7 +66,7 @@ export interface TimetableState {
 	removeService: (ref: ServiceRef, map: Map_ | null) => void;
 	updateService: (
 		ref: ServiceRef,
-		patch: Partial<Omit<Service, "actions">>,
+		patch: Patch<Omit<Service, "actions">>,
 		map: Map_ | null,
 	) => void;
 
@@ -191,7 +193,7 @@ export const useTimetableStore = create<TimetableState>((set, get) => {
 
 		updateService: (ref, patch, map) => {
 			commit(map, (timetable) =>
-				mapService(timetable, ref, (service) => ({ ...service, ...patch })),
+				mapService(timetable, ref, (service) => applyPatch(service, patch)),
 			);
 			// A rename moves the selection with the service the user is editing.
 			if (patch.ref !== undefined && patch.ref !== ref) {

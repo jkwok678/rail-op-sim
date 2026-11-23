@@ -214,8 +214,6 @@ export abstract class NamedElement extends Element {
 		}
 		return result;
 	}
-
-	abstract toSaveString(): string;
 }
 
 // ============================================================================
@@ -233,7 +231,7 @@ export class NamedLocation extends NamedElement {
 	}
 
 	/** @returns "NamedLocation,x,y[,Text,...]" */
-	toString(): string {
+	override toString(): string {
 		let result = `NamedLocation,${this.locationToString()}`;
 		const txt = this.getText();
 		if (txt) {
@@ -268,7 +266,7 @@ export class Concourse extends NamedElement {
 	}
 
 	/** @returns "Concourse,x,y[,Text,...]" */
-	toString(): string {
+	override toString(): string {
 		let result = `Concourse,${this.locationToString()}`;
 		const txt = this.getText();
 		if (txt) {

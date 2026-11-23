@@ -27,13 +27,13 @@ export class ErrorBoundary extends Component<
 	ErrorBoundaryProps,
 	ErrorBoundaryState
 > {
-	state: ErrorBoundaryState = { error: null };
+	override state: ErrorBoundaryState = { error: null };
 
 	static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
 		return { error: error instanceof Error ? error : new Error(String(error)) };
 	}
 
-	componentDidCatch(error: Error, info: ErrorInfo): void {
+	override componentDidCatch(error: Error, info: ErrorInfo): void {
 		debugLog("ui", `${this.props.name} crashed: ${error.message}`);
 		console.error(`${this.props.name} crashed`, error, info.componentStack);
 	}
@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<
 		this.setState({ error: null });
 	};
 
-	render(): ReactNode {
+	override render(): ReactNode {
 		const { error } = this.state;
 		if (error) return this.props.fallback({ error, reset: this.reset });
 		return this.props.children;

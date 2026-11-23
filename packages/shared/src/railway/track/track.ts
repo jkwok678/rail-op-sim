@@ -560,7 +560,7 @@ export class Track extends NamedElement {
 	}
 
 	/** @returns human-readable string representation */
-	toString(): string {
+	override toString(): string {
 		const parts = [
 			`${this.kindLabel()},${this.subtypeCode()}`,
 			...this.serializeFieldGroups(),

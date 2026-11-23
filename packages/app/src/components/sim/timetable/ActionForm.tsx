@@ -35,7 +35,7 @@ export interface ActionFormProps {
 	/** Other services in the timetable, for the reference fields. */
 	otherRefs: ServiceRef[];
 	/** Current service ref, selectable as a shuttle partner for self-alternating shuttles. */
-	selfRef?: ServiceRef;
+	selfRef?: ServiceRef | undefined;
 	/** Arm the canvas to fill one of this action's cell fields. */
 	onPick: (field: PendingCellPick["field"], exitIndex?: number) => void;
 	/** The pick currently armed, if it belongs to this action. */
