@@ -66,7 +66,9 @@ function setRouteAspects(
 	aspects: number[],
 ): void {
 	let ahead = endValue(graph, state, route, aspects);
-	for (const [i, seg] of [...route.segs.entries()].reverse()) {
+	for (let i = route.segs.length - 1; i >= 0; i--) {
+		const seg = route.segs[i];
+		if (!seg) continue;
 		if (occupied(i) || !crossingOpen(graph, state, seg.node)) {
 			ahead = BLOCKED;
 		}

@@ -188,7 +188,7 @@ export const KIND_META: Record<TrackKind, TrackKindMeta> = {
 
 type SubtypeKey = string;
 
-const STRAIGHT_LINKS: Record<SubtypeKey, number[]> = {
+const STRAIGHT_LINKS: Record<SubtypeKey, [number, number]> = {
 	STRAIGHTH: [3, 5],
 	STRAIGHTV: [1, 7],
 	STRAIGHTLEFTUP: [0, 8],
@@ -206,7 +206,7 @@ const DIRECTED_LINKS: Record<SubtypeKey, number[]> = {
 	DIRECTEDLEFTDOWN: [2, 6],
 };
 
-const CURVED_LINKS: Record<SubtypeKey, number[]> = {
+const CURVED_LINKS: Record<SubtypeKey, [number, number]> = {
 	// Tight (90°) curves
 	TIGHTCURVE1: [5, 7],
 	TIGHTCURVE2: [3, 7],
@@ -422,8 +422,7 @@ const bothWays = (pairs: readonly (readonly [number, number])[]): number[] =>
  */
 const GEOMETRIC_PAIRS: ReadonlySet<number> = new Set(
 	[...Object.values(STRAIGHT_LINKS), ...Object.values(CURVED_LINKS)].flatMap(
-		([a, b]) =>
-			a === undefined || b === undefined ? [] : [a * 9 + b, b * 9 + a],
+		([a, b]) => [a * 9 + b, b * 9 + a],
 	),
 );
 

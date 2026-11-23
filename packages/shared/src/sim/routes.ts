@@ -69,11 +69,11 @@ const prefers = (
 	node.preferred.some((p) => p.entry === seg.entry && p.exit === seg.exit);
 
 /**
- * The ways a route of `kind` may start on `node`, or a reason it may not.
- * Signals start in the direction they face; buffers and exits start heading
- * into the railway; unrestricted routes start on any plain cell either way.
+ * The ways a route of `kind` may start on `node` (at least one), or a reason
+ * it may not. Signals start in the direction they face; buffers and exits
+ * start heading into the railway; unrestricted routes start on any plain cell
+ * either way.
  */
-/** Ways a route can leave `node`: at least one, or why there are none. */
 function startSegs(node: GraphNode, kind: RouteKind): [Seg, ...Seg[]] | string {
 	if (node.crossing !== null)
 		return "A route cannot start on a level crossing.";

@@ -9,9 +9,12 @@
 import type { TrackKind } from "../track/track-data";
 import { getLinksForSubtype, getRails } from "../track/track-data";
 
+/** Four RailOS compass codes per SpeedTag (`-1` where unused). */
+type LinkRow = readonly [number, number, number, number];
+
 /** Links per SpeedTag, as compass codes (1 NW … 9 SE, 5 unused). */
 // biome-ignore format: rows follow RailOS's TFixedTrackArray groups
-const LINKS: readonly (readonly number[])[] = [
+const LINKS: readonly LinkRow[] = [
 	[-1, -1, -1, -1],
 	[4, 6, -1, -1], [2, 8, -1, -1], [6, 8, -1, -1], [4, 8, -1, -1], [2, 6, -1, -1], [2, 4, -1, -1],
 	[4, 6, 4, 2], [6, 4, 6, 2], [4, 6, 4, 8], [6, 4, 6, 8], [8, 2, 8, 4], [8, 2, 8, 6], [2, 8, 2, 4], [2, 8, 2, 6],
@@ -28,7 +31,7 @@ const LINKS: readonly (readonly number[])[] = [
 	[4, 6, -1, -1], [6, 4, -1, -1], [8, 2, -1, -1], [2, 8, -1, -1], [1, 9, -1, -1], [3, 7, -1, -1], [7, 3, -1, -1], [9, 1, -1, -1],
 	[4, 6, -1, -1], [6, 4, -1, -1], [8, 2, -1, -1], [2, 8, -1, -1], [1, 9, -1, -1], [3, 7, -1, -1], [7, 3, -1, -1], [9, 1, -1, -1],
 	[-1, -1, -1, -1],
-	...Array.from({ length: 28 }, () => [-1, -1, -1, -1]),
+	...Array.from({ length: 28 }, (): LinkRow => [-1, -1, -1, -1]),
 	[4, 6, -1, -1], [4, 6, -1, -1], [2, 8, -1, -1], [2, 8, -1, -1],
 	[4, 6, -1, -1], [2, 8, -1, -1],
 	[-1, -1, -1, -1],
@@ -41,7 +44,7 @@ const LINKS: readonly (readonly number[])[] = [
 if (LINKS.length !== 147) throw new Error(`LINKS has ${LINKS.length} rows`);
 
 /** The {@link LINKS} row for `tag`; throws for a tag outside the table. */
-export function linksOfTag(tag: number): readonly number[] {
+export function linksOfTag(tag: number): LinkRow {
 	const row = LINKS[tag];
 	if (!row) throw new RangeError(`unknown RailOS tag ${tag}`);
 	return row;
@@ -225,10 +228,11 @@ export function subtypeByLinks(
 
 /** A switch whose two rails are exactly the RailOS piece's two paths. */
 export function switchSubtype(tag: number): string | null {
-	const [a, b, cc, d] = linksOfTag(tag).map(linkOf);
-	if (a === undefined || b === undefined || cc === undefined || d === undefined)
-		return null;
-	const want = [pairKey(a, b), pairKey(cc, d)].sort();
+	const [a, b, cc, d] = linksOfTag(tag);
+	const want = [
+		pairKey(linkOf(a), linkOf(b)),
+		pairKey(linkOf(cc), linkOf(d)),
+	].sort();
 	return (
 		SUBTYPES.switch.find((s) => {
 			const rails = getRails("switch", s as never)

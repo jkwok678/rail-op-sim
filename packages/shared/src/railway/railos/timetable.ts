@@ -68,30 +68,26 @@ function parseStop(
 	w: { warning?: true },
 ): Action {
 	const second = timeOf(rest);
-	if (second !== null) {
-		const [location = "", dwell] = rest.slice(6).split(";");
-		return {
-			kind: "stop",
-			location,
-			arrive: time,
-			depart: second,
-			...(dwell ? { minDwellSeconds: Number(dwell) } : {}),
-			...w,
-		};
-	}
-	const [location = "", dwell] = rest.split(";");
-	const single = seenLocation ? { arrive: time } : { depart: time };
+	const [location, dwell] = (second !== null ? rest.slice(6) : rest).split(";");
+	if (!location) throw new Error(`missing location in "${rest}"`);
+	const timing =
+		second !== null
+			? { arrive: time, depart: second }
+			: seenLocation
+				? { arrive: time }
+				: { depart: time };
 	return {
 		kind: "stop",
 		location,
-		...single,
+		...timing,
 		...(dwell ? { minDwellSeconds: Number(dwell) } : {}),
 		...w,
 	};
 }
 
 function startCells(ids: string): { rear: Cell; front: Cell } {
-	const [rear = "", front = ""] = ids.split(" ");
+	const [rear, front] = ids.split(" ");
+	if (!rear || !front) throw new Error(`incomplete start cells "${ids}"`);
 	return { rear: cellFromId(rear), front: cellFromId(front) };
 }
 
@@ -222,6 +218,8 @@ const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
 	}),
 };
 
+const TWO_ARG_COMMANDS = new Set(["Snt-sh", "Sns-sh", "Fns-sh"]);
+
 function parseCommand(
 	word: string,
 	time: SimTime,
@@ -231,7 +229,12 @@ function parseCommand(
 ): Action {
 	const parser = COMMAND_PARSERS[word];
 	if (!parser) throw new Error(`Unsupported timetable action "${word}"`);
-	// A missing field reads as empty; validation reports what it should be.
+	if (word !== "cdt" && !third) {
+		throw new Error(`missing field in "${word}"`);
+	}
+	if (TWO_ARG_COMMANDS.has(word) && !fourth) {
+		throw new Error(`missing second field in "${word}"`);
+	}
 	return parser(time, third ?? "", fourth ?? "", w);
 }
 
@@ -255,11 +258,15 @@ function parseService(entry: string): Service {
 	const fields = stripSpaces(entry)
 		.split(",")
 		.filter((f) => f !== "");
-	const info = (fields[0] ?? "").split(";");
+	const [header, ...restFields] = fields;
+	if (!header) throw new Error("empty service entry");
+	const info = header.split(";");
+	const [ref] = info;
+	if (!ref) throw new Error(`missing service ref in "${header}"`);
 	const actions: Action[] = [];
 	let repeat: Service["repeat"];
 	let seen = false;
-	for (const field of fields.slice(1)) {
+	for (const field of restFields) {
 		if (field.startsWith("R;")) {
 			const [, mins, digits, count] = field.split(";").map(Number);
 			if (mins === undefined || digits === undefined || count === undefined) {
@@ -275,7 +282,7 @@ function parseService(entry: string): Service {
 	// Keys in the order the editor writes them.
 	const spec = trainSpec(info);
 	return {
-		ref: info[0] ?? "",
+		ref,
 		...(info[1] ? { description: info[1] } : {}),
 		...(spec ? { train: spec } : {}),
 		actions,
