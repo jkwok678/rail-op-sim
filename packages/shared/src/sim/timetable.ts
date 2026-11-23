@@ -16,7 +16,6 @@ import {
 	type Service,
 	type Timetable,
 } from "../railway/timetable/types";
-import { firstOf, itemAt, lastOf } from "../util/checked";
 import { applyPatch } from "../util/patch";
 import { clearCallingOnSignal } from "./callingOn";
 import {
@@ -194,8 +193,13 @@ function introduce(
 	start: ActionOf<"startNew" | "startNewShuttle">,
 ): void {
 	const { graph, state, log } = ctx;
-	const rear = nodeOf(graph, firstOf(train.segs, "segment").node);
-	const frontNode = nodeOf(graph, lastOf(train.segs, "segment").node);
+	const [rearSeg] = train.segs;
+	const frontSeg = train.segs.at(-1);
+	if (!rearSeg || !frontSeg) {
+		throw new Error(`${train.headcode} was introduced with no segments`);
+	}
+	const rear = nodeOf(graph, rearSeg.node);
+	const frontNode = nodeOf(graph, frontSeg.node);
 	if (rear.kind === "exit") {
 		train.speed = safeEntrySpeed(graph, state, train);
 		train.status = train.speed > 0 ? "running" : "waiting";
@@ -251,8 +255,7 @@ export function stopTarget(ctx: RunnerContext, train: Train): string | null {
 	const w = train.working;
 	if (w.done || train.control.mode === "signaller") return null;
 	const actions = actionsOf(ctx, w);
-	for (let i = w.index; i < actions.length; i++) {
-		const a = itemAt(actions, i, "action");
+	for (const a of actions.slice(w.index)) {
 		if (a.kind === "stop") return a.location;
 		if (isCommand(a)) return null;
 	}
@@ -572,8 +575,7 @@ function remainHere(ctx: RunnerContext, train: Train): void {
 	if (w.done) return;
 	w.done = true;
 	train.status = "finished";
-	const where =
-		w.at ?? placeName(nodeOf(ctx.graph, lastOf(train.segs, "segment").node));
+	const where = standingAt(ctx, train);
 	ctx.log.info(ctx.state.time, `${train.headcode} terminated at ${where}`);
 }
 
@@ -599,8 +601,7 @@ function runCommand(ctx: RunnerContext, train: Train, a: Command): boolean {
 	const now = ctx.state.time;
 	if (now < a.time + offsetOf(ctx, w) || now < w.lastActionAt + MIN_ACTION_GAP)
 		return false;
-	const where =
-		w.at ?? placeName(nodeOf(ctx.graph, lastOf(train.segs, "segment").node));
+	const where = standingAt(ctx, train);
 	switch (a.kind) {
 		case "changeDirection":
 			reverse(ctx.graph, train);
@@ -670,7 +671,7 @@ export function reverse(graph: RailGraph, train: Train): void {
 	train.segs = train.segs
 		.map((s) => ({ node: s.node, entry: s.exit, exit: s.entry }))
 		.reverse();
-	train.frontM = firstOf(lengths, "segment") - rearInto;
+	train.frontM = (lengths[0] ?? 0) - rearInto;
 }
 
 export function segLengthOf(graph: RailGraph, seg: Seg): number {
@@ -1121,8 +1122,8 @@ export function handoverTarget(
 ): ServiceHandover | null {
 	const actions = actionsOf(ctx, train.working);
 	const w = train.working;
-	for (let i = w.index; i < actions.length; i++) {
-		const a = itemAt(actions, i, "action");
+	for (const [k, a] of actions.slice(w.index).entries()) {
+		const i = w.index + k;
 		if (a.kind === "finishNewService") {
 			return { ref: a.nextRef, repeat: w.repeat, actionIndex: i };
 		}
@@ -1174,9 +1175,9 @@ function joinPartner(
 /** Whether either end of `a` is the next cell off either end of `b`. */
 function trainsAdjacent(ctx: RunnerContext, a: Train, b: Train): boolean {
 	const touches = (from: Train, to: Train): boolean => {
-		if (from.segs.length === 0) return false;
-		const front = lastOf(from.segs, "segment");
-		const rear = firstOf(from.segs, "segment");
+		const [rear] = from.segs;
+		const front = from.segs.at(-1);
+		if (!rear || !front) return false;
 		const ahead = nextSeg(ctx.graph, ctx.state.lies, front);
 		const behindRaw = nextSeg(ctx.graph, ctx.state.lies, flip(rear));
 		const cells = [ahead?.node, behindRaw?.node].filter(
@@ -1350,8 +1351,7 @@ function missBetween(
 	to: number,
 ): void {
 	const actions = actionsOf(ctx, train.working);
-	for (let i = from; i < to; i++) {
-		const a = itemAt(actions, i, "action");
+	for (const a of actions.slice(from, to)) {
 		const where = missedWhere(ctx, train, a);
 		if (a.kind === "stop") {
 			ctx.state.counters.missedStops++;
@@ -1400,11 +1400,9 @@ function findBooking(
 	from: number,
 	location: string,
 ): number {
-	for (let i = from; i < actions.length; i++) {
-		const a = itemAt(actions, i, "action");
-		if ((a.kind === "stop" || a.kind === "pass") && a.location === location)
-			return i;
+	for (const [k, a] of actions.slice(from).entries()) {
 		if (a.kind !== "stop" && a.kind !== "pass") return -1;
+		if (a.location === location) return from + k;
 	}
 	return -1;
 }
@@ -1422,8 +1420,8 @@ export function onEnterLocation(
 	if (j < 0) return;
 	missBetween(ctx, train, w.index, j);
 	w.index = j;
-	const a = itemAt(actions, j, "action");
-	if (a.kind !== "pass") return;
+	const a = actions[j];
+	if (a?.kind !== "pass") return;
 	ctx.log.timed(
 		ctx.state.time,
 		a.time + offsetOf(ctx, w),

@@ -8,7 +8,6 @@
  * directions come out the way the editor would make them.
  */
 
-import { defined } from "../../util/checked";
 import { Text } from "../element";
 import { type ParapetType, Platform } from "../enums";
 import { Map_ } from "../map/map";
@@ -319,22 +318,22 @@ class RailwayBuilder {
 		return straight ? createTrackData("straight", straight) : null;
 	}
 
+	private placePlatform(el: InactiveElement, x: number, y: number): void {
+		const side = PLATFORM_SIDE[el.tag];
+		if (side !== undefined) this.map.addPlatform(side, x, y);
+		if (!this.map.getTrackAt(x, y)?.hasPlatform()) {
+			this.warnings.push(
+				`${where(el.h, el.v)}: platform could not be added to the track there.`,
+			);
+		}
+	}
+
 	private placeInactive(): void {
 		for (const el of this.rly.inactive) {
 			const { x, y } = cellToLocation(this.map, railosCell(el.h, el.v));
 			const piece = pieceOf(el.tag);
 			if (piece === "platform") {
-				const track = this.map.getTrackAt(x, y);
-				this.map.addPlatform(
-					defined(PLATFORM_SIDE[el.tag], "platform side"),
-					x,
-					y,
-				);
-				if (!track?.hasPlatform()) {
-					this.warnings.push(
-						`${where(el.h, el.v)}: platform could not be added to the track there.`,
-					);
-				}
+				this.placePlatform(el, x, y);
 			} else if (piece === "concourse") {
 				this.map.createAddConcourse(x, y);
 			} else if (piece === "parapet") {

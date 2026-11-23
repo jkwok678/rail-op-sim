@@ -24,7 +24,6 @@ import {
 	signalFacingExit,
 	type TrackKind,
 } from "../railway/track/track-data";
-import { itemAt, soleItem } from "../util/checked";
 
 /** Index of a track in {@link RailGraph.nodes}. */
 export type NodeId = number;
@@ -103,7 +102,9 @@ export interface RailGraph {
 
 /** The node with id `id`. Throws if the id was not handed out by this graph. */
 export function nodeOf(graph: RailGraph, id: NodeId): GraphNode {
-	return itemAt(graph.nodes, id, "node");
+	const node = graph.nodes[id];
+	if (!node) throw new RangeError(`node ${id} is not in this graph`);
+	return node;
 }
 
 export const cellKey = (cell: Cell): string => `${cell.gx},${cell.gy}`;
@@ -136,7 +137,10 @@ export function segLength(graph: RailGraph, seg: Seg): number {
 export function occKeyOf(graph: RailGraph, seg: Seg): number {
 	const node = nodeOf(graph, seg.node);
 	const path = pathOf(graph, seg);
-	return itemAt(node.occKeys, Math.max(0, path?.rail ?? 0), "occupancy key");
+	const key = node.occKeys[Math.max(0, path?.rail ?? 0)];
+	if (key === undefined)
+		throw new RangeError(`node ${node.id} has no such rail`);
+	return key;
 }
 
 /** Whether a train running along `seg` passes a signal facing it. */
@@ -199,8 +203,10 @@ export function buildGraph(map: Map_): RailGraph {
 		}
 	});
 
-	const crossings = groupCrossings(nodes, byCell, (id) =>
-		itemAt(tracks, id, "track").hasLevelCrossing(),
+	const crossings = groupCrossings(
+		nodes,
+		byCell,
+		(id) => tracks[id]?.hasLevelCrossing() === true,
 	);
 
 	return { nodes, byCell, locations, next, crossings };
@@ -239,8 +245,8 @@ function groupCrossings(
 		) {
 			const id = byCell.get(cellKey(cell));
 			if (id === undefined || !hasCrossing(id)) break;
-			const member = itemAt(nodes, id, "node");
-			if (member.subtype !== node.subtype) break;
+			const member = nodes[id];
+			if (!member || member.subtype !== node.subtype) break;
 			member.crossing = crossings.length;
 			members.push(id);
 		}
@@ -294,8 +300,8 @@ function buildNode(track: Track, id: NodeId, cell: Cell): GraphNode {
 
 function deadEndOf(track: Track): number | null {
 	const links = getLinksForSubtype(track.data.kind, track.data.subtype);
-	const link = soleItem(links);
-	if (link === undefined) return null;
+	const [link] = links;
+	if (links.length !== 1 || link === undefined) return null;
 	return track.isTerminusDeadEnd(8 - link) ? 8 - link : null;
 }
 

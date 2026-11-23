@@ -1,4 +1,3 @@
-import { firstOf, itemAt, lastOf, soleItem } from "../../util/checked";
 import { MinHeap } from "../../util/min-heap";
 import { Concourse, type NamedElement, NamedLocation } from "../element";
 import { type PreferredDirection, Track } from "../track/track";
@@ -41,7 +40,9 @@ export const LINK_OFFSETS: readonly [number, number][] = [
 
 /** {@link LINK_OFFSETS} for `link`; throws for anything outside 0–8. */
 export function linkOffset(link: number): readonly [number, number] {
-	return itemAt(LINK_OFFSETS, link, "link");
+	const offset = LINK_OFFSETS[link];
+	if (!offset) throw new RangeError(`link ${link} is not 0–8`);
+	return offset;
 }
 
 /** A track with at least one active link that does not join a neighbour. */
@@ -540,7 +541,7 @@ function endpointOtherLink(track: Track, known: number): number | null {
 			l !== known &&
 			isTraversableLinkPair(track.data.kind, track.data.subtype, known, l),
 	);
-	return soleItem(partners) ?? null;
+	return partners.length === 1 ? (partners[0] ?? null) : null;
 }
 
 /** Outcome of {@link setPreferredDirectionsAlongPath}. */
@@ -594,9 +595,8 @@ export function setPreferredDirectionsAlongPath(
 	const legs = resolvePathDirections(map, path);
 	const facingSwitchEndpoint =
 		path.length > 1 &&
-		((legs[0] === null && firstOf(path, "track").data.kind === "switch") ||
-			(legs[path.length - 1] === null &&
-				lastOf(path, "track").data.kind === "switch"));
+		((legs[0] === null && path[0]?.data.kind === "switch") ||
+			(legs.at(-1) === null && path.at(-1)?.data.kind === "switch"));
 	if (facingSwitchEndpoint) {
 		return {
 			path,
