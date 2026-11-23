@@ -16,7 +16,6 @@
  * rules are testable with no railway fixture at all.
  */
 
-import { firstOf } from "../../util/checked";
 import type { Map_ } from "../map/map";
 import { isRailwayComplete, linkIndexForOffset } from "../map/map-connectivity";
 import { getLocationNames, trackAtCell } from "./locations";
@@ -913,7 +912,8 @@ function pairUp(
 		const matches = incoming.filter(
 			(to) => to.serviceRef === from.target && to.target === from.serviceRef,
 		);
-		if (matches.length === 0) {
+		const [to] = matches;
+		if (to === undefined) {
 			out.error(
 				"unmatched-reference",
 				`"${from.serviceRef}" names "${from.target}" as its ${labels.outName}, but "${from.target}" does not ${labels.inName} from it.`,
@@ -928,7 +928,6 @@ function pairUp(
 				{ serviceRef: from.serviceRef, actionIndex: from.actionIndex },
 			);
 		}
-		const to = firstOf(matches, "match");
 		unmatchedIn.delete(to);
 		if (from.time !== null && to.time !== null && from.time !== to.time) {
 			out.error(

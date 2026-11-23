@@ -10,7 +10,6 @@
  * take the same real time there, and nothing at all before the clock starts.
  */
 
-import { itemAt } from "../util/checked";
 import type { NodeId, RailGraph, Seg } from "./graph";
 import { nodeOf } from "./graph";
 import { routeKeys, trainKeys } from "./occupancy";
@@ -42,7 +41,7 @@ function crossingAt(
 	node: NodeId,
 ): CrossingState | null {
 	const index = nodeOf(graph, node).crossing;
-	return index === null ? null : itemAt(state.crossings, index, "crossing");
+	return index === null ? null : (state.crossings[index] ?? null);
 }
 
 /** Whether a train may run over `node`: no crossing there, or one that is down. */
@@ -107,8 +106,8 @@ export function workCrossings(graph: RailGraph, state: SimState): void {
 	const trains = trainKeys(graph, state.trains);
 	const routes = routeKeys(graph, state);
 	graph.crossings.forEach((lc, i) => {
-		const crossing = itemAt(state.crossings, i, "crossing");
-		if (crossing.barriers !== "down") return;
+		const crossing = state.crossings[i];
+		if (crossing?.barriers !== "down") return;
 		const keys = lc.nodes.flatMap((id) => nodeOf(graph, id).occKeys);
 		const trainOn = keys.some((key) => trains.has(key));
 		if (trainOn) crossing.trainSeen = true;

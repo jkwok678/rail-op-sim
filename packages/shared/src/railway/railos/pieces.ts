@@ -6,7 +6,6 @@
  * mapping cannot drift from the art tables.
  */
 
-import { itemAt } from "../../util/checked";
 import type { TrackKind } from "../track/track-data";
 import { getLinksForSubtype, getRails } from "../track/track-data";
 
@@ -42,8 +41,11 @@ const LINKS: readonly (readonly number[])[] = [
 if (LINKS.length !== 147) throw new Error(`LINKS has ${LINKS.length} rows`);
 
 /** The {@link LINKS} row for `tag`; throws for a tag outside the table. */
-export const linksOfTag = (tag: number): readonly number[] =>
-	itemAt(LINKS, tag, "RailOS tag");
+export function linksOfTag(tag: number): readonly number[] {
+	const row = LINKS[tag];
+	if (!row) throw new RangeError(`unknown RailOS tag ${tag}`);
+	return row;
+}
 
 /** Which of a signal's two links carries the signal: the exit it protects. */
 export const SIGNAL_END: Readonly<Record<number, 0 | 1>> = {
@@ -121,7 +123,9 @@ const COMPASS_OFFSETS: readonly (readonly [number, number])[] = [
 
 /** RailOS compass code (screen y down) → our link index (+Y up). */
 export function linkOf(compass: number): number {
-	const [dx, dyScreen] = itemAt(COMPASS_OFFSETS, compass, "compass code");
+	const offset = COMPASS_OFFSETS[compass];
+	if (!offset) throw new RangeError(`unknown RailOS compass code ${compass}`);
+	const [dx, dyScreen] = offset;
 	const dy = -dyScreen;
 	return (1 - dy) * 3 + (dx + 1);
 }

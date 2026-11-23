@@ -1,4 +1,3 @@
-import { itemAt } from "../../util/checked";
 import { record, recordField } from "../effect-journal";
 import { NamedElement, type NamedLocation } from "../element";
 import {
@@ -255,7 +254,8 @@ export class Track extends NamedElement {
 			(p) => p.entry === entry && p.exit === exit,
 		);
 		if (i === -1) return false;
-		const removed = itemAt(this.preferredDirections.splice(i, 1), 0);
+		const [removed] = this.preferredDirections.splice(i, 1);
+		if (!removed) return false;
 		// Splice the pair back at the index it came from rather than going through
 		// addPreferredDirection: that re-validates against the current topology,
 		// and during an undo the neighbour this pair depends on may not have been

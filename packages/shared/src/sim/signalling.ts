@@ -11,7 +11,6 @@
  * it and that next signal, or a level crossing there is not yet down.
  */
 
-import { itemAt, lastOf } from "../util/checked";
 import { crossingOpen } from "./crossings";
 import {
 	endsAtBuffers,
@@ -49,13 +48,13 @@ function endValue(
 	route: Route,
 	aspects: readonly number[],
 ): number {
-	const last = lastOf(route.segs, "segment");
+	const last = route.segs.at(-1);
+	if (!last) return BLOCKED;
 	// The world beyond an exit is assumed clear; buffers count as a red signal.
 	if (leavesMap(graph, last)) return GREEN;
 	if (endsAtBuffers(graph, last)) return RED;
 	const next = beyondRoute(graph, state, route);
-	if (next && isFacingSignal(graph, next))
-		return itemAt(aspects, next.node, "aspect");
+	if (next && isFacingSignal(graph, next)) return aspects[next.node] ?? BLOCKED;
 	return BLOCKED;
 }
 
@@ -67,14 +66,13 @@ function setRouteAspects(
 	aspects: number[],
 ): void {
 	let ahead = endValue(graph, state, route, aspects);
-	for (let i = route.segs.length - 1; i >= 0; i--) {
-		const seg = itemAt(route.segs, i, "segment");
+	for (const [i, seg] of [...route.segs.entries()].reverse()) {
 		if (occupied(i) || !crossingOpen(graph, state, seg.node)) {
 			ahead = BLOCKED;
 		}
 		if (isFacingSignal(graph, seg)) {
-			aspects[seg.node] = behind(ahead);
-			ahead = itemAt(aspects, seg.node, "aspect");
+			ahead = behind(ahead);
+			aspects[seg.node] = ahead;
 		}
 	}
 }

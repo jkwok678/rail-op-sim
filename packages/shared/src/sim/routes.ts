@@ -13,7 +13,6 @@
  */
 
 import type { Cell } from "../railway/timetable/types";
-import { firstOf, itemAt, lastOf, soleItem } from "../util/checked";
 import { MinHeap } from "../util/min-heap";
 import { clearCallingOnSignal } from "./callingOn";
 import { crossingChanging, lowerCrossingsOn } from "./crossings";
@@ -29,6 +28,7 @@ import {
 	pathOf,
 	type RailGraph,
 	type Seg,
+	type Step,
 	stepFrom,
 } from "./graph";
 import {
@@ -460,6 +460,16 @@ function plainSeg(
 	);
 }
 
+/** The one preferred way on from `step`, or null when there is none or a choice. */
+function soleWayOn(graph: RailGraph, step: Step): Seg | null {
+	const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
+		prefers(nodeOf(graph, step.node), p),
+	);
+	const [way] = ways;
+	if (ways.length !== 1 || !way) return null;
+	return { node: step.node, entry: way.entry, exit: way.exit };
+}
+
 /**
  * The plain section from `start` to just short of the next signal, or onto an
  * exit, or null when it is not plain all the way.
@@ -477,12 +487,8 @@ function plainAutoRoute(
 		if (endsAtBuffers(graph, current)) return null;
 		const step = stepFrom(graph, current.node, current.exit);
 		if (!step) return null;
-		const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
-			prefers(nodeOf(graph, step.node), p),
-		);
-		const way = soleItem(ways);
-		if (!way) return null;
-		const next = { node: step.node, entry: way.entry, exit: way.exit };
+		const next = soleWayOn(graph, step);
+		if (!next) return null;
 		if (isFacingSignal(graph, next)) return segs;
 		if (seen.has(next.node) || !plainSeg(graph, next, free)) return null;
 		seen.add(next.node);
@@ -528,17 +534,16 @@ export function togglePoints(
 	at: Cell,
 ): CommandResult {
 	const id = nodeAt(graph, at);
-	if (id === null || nodeOf(graph, id).kind !== "switch") {
-		return failed("Those are not points.");
-	}
-	const key = firstOf(nodeOf(graph, id).occKeys, "occupancy key");
+	const node = id === null ? null : nodeOf(graph, id);
+	const [key] = node?.kind === "switch" ? node.occKeys : [];
+	if (id === null || key === undefined) return failed("Those are not points.");
 	if (trainKeys(graph, state.trains).has(key))
 		return failed("A train is on those points.");
 	if (routeKeys(graph, state).has(key))
 		return failed("Those points are locked by a route.");
 	if (state.run === "paused")
 		return failed("Points cannot be moved while paused.");
-	state.lies[id] = 1 - itemAt(state.lies, id, "lie");
+	state.lies[id] = 1 - (state.lies[id] ?? 0);
 	return { ok: true };
 }
 
@@ -567,11 +572,12 @@ export function cancelOnWrongEntry(
 ): Route | null {
 	for (const route of state.routes) {
 		const i = route.segs.findIndex((s) => s.node === seg.node);
-		if (i < 0) continue;
-		const rightWay = sameSeg(itemAt(route.segs, i, "segment"), seg);
+		const here = route.segs[i];
+		if (!here) continue;
+		const before = route.segs[i - 1];
+		const rightWay = sameSeg(here, seg);
 		const inOrder =
-			i === 0 ||
-			(from !== null && sameSeg(itemAt(route.segs, i - 1, "segment"), from));
+			before === undefined || (from !== null && sameSeg(before, from));
 		if (rightWay && inOrder) return null;
 		if (route.kind === "auto" && rightWay) return null;
 		state.routes.splice(state.routes.indexOf(route), 1);
@@ -586,7 +592,7 @@ export function beyondRoute(
 	state: SimState,
 	route: Route,
 ): Seg | null {
-	const last = lastOf(route.segs, "segment");
-	const step = stepFrom(graph, last.node, last.exit);
+	const last = route.segs.at(-1);
+	const step = last ? stepFrom(graph, last.node, last.exit) : null;
 	return step ? followSeg(graph, state.lies, step) : null;
 }
