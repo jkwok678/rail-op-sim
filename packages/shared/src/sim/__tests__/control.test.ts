@@ -134,9 +134,7 @@ describe("signaller train control", () => {
 		expect(engine.handle({ type: "takeControl", trainId: train.id })).toEqual({
 			ok: true,
 		});
-		expect(
-			defined(engine.view().trains[0], "trains[0]").canRestoreTimetable,
-		).toBe(true);
+		expect(engine.view().trains[0]?.canRestoreTimetable).toBe(true);
 
 		// Step two elements off Ashfield (now occupying cells 4 and 5, gx=5): cannot restore away from Ashfield.
 		expect(engine.handle({ type: "stepForward", trainId: train.id })).toEqual({
@@ -149,9 +147,7 @@ describe("signaller train control", () => {
 		runFor(engine, 35);
 		expect(train.speed).toBe(0);
 		expect(frontCell(engine, train).gx).toBe(5);
-		expect(
-			defined(engine.view().trains[0], "trains[0]").canRestoreTimetable,
-		).toBe(false);
+		expect(engine.view().trains[0]?.canRestoreTimetable).toBe(false);
 		expect(
 			engine.handle({ type: "restoreTimetable", trainId: train.id }),
 		).toEqual({
@@ -391,7 +387,7 @@ describe("signaller train control", () => {
 			ok: true,
 		});
 		expect(engine.state.trains).toHaveLength(0);
-		expect(defined(engine.state.runs[0], "runs[0]").status).toBe("done");
+		expect(engine.state.runs[0]?.status).toBe("done");
 	});
 
 	it("joins two stopped trains only when both are under signaller control", () => {
@@ -546,9 +542,7 @@ describe("signaller train control", () => {
 
 		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.working.at).toBe("Ashfield");
-		expect(
-			defined(engine.view().trains[0], "trains[0]").followOnServiceRef,
-		).toBe("2B99");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("2B99");
 
 		// Set & clear reminder.
 		expect(
@@ -558,9 +552,7 @@ describe("signaller train control", () => {
 				reminder: "  Hold for path  ",
 			}),
 		).toEqual({ ok: true });
-		expect(defined(engine.view().trains[0], "trains[0]").reminder).toBe(
-			"Hold for path",
-		);
+		expect(engine.view().trains[0]?.reminder).toBe("Hold for path");
 		expect(
 			engine.handle({
 				type: "setReminder",
@@ -568,7 +560,7 @@ describe("signaller train control", () => {
 				reminder: "   ",
 			}),
 		).toEqual({ ok: true });
-		expect(defined(engine.view().trains[0], "trains[0]").reminder).toBeNull();
+		expect(engine.view().trains[0]?.reminder).toBeNull();
 
 		// Cannot become follow-on service while under signaller control.
 		engine.handle({ type: "takeControl", trainId: train.id });
@@ -623,9 +615,7 @@ describe("signaller train control", () => {
 		runFor(engine, 1);
 
 		const train = defined(engine.state.trains[0], "trains[0]");
-		expect(
-			defined(engine.view().trains[0], "trains[0]").followOnServiceRef,
-		).toBeNull();
+		expect(engine.view().trains[0]?.followOnServiceRef).toBeNull();
 		expect(
 			engine.handle({ type: "becomeNewService", trainId: train.id }),
 		).toEqual({
@@ -744,9 +734,7 @@ describe("signaller train control", () => {
 
 		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.headcode).toBe("1A01");
-		expect(
-			defined(engine.view().trains[0], "trains[0]").followOnServiceRef,
-		).toBe("1A02");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("1A02");
 
 		// First repeat: advances to next repeat 1A02 (repeat = 1).
 		expect(
@@ -757,9 +745,7 @@ describe("signaller train control", () => {
 		expect(train.working.repeat).toBe(1);
 
 		// On the last repeat: follow-on is now the non-repeating tail service 2B99.
-		expect(
-			defined(engine.view().trains[0], "trains[0]").followOnServiceRef,
-		).toBe("2B99");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("2B99");
 		expect(
 			engine.handle({ type: "becomeNewService", trainId: train.id }),
 		).toEqual({ ok: true });

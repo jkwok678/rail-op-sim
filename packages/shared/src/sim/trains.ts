@@ -530,15 +530,17 @@ export function trainSpans(
 	train: Train,
 ): { seg: Seg; from: number; to: number }[] {
 	const spans: { seg: Seg; from: number; to: number }[] = [];
-	const lead = train.segs.at(-1);
+	const last = train.segs.length - 1;
+	const lead = train.segs[last];
 	if (!lead) return spans;
 	const frontLen = segLength(graph, lead);
 	// Whatever has run on past an exit's outer edge is off the map.
 	let remaining = train.lengthM - Math.max(0, train.frontM - frontLen);
-	for (const [back, seg] of [...train.segs].reverse().entries()) {
-		if (remaining <= 0) break;
+	for (let i = last; i >= 0 && remaining > 0; i--) {
+		const seg = train.segs[i];
+		if (!seg) continue;
 		const len = segLength(graph, seg) || 1;
-		const frontHere = back === 0 ? Math.min(train.frontM, len) : len;
+		const frontHere = i === last ? Math.min(train.frontM, len) : len;
 		const covered = Math.min(frontHere, remaining);
 		spans.unshift({
 			seg,

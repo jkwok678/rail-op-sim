@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { defined } from "../../railway/__tests__/test-helpers";
 import { Map_ } from "../../railway/map/map";
-import { buildGraph } from "../graph";
+import { buildGraph, nodeOf } from "../graph";
 import {
 	addTrain,
 	cell,
@@ -42,7 +41,7 @@ describe("level crossing graph", () => {
 		map.makeTrackList();
 		const graph = buildGraph(map);
 		const cells = graph.crossings.map((lc) =>
-			lc.nodes.map((id) => defined(graph.nodes[id], "nodes[id]").cell),
+			lc.nodes.map((id) => nodeOf(graph, id).cell),
 		);
 		expect(cells).toEqual([
 			[cell(0, 0), cell(0, 1), cell(0, 2)],
