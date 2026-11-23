@@ -9,6 +9,7 @@ import {
 	linkLocalText,
 } from "../map/map-text-linking";
 import type { FontInfo } from "../types";
+import { defined, trackAt } from "./test-helpers";
 
 const testFont: FontInfo = { family: "Arial", pointSize: 12 };
 
@@ -34,7 +35,7 @@ describe("linkLocalText", () => {
 		addPlatform(map, Platform.UP, 0, 0);
 		const text = new Text(0, 0, "Platform A", testFont);
 		linkLocalText(map, 0, 0, text);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		expect(track.getText()).toBe(text);
 		expect(track.getNamed()).toBe(true);
 	});
@@ -54,7 +55,7 @@ describe("linkLocalText", () => {
 		);
 		const text = new Text(0, 0, "Platform A", testFont);
 		linkLocalText(map, 0, 0, text);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		expect(track.getNamed()).toBe(false);
 	});
 
@@ -63,7 +64,7 @@ describe("linkLocalText", () => {
 		map.createAddConcourse(0, 0);
 		const text = new Text(0, 0, "Station", testFont);
 		linkLocalText(map, 0, 0, text);
-		const concourse = map.getConcourseAt(0, 0)!;
+		const concourse = defined(map.getConcourseAt(0, 0));
 		expect(concourse.getNamed()).toBe(true);
 	});
 
@@ -72,7 +73,7 @@ describe("linkLocalText", () => {
 		map.createAddNamedLocation(0, 0);
 		const text = new Text(0, 0, "City", testFont);
 		linkLocalText(map, 0, 0, text);
-		const nl = map.getNamedLocationAt(0, 0)!;
+		const nl = defined(map.getNamedLocationAt(0, 0));
 		expect(nl.getNamed()).toBe(true);
 	});
 
@@ -103,15 +104,15 @@ describe("deleteTextFromAllElements", () => {
 		);
 		addPlatform(map, Platform.UP, 0, 0);
 		const text = new Text(0, 0, "Platform A", testFont);
-		map.getTrackAt(0, 0)!.setText(text);
+		trackAt(map, 0, 0).setText(text);
 
 		map.createAddConcourse(16, 0);
-		map.getConcourseAt(16, 0)!.setText(text);
+		defined(map.getConcourseAt(16, 0)).setText(text);
 
 		deleteTextFromAllElements(map, text);
 
-		expect(map.getTrackAt(0, 0)!.getText()).toBeNull();
-		expect(map.getConcourseAt(16, 0)!.getText()).toBeNull();
+		expect(trackAt(map, 0, 0).getText()).toBeNull();
+		expect(defined(map.getConcourseAt(16, 0)).getText()).toBeNull();
 	});
 
 	it("does nothing when text is not referenced anywhere", () => {
@@ -182,10 +183,10 @@ describe("changeDeleteText", () => {
 		);
 		addPlatform(map, Platform.UP, 0, 0);
 		const text = map.createAddText(0, 0, "Platform A", testFont);
-		map.getTrackAt(0, 0)!.setText(text);
+		trackAt(map, 0, 0).setText(text);
 
 		changeDeleteText(map, "", true, text);
-		expect(map.getTrackAt(0, 0)!.getText()).toBeNull();
+		expect(trackAt(map, 0, 0).getText()).toBeNull();
 	});
 });
 
@@ -206,9 +207,9 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		// Name the middle one — should flood to all three
 		map.createAddLinkText(1, 0, "Station", true, testFont);
 
-		const nl0 = map.getNamedLocationAt(0, 0)!;
-		const nl1 = map.getNamedLocationAt(1, 0)!;
-		const nl2 = map.getNamedLocationAt(2, 0)!;
+		const nl0 = defined(map.getNamedLocationAt(0, 0));
+		const nl1 = defined(map.getNamedLocationAt(1, 0));
+		const nl2 = defined(map.getNamedLocationAt(2, 0));
 
 		// All three should be named
 		expect(nl0.getNamed()).toBe(true);
@@ -248,10 +249,12 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 			[0, 1],
 			[1, 1],
 		]) {
-			const nl = map.getNamedLocationAt(gx, gy)!;
+			const nl = defined(map.getNamedLocationAt(gx, gy));
 			expect(nl.getNamed()).toBe(true);
 			expect(nl.getText()!.getReadableText()).toBe("Depot");
-			expect(nl.getText()).toBe(map.getNamedLocationAt(0, 0)!.getText());
+			expect(nl.getText()).toBe(
+				defined(map.getNamedLocationAt(0, 0)).getText(),
+			);
 		}
 
 		expect(map.getTextList()).toHaveLength(1);
@@ -266,7 +269,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		map.createAddNamedLocation(2, 0);
 		map.createAddLinkText(1, 0, "Ghost Town", true, testFont);
 
-		const nl1 = map.getNamedLocationAt(1, 0)!;
+		const nl1 = defined(map.getNamedLocationAt(1, 0));
 		const sharedText = nl1.getText()!;
 
 		// Delete via changeDeleteText with empty string
@@ -274,7 +277,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 
 		// All three should be unnamed
 		for (let gx = 0; gx <= 2; gx++) {
-			const nl = map.getNamedLocationAt(gx, 0)!;
+			const nl = defined(map.getNamedLocationAt(gx, 0));
 			expect(nl.getNamed()).toBe(false);
 			expect(nl.getText()).toBeNull();
 		}
@@ -292,14 +295,14 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		map.createAddNamedLocation(2, 0);
 		map.createAddLinkText(1, 0, "Old Name", true, testFont);
 
-		const sharedText = map.getNamedLocationAt(1, 0)!.getText()!;
+		const sharedText = defined(map.getNamedLocationAt(1, 0)).getText()!;
 
 		// Edit the shared text
 		changeDeleteText(map, "New Name", true, sharedText);
 
 		// All three still named, now with new text
 		for (let gx = 0; gx <= 2; gx++) {
-			const nl = map.getNamedLocationAt(gx, 0)!;
+			const nl = defined(map.getNamedLocationAt(gx, 0));
 			expect(nl.getNamed()).toBe(true);
 			expect(nl.getText()).toBe(sharedText);
 		}
@@ -319,10 +322,10 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		// Place a NEW NamedLocation adjacent to the named group
 		map.createAddNamedLocation(2, 0);
 
-		const nl2 = map.getNamedLocationAt(2, 0)!;
+		const nl2 = defined(map.getNamedLocationAt(2, 0));
 		// createAddNamedLocation calls linkNewElementToText -> should inherit
 		expect(nl2.getNamed()).toBe(true);
-		expect(nl2.getText()).toBe(map.getNamedLocationAt(1, 0)!.getText());
+		expect(nl2.getText()).toBe(defined(map.getNamedLocationAt(1, 0)).getText());
 		expect(nl2.getText()!.getReadableText()).toBe("Hub");
 	});
 
@@ -338,12 +341,12 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		map.createAddLinkText(0, 0, "Diagonal", true, testFont);
 
 		// (0,0) should be named
-		expect(map.getNamedLocationAt(0, 0)!.getNamed()).toBe(true);
+		expect(defined(map.getNamedLocationAt(0, 0)).getNamed()).toBe(true);
 
 		// (2,0) is not cardinally adjacent to (0,0), so not linked
-		expect(map.getNamedLocationAt(2, 0)!.getNamed()).toBe(false);
+		expect(defined(map.getNamedLocationAt(2, 0)).getNamed()).toBe(false);
 
 		// (1,1) is not cardinally adjacent to (0,0), so not linked
-		expect(map.getNamedLocationAt(1, 1)!.getNamed()).toBe(false);
+		expect(defined(map.getNamedLocationAt(1, 1)).getNamed()).toBe(false);
 	});
 });

@@ -85,7 +85,7 @@ export function linkLocalText(
 			bridgeUnderpassTrack.setText(linkedText);
 		}
 	}
-	if (track && track.hasPlatform()) {
+	if (track?.hasPlatform()) {
 		track.setText(linkedText);
 	}
 	if (concourse && !concourse.getNamed()) {

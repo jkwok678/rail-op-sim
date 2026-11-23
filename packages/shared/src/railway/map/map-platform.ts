@@ -186,7 +186,7 @@ export function addLevelCrossing(
 	locationY: number,
 ): void {
 	const t = map.getTrackAt(locationX, locationY);
-	if (!t || t.data.kind !== "straight") return;
+	if (t?.data.kind !== "straight") return;
 
 	if (
 		!(t.hasPlatform() || t.hasLevelCrossing() || t.hasLinkedNamedLocation())
@@ -202,7 +202,7 @@ export function addLevelCrossing(
  */
 export function removePlatform(map: Map_, x: number, y: number): boolean {
 	const t = map.getTrackAt(x, y);
-	if (!t || !t.hasPlatform()) return false;
+	if (!t?.hasPlatform()) return false;
 	t.setPlatform1(false);
 	t.setPlatform2(false);
 	// Track text-linking is platform-gated, except bridge/underpass naming.
@@ -216,7 +216,7 @@ export function removePlatform(map: Map_, x: number, y: number): boolean {
  */
 export function removeLevelCrossing(map: Map_, x: number, y: number): boolean {
 	const t = map.getTrackAt(x, y);
-	if (!t || !t.hasLevelCrossing()) return false;
+	if (!t?.hasLevelCrossing()) return false;
 	t.removeLevelCrossing();
 	return true;
 }

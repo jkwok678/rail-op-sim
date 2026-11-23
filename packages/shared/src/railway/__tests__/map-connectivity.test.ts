@@ -28,6 +28,7 @@ import {
 } from "../map/map-connectivity";
 import type { TrackKind } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
+import { trackAt } from "./test-helpers";
 
 // ============================================================================
 // checkAllTracksConnected
@@ -339,8 +340,8 @@ describe("getConnectivityReport", () => {
 
 		setPreferredDirectionsAlongPath(
 			map,
-			map.getTrackAt(-16, 0)!,
-			map.getTrackAt(32, 0)!,
+			trackAt(map, -16, 0),
+			trackAt(map, 32, 0),
 		);
 		const directed = getConnectivityReport(map);
 		expect(directed.connected).toBe(true);
@@ -443,8 +444,8 @@ describe("isRailwayComplete", () => {
 	const directLine = (map: Map_): void => {
 		setPreferredDirectionsAlongPath(
 			map,
-			map.getTrackAt(-16, 0)!,
-			map.getTrackAt(32, 0)!,
+			trackAt(map, -16, 0),
+			trackAt(map, 32, 0),
 		);
 	};
 
@@ -503,10 +504,10 @@ describe("isRailwayComplete", () => {
 		joinedLine(map);
 		directLine(map);
 		map.addPlatform(Platform.UP, 0, 0);
-		expect(elementNeedsName(map.getTrackAt(0, 0)!)).toBe(true);
+		expect(elementNeedsName(trackAt(map, 0, 0))).toBe(true);
 		expect(isRailwayComplete(map)).toBe(false);
 
-		map.getTrackAt(0, 0)!.setText(map.createAddText(0, 0, "Platform 1", FONT));
+		trackAt(map, 0, 0).setText(map.createAddText(0, 0, "Platform 1", FONT));
 		expect(isRailwayComplete(map)).toBe(true);
 	});
 
@@ -692,7 +693,7 @@ describe("findPathBetween", () => {
 			0,
 			0,
 		);
-		const start = map.getTrackAt(0, 0)!;
+		const start = trackAt(map, 0, 0);
 		const path = findPathBetween(map, start, start);
 		expect(path).toEqual([start]);
 	});
@@ -721,8 +722,8 @@ describe("findPathBetween", () => {
 			16,
 			0,
 		);
-		const start = map.getTrackAt(0, 0)!;
-		const end = map.getTrackAt(16, 0)!;
+		const start = trackAt(map, 0, 0);
+		const end = trackAt(map, 16, 0);
 		const path = findPathBetween(map, start, end);
 		expect(path).not.toBeNull();
 		expect(path!.length).toBe(2);
@@ -742,7 +743,7 @@ describe("findPathBetween", () => {
 		put(3, 1, "curved", "CURVE1");
 		put(4, 1, "curved", "CURVE2");
 		map.makeTrackList();
-		const at = (gx: number) => map.getTrackAt(gx * 16, 0)!;
+		const at = (gx: number) => trackAt(map, gx * 16, 0);
 		for (const [from, to] of [
 			[0, 6],
 			[6, 0],
@@ -799,8 +800,8 @@ describe("findPathBetween", () => {
 			32,
 			0,
 		);
-		const start = map.getTrackAt(-16, 0)!;
-		const end = map.getTrackAt(32, 0)!;
+		const start = trackAt(map, -16, 0);
+		const end = trackAt(map, 32, 0);
 		const path = findPathBetween(map, start, end);
 		expect(path).not.toBeNull();
 		expect(path!.length).toBe(4);
@@ -830,8 +831,8 @@ describe("findPathBetween", () => {
 			0,
 			32,
 		);
-		const start = map.getTrackAt(0, 0)!;
-		const end = map.getTrackAt(0, 32)!;
+		const start = trackAt(map, 0, 0);
+		const end = trackAt(map, 0, 32);
 		const path = findPathBetween(map, start, end);
 		expect(path).toBeNull();
 	});
@@ -872,8 +873,8 @@ describe("findPathBetween", () => {
 			16,
 			0,
 		);
-		const start = map.getTrackAt(-16, 0)!;
-		const end = map.getTrackAt(16, 0)!;
+		const start = trackAt(map, -16, 0);
+		const end = trackAt(map, 16, 0);
 		const path = findPathBetween(map, start, end);
 		expect(path).not.toBeNull();
 		expect(path!.length).toBe(3); // left → switch → right
@@ -903,8 +904,8 @@ describe("findPathBetween", () => {
 			16,
 			0,
 		);
-		const start = map.getTrackAt(0, 0)!;
-		const end = map.getTrackAt(16, 0)!;
+		const start = trackAt(map, 0, 0);
+		const end = trackAt(map, 16, 0);
 		findPathBetween(map, start, end);
 
 		// All tracks should have found reset to false
@@ -983,14 +984,14 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		straightH(map, 32);
-		const start = map.getTrackAt(0, 0)!;
-		const end = map.getTrackAt(32, 0)!;
+		const start = trackAt(map, 0, 0);
+		const end = trackAt(map, 32, 0);
 		const result = setPreferredDirectionsAlongPath(map, start, end);
 		expect(result).not.toBeNull();
 		expect(result!.path).toHaveLength(3);
 		expect(result!.applied).toBe(3);
 		for (const x of [0, 16, 32]) {
-			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([
+			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([
 				{ entry: 3, exit: 5 },
 			]);
 		}
@@ -1001,19 +1002,19 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		straightH(map, 32);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(32, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 32, 0);
 		setPreferredDirectionsAlongPath(map, left, right);
 		setPreferredDirectionsAlongPath(map, right, left);
 		for (const x of [0, 16, 32]) {
-			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([
+			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([
 				{ entry: 3, exit: 5 },
 				{ entry: 5, exit: 3 },
 			]);
 		}
 		// Re-running L→R must not add duplicates, and must report nothing applied.
 		const repeat = setPreferredDirectionsAlongPath(map, left, right);
-		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toHaveLength(2);
+		expect(trackAt(map, 16, 0).getPreferredDirections()).toHaveLength(2);
 		expect(repeat!.applied).toBe(0);
 		expect(repeat!.unassigned).toBe(3);
 	});
@@ -1023,8 +1024,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 		// TIGHTCURVE1 at (0,0): links 5 (right → 16,0) and 7 (bottom).
 		map.addTrack({ kind: "curved", subtype: CurvedType.TIGHTCURVE1 }, 0, 0);
 		straightH(map, 16);
-		const start = map.getTrackAt(16, 0)!;
-		const curve = map.getTrackAt(0, 0)!;
+		const start = trackAt(map, 16, 0);
+		const curve = trackAt(map, 0, 0);
 		setPreferredDirectionsAlongPath(map, start, curve);
 		expect(curve.getPreferredDirections()).toEqual([{ entry: 5, exit: 7 }]);
 		expect(start.getPreferredDirections()).toEqual([{ entry: 5, exit: 3 }]);
@@ -1045,15 +1046,15 @@ describe("setPreferredDirectionsAlongPath", () => {
 			32,
 			0,
 		);
-		const start = map.getTrackAt(0, 0)!;
-		const buffer = map.getTrackAt(32, 0)!;
+		const start = trackAt(map, 0, 0);
+		const buffer = trackAt(map, 32, 0);
 		setPreferredDirectionsAlongPath(map, start, buffer);
 		// Entry from the network (link 3), exit into the buffer stop (link 5).
 		expect(buffer.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
-		expect(map.getTrackAt(0, 0)!.getPreferredDirections()).toEqual([
+		expect(trackAt(map, 0, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
 		]);
-		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toEqual([
+		expect(trackAt(map, 16, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
 		]);
 	});
@@ -1073,11 +1074,11 @@ describe("setPreferredDirectionsAlongPath", () => {
 		);
 		straightH(map, -16);
 		straightH(map, 16);
-		const left = map.getTrackAt(-16, 0)!;
-		const right = map.getTrackAt(16, 0)!;
+		const left = trackAt(map, -16, 0);
+		const right = trackAt(map, 16, 0);
 		setPreferredDirectionsAlongPath(map, left, right);
 		// Switch is mid-path → gets entry(toward prev=left, link 3) → exit(toward next=right, link 5).
-		expect(map.getTrackAt(0, 0)!.getPreferredDirections()).toEqual([
+		expect(trackAt(map, 0, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
 		]);
 
@@ -1095,8 +1096,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			0,
 		);
 		straightH(map2, 16);
-		const startTrack = map2.getTrackAt(16, 0)!;
-		const switchTrack = map2.getTrackAt(0, 0)!;
+		const startTrack = trackAt(map2, 16, 0);
+		const switchTrack = trackAt(map2, 0, 0);
 		setPreferredDirectionsAlongPath(map2, startTrack, switchTrack);
 		expect(switchTrack.getPreferredDirections()).toEqual([
 			{ entry: 5, exit: 3 },
@@ -1122,8 +1123,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			0,
 		);
 		straightV(map, 0, 16); // link 1 (top) neighbour of the switch
-		const start = map.getTrackAt(0, 16)!;
-		const switchTrack = map.getTrackAt(0, 0)!;
+		const start = trackAt(map, 0, 16);
+		const switchTrack = trackAt(map, 0, 0);
 		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
 		expect(switchTrack.getPreferredDirections()).toEqual([
 			{ entry: 1, exit: 3 },
@@ -1149,8 +1150,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			0,
 		);
 		straightH(map, -16);
-		const start = map.getTrackAt(-16, 0)!;
-		const switchTrack = map.getTrackAt(0, 0)!;
+		const start = trackAt(map, -16, 0);
+		const switchTrack = trackAt(map, 0, 0);
 		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
 		expect(switchTrack.getPreferredDirections()).toEqual([]);
 		expect(start.getPreferredDirections()).toEqual([]);
@@ -1182,8 +1183,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			16,
 			16,
 		);
-		const spur = trailing.getTrackAt(16, 16)!;
-		const swTrail = trailing.getTrackAt(0, 0)!;
+		const spur = trackAt(trailing, 16, 16);
+		const swTrail = trackAt(trailing, 0, 0);
 		const trailResult = setPreferredDirectionsAlongPath(
 			trailing,
 			spur,
@@ -1204,8 +1205,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 			0,
 		);
 		straightH(facing, -16);
-		const stem = facing.getTrackAt(-16, 0)!;
-		const swFace = facing.getTrackAt(0, 0)!;
+		const stem = trackAt(facing, -16, 0);
+		const swFace = trackAt(facing, 0, 0);
 		const faceResult = setPreferredDirectionsAlongPath(facing, stem, swFace);
 		expect(swFace.getPreferredDirections()).toEqual([]);
 		expect(stem.getPreferredDirections()).toEqual([]);
@@ -1217,8 +1218,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 		const map = new Map_();
 		straightH(map, 0, 0);
 		straightH(map, 0, 32);
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(0, 32)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 0, 32);
 		expect(setPreferredDirectionsAlongPath(map, a, b)).toBeNull();
 		expect(a.getPreferredDirections()).toEqual([]);
 		expect(b.getPreferredDirections()).toEqual([]);
@@ -1227,7 +1228,7 @@ describe("setPreferredDirectionsAlongPath", () => {
 	it("returns [start] and assigns nothing when start === end", () => {
 		const map = new Map_();
 		straightH(map, 0);
-		const t = map.getTrackAt(0, 0)!;
+		const t = trackAt(map, 0, 0);
 		const result = setPreferredDirectionsAlongPath(map, t, t);
 		expect(result!.path).toEqual([t]);
 		expect(result!.applied).toBe(0);
@@ -1242,18 +1243,18 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(map, 64);
 		map.connectTwoLinkedTracks(16, 0);
 		map.connectTwoLinkedTracks(48, 0);
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(64, 0)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 64, 0);
 		const result = setPreferredDirectionsAlongPath(map, a, b);
 		expect(result).not.toBeNull();
 		expect(result!.path).toHaveLength(4);
 		expect(result!.applied).toBe(4);
 		// LINKRIGHT: enter from the railway (3), leave through the mouth (5).
-		expect(map.getTrackAt(16, 0)!.getPreferredDirections()).toEqual([
+		expect(trackAt(map, 16, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
 		]);
 		// LINKLEFT: enter through the mouth (3), leave onto the far railway (5).
-		expect(map.getTrackAt(48, 0)!.getPreferredDirections()).toEqual([
+		expect(trackAt(map, 48, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
 		]);
 	});
@@ -1262,8 +1263,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 		const map = new Map_();
 		straightH(map, 0);
 		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
-		const start = map.getTrackAt(0, 0)!;
-		const portal = map.getTrackAt(16, 0)!;
+		const start = trackAt(map, 0, 0);
+		const portal = trackAt(map, 16, 0);
 		const result = setPreferredDirectionsAlongPath(map, start, portal);
 		expect(result!.applied).toBe(1);
 		expect(start.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
@@ -1308,8 +1309,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		straightH(map, 32);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(32, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 32, 0);
 		setPreferredDirectionsAlongPath(map, left, right);
 		return { map, left, right };
 	};
@@ -1322,8 +1323,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		expect(result!.removed).toBe(3);
 		expect(result!.untouched).toBe(0);
 		for (const x of [0, 16, 32]) {
-			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
-			expect(map.getTrackAt(x, 0)!.hasPreferredDirection()).toBe(false);
+			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
+			expect(trackAt(map, x, 0).hasPreferredDirection()).toBe(false);
 		}
 	});
 
@@ -1333,8 +1334,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		const result = clearPreferredDirectionsAlongPath(map, left, right);
 		expect(result!.removed).toBe(3);
 		for (const x of [0, 16, 32]) {
-			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
-			expect(map.getTrackAt(x, 0)!.getDirectionality()).toBe("none");
+			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
+			expect(trackAt(map, x, 0).getDirectionality()).toBe("none");
 		}
 	});
 
@@ -1344,7 +1345,7 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		const result = clearPreferredDirectionsAlongPath(map, right, left);
 		expect(result!.removed).toBe(3);
 		for (const x of [0, 16, 32]) {
-			expect(map.getTrackAt(x, 0)!.getPreferredDirections()).toEqual([]);
+			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
 		}
 	});
 
@@ -1352,8 +1353,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		const map = new Map_();
 		straightH(map, 0);
 		straightH(map, 16);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(16, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 16, 0);
 		const result = clearPreferredDirectionsAlongPath(map, left, right);
 		expect(result!.removed).toBe(0);
 		expect(result!.untouched).toBe(2);
@@ -1375,10 +1376,10 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		straightH(map, -16);
 		straightH(map, 16);
 		straightV(map, 0, 16);
-		const left = map.getTrackAt(-16, 0)!;
-		const right = map.getTrackAt(16, 0)!;
-		const top = map.getTrackAt(0, 16)!;
-		const sw = map.getTrackAt(0, 0)!;
+		const left = trackAt(map, -16, 0);
+		const right = trackAt(map, 16, 0);
+		const top = trackAt(map, 0, 16);
+		const sw = trackAt(map, 0, 0);
 
 		setPreferredDirectionsAlongPath(map, left, right); // straight, 3→5
 		setPreferredDirectionsAlongPath(map, left, top); // spur, 3→1
@@ -1395,8 +1396,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		const map = new Map_();
 		straightH(map, 0, 0);
 		straightH(map, 0, 32);
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(0, 32)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 0, 32);
 		a.addPreferredDirection(3, 5);
 		expect(clearPreferredDirectionsAlongPath(map, a, b)).toBeNull();
 		expect(a.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
@@ -1405,7 +1406,7 @@ describe("clearPreferredDirectionsAlongPath", () => {
 	it("returns [start] and removes nothing when start === end", () => {
 		const map = new Map_();
 		straightH(map, 0);
-		const t = map.getTrackAt(0, 0)!;
+		const t = trackAt(map, 0, 0);
 		t.addPreferredDirection(3, 5);
 		const result = clearPreferredDirectionsAlongPath(map, t, t);
 		expect(result!.path).toEqual([t]);
@@ -1461,9 +1462,9 @@ describe("path traversability", () => {
 
 	it("routes straight through a crossover but not between its two paths", () => {
 		const map = crossoverMap();
-		const left = map.getTrackAt(-16, 0)!;
-		const right = map.getTrackAt(16, 0)!;
-		const above = map.getTrackAt(0, 16)!;
+		const left = trackAt(map, -16, 0);
+		const right = trackAt(map, 16, 0);
+		const above = trackAt(map, 0, 16);
 		// Horizontal path (3↔5) is fine.
 		expect(findPathBetween(map, left, right)).toHaveLength(3);
 		// Left arm to top arm would need the impossible turn 3→1.
@@ -1472,7 +1473,7 @@ describe("path traversability", () => {
 
 	it("never records an impossible turn across a crossover", () => {
 		const map = crossoverMap();
-		const crossover = map.getTrackAt(0, 0)!;
+		const crossover = trackAt(map, 0, 0);
 		expect(crossover.addPreferredDirection(3, 1)).toBe(false);
 		expect(crossover.addPreferredDirection(3, 5)).toBe(true);
 		expect(crossover.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
@@ -1493,9 +1494,9 @@ describe("path traversability", () => {
 			0,
 		);
 		straightH(map, 32);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(32, 0)!;
-		const directed = map.getTrackAt(16, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 32, 0);
+		const directed = trackAt(map, 16, 0);
 
 		// With the arrow: assigned all the way through.
 		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(3);
@@ -1521,8 +1522,8 @@ describe("path traversability", () => {
 			0,
 		);
 		straightH(map, 32);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(32, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 32, 0);
 		// Default options (used by the section tool) route in both senses.
 		expect(findPathBetween(map, right, left)).toHaveLength(3);
 		expect(
@@ -1536,8 +1537,8 @@ describe("path traversability", () => {
 		// has no matching link 3 on the V — they do not join.
 		straightH(map, 0);
 		straightV(map, 16, 0);
-		const h = map.getTrackAt(0, 0)!;
-		const v = map.getTrackAt(16, 0)!;
+		const h = trackAt(map, 0, 0);
+		const v = trackAt(map, 16, 0);
 		expect(findPathBetween(map, h, v)).toBeNull();
 		expect(setPreferredDirectionsAlongPath(map, h, v)).toBeNull();
 		expect(h.getPreferredDirections()).toEqual([]);
@@ -1557,8 +1558,8 @@ describe("path traversability", () => {
 			0,
 		);
 		straightH(map, -16);
-		const directed = map.getTrackAt(0, 0)!;
-		const left = map.getTrackAt(-16, 0)!;
+		const directed = trackAt(map, 0, 0);
+		const left = trackAt(map, -16, 0);
 		expect(
 			findPathBetween(map, directed, left, { respectOneWay: true }),
 		).toBeNull();
@@ -1582,8 +1583,8 @@ describe("path traversability", () => {
 			0,
 		);
 		straightH(map, -16);
-		const directed = map.getTrackAt(0, 0)!;
-		const left = map.getTrackAt(-16, 0)!;
+		const directed = trackAt(map, 0, 0);
+		const left = trackAt(map, -16, 0);
 		expect(
 			findPathBetween(map, left, directed, { respectOneWay: true }),
 		).toBeNull();
@@ -1640,10 +1641,10 @@ describe("tight-radius switch geometry", () => {
 		);
 		return {
 			map,
-			sw: map.getTrackAt(0, 0)!,
-			left: map.getTrackAt(-16, 0)!,
-			right: map.getTrackAt(16, 0)!,
-			top: map.getTrackAt(0, 16)!,
+			sw: trackAt(map, 0, 0),
+			left: trackAt(map, -16, 0),
+			right: trackAt(map, 16, 0),
+			top: trackAt(map, 0, 16),
 		};
 	};
 
@@ -1715,10 +1716,10 @@ describe("split-switch geometry", () => {
 			0,
 			-16,
 		);
-		const left = map.getTrackAt(-16, 0)!;
-		const diag = map.getTrackAt(16, 16)!;
-		const bottom = map.getTrackAt(0, -16)!;
-		const sw = map.getTrackAt(0, 0)!;
+		const left = trackAt(map, -16, 0);
+		const diag = trackAt(map, 16, 16);
+		const bottom = trackAt(map, 0, -16);
+		const sw = trackAt(map, 0, 0);
 
 		expect(findPathBetween(map, left, diag)).toHaveLength(3);
 		expect(findPathBetween(map, left, bottom)).toHaveLength(3);
@@ -1756,8 +1757,8 @@ describe("revalidatePreferredDirections", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		straightH(map, 32);
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(32, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 32, 0);
 		setPreferredDirectionsAlongPath(map, left, right);
 		expect(left.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 
@@ -1780,7 +1781,7 @@ describe("revalidatePreferredDirections", () => {
 			16,
 			0,
 		);
-		const left = map.getTrackAt(0, 0)!;
+		const left = trackAt(map, 0, 0);
 		expect(left.addPreferredDirection(3, 5)).toBe(true);
 		expect(revalidatePreferredDirections(map)).toBe(1);
 		expect(left.getPreferredDirections()).toEqual([]);
@@ -1795,10 +1796,10 @@ describe("revalidatePreferredDirections", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		map.connectTwoLinkedTracks(48, 0);
 
-		const left = map.getTrackAt(0, 0)!;
-		const right = map.getTrackAt(64, 0)!;
-		const west = map.getTrackAt(16, 0)!;
-		const east = map.getTrackAt(48, 0)!;
+		const left = trackAt(map, 0, 0);
+		const right = trackAt(map, 64, 0);
+		const west = trackAt(map, 16, 0);
+		const east = trackAt(map, 48, 0);
 		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(4);
 
 		map.deleteElement(0, 0);
@@ -1818,8 +1819,8 @@ describe("revalidatePreferredDirections", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		map.connectTwoLinkedTracks(48, 0);
 
-		const west = map.getTrackAt(16, 0)!;
-		const east = map.getTrackAt(48, 0)!;
+		const west = trackAt(map, 16, 0);
+		const east = trackAt(map, 48, 0);
 		// Both mouths pointing into the hop — trains arrive at both, leave from neither.
 		expect(west.addPreferredDirection(3, 5)).toBe(true);
 		expect(east.addPreferredDirection(5, 3)).toBe(true);
@@ -1837,8 +1838,8 @@ describe("revalidatePreferredDirections", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(16, 0)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 16, 0);
 		a.addPreferredDirection(3, 5);
 		b.addPreferredDirection(5, 3);
 
@@ -1856,8 +1857,8 @@ describe("revalidatePreferredDirections", () => {
 		straightH(map, 0);
 		straightH(map, 16);
 		map.addTrack({ kind: "exit", subtype: ExitType.EXITRIGHT }, 32, 0);
-		const twoWay = map.getTrackAt(0, 0)!;
-		const oneWay = map.getTrackAt(16, 0)!;
+		const twoWay = trackAt(map, 0, 0);
+		const oneWay = trackAt(map, 16, 0);
 		// Westbound starts at the boundary; eastbound crosses it and carries on.
 		twoWay.addPreferredDirection(3, 5);
 		twoWay.addPreferredDirection(5, 3);

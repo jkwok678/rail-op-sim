@@ -16,6 +16,7 @@ import {
 } from "../enums";
 import { Map_ } from "../map";
 import type { FontInfo, MessageCallback, TextSelectionPrompt } from "../types";
+import { trackAt } from "./test-helpers";
 
 const testFont: FontInfo = { family: "Arial", pointSize: 12 };
 
@@ -394,7 +395,7 @@ describe("Existence guards", () => {
 			0,
 			0,
 		);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		track.setPlatform1(true);
 		expect(map.checkCanAddNamedLocation(0, 0)).toBe(false);
 	});
@@ -525,8 +526,8 @@ describe("LinkedTrack state machine", () => {
 		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
 		map.connectTwoLinkedTracks(0, 0);
 		map.connectTwoLinkedTracks(16, 0);
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(16, 0)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 16, 0);
 		expect(a.isLinked()).toBe(true);
 		expect(b.isLinked()).toBe(true);
 	});
@@ -554,10 +555,10 @@ describe("LinkedTrack state machine", () => {
 		map.connectTwoLinkedTracks(0, 16);
 		map.connectTwoLinkedTracks(16, 16);
 
-		const a = map.getTrackAt(0, 0)!;
-		const x = map.getTrackAt(16, 0)!;
-		const b = map.getTrackAt(0, 16)!;
-		const y = map.getTrackAt(16, 16)!;
+		const a = trackAt(map, 0, 0);
+		const x = trackAt(map, 16, 0);
+		const b = trackAt(map, 0, 16);
+		const y = trackAt(map, 16, 16);
 		expect(a.getOtherLinkedTrack()).toBe(x);
 		expect(b.getOtherLinkedTrack()).toBe(y);
 
@@ -588,8 +589,8 @@ describe("LinkedTrack state machine", () => {
 		map.connectTwoLinkedTracks(0, 0);
 		map.connectTwoLinkedTracks(16, 0);
 
-		const a = map.getTrackAt(0, 0)!;
-		const b = map.getTrackAt(16, 0)!;
+		const a = trackAt(map, 0, 0);
+		const b = trackAt(map, 16, 0);
 		expect(a.getOtherLinkedTrack()).toBe(b);
 		expect(b.getOtherLinkedTrack()).toBe(a);
 	});
@@ -605,9 +606,9 @@ describe("LinkedTrack state machine", () => {
 		map.connectTwoLinkedTracks(0, 0);
 		map.connectTwoLinkedTracks(0, 16);
 
-		const a = map.getTrackAt(0, 0)!;
-		const x = map.getTrackAt(16, 0)!;
-		const b = map.getTrackAt(0, 16)!;
+		const a = trackAt(map, 0, 0);
+		const x = trackAt(map, 16, 0);
+		const b = trackAt(map, 0, 16);
 		expect(a.getOtherLinkedTrack()).toBe(b);
 		expect(b.getOtherLinkedTrack()).toBe(a);
 		expect(x.isLinked()).toBe(false);
@@ -697,7 +698,7 @@ describe("deleteElement", () => {
 		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
 		map.connectTwoLinkedTracks(0, 0);
 		map.connectTwoLinkedTracks(16, 0);
-		const b = map.getTrackAt(16, 0)!;
+		const b = trackAt(map, 16, 0);
 		expect(b.isLinked()).toBe(true);
 		map.deleteElement(0, 0);
 		expect(b.isLinked()).toBe(false);
@@ -716,7 +717,7 @@ describe("deleteElement", () => {
 			0,
 			0,
 		);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		map.createAddNamedLocation(0, 0);
 		// Both are reachable at the cell: the track for its neighbours, the
 		// named location for naming and deletion.
@@ -744,7 +745,7 @@ describe("deleteElement", () => {
 			0,
 			0,
 		);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		map.createAddNamedLocation(0, 0);
 
 		expect(map.deleteElement(0, 0)).toBe(true);
@@ -773,7 +774,7 @@ describe("deleteElement", () => {
 			0,
 			0,
 		);
-		const track = map.getTrackAt(0, 0)!;
+		const track = trackAt(map, 0, 0);
 		const text = map.createAddText(0, 0, "Platform A", testFont);
 		track.setText(text);
 		expect(map.getTextList()).toHaveLength(1);

@@ -8,7 +8,7 @@ import {
 
 describe("round1", () => {
 	it("rounds to 1 decimal place", () => {
-		expect(round1(3.14159)).toBe(3.1);
+		expect(round1(1.2345)).toBe(1.2);
 		expect(round1(2.78)).toBe(2.8);
 		expect(round1(5.0)).toBe(5.0);
 		expect(round1(0.05)).toBe(0.1);

@@ -526,7 +526,10 @@ export class Map_ {
 
 	setTextToMove(exactX: number, exactY: number): boolean;
 	setTextToMove(t: Text | null): void;
-	setTextToMove(arg1: number | Text | null, arg2?: number): boolean | void {
+	setTextToMove(
+		arg1: number | Text | null,
+		arg2?: number,
+	): boolean | undefined {
 		if (typeof arg1 === "number" && typeof arg2 === "number") {
 			if (this.checkTextExists(arg1, arg2)) {
 				this.textToMove = this.getTextAt(arg1, arg2);
@@ -536,6 +539,7 @@ export class Map_ {
 			return false;
 		}
 		this.textToMove = arg1 as Text | null;
+		return undefined;
 	}
 
 	moveText(x: number, y: number): void {
@@ -569,8 +573,10 @@ export class Map_ {
 
 		if (el instanceof Track) {
 			// Handle linked track cleanup
-			if (el.data.kind === "linked" && el.getOtherLinkedTrack()) {
-				this.disconnectLinkedTrack(el, el.getOtherLinkedTrack()!);
+			const linkedPartner =
+				el.data.kind === "linked" ? el.getOtherLinkedTrack() : null;
+			if (linkedPartner) {
+				this.disconnectLinkedTrack(el, linkedPartner);
 			}
 
 			// Remove from kind array
@@ -718,21 +724,20 @@ export class Map_ {
 
 	connectTwoLinkedTracks(x: number, y: number): void {
 		const clicked = this.getTrackAt(x, y);
-		if (!clicked || clicked.data.kind !== "linked") return;
+		if (clicked?.data.kind !== "linked") return;
 
 		if (!this.linkedTrack1) {
 			this.linkedTrack1 = clicked;
 		} else if (!this.linkedTrack2 && clicked !== this.linkedTrack1) {
 			this.linkedTrack2 = clicked;
 			// If either is already linked, disconnect first
-			if (clicked.isLinked()) {
-				this.disconnectLinkedTrack(clicked, clicked.getOtherLinkedTrack()!);
+			const clickedPartner = clicked.getOtherLinkedTrack();
+			if (clickedPartner) {
+				this.disconnectLinkedTrack(clicked, clickedPartner);
 			}
-			if (this.linkedTrack1.isLinked()) {
-				this.disconnectLinkedTrack(
-					this.linkedTrack1,
-					this.linkedTrack1.getOtherLinkedTrack()!,
-				);
+			const firstPartner = this.linkedTrack1.getOtherLinkedTrack();
+			if (firstPartner) {
+				this.disconnectLinkedTrack(this.linkedTrack1, firstPartner);
 			}
 			this.connectLinkedTrack();
 		}

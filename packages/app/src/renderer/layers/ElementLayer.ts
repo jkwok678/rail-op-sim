@@ -269,13 +269,13 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 						const p2 = track.getPlatform2();
 						if (p1 && mapping.platform1Side) {
 							const lookupKey = platformSvgKey(mapping.platform1Side, isNamed);
-							const key = cellKey(gx, gy) + ":p1";
+							const key = `${cellKey(gx, gy)}:p1`;
 							seenSpriteKeys.add(key);
 							upsertSprite(key, lookupKey, gx, gy);
 						}
 						if (p2 && mapping.platform2Side) {
 							const lookupKey = platformSvgKey(mapping.platform2Side, isNamed);
-							const key = cellKey(gx, gy) + ":p2";
+							const key = `${cellKey(gx, gy)}:p2`;
 							seenSpriteKeys.add(key);
 							upsertSprite(key, lookupKey, gx, gy);
 						}
@@ -285,7 +285,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 				// ── Bridge / Underpass Set/Unset overlay ──
 				if (track.data.kind === "bridgeUnderpass") {
 					const lookupKey = isNamed ? subtype : `${subtype}_UNSET`;
-					const key = cellKey(gx, gy) + ":bridge";
+					const key = `${cellKey(gx, gy)}:bridge`;
 					seenSpriteKeys.add(key);
 					upsertSprite(key, lookupKey, gx, gy);
 				}
