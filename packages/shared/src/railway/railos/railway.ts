@@ -17,15 +17,16 @@ import type { Track } from "../track/track";
 import {
 	getDirectedFlow,
 	getRails,
+	type Rail,
 	signalFacingExit,
 	type TrackData,
 	type TrackKind,
 } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
 import {
-	LINKS,
 	linkOf,
 	linksOf,
+	linksOfTag,
 	type Piece,
 	pairKey,
 	pieceOf,
@@ -317,18 +318,22 @@ class RailwayBuilder {
 		return straight ? createTrackData("straight", straight) : null;
 	}
 
+	private placePlatform(el: InactiveElement, x: number, y: number): void {
+		const side = PLATFORM_SIDE[el.tag];
+		if (side !== undefined) this.map.addPlatform(side, x, y);
+		if (!this.map.getTrackAt(x, y)?.hasPlatform()) {
+			this.warnings.push(
+				`${where(el.h, el.v)}: platform could not be added to the track there.`,
+			);
+		}
+	}
+
 	private placeInactive(): void {
 		for (const el of this.rly.inactive) {
 			const { x, y } = cellToLocation(this.map, railosCell(el.h, el.v));
 			const piece = pieceOf(el.tag);
 			if (piece === "platform") {
-				const track = this.map.getTrackAt(x, y);
-				this.map.addPlatform(PLATFORM_SIDE[el.tag], x, y);
-				if (!track?.hasPlatform()) {
-					this.warnings.push(
-						`${where(el.h, el.v)}: platform could not be added to the track there.`,
-					);
-				}
+				this.placePlatform(el, x, y);
 			} else if (piece === "concourse") {
 				this.map.createAddConcourse(x, y);
 			} else if (piece === "parapet") {
@@ -434,11 +439,12 @@ const TRACK_BUILDERS: Partial<
 	},
 	crossover: (_el, links) => byLinks("crossover", links),
 	bridge: (_el, links) => byLinks("flyover", links),
-	buffers: (_el, links) => byLinks("buffer", [links[1]]),
-	continuation: (_el, links) => byLinks("exit", [links[1]]),
-	gap: (_el, links) => byLinks("linked", [links[1]]),
+	buffers: (_el, links) => byLinks("buffer", links.slice(1, 2)),
+	continuation: (_el, links) => byLinks("exit", links.slice(1, 2)),
+	gap: (_el, links) => byLinks("linked", links.slice(1, 2)),
 	signal: (el, links) => {
-		const exit = links[SIGNAL_END[el.tag]];
+		const end = SIGNAL_END[el.tag];
+		const exit = end === undefined ? undefined : links[end];
 		const s = SUBTYPES.signal.find(
 			(st) => signalFacingExit(st as never) === exit,
 		);
@@ -469,20 +475,24 @@ function signalAspect(marker: string): number {
 	return m === "3" ? 3 : m === "2" ? 2 : m === "G" ? 1 : 4;
 }
 
+/** Which of a two-rail track's rails RailOS's first link pair is: 0 main, 1 secondary. */
+function mainRailOf(rails: readonly Rail[], tag: number): 0 | 1 {
+	const [a, b] = linksOfTag(tag);
+	const first = rails.find(
+		(r) => pairKey(r.a, r.b) === pairKey(linkOf(a), linkOf(b)),
+	);
+	return first && !first.secondary ? 0 : 1;
+}
+
 /** RailOS lengths/speeds onto our main and secondary paths. */
 function applyFigures(track: Track, el: ActiveElement): void {
 	const clampSpeed = (s: number) => Math.max(10, Math.min(400, s));
 	const rails = getRails(track.data.kind, track.data.subtype);
-	let main = 0;
-	if (rails.length === 2) {
-		const [a, b] = LINKS[el.tag].slice(0, 2).map(linkOf);
-		const first = rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
-		main = first && !first.secondary ? 0 : 1;
-	}
+	const main = rails.length === 2 ? mainRailOf(rails, el.tag) : 0;
 	if (el.lengths[main] > 0) track.setTrackMainLength(el.lengths[main]);
 	if (el.speeds[main] > 0) track.setTrackMainSpeed(clampSpeed(el.speeds[main]));
 	if (rails.length === 2) {
-		const other = 1 - main;
+		const other = main === 0 ? 1 : 0;
 		if (el.lengths[other] > 0) track.setTrackSecondaryLength(el.lengths[other]);
 		if (el.speeds[other] > 0)
 			track.setTrackSecondarySpeed(clampSpeed(el.speeds[other]));

@@ -130,8 +130,8 @@ describe("openRailosImport", () => {
 
 		expect(openRailosImport(result, "yaml")).toBe("blocked");
 		expect(order).toEqual(["map", "timetable"]);
-		expect(vi.mocked(applyLoadedMap).mock.calls[0][0].format).toBe("yaml");
-		expect(vi.mocked(applyLoadedTimetable).mock.calls[0][0].format).toBe(
+		expect(vi.mocked(applyLoadedMap).mock.calls[0]?.[0].format).toBe("yaml");
+		expect(vi.mocked(applyLoadedTimetable).mock.calls[0]?.[0].format).toBe(
 			"yaml",
 		);
 	});
@@ -139,7 +139,7 @@ describe("openRailosImport", () => {
 	it("leaves the timetable alone when only a railway was imported", () => {
 		openRailosImport(convertRailosFiles([source(RLY)]));
 		expect(applyLoadedMap).toHaveBeenCalledOnce();
-		expect(vi.mocked(applyLoadedMap).mock.calls[0][0].format).toBe("json");
+		expect(vi.mocked(applyLoadedMap).mock.calls[0]?.[0].format).toBe("json");
 		expect(applyLoadedTimetable).not.toHaveBeenCalled();
 	});
 });

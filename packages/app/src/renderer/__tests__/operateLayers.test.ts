@@ -5,6 +5,7 @@ import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 import { attachOperateLayers } from "#/renderer/operateLayers";
 import { useModeStore } from "#/store/mode-store";
 import { useOperateStore } from "#/store/operate-store";
+import { defined } from "../../lib/__tests__/test-helpers";
 
 const seg = (gx: number) => ({ gx, gy: 0, entry: 3, exit: 5, from: 0, to: 1 });
 
@@ -148,7 +149,12 @@ describe("attachOperateLayers", () => {
 	it("flashes a crossing whose barriers are on the move", () => {
 		const moving = view({
 			pendingRoute: null,
-			levelCrossings: [{ ...view().levelCrossings[0], barriers: "lowering" }],
+			levelCrossings: [
+				{
+					...defined(view().levelCrossings[0], "levelCrossings[0]"),
+					barriers: "lowering",
+				},
+			],
 		});
 		useOperateStore.setState({ view: moving });
 		const first = crossings().size;

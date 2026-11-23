@@ -67,9 +67,10 @@ export function convertRailosFiles(files: RailosSourceFile[]): RailosImport {
 	const rly = files.filter((f) => extensionOf(f.name) === "rly");
 	const ttb = files.filter((f) => extensionOf(f.name) === "ttb");
 	const other = files.filter((f) => !rly.includes(f) && !ttb.includes(f));
-	if (other.length > 0) {
+	const [stray] = other;
+	if (stray) {
 		throw new RailosImportError(
-			`${other[0].name} is not a RailOS file — pick a .rly railway and/or a .ttb timetable.`,
+			`${stray.name} is not a RailOS file — pick a .rly railway and/or a .ttb timetable.`,
 		);
 	}
 	if (rly.length > 1 || ttb.length > 1 || files.length === 0) {

@@ -68,23 +68,18 @@ function parseStop(
 	w: { warning?: true },
 ): Action {
 	const second = timeOf(rest);
-	if (second !== null) {
-		const [location = "", dwell] = rest.slice(6).split(";");
-		return {
-			kind: "stop",
-			location,
-			arrive: time,
-			depart: second,
-			...(dwell ? { minDwellSeconds: Number(dwell) } : {}),
-			...w,
-		};
-	}
-	const [location, dwell] = rest.split(";");
-	const single = seenLocation ? { arrive: time } : { depart: time };
+	const [location, dwell] = (second !== null ? rest.slice(6) : rest).split(";");
+	if (!location) throw new Error(`missing location in "${rest}"`);
+	const timing =
+		second !== null
+			? { arrive: time, depart: second }
+			: seenLocation
+				? { arrive: time }
+				: { depart: time };
 	return {
 		kind: "stop",
 		location,
-		...single,
+		...timing,
 		...(dwell ? { minDwellSeconds: Number(dwell) } : {}),
 		...w,
 	};
@@ -92,6 +87,7 @@ function parseStop(
 
 function startCells(ids: string): { rear: Cell; front: Cell } {
 	const [rear, front] = ids.split(" ");
+	if (!rear || !front) throw new Error(`incomplete start cells "${ids}"`);
 	return { rear: cellFromId(rear), front: cellFromId(front) };
 }
 
@@ -222,16 +218,24 @@ const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
 	}),
 };
 
+const TWO_ARG_COMMANDS = new Set(["Snt-sh", "Sns-sh", "Fns-sh"]);
+
 function parseCommand(
 	word: string,
 	time: SimTime,
-	third: string,
-	fourth: string,
+	third: string | undefined,
+	fourth: string | undefined,
 	w: { warning?: true },
 ): Action {
 	const parser = COMMAND_PARSERS[word];
 	if (!parser) throw new Error(`Unsupported timetable action "${word}"`);
-	return parser(time, third, fourth, w);
+	if (word !== "cdt" && !third) {
+		throw new Error(`missing field in "${word}"`);
+	}
+	if (TWO_ARG_COMMANDS.has(word) && !fourth) {
+		throw new Error(`missing second field in "${word}"`);
+	}
+	return parser(time, third ?? "", fourth ?? "", w);
 }
 
 function parseAction(field: string, seenLocation: boolean): Action {
@@ -243,7 +247,7 @@ function parseAction(field: string, seenLocation: boolean): Action {
 	const time = timeOf(text);
 	if (time === null) throw new Error(`no time in "${field}"`);
 	const rest = text.slice(6);
-	const [word, third, fourth] = rest.split(";");
+	const [word = "", third, fourth] = rest.split(";");
 	if (timeOf(rest) !== null || !COMMANDS.has(word)) {
 		return parseStop(time, rest, seenLocation, w);
 	}
@@ -254,13 +258,20 @@ function parseService(entry: string): Service {
 	const fields = stripSpaces(entry)
 		.split(",")
 		.filter((f) => f !== "");
-	const info = fields[0].split(";");
+	const [header, ...restFields] = fields;
+	if (!header) throw new Error("empty service entry");
+	const info = header.split(";");
+	const [ref] = info;
+	if (!ref) throw new Error(`missing service ref in "${header}"`);
 	const actions: Action[] = [];
 	let repeat: Service["repeat"];
 	let seen = false;
-	for (const field of fields.slice(1)) {
+	for (const field of restFields) {
 		if (field.startsWith("R;")) {
 			const [, mins, digits, count] = field.split(";").map(Number);
+			if (mins === undefined || digits === undefined || count === undefined) {
+				throw new Error(`incomplete repeat "${field}"`);
+			}
 			repeat = { intervalMinutes: mins, headcodeIncrement: digits, count };
 			continue;
 		}
@@ -271,7 +282,7 @@ function parseService(entry: string): Service {
 	// Keys in the order the editor writes them.
 	const spec = trainSpec(info);
 	return {
-		ref: info[0],
+		ref,
 		...(info[1] ? { description: info[1] } : {}),
 		...(spec ? { train: spec } : {}),
 		actions,
@@ -302,17 +313,18 @@ export function convertRailosTimetable(
 ): RailosTimetableResult {
 	const warnings: string[] = [];
 	const entries = text.split("\0");
-	let i = entries.findIndex((e) => timeOf(stripSpaces(e)) !== null);
-	if (i < 0) {
+	const i = entries.findIndex((e) => timeOf(stripSpaces(e)) !== null);
+	const first = entries[i];
+	if (first === undefined) {
 		throw new InvalidRailosFileError(
 			"Not a RailOS timetable: no start time found.",
 		);
 	}
-	const startTime = timeOf(stripSpaces(entries[i])) as SimTime;
+	const startTime = timeOf(stripSpaces(first)) as SimTime;
 	const services: Service[] = [];
 	const seenRefs = new Set<string>();
-	for (i++; i < entries.length; i++) {
-		const entry = stripSpaces(entries[i]);
+	for (const raw of entries.slice(i + 1)) {
+		const entry = stripSpaces(raw);
 		if (entry === "" || /^,*$/.test(entry)) break;
 		if (entry.startsWith("*")) continue;
 		try {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { defined } from "../../railway/__tests__/test-helpers";
 import {
 	addTrain,
 	CELL,
@@ -67,7 +68,7 @@ describe("a train at a signal", () => {
 			kind: "auto",
 		});
 		engine.advance(20);
-		expect(engine.view().signals[0].aspect).toBe(0);
+		expect(engine.view().signals[0]?.aspect).toBe(0);
 	});
 });
 
@@ -192,7 +193,7 @@ describe("the train view", () => {
 	it("lays the train back from its front over its length", () => {
 		const engine = engineFor(line("X----X"));
 		addTrain(engine, cell(1), cell(2));
-		const [view] = engine.view().trains;
+		const view = defined(engine.view().trains[0], "trains[0]");
 		expect(view.segs.map((s) => [s.gx, s.from, s.to])).toEqual([
 			[1, 0, 1],
 			[2, 0, 1],

@@ -246,8 +246,8 @@ export const useTimetableStore = create<TimetableState>((set, get) => {
 					const actions = [...service.actions];
 					if (from < 0 || from >= actions.length) return service;
 					const target = Math.max(0, Math.min(to, actions.length - 1));
-					const [moved] = actions.splice(from, 1);
-					actions.splice(target, 0, moved);
+					const moved = actions.splice(from, 1);
+					actions.splice(target, 0, ...moved);
 					return { ...service, actions };
 				}),
 			);

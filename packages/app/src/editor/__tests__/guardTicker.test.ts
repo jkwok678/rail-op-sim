@@ -1,6 +1,7 @@
 import { Ticker } from "pixi.js";
 import { describe, expect, it, vi } from "vitest";
 import { guardTicker } from "#/editor/guardTicker";
+import { defined } from "../../lib/__tests__/test-helpers";
 
 describe("guardTicker", () => {
 	it("passes a normal frame through", () => {
@@ -50,8 +51,9 @@ describe("guardTicker", () => {
 		const onError = vi.fn();
 		guardTicker(ticker, onError);
 		ticker.update();
-		expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
-		expect(onError.mock.calls[0][0].message).toBe("plain");
+		const [err] = defined(onError.mock.calls[0], "calls[0]");
+		expect(err).toBeInstanceOf(Error);
+		expect(err.message).toBe("plain");
 		expect(ticker.stop).toHaveBeenCalled();
 	});
 });

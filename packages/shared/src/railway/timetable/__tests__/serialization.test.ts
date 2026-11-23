@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { defined } from "../../__tests__/test-helpers";
 import {
 	createDefaultTrainSpec,
 	createEmptyTimetable,
@@ -174,15 +175,18 @@ describe("parseTimetable — round trips", () => {
 		]);
 		const parsed = roundTrip(original);
 		expect(parsed).toEqual(original);
-		expect(Object.hasOwn(parsed.services[0], "description")).toBe(false);
-		expect(Object.hasOwn(parsed.services[0].actions[1], "warning")).toBe(false);
+		const first = defined(parsed.services[0], "services[0]");
+		expect(Object.hasOwn(first, "description")).toBe(false);
+		expect(
+			Object.hasOwn(defined(first.actions[1], "actions[1]"), "warning"),
+		).toBe(false);
 	});
 
 	it("refuses to share arrays with the document it parsed", () => {
 		const doc = JSON.parse(JSON.stringify(twoServiceTimetable()));
 		const parsed = parseTimetable(doc);
 		expect(parsed.services).not.toBe(doc.services);
-		expect(parsed.services[0].actions).not.toBe(doc.services[0].actions);
+		expect(parsed.services[0]?.actions).not.toBe(doc.services[0].actions);
 	});
 
 	it("accepts a hand-written clock time in place of seconds", () => {
@@ -207,7 +211,7 @@ describe("parseTimetable — round trips", () => {
 		};
 		const parsed = parseTimetable(doc);
 		expect(parsed.startTime).toBe(parseSimTime("05:00"));
-		const start = parsed.services[0].actions[0];
+		const start = defined(parsed.services[0]?.actions[0], "start action");
 		if (start.kind !== "startNew") throw new Error("wrong kind");
 		expect(start.time).toBe(parseSimTime("06:00"));
 	});

@@ -10,14 +10,16 @@ export class MinHeap<T> {
 
 	push(item: T): void {
 		const items = this.items;
-		items.push(item);
-		let i = items.length - 1;
+		let i = items.push(item) - 1;
+		// Move parents down into the hole until `item` fits.
 		while (i > 0) {
 			const parent = (i - 1) >> 1;
-			if (!this.before(items[i], items[parent])) break;
-			[items[i], items[parent]] = [items[parent], items[i]];
+			const up = items[parent];
+			if (up === undefined || !this.before(item, up)) break;
+			items[i] = up;
 			i = parent;
 		}
+		items[i] = item;
 	}
 
 	pop(): T | undefined {
@@ -25,17 +27,26 @@ export class MinHeap<T> {
 		const top = items[0];
 		const last = items.pop();
 		if (items.length === 0 || last === undefined) return top;
-		items[0] = last;
-		for (let i = 0; ; ) {
+		// Sift `last` down from the root, moving the smaller child up each step.
+		let i = 0;
+		for (;;) {
 			const l = i * 2 + 1;
-			const r = l + 1;
-			let best = i;
-			if (l < items.length && this.before(items[l], items[best])) best = l;
-			if (r < items.length && this.before(items[r], items[best])) best = r;
-			if (best === i) break;
-			[items[i], items[best]] = [items[best], items[i]];
-			i = best;
+			const left = items[l];
+			const right = items[l + 1];
+			let child = l;
+			let best = left;
+			if (
+				right !== undefined &&
+				(best === undefined || this.before(right, best))
+			) {
+				child = l + 1;
+				best = right;
+			}
+			if (best === undefined || !this.before(best, last)) break;
+			items[i] = best;
+			i = child;
 		}
+		items[i] = last;
 		return top;
 	}
 }

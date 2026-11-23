@@ -257,18 +257,16 @@ export function createLinkHighlightLayer(
 		sectionOutlines.setEnd(end, true);
 	}
 
-	function setSectionPreview(coords: Coord[] | null, end: Coord | null): void {
-		sectionPreviewGfx.clear();
-		sectionOutlines.setEnd(end, coords !== null);
-		if (!end || !coords || coords.length < 2) return;
-
+	function strokeSectionPreview(coords: readonly Coord[]): void {
+		const [first, ...rest] = coords;
+		if (!first || rest.length === 0) return;
 		// Stroked through cell centres rather than tinted like a committed
 		// selection: the tint needs a recoloured sprite per cell, which is far
 		// too much to rebuild on every pointermove.
-		const first = gridToWorld(coords[0].gx, coords[0].gy);
-		sectionPreviewGfx.moveTo(first.x, first.y);
-		for (let i = 1; i < coords.length; i++) {
-			const { x, y } = gridToWorld(coords[i].gx, coords[i].gy);
+		const start = gridToWorld(first.gx, first.gy);
+		sectionPreviewGfx.moveTo(start.x, start.y);
+		for (const c of rest) {
+			const { x, y } = gridToWorld(c.gx, c.gy);
 			sectionPreviewGfx.lineTo(x, y);
 		}
 		sectionPreviewGfx.stroke({
@@ -277,6 +275,12 @@ export function createLinkHighlightLayer(
 			cap: "round",
 			join: "round",
 		});
+	}
+
+	function setSectionPreview(coords: Coord[] | null, end: Coord | null): void {
+		sectionPreviewGfx.clear();
+		sectionOutlines.setEnd(end, coords !== null);
+		if (end && coords) strokeSectionPreview(coords);
 	}
 
 	function setSectionRouteVisible(visible: boolean): void {

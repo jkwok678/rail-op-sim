@@ -234,7 +234,7 @@ describe("validateTimetableAgainstMap — the state of the railway", () => {
 			railwayFixture(),
 		);
 		expect(codes(issues)).toEqual(["railway-incomplete"]);
-		expect(issues[0].severity).toBe("warning");
+		expect(issues[0]?.severity).toBe("warning");
 	});
 
 	it("says nothing about completeness once the railway is complete", () => {

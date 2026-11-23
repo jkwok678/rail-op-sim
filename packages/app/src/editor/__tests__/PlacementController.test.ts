@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+
 import { Platform, StraightType } from "@rail-op-sim/shared";
 import { type Application, Container, Texture } from "pixi.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -12,6 +13,7 @@ import type { TextureCache } from "#/renderer/textureCache";
 import { useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "../../lib/__tests__/test-helpers";
 
 describe("resolveClickTarget", () => {
 	it("sends every click in operate mode to the signalling", () => {
@@ -177,7 +179,7 @@ describe("PlacementController dispatch", () => {
 		function placeHitText() {
 			useEditorStore.getState().setTool("text");
 			controller.placeText(64, -64, "Hello", { family: "sans", pointSize: 12 });
-			const text = controller.map.getTextList()[0];
+			const text = defined(controller.map.getTextList()[0], "getTextList()[0]");
 			layers.text.hitTest.mockReturnValue(text);
 			return text;
 		}
@@ -209,7 +211,7 @@ describe("PlacementController dispatch", () => {
 	describe("document operations from the dialogs and panels", () => {
 		it("edits and deletes a text by its grid location", () => {
 			controller.placeText(64, -64, "Hello", { family: "sans", pointSize: 12 });
-			const text = controller.map.getTextList()[0];
+			const text = defined(controller.map.getTextList()[0], "getTextList()[0]");
 			const [tx, ty] = [text.getLocationX(), text.getLocationY()];
 			expect(controller.getTextByLocation(tx, ty)).toBe(text);
 

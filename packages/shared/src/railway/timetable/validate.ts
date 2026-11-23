@@ -196,12 +196,14 @@ function validateRepeat(ref: ServiceRef, repeat: Repeat, out: IssueList): void {
 function validateShape(service: Service, out: IssueList): boolean {
 	const { ref, actions } = service;
 	const at = (actionIndex: number) => ({ serviceRef: ref, actionIndex });
-	if (actions.length === 0) {
+	const first = actions[0];
+	const last = actions[actions.length - 1];
+	if (!first || !last) {
 		out.error("no-actions", `"${ref}" does nothing.`, { serviceRef: ref });
 		return false;
 	}
 
-	if (!isStartAction(actions[0])) {
+	if (!isStartAction(first)) {
 		out.error(
 			"no-start",
 			`"${ref}" must begin with a start action (${START_KINDS.join(", ")}).`,
@@ -209,7 +211,7 @@ function validateShape(service: Service, out: IssueList): boolean {
 		);
 	}
 	const lastIndex = actions.length - 1;
-	if (!isFinishAction(actions[lastIndex])) {
+	if (!isFinishAction(last)) {
 		out.error(
 			"no-finish",
 			`"${ref}" must end with a finish action (${FINISH_KINDS.join(", ")}).`,
@@ -240,7 +242,8 @@ function validateShape(service: Service, out: IssueList): boolean {
 function validateTrainPresence(service: Service, out: IssueList): void {
 	const { ref } = service;
 	const first = service.actions[0];
-	const startCreatesTrain = isStartAction(first) && createsTrain(first);
+	const startCreatesTrain =
+		first !== undefined && isStartAction(first) && createsTrain(first);
 	if (startCreatesTrain && !service.train) {
 		out.error(
 			"missing-train",
@@ -909,7 +912,8 @@ function pairUp(
 		const matches = incoming.filter(
 			(to) => to.serviceRef === from.target && to.target === from.serviceRef,
 		);
-		if (matches.length === 0) {
+		const [to] = matches;
+		if (to === undefined) {
 			out.error(
 				"unmatched-reference",
 				`"${from.serviceRef}" names "${from.target}" as its ${labels.outName}, but "${from.target}" does not ${labels.inName} from it.`,
@@ -924,7 +928,6 @@ function pairUp(
 				{ serviceRef: from.serviceRef, actionIndex: from.actionIndex },
 			);
 		}
-		const to = matches[0];
 		unmatchedIn.delete(to);
 		if (from.time !== null && to.time !== null && from.time !== to.time) {
 			out.error(

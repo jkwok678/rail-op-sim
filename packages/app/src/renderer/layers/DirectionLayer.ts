@@ -1,5 +1,5 @@
 import {
-	LINK_OFFSETS,
+	linkOffset,
 	type Map as Map_,
 	type PreferredDirection,
 	resolvePathDirections,
@@ -127,7 +127,7 @@ export function createDirectionLayer(): DirectionLayer {
 
 	/** World-space unit direction of a link index (grid +Y flips to world −Y). */
 	const linkWorldVec = (link: number): { x: number; y: number } => {
-		const [dx, dy] = LINK_OFFSETS[link];
+		const [dx, dy] = linkOffset(link);
 		const len = Math.hypot(dx, dy) || 1;
 		return { x: dx / len, y: -dy / len };
 	};
@@ -143,7 +143,7 @@ export function createDirectionLayer(): DirectionLayer {
 		cy: number,
 		link: number,
 	): { x: number; y: number } => {
-		const [dx, dy] = LINK_OFFSETS[link];
+		const [dx, dy] = linkOffset(link);
 		const half = CELL_SIZE / 2;
 		return { x: cx + dx * half, y: cy - dy * half };
 	};
@@ -269,10 +269,9 @@ export function createDirectionLayer(): DirectionLayer {
 				map,
 				path,
 			);
-			for (let i = 0; i < path.length; i++) {
+			for (const [i, track] of path.entries()) {
 				const leg = legs[i];
 				if (!leg) continue;
-				const track = path[i];
 				const { x, y } = gridToWorld(
 					track.getLocationX(),
 					track.getLocationY(),

@@ -4,6 +4,7 @@ import { loadTimetable } from "#/lib/timetableActions";
 import { pickAndReadTimetableFile } from "#/lib/timetableFile";
 import { useEditorStore } from "#/store/editor-store";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "./test-helpers";
 
 vi.mock("#/lib/timetableFile", () => ({
 	downloadTimetable: vi.fn(),
@@ -63,7 +64,7 @@ describe("loadTimetable", () => {
 
 		const message = await loadTimetable();
 		expect(message).toContain("Operate is unavailable");
-		const [first] = useTimetableStore.getState().issues;
+		const first = defined(useTimetableStore.getState().issues[0], "issues[0]");
 		expect(message).toContain(first.message);
 	});
 });

@@ -16,6 +16,7 @@ import {
 } from "@rail-op-sim/shared";
 import { describe, expect, it } from "vitest";
 import { SVG_MAP } from "../svgMap";
+import { defined } from "./test-helpers";
 
 /** Every track subtype enum — the full set the editor can place. */
 const TRACK_ENUMS = {
@@ -98,7 +99,7 @@ describe("SVG_MAP completeness", () => {
 		const seen = new Map<string, string>();
 		const dupes: string[] = [];
 		for (const subtype of ALL_TRACK_SUBTYPES) {
-			const file = SVG_MAP[subtype];
+			const file = defined(SVG_MAP[subtype], subtype);
 			const prev = seen.get(file);
 			if (prev) dupes.push(`${file} (${prev} & ${subtype})`);
 			else seen.set(file, subtype);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyPatch, type Patch } from "../../../util/patch";
+import { defined } from "../../__tests__/test-helpers";
 import { parseSimTime } from "../time";
 import type { Action, Service, Timetable } from "../types";
 import {
@@ -271,7 +272,7 @@ describe("validateTimetableStructure — the shape of a service", () => {
 
 	it("shuttle-time: the first return is not one interval after the start", () => {
 		const tt = linkedShuttle();
-		const finish = tt.services[1].actions[1];
+		const finish = defined(tt.services[1]?.actions[1], "shuttle finish");
 		if (finish.kind !== "finishShuttleRemainHere") {
 			throw new Error("expected a shuttle finish");
 		}
@@ -281,7 +282,7 @@ describe("validateTimetableStructure — the shape of a service", () => {
 
 	it("shuttle-start-speed: a shuttle train that is already moving", () => {
 		const tt = linkedShuttle();
-		const train = tt.services[0].train;
+		const train = tt.services[0]?.train;
 		if (!train) throw new Error("expected a train");
 		train.startSpeedKmh = 40;
 		expect(structureCodes(tt)).toContain("shuttle-start-speed");
@@ -308,7 +309,7 @@ describe("validateTimetableStructure — the shape of a service", () => {
 
 	it("shuttle-repeat-mismatch: alternating shuttle halves with different repeats", () => {
 		const tt = linkedShuttle();
-		tt.services[1].repeat = {
+		defined(tt.services[1], "services[1]").repeat = {
 			intervalMinutes: 20,
 			headcodeIncrement: 1,
 			count: 2,
@@ -487,7 +488,7 @@ describe("validateTimetableStructure — the train spec", () => {
 
 	it("unused-train: a follow-on carrying a spec warns, since RailOS ignores it", () => {
 		const tt = twoServiceTimetable();
-		tt.services[1].train = { ...TRAIN };
+		defined(tt.services[1], "services[1]").train = { ...TRAIN };
 		const issues = validateTimetableStructure(tt);
 		expect(codes(issues)).toEqual(["unused-train"]);
 		expect(hasErrors(issues)).toBe(false);
@@ -661,7 +662,7 @@ describe("validateTimetableStructure — references between services", () => {
 		tt.services.pop();
 		const issues = validateTimetableStructure(tt);
 		expect(codes(issues)).toContain("unknown-service-ref");
-		expect(issues[0].serviceRef).toBe("1A01");
+		expect(issues[0]?.serviceRef).toBe("1A01");
 	});
 
 	it("self-reference: a service handing over to itself", () => {
@@ -678,13 +679,14 @@ describe("validateTimetableStructure — references between services", () => {
 
 	it("unmatched-reference: a hand-over the successor does not take up", () => {
 		const tt = twoServiceTimetable();
-		tt.services[1].actions[0] = {
+		const second = defined(tt.services[1], "services[1]");
+		second.actions[0] = {
 			kind: "startNew",
 			time: parseSimTime("06:12"),
 			rear: { gx: 3, gy: 0 },
 			front: { gx: 4, gy: 0 },
 		};
-		tt.services[1].train = { ...TRAIN };
+		second.train = { ...TRAIN };
 		expect(structureCodes(tt)).toContain("unmatched-reference");
 	});
 
@@ -692,7 +694,9 @@ describe("validateTimetableStructure — references between services", () => {
 		const tt = twoServiceTimetable();
 		// 1A01 now ends by itself, leaving 2B01 waiting for a train that is
 		// never handed over.
-		tt.services[0].actions[3] = { kind: "finishRemainHere" };
+		defined(tt.services[0], "services[0]").actions[3] = {
+			kind: "finishRemainHere",
+		};
 		const issues = validateTimetableStructure(tt);
 		expect(codes(issues)).toContain("unmatched-reference");
 		expect(issuesForService(issues, "2B01")).toHaveLength(1);
@@ -700,7 +704,7 @@ describe("validateTimetableStructure — references between services", () => {
 
 	it("reference-time-mismatch: two ends of a hand-over booked at different times", () => {
 		const tt = twoServiceTimetable();
-		const takeOver = tt.services[1].actions[0];
+		const takeOver = defined(tt.services[1]?.actions[0], "takeOver");
 		if (takeOver.kind !== "startNewService") throw new Error("bad fixture");
 		takeOver.time = parseSimTime("06:15");
 		expect(structureCodes(tt)).toContain("reference-time-mismatch");
@@ -759,7 +763,7 @@ describe("issue addressing", () => {
 	it("issuesForService picks out one service's issues", () => {
 		const tt = twoServiceTimetable();
 		// A fault in the first service's train, which the second does not share.
-		tt.services[0].train = { ...TRAIN, powerKw: 0 };
+		defined(tt.services[0], "services[0]").train = { ...TRAIN, powerKw: 0 };
 		const issues = validateTimetableStructure(tt);
 		expect(issuesForService(issues, "2B01")).toEqual([]);
 		expect(codes(issuesForService(issues, "1A01"))).toEqual(["train-spec"]);

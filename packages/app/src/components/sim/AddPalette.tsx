@@ -178,10 +178,11 @@ export function AddPalette() {
 		}
 	};
 
+	const subtypeValues = selectedKind
+		? (SUBTYPE_VALUES[selectedKind] ?? [])
+		: [];
 	/** Whether the current selectedKind has a subtype grid to show. */
-	const hasSubtypeGrid =
-		selectedKind != null && SUBTYPE_VALUES[selectedKind] != null;
-	const subtypeValues = selectedKind ? SUBTYPE_VALUES[selectedKind] : [];
+	const hasSubtypeGrid = subtypeValues.length > 0;
 	const isSingleSubtype = subtypeValues.length === 1;
 
 	// Title for the header bar

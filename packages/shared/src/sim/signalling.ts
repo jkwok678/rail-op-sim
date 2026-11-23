@@ -48,12 +48,13 @@ function endValue(
 	route: Route,
 	aspects: readonly number[],
 ): number {
-	const last = route.segs[route.segs.length - 1];
+	const last = route.segs.at(-1);
+	if (!last) return BLOCKED;
 	// The world beyond an exit is assumed clear; buffers count as a red signal.
 	if (leavesMap(graph, last)) return GREEN;
 	if (endsAtBuffers(graph, last)) return RED;
 	const next = beyondRoute(graph, state, route);
-	if (next && isFacingSignal(graph, next)) return aspects[next.node];
+	if (next && isFacingSignal(graph, next)) return aspects[next.node] ?? BLOCKED;
 	return BLOCKED;
 }
 
@@ -67,12 +68,13 @@ function setRouteAspects(
 	let ahead = endValue(graph, state, route, aspects);
 	for (let i = route.segs.length - 1; i >= 0; i--) {
 		const seg = route.segs[i];
+		if (!seg) continue;
 		if (occupied(i) || !crossingOpen(graph, state, seg.node)) {
 			ahead = BLOCKED;
 		}
 		if (isFacingSignal(graph, seg)) {
-			aspects[seg.node] = behind(ahead);
-			ahead = aspects[seg.node];
+			ahead = behind(ahead);
+			aspects[seg.node] = ahead;
 		}
 	}
 }

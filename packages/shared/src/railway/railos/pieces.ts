@@ -9,9 +9,12 @@
 import type { TrackKind } from "../track/track-data";
 import { getLinksForSubtype, getRails } from "../track/track-data";
 
+/** Four RailOS compass codes per SpeedTag (`-1` where unused). */
+type LinkRow = readonly [number, number, number, number];
+
 /** Links per SpeedTag, as compass codes (1 NW … 9 SE, 5 unused). */
 // biome-ignore format: rows follow RailOS's TFixedTrackArray groups
-export const LINKS: readonly (readonly number[])[] = [
+const LINKS: readonly LinkRow[] = [
 	[-1, -1, -1, -1],
 	[4, 6, -1, -1], [2, 8, -1, -1], [6, 8, -1, -1], [4, 8, -1, -1], [2, 6, -1, -1], [2, 4, -1, -1],
 	[4, 6, 4, 2], [6, 4, 6, 2], [4, 6, 4, 8], [6, 4, 6, 8], [8, 2, 8, 4], [8, 2, 8, 6], [2, 8, 2, 4], [2, 8, 2, 6],
@@ -28,7 +31,7 @@ export const LINKS: readonly (readonly number[])[] = [
 	[4, 6, -1, -1], [6, 4, -1, -1], [8, 2, -1, -1], [2, 8, -1, -1], [1, 9, -1, -1], [3, 7, -1, -1], [7, 3, -1, -1], [9, 1, -1, -1],
 	[4, 6, -1, -1], [6, 4, -1, -1], [8, 2, -1, -1], [2, 8, -1, -1], [1, 9, -1, -1], [3, 7, -1, -1], [7, 3, -1, -1], [9, 1, -1, -1],
 	[-1, -1, -1, -1],
-	...Array.from({ length: 28 }, () => [-1, -1, -1, -1]),
+	...Array.from({ length: 28 }, (): LinkRow => [-1, -1, -1, -1]),
 	[4, 6, -1, -1], [4, 6, -1, -1], [2, 8, -1, -1], [2, 8, -1, -1],
 	[4, 6, -1, -1], [2, 8, -1, -1],
 	[-1, -1, -1, -1],
@@ -39,6 +42,13 @@ export const LINKS: readonly (readonly number[])[] = [
 ];
 
 if (LINKS.length !== 147) throw new Error(`LINKS has ${LINKS.length} rows`);
+
+/** The {@link LINKS} row for `tag`; throws for a tag outside the table. */
+export function linksOfTag(tag: number): LinkRow {
+	const row = LINKS[tag];
+	if (!row) throw new RangeError(`unknown RailOS tag ${tag}`);
+	return row;
+}
 
 /** Which of a signal's two links carries the signal: the exit it protects. */
 export const SIGNAL_END: Readonly<Record<number, 0 | 1>> = {
@@ -116,14 +126,18 @@ const COMPASS_OFFSETS: readonly (readonly [number, number])[] = [
 
 /** RailOS compass code (screen y down) → our link index (+Y up). */
 export function linkOf(compass: number): number {
-	const [dx, dyScreen] = COMPASS_OFFSETS[compass];
+	const offset = COMPASS_OFFSETS[compass];
+	if (!offset) throw new RangeError(`unknown RailOS compass code ${compass}`);
+	const [dx, dyScreen] = offset;
 	const dy = -dyScreen;
 	return (1 - dy) * 3 + (dx + 1);
 }
 
 /** The links a piece uses, as our link indices. */
 export const linksOf = (tag: number): number[] =>
-	LINKS[tag].filter((l) => l > 0).map(linkOf);
+	linksOfTag(tag)
+		.filter((l) => l > 0)
+		.map(linkOf);
 
 /** Every subtype of `kind`, from the link table (the factory validates names). */
 export const SUBTYPES: Readonly<Record<TrackKind, readonly string[]>> = {
@@ -214,8 +228,11 @@ export function subtypeByLinks(
 
 /** A switch whose two rails are exactly the RailOS piece's two paths. */
 export function switchSubtype(tag: number): string | null {
-	const [a, b, cc, d] = LINKS[tag].map(linkOf);
-	const want = [pairKey(a, b), pairKey(cc, d)].sort();
+	const [a, b, cc, d] = linksOfTag(tag);
+	const want = [
+		pairKey(linkOf(a), linkOf(b)),
+		pairKey(linkOf(cc), linkOf(d)),
+	].sort();
 	return (
 		SUBTYPES.switch.find((s) => {
 			const rails = getRails("switch", s as never)

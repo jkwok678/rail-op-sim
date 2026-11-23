@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { defined } from "../../railway/__tests__/test-helpers";
 import {
 	addTrain,
 	cell,
@@ -45,7 +46,7 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 1);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.status).toBe("running");
 
 		expect(engine.handle({ type: "takeControl", trainId: train.id })).toEqual({
@@ -128,12 +129,12 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 1);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.working.at).toBe("Ashfield");
 		expect(engine.handle({ type: "takeControl", trainId: train.id })).toEqual({
 			ok: true,
 		});
-		expect(engine.view().trains[0].canRestoreTimetable).toBe(true);
+		expect(engine.view().trains[0]?.canRestoreTimetable).toBe(true);
 
 		// Step two elements off Ashfield (now occupying cells 4 and 5, gx=5): cannot restore away from Ashfield.
 		expect(engine.handle({ type: "stepForward", trainId: train.id })).toEqual({
@@ -146,7 +147,7 @@ describe("signaller train control", () => {
 		runFor(engine, 35);
 		expect(train.speed).toBe(0);
 		expect(frontCell(engine, train).gx).toBe(5);
-		expect(engine.view().trains[0].canRestoreTimetable).toBe(false);
+		expect(engine.view().trains[0]?.canRestoreTimetable).toBe(false);
 		expect(
 			engine.handle({ type: "restoreTimetable", trainId: train.id }),
 		).toEqual({
@@ -243,11 +244,11 @@ describe("signaller train control", () => {
 		runFor(engine, 25);
 		expect(train.speed).toBe(0);
 
-		const beforeExit = train.segs[train.segs.length - 1].exit;
+		const beforeExit = defined(train.segs.at(-1), "segs.at(-1)").exit;
 		expect(
 			engine.handle({ type: "changeDirection", trainId: train.id }),
 		).toEqual({ ok: true });
-		const afterExit = train.segs[train.segs.length - 1].exit;
+		const afterExit = defined(train.segs.at(-1), "segs.at(-1)").exit;
 		expect(afterExit).not.toBe(beforeExit);
 	});
 
@@ -365,7 +366,7 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 2);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.speed).toBeGreaterThan(0);
 		// Refused under timetable control.
 		expect(engine.handle({ type: "removeTrain", trainId: train.id })).toEqual({
@@ -386,7 +387,7 @@ describe("signaller train control", () => {
 			ok: true,
 		});
 		expect(engine.state.trains).toHaveLength(0);
-		expect(engine.state.runs[0].status).toBe("done");
+		expect(engine.state.runs[0]?.status).toBe("done");
 	});
 
 	it("joins two stopped trains only when both are under signaller control", () => {
@@ -455,7 +456,7 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 2);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.speed).toBeGreaterThan(0);
 		// Refused while moving.
 		expect(
@@ -539,9 +540,9 @@ describe("signaller train control", () => {
 		runFor(engine, 1);
 		engine.drainTimetables();
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.working.at).toBe("Ashfield");
-		expect(engine.view().trains[0].followOnServiceRef).toBe("2B99");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("2B99");
 
 		// Set & clear reminder.
 		expect(
@@ -551,7 +552,7 @@ describe("signaller train control", () => {
 				reminder: "  Hold for path  ",
 			}),
 		).toEqual({ ok: true });
-		expect(engine.view().trains[0].reminder).toBe("Hold for path");
+		expect(engine.view().trains[0]?.reminder).toBe("Hold for path");
 		expect(
 			engine.handle({
 				type: "setReminder",
@@ -559,7 +560,7 @@ describe("signaller train control", () => {
 				reminder: "   ",
 			}),
 		).toEqual({ ok: true });
-		expect(engine.view().trains[0].reminder).toBeNull();
+		expect(engine.view().trains[0]?.reminder).toBeNull();
 
 		// Cannot become follow-on service while under signaller control.
 		engine.handle({ type: "takeControl", trainId: train.id });
@@ -613,8 +614,8 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 1);
 
-		const train = engine.state.trains[0];
-		expect(engine.view().trains[0].followOnServiceRef).toBeNull();
+		const train = defined(engine.state.trains[0], "trains[0]");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBeNull();
 		expect(
 			engine.handle({ type: "becomeNewService", trainId: train.id }),
 		).toEqual({
@@ -660,7 +661,7 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 1);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(frontCell(engine, train).gx).toBe(3);
 
 		// Turn short at Ashfield before Barton & changeDirection: train reverses to face left.
@@ -731,9 +732,9 @@ describe("signaller train control", () => {
 		engine.handle({ type: "run" });
 		runFor(engine, 1);
 
-		const train = engine.state.trains[0];
+		const train = defined(engine.state.trains[0], "trains[0]");
 		expect(train.headcode).toBe("1A01");
-		expect(engine.view().trains[0].followOnServiceRef).toBe("1A02");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("1A02");
 
 		// First repeat: advances to next repeat 1A02 (repeat = 1).
 		expect(
@@ -744,7 +745,7 @@ describe("signaller train control", () => {
 		expect(train.working.repeat).toBe(1);
 
 		// On the last repeat: follow-on is now the non-repeating tail service 2B99.
-		expect(engine.view().trains[0].followOnServiceRef).toBe("2B99");
+		expect(engine.view().trains[0]?.followOnServiceRef).toBe("2B99");
 		expect(
 			engine.handle({ type: "becomeNewService", trainId: train.id }),
 		).toEqual({ ok: true });

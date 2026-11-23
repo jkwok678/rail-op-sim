@@ -8,7 +8,7 @@ import type { HoveredTrainInfo } from "#/store/editor-store";
 
 export interface BuildHoveredTrainInfoOptions {
 	/** The train's formatted timetable rows, from the operate store. */
-	timetableRows?: readonly TrainTimetableRow[];
+	timetableRows?: readonly TrainTimetableRow[] | undefined;
 	showBasic?: boolean;
 	showTimetable?: boolean;
 }

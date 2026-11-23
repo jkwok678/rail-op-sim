@@ -18,8 +18,10 @@ export interface RouteLayer {
 }
 
 function strokePath(g: Graphics, points: Point[]): void {
-	g.moveTo(points[0].x, points[0].y);
-	for (const p of points.slice(1)) g.lineTo(p.x, p.y);
+	const [first, ...rest] = points;
+	if (!first) return;
+	g.moveTo(first.x, first.y);
+	for (const p of rest) g.lineTo(p.x, p.y);
 }
 
 /**

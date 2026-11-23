@@ -342,7 +342,7 @@ export function TrainContextMenu() {
 			</div>
 			<Separator className="my-1" />
 			{items.map((item, idx) => {
-				const prevGroup = idx > 0 ? items[idx - 1].group : item.group;
+				const prevGroup = items[idx - 1]?.group ?? item.group;
 				return (
 					<div key={item.id}>
 						{item.group !== prevGroup ? <Separator className="my-1" /> : null}

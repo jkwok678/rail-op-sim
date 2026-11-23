@@ -34,9 +34,9 @@ export function stepService(
 ): string | null {
 	if (refs.length === 0) return null;
 	const index = selected === null ? -1 : refs.indexOf(selected);
-	if (index === -1) return direction === 1 ? refs[0] : refs[refs.length - 1];
+	if (index === -1) return (direction === 1 ? refs[0] : refs.at(-1)) ?? null;
 	if (refs.length === 1) return null;
-	return refs[(index + direction + refs.length) % refs.length];
+	return refs[(index + direction + refs.length) % refs.length] ?? null;
 }
 
 /**

@@ -8,6 +8,7 @@
 import {
 	type GraphPath,
 	type NodeId,
+	nodeOf,
 	occKeyOf,
 	type RailGraph,
 	type Seg,
@@ -52,7 +53,7 @@ export function pathsFrom(
 	node: NodeId,
 	entry: number,
 ): GraphPath[] {
-	return graph.nodes[node].paths.filter((p) => p.entry === entry);
+	return nodeOf(graph, node).paths.filter((p) => p.entry === entry);
 }
 
 /**
@@ -66,11 +67,12 @@ export function followSeg(
 	step: Step,
 ): Seg | null {
 	const options = pathsFrom(graph, step.node, step.entry);
-	if (options.length === 0) return null;
+	const [first] = options;
+	if (!first) return null;
 	const chosen =
 		options.length === 1
-			? options[0]
-			: (options.find((p) => p.rail === lies[step.node]) ?? options[0]);
+			? first
+			: (options.find((p) => p.rail === lies[step.node]) ?? first);
 	return { node: step.node, entry: chosen.entry, exit: chosen.exit };
 }
 
@@ -80,7 +82,7 @@ export function liesAgainst(
 	lies: readonly number[],
 	seg: Seg,
 ): boolean {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	if (node.kind !== "switch") return false;
 	const path = node.paths.find(
 		(p) => p.entry === seg.entry && p.exit === seg.exit,

@@ -23,10 +23,12 @@ import {
 	leavesMap,
 	type NodeId,
 	nodeAt,
+	nodeOf,
 	occKeyOf,
 	pathOf,
 	type RailGraph,
 	type Seg,
+	type Step,
 	stepFrom,
 } from "./graph";
 import {
@@ -67,11 +69,12 @@ const prefers = (
 	node.preferred.some((p) => p.entry === seg.entry && p.exit === seg.exit);
 
 /**
- * The ways a route of `kind` may start on `node`, or a reason it may not.
- * Signals start in the direction they face; buffers and exits start heading
- * into the railway; unrestricted routes start on any plain cell either way.
+ * The ways a route of `kind` may start on `node` (at least one), or a reason
+ * it may not. Signals start in the direction they face; buffers and exits
+ * start heading into the railway; unrestricted routes start on any plain cell
+ * either way.
  */
-function startSegs(node: GraphNode, kind: RouteKind): Seg[] | string {
+function startSegs(node: GraphNode, kind: RouteKind): [Seg, ...Seg[]] | string {
 	if (node.crossing !== null)
 		return "A route cannot start on a level crossing.";
 	if (followsPreferred(kind)) {
@@ -91,11 +94,17 @@ function startSegs(node: GraphNode, kind: RouteKind): Seg[] | string {
 		return [{ node: node.id, entry: dead, exit: 8 - dead }];
 	}
 	if (isJunction(node)) return "A route cannot start on points or a crossing.";
-	return node.paths.map((p) => ({
+	return throughSegs(node);
+}
+
+/** Every way through `node`, or why there is none. */
+function throughSegs(node: GraphNode): [Seg, ...Seg[]] | string {
+	const [first, ...rest] = node.paths.map((p) => ({
 		node: node.id,
 		entry: p.entry,
 		exit: p.exit,
 	}));
+	return first ? [first, ...rest] : "There is no way through that track.";
 }
 
 /** Why a route of `kind` cannot start at `at`, or ok. */
@@ -107,7 +116,7 @@ export function checkRouteStart(
 ): CommandResult {
 	const id = nodeAt(graph, at);
 	if (id === null) return failed("There is no track there.");
-	const starts = startSegs(graph.nodes[id], kind);
+	const starts = startSegs(nodeOf(graph, id), kind);
 	if (typeof starts === "string") return failed(starts);
 	const blocked = blockedReason(graph, state, starts[0]);
 	return blocked ? failed(blocked) : { ok: true };
@@ -140,7 +149,7 @@ function arrival(
 ): "include" | "before" | null {
 	if (seg.node !== end) return null;
 	if (isFacingSignal(graph, seg)) return "before";
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	if (!followsPreferred(kind)) return isJunction(node) ? null : "include";
 	if (leavesMap(graph, seg)) return "include";
 	if (endsAtBuffers(graph, seg)) return kind === "auto" ? null : "include";
@@ -171,9 +180,9 @@ function findRoute(
 	if (startId === null || endId === null)
 		return failed("There is no track there.");
 	if (startId === endId) return failed("A route must end somewhere else.");
-	if (graph.nodes[endId].crossing !== null)
+	if (nodeOf(graph, endId).crossing !== null)
 		return failed("A route cannot end on a level crossing.");
-	const starts = startSegs(graph.nodes[startId], kind);
+	const starts = startSegs(nodeOf(graph, startId), kind);
 	if (typeof starts === "string") return failed(starts);
 
 	const trains = trainKeys(graph, state.trains);
@@ -217,7 +226,7 @@ const cheaper = (a: Cost, b: Cost): boolean =>
 
 /** The cost of running along `seg`, given how the points lie now. */
 function segCost(graph: RailGraph, lies: readonly number[], seg: Seg): Cost {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	const path = pathOf(graph, seg);
 	// A cell with no length set still counts, so nothing is free to run over.
 	const length = Math.max(path?.lengthM ?? 0, 1);
@@ -320,7 +329,7 @@ function canExtend(
 	overCrossings: boolean,
 ): boolean {
 	if (!followsPreferred(kind)) return true;
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	if (kind === "auto" && node.crossing !== null && !overCrossings) {
 		return false;
 	}
@@ -330,7 +339,7 @@ function canExtend(
 function withLies(graph: RailGraph, state: SimState, segs: Seg[]): RouteFound {
 	const lies: [NodeId, number][] = [];
 	for (const seg of segs) {
-		if (graph.nodes[seg.node].kind !== "switch") continue;
+		if (nodeOf(graph, seg.node).kind !== "switch") continue;
 		const rail = pathOf(graph, seg)?.rail ?? -1;
 		if (rail >= 0 && state.lies[seg.node] !== rail) lies.push([seg.node, rail]);
 	}
@@ -441,7 +450,7 @@ function plainSeg(
 	seg: Seg,
 	free: (s: Seg) => boolean,
 ): boolean {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	return (
 		!needsChoosing(node) &&
 		node.crossing === null &&
@@ -449,6 +458,16 @@ function plainSeg(
 		!twoWay(node, seg) &&
 		free(seg)
 	);
+}
+
+/** The one preferred way on from `step`, or null when there is none or a choice. */
+function soleWayOn(graph: RailGraph, step: Step): Seg | null {
+	const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
+		prefers(nodeOf(graph, step.node), p),
+	);
+	const [way] = ways;
+	if (ways.length !== 1 || !way) return null;
+	return { node: step.node, entry: way.entry, exit: way.exit };
 }
 
 /**
@@ -468,11 +487,8 @@ function plainAutoRoute(
 		if (endsAtBuffers(graph, current)) return null;
 		const step = stepFrom(graph, current.node, current.exit);
 		if (!step) return null;
-		const ways = pathsFrom(graph, step.node, step.entry).filter((p) =>
-			prefers(graph.nodes[step.node], p),
-		);
-		if (ways.length !== 1) return null;
-		const next = { node: step.node, entry: ways[0].entry, exit: ways[0].exit };
+		const next = soleWayOn(graph, step);
+		if (!next) return null;
 		if (isFacingSignal(graph, next)) return segs;
 		if (seen.has(next.node) || !plainSeg(graph, next, free)) return null;
 		seen.add(next.node);
@@ -518,17 +534,16 @@ export function togglePoints(
 	at: Cell,
 ): CommandResult {
 	const id = nodeAt(graph, at);
-	if (id === null || graph.nodes[id].kind !== "switch") {
-		return failed("Those are not points.");
-	}
-	const key = graph.nodes[id].occKeys[0];
+	const node = id === null ? null : nodeOf(graph, id);
+	const [key] = node?.kind === "switch" ? node.occKeys : [];
+	if (id === null || key === undefined) return failed("Those are not points.");
 	if (trainKeys(graph, state.trains).has(key))
 		return failed("A train is on those points.");
 	if (routeKeys(graph, state).has(key))
 		return failed("Those points are locked by a route.");
 	if (state.run === "paused")
 		return failed("Points cannot be moved while paused.");
-	state.lies[id] = 1 - state.lies[id];
+	state.lies[id] = 1 - (state.lies[id] ?? 0);
 	return { ok: true };
 }
 
@@ -557,10 +572,12 @@ export function cancelOnWrongEntry(
 ): Route | null {
 	for (const route of state.routes) {
 		const i = route.segs.findIndex((s) => s.node === seg.node);
-		if (i < 0) continue;
-		const rightWay = sameSeg(route.segs[i], seg);
+		const here = route.segs[i];
+		if (!here) continue;
+		const before = route.segs[i - 1];
+		const rightWay = sameSeg(here, seg);
 		const inOrder =
-			i === 0 || (from !== null && sameSeg(route.segs[i - 1], from));
+			before === undefined || (from !== null && sameSeg(before, from));
 		if (rightWay && inOrder) return null;
 		if (route.kind === "auto" && rightWay) return null;
 		state.routes.splice(state.routes.indexOf(route), 1);
@@ -575,7 +592,7 @@ export function beyondRoute(
 	state: SimState,
 	route: Route,
 ): Seg | null {
-	const last = route.segs[route.segs.length - 1];
-	const step = stepFrom(graph, last.node, last.exit);
+	const last = route.segs.at(-1);
+	const step = last ? stepFrom(graph, last.node, last.exit) : null;
 	return step ? followSeg(graph, state.lies, step) : null;
 }

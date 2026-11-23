@@ -18,7 +18,13 @@ import {
 } from "../railway/timetable/types";
 import { applyPatch } from "../util/patch";
 import { clearCallingOnSignal } from "./callingOn";
-import { cellKey, type GraphNode, type RailGraph, type Seg } from "./graph";
+import {
+	cellKey,
+	type GraphNode,
+	nodeOf,
+	type RailGraph,
+	type Seg,
+} from "./graph";
 import type { PerformanceLog } from "./log";
 import { liesAgainst, nextSeg, sameSeg } from "./occupancy";
 import { releaseBehind } from "./routes";
@@ -187,8 +193,13 @@ function introduce(
 	start: ActionOf<"startNew" | "startNewShuttle">,
 ): void {
 	const { graph, state, log } = ctx;
-	const rear = graph.nodes[train.segs[0].node];
-	const frontNode = graph.nodes[train.segs[train.segs.length - 1].node];
+	const [rearSeg] = train.segs;
+	const frontSeg = train.segs.at(-1);
+	if (!rearSeg || !frontSeg) {
+		throw new Error(`${train.headcode} was introduced with no segments`);
+	}
+	const rear = nodeOf(graph, rearSeg.node);
+	const frontNode = nodeOf(graph, frontSeg.node);
 	if (rear.kind === "exit") {
 		train.speed = safeEntrySpeed(graph, state, train);
 		train.status = train.speed > 0 ? "running" : "waiting";
@@ -244,8 +255,7 @@ export function stopTarget(ctx: RunnerContext, train: Train): string | null {
 	const w = train.working;
 	if (w.done || train.control.mode === "signaller") return null;
 	const actions = actionsOf(ctx, w);
-	for (let i = w.index; i < actions.length; i++) {
-		const a = actions[i];
+	for (const a of actions.slice(w.index)) {
 		if (a.kind === "stop") return a.location;
 		if (isCommand(a)) return null;
 	}
@@ -565,8 +575,7 @@ function remainHere(ctx: RunnerContext, train: Train): void {
 	if (w.done) return;
 	w.done = true;
 	train.status = "finished";
-	const where =
-		w.at ?? placeName(ctx.graph.nodes[train.segs[train.segs.length - 1].node]);
+	const where = standingAt(ctx, train);
 	ctx.log.info(ctx.state.time, `${train.headcode} terminated at ${where}`);
 }
 
@@ -592,8 +601,7 @@ function runCommand(ctx: RunnerContext, train: Train, a: Command): boolean {
 	const now = ctx.state.time;
 	if (now < a.time + offsetOf(ctx, w) || now < w.lastActionAt + MIN_ACTION_GAP)
 		return false;
-	const where =
-		w.at ?? placeName(ctx.graph.nodes[train.segs[train.segs.length - 1].node]);
+	const where = standingAt(ctx, train);
 	switch (a.kind) {
 		case "changeDirection":
 			reverse(ctx.graph, train);
@@ -633,7 +641,8 @@ export function becomeService(
 	const next = serviceByRef(ctx.timetable, nextRef);
 	const w = train.working;
 	if (!next) {
-		holdUnsupported(ctx, train, actionsOf(ctx, w)[w.index]);
+		const current = actionsOf(ctx, w)[w.index];
+		if (current) holdUnsupported(ctx, train, current);
 		return false;
 	}
 	const old = train.headcode;
@@ -662,12 +671,12 @@ export function reverse(graph: RailGraph, train: Train): void {
 	train.segs = train.segs
 		.map((s) => ({ node: s.node, entry: s.exit, exit: s.entry }))
 		.reverse();
-	train.frontM = lengths[0] - rearInto;
+	train.frontM = (lengths[0] ?? 0) - rearInto;
 }
 
 export function segLengthOf(graph: RailGraph, seg: Seg): number {
 	return (
-		graph.nodes[seg.node].paths.find(
+		nodeOf(graph, seg.node).paths.find(
 			(p) => p.entry === seg.entry && p.exit === seg.exit,
 		)?.lengthM ?? 0
 	);
@@ -707,7 +716,7 @@ const flip = (seg: Seg): Seg => ({
 function standingAt(ctx: RunnerContext, train: Train): string {
 	if (train.working.at) return train.working.at;
 	const seg = train.segs[train.segs.length - 1];
-	return seg ? placeName(ctx.graph.nodes[seg.node]) : "the railway";
+	return seg ? placeName(nodeOf(ctx.graph, seg.node)) : "the railway";
 }
 
 /**
@@ -719,10 +728,10 @@ function splitLocation(ctx: RunnerContext, train: Train): string | null {
 	const lead = train.segs[train.segs.length - 1];
 	const mid = train.segs[0];
 	if (lead) {
-		const name = ctx.graph.nodes[lead.node].location;
+		const name = nodeOf(ctx.graph, lead.node).location;
 		if (name) return name;
 	}
-	return mid ? ctx.graph.nodes[mid.node].location : null;
+	return mid ? nodeOf(ctx.graph, mid.node).location : null;
 }
 
 /** Say `report` once per action, until the action is carried out. */
@@ -864,14 +873,14 @@ function splitEnds(
 	const rwd1 = walk(ctx, mid, -1);
 	const rwd2 = rwd1 ? walk(ctx, rwd1.seg, -1) : null;
 	const isNamed = (w: Walked) =>
-		ctx.graph.nodes[w.seg.node].location === location;
+		nodeOf(ctx.graph, w.seg.node).location === location;
 	const fwd = countWalkReach(fwd1, fwd2, isNamed, 0, 0);
 	const rwd = countWalkReach(
 		rwd1,
 		rwd2,
 		isNamed,
 		1,
-		ctx.graph.nodes[mid.node].location === location ? 1 : 0,
+		nodeOf(ctx.graph, mid.node).location === location ? 1 : 0,
 	);
 	const walks: SplitWalks = {
 		mid,
@@ -1113,8 +1122,8 @@ export function handoverTarget(
 ): ServiceHandover | null {
 	const actions = actionsOf(ctx, train.working);
 	const w = train.working;
-	for (let i = w.index; i < actions.length; i++) {
-		const a = actions[i];
+	for (const [k, a] of actions.slice(w.index).entries()) {
+		const i = w.index + k;
 		if (a.kind === "finishNewService") {
 			return { ref: a.nextRef, repeat: w.repeat, actionIndex: i };
 		}
@@ -1166,9 +1175,9 @@ function joinPartner(
 /** Whether either end of `a` is the next cell off either end of `b`. */
 function trainsAdjacent(ctx: RunnerContext, a: Train, b: Train): boolean {
 	const touches = (from: Train, to: Train): boolean => {
-		if (from.segs.length === 0) return false;
-		const front = from.segs[from.segs.length - 1];
-		const rear = from.segs[0];
+		const [rear] = from.segs;
+		const front = from.segs.at(-1);
+		if (!rear || !front) return false;
 		const ahead = nextSeg(ctx.graph, ctx.state.lies, front);
 		const behindRaw = nextSeg(ctx.graph, ctx.state.lies, flip(rear));
 		const cells = [ahead?.node, behindRaw?.node].filter(
@@ -1342,8 +1351,7 @@ function missBetween(
 	to: number,
 ): void {
 	const actions = actionsOf(ctx, train.working);
-	for (let i = from; i < to; i++) {
-		const a = actions[i];
+	for (const a of actions.slice(from, to)) {
 		const where = missedWhere(ctx, train, a);
 		if (a.kind === "stop") {
 			ctx.state.counters.missedStops++;
@@ -1392,11 +1400,9 @@ function findBooking(
 	from: number,
 	location: string,
 ): number {
-	for (let i = from; i < actions.length; i++) {
-		const a = actions[i];
-		if ((a.kind === "stop" || a.kind === "pass") && a.location === location)
-			return i;
+	for (const [k, a] of actions.slice(from).entries()) {
 		if (a.kind !== "stop" && a.kind !== "pass") return -1;
+		if (a.location === location) return from + k;
 	}
 	return -1;
 }
@@ -1415,7 +1421,7 @@ export function onEnterLocation(
 	missBetween(ctx, train, w.index, j);
 	w.index = j;
 	const a = actions[j];
-	if (a.kind !== "pass") return;
+	if (a?.kind !== "pass") return;
 	ctx.log.timed(
 		ctx.state.time,
 		a.time + offsetOf(ctx, w),
@@ -1459,7 +1465,7 @@ export function onLeftRailway(
 ): void {
 	const { graph, state, log } = ctx;
 	const w = train.working;
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	const actions = actionsOf(ctx, w);
 	const j = actions.findIndex(
 		(a, i) => i >= w.index && a.kind === "finishExit",

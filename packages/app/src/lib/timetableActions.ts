@@ -1,4 +1,3 @@
-import { hasErrors } from "@rail-op-sim/shared";
 import { PlacementController } from "#/editor/PlacementController";
 import { debugLog } from "#/lib/debugLogger";
 import {
@@ -64,7 +63,8 @@ function describeLoadedIssues(): string | null {
 	const errors = useTimetableStore
 		.getState()
 		.issues.filter((issue) => issue.severity === "error");
-	if (!hasErrors(errors)) return null;
+	const [first] = errors;
+	if (!first) return null;
 	const more = errors.length > 1 ? ` (and ${errors.length - 1} more)` : "";
-	return `Timetable loaded with ${errors.length === 1 ? "an error" : `${errors.length} errors`}, so Operate is unavailable: ${errors[0].message}${more}`;
+	return `Timetable loaded with ${errors.length === 1 ? "an error" : `${errors.length} errors`}, so Operate is unavailable: ${first.message}${more}`;
 }

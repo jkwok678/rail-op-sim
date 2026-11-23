@@ -8,6 +8,7 @@ import { clearCallingOnSignal } from "./callingOn";
 import {
 	isFacingSignal,
 	leavesMap,
+	nodeOf,
 	occKeyOf,
 	type RailGraph,
 	type Seg,
@@ -57,14 +58,9 @@ function findTrain(ctx: RunnerContext, trainId: number): Train | null {
 	return ctx.state.trains.find((t) => t.id === trainId) ?? null;
 }
 
-function frontSeg(train: Train): Seg {
-	return train.segs[train.segs.length - 1];
-}
-
 function frontLocation(graph: RailGraph, train: Train): string | null {
-	return train.segs.length > 0
-		? graph.nodes[frontSeg(train).node].location
-		: null;
+	const front = train.segs.at(-1);
+	return front ? nodeOf(graph, front.node).location : null;
 }
 
 function markRunDone(ctx: RunnerContext, trainId: number): void {
@@ -144,8 +140,8 @@ export function availableFollowOnService(
 		(a, i) =>
 			i >= 1 && (a.kind === "stop" || a.kind === "pass") && a.location === here,
 	);
-	if (matchIdx < 0) return null;
 	const matched = next.actions[matchIdx];
+	if (!matched) return null;
 	const resumeIndex =
 		matched.kind === "pass" ||
 		(matched.kind === "stop" && matched.depart === undefined)
@@ -393,9 +389,9 @@ function stepForward(ctx: RunnerContext, trainId: number): CommandResult {
 		return fail("Take signaller control before stepping forward.");
 	if (train.speed > 0)
 		return fail("Train must be stopped before stepping forward.");
-	if (train.segs.length === 0) return fail("Train is not on the railway.");
+	const front = train.segs.at(-1);
+	if (!front) return fail("Train is not on the railway.");
 
-	const front = frontSeg(train);
 	const frontLen = segLength(ctx.graph, front);
 	const rem = Math.max(0, frontLen - train.frontM);
 	const dist =
@@ -417,18 +413,11 @@ function passRed(ctx: RunnerContext, trainId: number): CommandResult {
 		return fail("Take signaller control before passing a red signal.");
 	if (train.speed > 0)
 		return fail("Train must be stopped before passing a red signal.");
-	if (train.segs.length === 0) return fail("Train is not on the railway.");
 
 	const { graph, state } = ctx;
-	const front = frontSeg(train);
-	const rem = Math.max(0, segLength(graph, front) - train.frontM);
-	const next = nextSeg(graph, state.lies, front);
-	if (
-		rem > 1.0 ||
-		!next ||
-		!isFacingSignal(graph, next) ||
-		state.aspects[next.node] !== 0
-	) {
+	const front = train.segs.at(-1);
+	const next = front ? segJustAhead(ctx, train, front) : null;
+	if (!next || !isFacingSignal(graph, next) || state.aspects[next.node] !== 0) {
 		return fail("Train is not stopped at a red signal.");
 	}
 
@@ -438,7 +427,7 @@ function passRed(ctx: RunnerContext, trainId: number): CommandResult {
 	train.wait = null;
 	ctx.log.info(
 		ctx.state.time,
-		`${train.headcode} authorised to pass red signal at ${placeName(graph.nodes[next.node])}`,
+		`${train.headcode} authorised to pass red signal at ${placeName(nodeOf(graph, next.node))}`,
 	);
 	return ok();
 }
@@ -467,6 +456,35 @@ function removeTrain(ctx: RunnerContext, trainId: number): CommandResult {
 	return ok();
 }
 
+/**
+ * The segment just past a train whose front has stopped at the end of `front`,
+ * or null when it is short of the end or nothing lies beyond.
+ */
+function segJustAhead(
+	ctx: RunnerContext,
+	train: Train,
+	front: Seg,
+): Seg | null {
+	const rem = Math.max(0, segLength(ctx.graph, front) - train.frontM);
+	return rem > 1.0 ? null : nextSeg(ctx.graph, ctx.state.lies, front);
+}
+
+/**
+ * How `other` meets a train about to enter `next`: its front facing back
+ * along it (it must turn round to join), its rear on it, or neither.
+ */
+function joinOrientation(other: Train, next: Seg): "front" | "rear" | null {
+	const front = other.segs.at(-1);
+	if (
+		front &&
+		sameSeg({ node: front.node, entry: front.exit, exit: front.entry }, next)
+	) {
+		return "front";
+	}
+	const [rear] = other.segs;
+	return rear && sameSeg(rear, next) ? "rear" : null;
+}
+
 function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 	const train = findTrain(ctx, trainId);
 	if (!train) return fail("Train not found.");
@@ -475,15 +493,12 @@ function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 	if (train.control.mode !== "signaller")
 		return fail("Take signaller control before joining trains.");
 	if (train.speed > 0) return fail("Train must be stopped before joining.");
-	if (train.segs.length === 0) return fail("Train is not on the railway.");
+	const front = train.segs.at(-1);
+	if (!front) return fail("Train is not on the railway.");
 
 	const { graph, state } = ctx;
-	const front = frontSeg(train);
-	const rem = Math.max(0, segLength(graph, front) - train.frontM);
-	const next = nextSeg(graph, state.lies, front);
-	if (rem > 1.0 || !next) {
-		return fail("There is no train immediately ahead to join.");
-	}
+	const next = segJustAhead(ctx, train, front);
+	if (!next) return fail("There is no train immediately ahead to join.");
 
 	const nextKey = occKeyOf(graph, next);
 	const other = state.trains.find(
@@ -500,18 +515,9 @@ function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 		);
 	}
 
-	const otherFront = other.segs[other.segs.length - 1];
-	const sameDirRear = sameSeg(other.segs[0], next);
-	const oppositeFront = sameSeg(
-		{ node: otherFront.node, entry: otherFront.exit, exit: otherFront.entry },
-		next,
-	);
-	if (!sameDirRear && !oppositeFront) {
-		return fail("Cannot join trains at this track configuration.");
-	}
-	if (oppositeFront) {
-		reverse(graph, other);
-	}
+	const meets = joinOrientation(other, next);
+	if (!meets) return fail("Cannot join trains at this track configuration.");
+	if (meets === "front") reverse(graph, other);
 
 	const oldFrontLen = segLengthOf(graph, front);
 	if (train.frontM < oldFrontLen) {
@@ -552,15 +558,12 @@ function skipActions(
 		return fail("Train has already finished its timetable.");
 
 	const actions = actionsOf(ctx, train.working);
-	if (
-		!Number.isInteger(toIndex) ||
-		toIndex <= train.working.index ||
-		toIndex >= actions.length
-	) {
+	if (!Number.isInteger(toIndex) || toIndex <= train.working.index) {
 		return fail("Invalid timetable step to skip to.");
 	}
 
 	const target = actions[toIndex];
+	if (!target) return fail("Invalid timetable step to skip to.");
 	if (isFinishAction(target)) {
 		return fail("Cannot skip directly to a finish action.");
 	}

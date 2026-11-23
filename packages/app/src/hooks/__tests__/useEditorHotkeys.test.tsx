@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+
 import {
 	createEmptyTimetable,
 	parseSimTime,
@@ -13,6 +14,7 @@ import { SHORTCUTS, shortcutDisplay } from "#/lib/shortcuts";
 import { type TrackStatus, useEditorStore } from "#/store/editor-store";
 import { useModeStore } from "#/store/mode-store";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "../../lib/__tests__/test-helpers";
 
 vi.mock("#/lib/documentActions", () => ({
 	saveDocument: vi.fn(),
@@ -333,11 +335,12 @@ describe("timetable list keys", () => {
 		seed();
 		const { rerender } = render(<Harness />);
 		const order = () =>
-			useTimetableStore
-				.getState()
-				.timetable.services[0].actions.map((action) =>
-					action.kind === "pass" ? action.location : action.kind,
-				);
+			defined(
+				useTimetableStore.getState().timetable.services[0],
+				"services[0]",
+			).actions.map((action) =>
+				action.kind === "pass" ? action.location : action.kind,
+			);
 
 		press("ArrowDown", { altKey: true, code: "ArrowDown" });
 		expect(useTimetableStore.getState().selectedActionIndex).toBe(2);
