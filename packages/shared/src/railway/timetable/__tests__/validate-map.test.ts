@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { itemAt } from "../../../util/checked";
 import { StraightType } from "../../enums";
 import { Map_ } from "../../map/map";
 import { parseSimTime } from "../time";
@@ -234,7 +235,7 @@ describe("validateTimetableAgainstMap — the state of the railway", () => {
 			railwayFixture(),
 		);
 		expect(codes(issues)).toEqual(["railway-incomplete"]);
-		expect(issues[0].severity).toBe("warning");
+		expect(itemAt(issues, 0).severity).toBe("warning");
 	});
 
 	it("says nothing about completeness once the railway is complete", () => {

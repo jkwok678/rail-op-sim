@@ -248,7 +248,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 			[1, 0],
 			[0, 1],
 			[1, 1],
-		]) {
+		] as const) {
 			const nl = defined(map.getNamedLocationAt(gx, gy));
 			expect(nl.getNamed()).toBe(true);
 			expect(nl.getText()!.getReadableText()).toBe("Depot");

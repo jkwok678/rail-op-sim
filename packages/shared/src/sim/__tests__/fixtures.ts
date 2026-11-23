@@ -10,6 +10,7 @@ import type {
 } from "../../railway/timetable/types";
 import type { TrackKind } from "../../railway/track/track-data";
 import { createTrackData } from "../../railway/track/track-factory";
+import { itemAt, lastOf } from "../../util/checked";
 import { applyPatch, type Patch } from "../../util/patch";
 import { createEngine, type Engine } from "../engine";
 import { startPosition, trainFromSpec } from "../trains";
@@ -167,7 +168,7 @@ export function nameCells(
 	name: string,
 	gy = 0,
 ): void {
-	const text = new Text(gxs[0] * CELL, gy * CELL, name, {
+	const text = new Text(itemAt(gxs, 0) * CELL, gy * CELL, name, {
 		family: "sans-serif",
 		pointSize: 12,
 	});
@@ -344,5 +345,5 @@ export function frontCell(
 	engine: Engine,
 	train: Train,
 ): { gx: number; gy: number } {
-	return engine.graph.nodes[train.segs[train.segs.length - 1].node].cell;
+	return itemAt(engine.graph.nodes, lastOf(train.segs).node).cell;
 }

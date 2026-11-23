@@ -1,3 +1,4 @@
+import { itemAt } from "../../../util/checked";
 import { Text } from "../../element";
 import { BufferType, ExitType, Platform, StraightType } from "../../enums";
 import { Map_ } from "../../map/map";
@@ -156,7 +157,7 @@ export function nameTrack(map: Map_, gx: number, name: string): void {
  * same Text across the run, and serialization preserves the sharing by index.
  */
 export function nameTracks(map: Map_, gxs: number[], name: string): void {
-	const text = new Text(gxs[0] * CELL, 0, name, { ...FONT });
+	const text = new Text(itemAt(gxs, 0) * CELL, 0, name, { ...FONT });
 	map.addText(text);
 	for (const gx of gxs) {
 		const track = map.getTrackAt(gx * CELL, 0);

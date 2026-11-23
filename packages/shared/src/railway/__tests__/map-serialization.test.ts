@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { itemAt } from "../../util/checked";
 import {
 	ExitType,
 	LinkedType,
@@ -275,7 +276,7 @@ describe("preferred directions serialization", () => {
 		map.setImageSize(1);
 		addStraightH(map, 0);
 		const s = serializeMap(map);
-		expect(s.tracks[0].preferredDirections).toBeUndefined();
+		expect(itemAt(s.tracks, 0).preferredDirections).toBeUndefined();
 	});
 
 	it("deserializes an old snapshot without the field to an empty list", () => {
@@ -284,7 +285,7 @@ describe("preferred directions serialization", () => {
 		addStraightH(map, 0);
 		const s = serializeMap(map);
 		// Simulate a legacy save with no preferredDirections key.
-		delete s.tracks[0].preferredDirections;
+		delete itemAt(s.tracks, 0).preferredDirections;
 
 		const restored = new Map_();
 		deserializeMap(s, restored);

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { itemAt } from "../../util/checked";
 import { nodeAt } from "../graph";
 import {
 	addTrain,
@@ -15,7 +16,9 @@ import {
 const twoSignals = () => line("X->-->-X");
 
 const segNodes = (engine: ReturnType<typeof engineFor>, i = 0) =>
-	engine.state.routes[i].segs.map((s) => engine.graph.nodes[s.node].cell.gx);
+	itemAt(engine.state.routes, i).segs.map(
+		(s) => itemAt(engine.graph.nodes, s.node).cell.gx,
+	);
 
 describe("setting routes", () => {
 	it("sets a preferred route from a signal up to, not onto, the next one", () => {
@@ -150,7 +153,7 @@ describe("points", () => {
 	it("throws free points over by hand", () => {
 		const engine = engineFor(passingLoop());
 		const sw = nodeAt(engine.graph, cell(5)) as number;
-		const before = engine.state.lies[sw];
+		const before = itemAt(engine.state.lies, sw);
 		expect(engine.handle({ type: "togglePoints", at: cell(5) })).toEqual({
 			ok: true,
 		});
@@ -173,14 +176,16 @@ describe("points", () => {
 			kind: "preferred",
 		});
 		expect(result).toEqual({ ok: true });
-		const cells = engine.state.routes[1].segs.map(
-			(s) => engine.graph.nodes[s.node].cell,
+		const cells = itemAt(engine.state.routes, 1).segs.map(
+			(s) => itemAt(engine.graph.nodes, s.node).cell,
 		);
 		expect(cells).toContainEqual({ gx: 3, gy: 1 });
 	});
 
 	const routeCells = (engine: ReturnType<typeof engineFor>) =>
-		engine.state.routes[0].segs.map((s) => engine.graph.nodes[s.node].cell);
+		itemAt(engine.state.routes, 0).segs.map(
+			(s) => itemAt(engine.graph.nodes, s.node).cell,
+		);
 
 	it("runs straight along the main line rather than round a loop as short", () => {
 		for (const [from, to, kind] of [
@@ -243,7 +248,7 @@ describe("points", () => {
 			});
 			expect(result).toEqual({ ok: true });
 			expect(routeCells(engine)).toContainEqual(via);
-			lies.push(engine.state.lies[sw]);
+			lies.push(itemAt(engine.state.lies, sw));
 		}
 		expect(lies[0]).not.toBe(lies[1]);
 	});
@@ -295,7 +300,7 @@ describe("points", () => {
 				const cells = routeCells(engine);
 				if (to.gy === 1) expect(cells).toContainEqual(via);
 				else expect(cells).not.toContainEqual({ gx: 3, gy: 1 });
-				lies.push(engine.state.lies[sw]);
+				lies.push(itemAt(engine.state.lies, sw));
 			}
 			expect(lies[0]).not.toBe(lies[1]);
 		}
@@ -378,7 +383,7 @@ describe("setting every automatic route", () => {
 	const allNodes = (engine: ReturnType<typeof engineFor>) =>
 		engine.state.routes.map((r) =>
 			r.segs.map((s) => {
-				const { gx, gy } = engine.graph.nodes[s.node].cell;
+				const { gx, gy } = itemAt(engine.graph.nodes, s.node).cell;
 				return `${gx},${gy}`;
 			}),
 		);
@@ -543,7 +548,7 @@ describe("routes through intermediate signals", () => {
 		for (const [from, to] of [
 			[2, 4],
 			[4, 6],
-		]) {
+		] as const) {
 			const result = engine.handle({
 				type: "setRoute",
 				from: cell(from),

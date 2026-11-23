@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { itemAt } from "../../util/checked";
 import {
 	BufferType,
 	CrossoverType,
@@ -360,8 +361,8 @@ describe("getConnectivityReport", () => {
 		expect(report.dangling).toHaveLength(2);
 		expect(report.dangling.map((d) => d.track.getLocationX())).toEqual([0, 16]);
 		// Each records which link indices are open: 3 = left, 5 = right.
-		expect(report.dangling[0].links).toEqual([3]);
-		expect(report.dangling[1].links).toEqual([5]);
+		expect(itemAt(report.dangling, 0).links).toEqual([3]);
+		expect(itemAt(report.dangling, 1).links).toEqual([5]);
 	});
 
 	it("reports an unpaired portal separately from open ends", () => {
@@ -375,7 +376,7 @@ describe("getConnectivityReport", () => {
 		const report = getConnectivityReport(map);
 		expect(report.connected).toBe(false);
 		expect(report.unpairedLinked).toHaveLength(1);
-		expect(report.unpairedLinked[0].getLocationX()).toBe(96);
+		expect(itemAt(report.unpairedLinked, 0).getLocationX()).toBe(96);
 	});
 
 	it("does not treat occupancy as a join — H next to V is incomplete", () => {
@@ -582,7 +583,7 @@ describe("findUnpairedLinkedTracks", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		const unpaired = findUnpairedLinkedTracks(map);
 		expect(unpaired).toHaveLength(1);
-		expect(unpaired[0].data.subtype).toBe(LinkedType.LINKUP);
+		expect(itemAt(unpaired, 0).data.subtype).toBe(LinkedType.LINKUP);
 	});
 });
 
@@ -607,8 +608,8 @@ describe("getLinkedTrackPairs", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		const pairs = getLinkedTrackPairs(map);
 		expect(pairs).toHaveLength(1);
-		expect(pairs[0].a.isLinked()).toBe(true);
-		expect(pairs[0].b.isLinked()).toBe(true);
+		expect(itemAt(pairs, 0).a.isLinked()).toBe(true);
+		expect(itemAt(pairs, 0).b.isLinked()).toBe(true);
 	});
 
 	it("returns only paired tracks when mixed with unpaired", () => {
@@ -747,7 +748,7 @@ describe("findPathBetween", () => {
 		for (const [from, to] of [
 			[0, 6],
 			[6, 0],
-		]) {
+		] as const) {
 			const path = findPathBetween(map, at(from), at(to));
 			expect(path?.map((t) => t.getLocationY())).toEqual(Array(7).fill(0));
 		}

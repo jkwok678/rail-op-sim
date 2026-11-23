@@ -36,13 +36,13 @@ describe("track kind labels", () => {
 
 	it("uses title case for captions and lower case for sentence phrases", () => {
 		for (const kind of ALL_KINDS) {
-			expect(kindToShortLabel(kind)[0], kind).toBe(
-				kindToShortLabel(kind)[0].toUpperCase(),
+			expect(kindToShortLabel(kind).charAt(0), kind).toBe(
+				kindToShortLabel(kind).charAt(0).toUpperCase(),
 			);
 			// Phrases are dropped mid-sentence ("Undo add straight track"), so a
 			// capital would read as a proper noun.
-			expect(kindToPhrase(kind)[0], kind).toBe(
-				kindToPhrase(kind)[0].toLowerCase(),
+			expect(kindToPhrase(kind).charAt(0), kind).toBe(
+				kindToPhrase(kind).charAt(0).toLowerCase(),
 			);
 		}
 	});

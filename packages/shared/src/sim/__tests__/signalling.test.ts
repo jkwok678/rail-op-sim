@@ -30,7 +30,7 @@ describe("signal aspects", () => {
 			[2, 4],
 			[4, 6],
 			[6, 8],
-		]) {
+		] as const) {
 			engine.handle({
 				type: "setRoute",
 				from: cell(from),

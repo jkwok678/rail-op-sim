@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { itemAt } from "../../../util/checked";
 import {
 	convertRailosRailway,
 	convertRailosTimetable,
@@ -199,7 +200,7 @@ describe("convertRailosTimetable", () => {
 		);
 		expect(warnings).toEqual([]);
 		expect(timetable.services).toHaveLength(6);
-		expect(timetable.services[0].train).toEqual({
+		expect(itemAt(timetable.services, 0).train).toEqual({
 			startSpeedKmh: 40,
 			maxSpeedKmh: 120,
 			massTonnes: 200,
@@ -207,12 +208,12 @@ describe("convertRailosTimetable", () => {
 			powerKw: 1500,
 			signallerSpeedKmh: 30,
 		});
-		expect(timetable.services[0].repeat).toEqual({
+		expect(itemAt(timetable.services, 0).repeat).toEqual({
 			intervalMinutes: 30,
 			headcodeIncrement: 2,
 			count: 3,
 		});
-		expect(timetable.services[0].actions.map((a) => a.kind)).toEqual([
+		expect(itemAt(timetable.services, 0).actions.map((a) => a.kind)).toEqual([
 			"startNew",
 			"stop",
 			"changeDirection",
@@ -224,7 +225,7 @@ describe("convertRailosTimetable", () => {
 			"stop",
 			"finishNewService",
 		]);
-		expect(timetable.services[5].actions.map((a) => a.kind)).toEqual([
+		expect(itemAt(timetable.services, 5).actions.map((a) => a.kind)).toEqual([
 			"startFromShuttle",
 			"finishRemainHere",
 		]);
