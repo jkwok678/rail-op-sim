@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { itemAt } from "../../../util/checked";
+import { defined } from "../../__tests__/test-helpers";
 import {
 	createDefaultTrainSpec,
 	createEmptyTimetable,
@@ -175,11 +175,17 @@ describe("parseTimetable — round trips", () => {
 		]);
 		const parsed = roundTrip(original);
 		expect(parsed).toEqual(original);
-		expect(Object.hasOwn(itemAt(parsed.services, 0), "description")).toBe(
-			false,
-		);
 		expect(
-			Object.hasOwn(itemAt(itemAt(parsed.services, 0).actions, 1), "warning"),
+			Object.hasOwn(defined(parsed.services[0], "services[0]"), "description"),
+		).toBe(false);
+		expect(
+			Object.hasOwn(
+				defined(
+					defined(parsed.services[0], "parsed.services[0]").actions[1],
+					'defined(parsed.services[0], "services[0]").actions[1]',
+				),
+				"warning",
+			),
 		).toBe(false);
 	});
 
@@ -187,7 +193,7 @@ describe("parseTimetable — round trips", () => {
 		const doc = JSON.parse(JSON.stringify(twoServiceTimetable()));
 		const parsed = parseTimetable(doc);
 		expect(parsed.services).not.toBe(doc.services);
-		expect(itemAt(parsed.services, 0).actions).not.toBe(
+		expect(defined(parsed.services[0], "services[0]").actions).not.toBe(
 			doc.services[0].actions,
 		);
 	});
@@ -214,7 +220,10 @@ describe("parseTimetable — round trips", () => {
 		};
 		const parsed = parseTimetable(doc);
 		expect(parsed.startTime).toBe(parseSimTime("05:00"));
-		const start = itemAt(itemAt(parsed.services, 0).actions, 0);
+		const start = defined(
+			defined(parsed.services[0], "parsed.services[0]").actions[0],
+			'defined(parsed.services[0], "services[0]").actions[0]',
+		);
 		if (start.kind !== "startNew") throw new Error("wrong kind");
 		expect(start.time).toBe(parseSimTime("06:00"));
 	});

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { itemAt } from "../../util/checked";
 import {
 	BufferType,
 	CrossoverType,
@@ -29,7 +28,7 @@ import {
 } from "../map/map-connectivity";
 import type { TrackKind } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
-import { trackAt } from "./test-helpers";
+import { defined, trackAt } from "./test-helpers";
 
 // ============================================================================
 // checkAllTracksConnected
@@ -361,8 +360,8 @@ describe("getConnectivityReport", () => {
 		expect(report.dangling).toHaveLength(2);
 		expect(report.dangling.map((d) => d.track.getLocationX())).toEqual([0, 16]);
 		// Each records which link indices are open: 3 = left, 5 = right.
-		expect(itemAt(report.dangling, 0).links).toEqual([3]);
-		expect(itemAt(report.dangling, 1).links).toEqual([5]);
+		expect(defined(report.dangling[0], "dangling[0]").links).toEqual([3]);
+		expect(defined(report.dangling[1], "dangling[1]").links).toEqual([5]);
 	});
 
 	it("reports an unpaired portal separately from open ends", () => {
@@ -376,7 +375,12 @@ describe("getConnectivityReport", () => {
 		const report = getConnectivityReport(map);
 		expect(report.connected).toBe(false);
 		expect(report.unpairedLinked).toHaveLength(1);
-		expect(itemAt(report.unpairedLinked, 0).getLocationX()).toBe(96);
+		expect(
+			defined(
+				report.unpairedLinked[0],
+				"report.unpairedLinked[0]",
+			).getLocationX(),
+		).toBe(96);
 	});
 
 	it("does not treat occupancy as a join — H next to V is incomplete", () => {
@@ -583,7 +587,9 @@ describe("findUnpairedLinkedTracks", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		const unpaired = findUnpairedLinkedTracks(map);
 		expect(unpaired).toHaveLength(1);
-		expect(itemAt(unpaired, 0).data.subtype).toBe(LinkedType.LINKUP);
+		expect(defined(unpaired[0], "unpaired[0]").data.subtype).toBe(
+			LinkedType.LINKUP,
+		);
 	});
 });
 
@@ -608,8 +614,8 @@ describe("getLinkedTrackPairs", () => {
 		map.connectTwoLinkedTracks(16, 0);
 		const pairs = getLinkedTrackPairs(map);
 		expect(pairs).toHaveLength(1);
-		expect(itemAt(pairs, 0).a.isLinked()).toBe(true);
-		expect(itemAt(pairs, 0).b.isLinked()).toBe(true);
+		expect(defined(pairs[0], "pairs[0]").a.isLinked()).toBe(true);
+		expect(defined(pairs[0], "pairs[0]").b.isLinked()).toBe(true);
 	});
 
 	it("returns only paired tracks when mixed with unpaired", () => {

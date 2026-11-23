@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { itemAt } from "../../../util/checked";
+import { defined } from "../../__tests__/test-helpers";
 import {
 	convertRailosRailway,
 	convertRailosTimetable,
@@ -200,7 +200,7 @@ describe("convertRailosTimetable", () => {
 		);
 		expect(warnings).toEqual([]);
 		expect(timetable.services).toHaveLength(6);
-		expect(itemAt(timetable.services, 0).train).toEqual({
+		expect(defined(timetable.services[0], "services[0]").train).toEqual({
 			startSpeedKmh: 40,
 			maxSpeedKmh: 120,
 			massTonnes: 200,
@@ -208,12 +208,14 @@ describe("convertRailosTimetable", () => {
 			powerKw: 1500,
 			signallerSpeedKmh: 30,
 		});
-		expect(itemAt(timetable.services, 0).repeat).toEqual({
+		expect(defined(timetable.services[0], "services[0]").repeat).toEqual({
 			intervalMinutes: 30,
 			headcodeIncrement: 2,
 			count: 3,
 		});
-		expect(itemAt(timetable.services, 0).actions.map((a) => a.kind)).toEqual([
+		expect(
+			defined(timetable.services[0], "services[0]").actions.map((a) => a.kind),
+		).toEqual([
 			"startNew",
 			"stop",
 			"changeDirection",
@@ -225,10 +227,9 @@ describe("convertRailosTimetable", () => {
 			"stop",
 			"finishNewService",
 		]);
-		expect(itemAt(timetable.services, 5).actions.map((a) => a.kind)).toEqual([
-			"startFromShuttle",
-			"finishRemainHere",
-		]);
+		expect(
+			defined(timetable.services[5], "services[5]").actions.map((a) => a.kind),
+		).toEqual(["startFromShuttle", "finishRemainHere"]);
 	});
 
 	it("renames a repeated ref, and each run keeps its own warnings", () => {

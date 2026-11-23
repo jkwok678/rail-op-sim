@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { defined } from "../../railway/__tests__/test-helpers";
 import type { Action } from "../../railway/timetable/types";
-import { defined, itemAt } from "../../util/checked";
 import {
 	repeatHeadcode,
 	timetableEntries,
@@ -91,7 +91,7 @@ describe("a through service", () => {
 			onTimeDeps: 2,
 			onTimeExits: 1,
 		});
-		expect(itemAt(engine.state.runs, 0).status).toBe("done");
+		expect(defined(engine.state.runs[0], "runs[0]").status).toBe("done");
 	});
 
 	it("passes a location it is booked to pass", () => {
@@ -265,9 +265,11 @@ describe("the train list", () => {
 		);
 		engine.handle({ type: "run" });
 		engine.advance(1);
-		expect(itemAt(engine.view().trains, 0).next).toBe("dep Terminus 06:05");
+		expect(defined(engine.view().trains[0], "trains[0]").next).toBe(
+			"dep Terminus 06:05",
+		);
 		const rows = engine.drainTimetables();
-		expect(rows[itemAt(engine.view().trains, 0).id]).toEqual([
+		expect(rows[defined(engine.view().trains[0], "trains[0]").id]).toEqual([
 			{ time: "06:00", label: "start" },
 			{ time: "06:05", label: "dep Terminus" },
 			{ time: "06:10", label: "exit" },
@@ -275,17 +277,25 @@ describe("the train list", () => {
 		expect(engine.drainTimetables()).toEqual({});
 		expect(
 			timetableEntries(
-				defined(rows[itemAt(engine.view().trains, 0).id], "timetable rows"),
-				itemAt(engine.view().trains, 0),
+				defined(
+					rows[defined(engine.view().trains[0], "engine.view().trains[0]").id],
+					"timetable rows",
+				),
+				defined(engine.view().trains[0], "trains[0]"),
 			).map((e) => e.state),
 		).toEqual(["done", "next", "upcoming"]);
 		engine.advance(400);
-		expect(itemAt(engine.view().trains, 0).next).toBe("exit 06:10");
+		expect(defined(engine.view().trains[0], "trains[0]").next).toBe(
+			"exit 06:10",
+		);
 		expect(engine.drainTimetables()).toEqual({});
 		expect(
 			timetableEntries(
-				defined(rows[itemAt(engine.view().trains, 0).id], "timetable rows"),
-				itemAt(engine.view().trains, 0),
+				defined(
+					rows[defined(engine.view().trains[0], "engine.view().trains[0]").id],
+					"timetable rows",
+				),
+				defined(engine.view().trains[0], "trains[0]"),
 			).map((e) => e.state),
 		).toEqual(["done", "done", "next"]);
 	});
@@ -471,8 +481,8 @@ describe("splits and joins", () => {
 			60,
 		);
 		expect(engine.state.trains.map((tr) => tr.headcode)).toEqual(["1A01"]);
-		expect(itemAt(engine.state.trains, 0).massKg).toBe(400_000);
-		expect(itemAt(engine.state.trains, 0).powerW).toBe(4_000_000);
+		expect(defined(engine.state.trains[0], "trains[0]").massKg).toBe(400_000);
+		expect(defined(engine.state.trains[0], "trains[0]").powerW).toBe(4_000_000);
 		expect(engine.state.runs.find((r) => r.ref === "1B01")?.status).toBe(
 			"done",
 		);
@@ -521,7 +531,7 @@ describe("splits and joins", () => {
 			180,
 		);
 		expect(engine.state.trains).toHaveLength(1);
-		expect(itemAt(engine.state.trains, 0).lengthM).toBe(200);
+		expect(defined(engine.state.trains[0], "trains[0]").lengthM).toBe(200);
 	});
 
 	it("resets extraDwell when setting off so the next stop uses normal dwell", () => {

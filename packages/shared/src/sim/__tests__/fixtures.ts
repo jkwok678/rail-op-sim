@@ -1,3 +1,4 @@
+import { defined } from "../../railway/__tests__/test-helpers";
 import { Text } from "../../railway/element";
 import { Map_ } from "../../railway/map/map";
 import { setPreferredDirectionsAlongPath } from "../../railway/map/map-connectivity";
@@ -10,7 +11,6 @@ import type {
 } from "../../railway/timetable/types";
 import type { TrackKind } from "../../railway/track/track-data";
 import { createTrackData } from "../../railway/track/track-factory";
-import { itemAt, lastOf } from "../../util/checked";
 import { applyPatch, type Patch } from "../../util/patch";
 import { createEngine, type Engine } from "../engine";
 import { startPosition, trainFromSpec } from "../trains";
@@ -168,7 +168,7 @@ export function nameCells(
 	name: string,
 	gy = 0,
 ): void {
-	const text = new Text(itemAt(gxs, 0) * CELL, gy * CELL, name, {
+	const text = new Text(defined(gxs[0], "gxs[0]") * CELL, gy * CELL, name, {
 		family: "sans-serif",
 		pointSize: 12,
 	});
@@ -345,5 +345,8 @@ export function frontCell(
 	engine: Engine,
 	train: Train,
 ): { gx: number; gy: number } {
-	return itemAt(engine.graph.nodes, lastOf(train.segs).node).cell;
+	return defined(
+		engine.graph.nodes[defined(train.segs.at(-1), "train.segs.at(-1)").node],
+		'engine.graph.nodes[defined(train.segs.at(-1), "segs.at(-1)").node]',
+	).cell;
 }
