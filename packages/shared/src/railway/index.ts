@@ -67,6 +67,7 @@ export {
 	isRailwayComplete,
 	LINK_OFFSETS,
 	linkIndexForOffset,
+	linkOffset,
 	neighborThroughLink,
 	portalMouthLink,
 	preferredDirectionIssue,

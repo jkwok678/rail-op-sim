@@ -7,6 +7,7 @@
  */
 
 import type { Cell, Timetable } from "../railway/timetable/types";
+import { itemAt, lastOf } from "../util/checked";
 import { lowerCrossingsOn } from "./crossings";
 import {
 	endsAtBuffers,
@@ -14,6 +15,7 @@ import {
 	leavesMap,
 	type NodeId,
 	nodeAt,
+	nodeOf,
 	occKeyOf,
 	pathOf,
 	type RailGraph,
@@ -58,7 +60,7 @@ function upcomingStopsBeforeReversal(
 	const service = serviceByRef(timetable, train.working.ref);
 	if (!service) return stops;
 	for (let i = train.working.index; i < service.actions.length; i++) {
-		const a = service.actions[i];
+		const a = itemAt(service.actions, i, "action");
 		if (a.kind === "changeDirection") break;
 		if (a.kind === "stop") stops.add(a.location);
 	}
@@ -82,7 +84,7 @@ function trainOccupancyMap(
 
 function isFacingOtherTrain(graph: RailGraph, other: Train, seg: Seg): boolean {
 	if (other.segs.length === 0) return false;
-	const front = other.segs[other.segs.length - 1];
+	const front = lastOf(other.segs, "segment");
 	return (
 		occKeyOf(graph, front) === occKeyOf(graph, seg) && !sameSeg(front, seg)
 	);
@@ -147,7 +149,7 @@ function isTargetPlatformCell(
 	leadStation: string | null,
 	stops: ReadonlySet<string>,
 ): boolean {
-	const node = graph.nodes[cur.node];
+	const node = nodeOf(graph, cur.node);
 	if (
 		!node.location ||
 		node.location === leadStation ||
@@ -196,8 +198,10 @@ function walkCallingOnRoute(
 	firstAhead: Seg,
 	stops: ReadonlySet<string>,
 ): Seg[] | null {
-	const leadStation =
-		graph.nodes[train.segs[train.segs.length - 1].node].location;
+	const leadStation = nodeOf(
+		graph,
+		lastOf(train.segs, "segment").node,
+	).location;
 	const others = trainOccupancyMap(graph, state.trains, train);
 	const seen = new Set<number>();
 	const path: Seg[] = [];
@@ -258,7 +262,7 @@ function callingOnCheck(
 	const firstAhead = protectingRedSignal(
 		graph,
 		state,
-		train.segs[train.segs.length - 1],
+		lastOf(train.segs, "segment"),
 	);
 	if (!firstAhead) return null;
 
@@ -305,7 +309,7 @@ export function callOn(
 		return { ok: false, message: "Cannot call on while paused." };
 	}
 	const signalNode = nodeAt(graph, at);
-	if (signalNode === null || graph.nodes[signalNode].signalExit === null) {
+	if (signalNode === null || nodeOf(graph, signalNode).signalExit === null) {
 		return { ok: false, message: "There is no signal there." };
 	}
 	for (const train of state.trains) {

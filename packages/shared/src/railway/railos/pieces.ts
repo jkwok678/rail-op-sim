@@ -6,6 +6,7 @@
  * mapping cannot drift from the art tables.
  */
 
+import { itemAt } from "../../util/checked";
 import type { TrackKind } from "../track/track-data";
 import { getLinksForSubtype, getRails } from "../track/track-data";
 
@@ -39,6 +40,10 @@ export const LINKS: readonly (readonly number[])[] = [
 ];
 
 if (LINKS.length !== 147) throw new Error(`LINKS has ${LINKS.length} rows`);
+
+/** The {@link LINKS} row for `tag`; throws for a tag outside the table. */
+export const linksOfTag = (tag: number): readonly number[] =>
+	itemAt(LINKS, tag, "RailOS tag");
 
 /** Which of a signal's two links carries the signal: the exit it protects. */
 export const SIGNAL_END: Readonly<Record<number, 0 | 1>> = {
@@ -116,14 +121,16 @@ const COMPASS_OFFSETS: readonly (readonly [number, number])[] = [
 
 /** RailOS compass code (screen y down) → our link index (+Y up). */
 export function linkOf(compass: number): number {
-	const [dx, dyScreen] = COMPASS_OFFSETS[compass];
+	const [dx, dyScreen] = itemAt(COMPASS_OFFSETS, compass, "compass code");
 	const dy = -dyScreen;
 	return (1 - dy) * 3 + (dx + 1);
 }
 
 /** The links a piece uses, as our link indices. */
 export const linksOf = (tag: number): number[] =>
-	LINKS[tag].filter((l) => l > 0).map(linkOf);
+	linksOfTag(tag)
+		.filter((l) => l > 0)
+		.map(linkOf);
 
 /** Every subtype of `kind`, from the link table (the factory validates names). */
 export const SUBTYPES: Readonly<Record<TrackKind, readonly string[]>> = {
@@ -214,7 +221,9 @@ export function subtypeByLinks(
 
 /** A switch whose two rails are exactly the RailOS piece's two paths. */
 export function switchSubtype(tag: number): string | null {
-	const [a, b, cc, d] = LINKS[tag].map(linkOf);
+	const [a, b, cc, d] = linksOfTag(tag).map(linkOf);
+	if (a === undefined || b === undefined || cc === undefined || d === undefined)
+		return null;
 	const want = [pairKey(a, b), pairKey(cc, d)].sort();
 	return (
 		SUBTYPES.switch.find((s) => {

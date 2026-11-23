@@ -8,6 +8,7 @@
  * directions come out the way the editor would make them.
  */
 
+import { defined } from "../../util/checked";
 import { Text } from "../element";
 import { type ParapetType, Platform } from "../enums";
 import { Map_ } from "../map/map";
@@ -23,9 +24,9 @@ import {
 } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
 import {
-	LINKS,
 	linkOf,
 	linksOf,
+	linksOfTag,
 	type Piece,
 	pairKey,
 	pieceOf,
@@ -323,7 +324,11 @@ class RailwayBuilder {
 			const piece = pieceOf(el.tag);
 			if (piece === "platform") {
 				const track = this.map.getTrackAt(x, y);
-				this.map.addPlatform(PLATFORM_SIDE[el.tag], x, y);
+				this.map.addPlatform(
+					defined(PLATFORM_SIDE[el.tag], "platform side"),
+					x,
+					y,
+				);
 				if (!track?.hasPlatform()) {
 					this.warnings.push(
 						`${where(el.h, el.v)}: platform could not be added to the track there.`,
@@ -434,11 +439,12 @@ const TRACK_BUILDERS: Partial<
 	},
 	crossover: (_el, links) => byLinks("crossover", links),
 	bridge: (_el, links) => byLinks("flyover", links),
-	buffers: (_el, links) => byLinks("buffer", [links[1]]),
-	continuation: (_el, links) => byLinks("exit", [links[1]]),
-	gap: (_el, links) => byLinks("linked", [links[1]]),
+	buffers: (_el, links) => byLinks("buffer", links.slice(1, 2)),
+	continuation: (_el, links) => byLinks("exit", links.slice(1, 2)),
+	gap: (_el, links) => byLinks("linked", links.slice(1, 2)),
 	signal: (el, links) => {
-		const exit = links[SIGNAL_END[el.tag]];
+		const end = SIGNAL_END[el.tag];
+		const exit = end === undefined ? undefined : links[end];
 		const s = SUBTYPES.signal.find(
 			(st) => signalFacingExit(st as never) === exit,
 		);
@@ -473,16 +479,19 @@ function signalAspect(marker: string): number {
 function applyFigures(track: Track, el: ActiveElement): void {
 	const clampSpeed = (s: number) => Math.max(10, Math.min(400, s));
 	const rails = getRails(track.data.kind, track.data.subtype);
-	let main = 0;
+	let main: 0 | 1 = 0;
 	if (rails.length === 2) {
-		const [a, b] = LINKS[el.tag].slice(0, 2).map(linkOf);
-		const first = rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
+		const [a, b] = linksOfTag(el.tag).slice(0, 2).map(linkOf);
+		const first =
+			a === undefined || b === undefined
+				? undefined
+				: rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
 		main = first && !first.secondary ? 0 : 1;
 	}
 	if (el.lengths[main] > 0) track.setTrackMainLength(el.lengths[main]);
 	if (el.speeds[main] > 0) track.setTrackMainSpeed(clampSpeed(el.speeds[main]));
 	if (rails.length === 2) {
-		const other = 1 - main;
+		const other = main === 0 ? 1 : 0;
 		if (el.lengths[other] > 0) track.setTrackSecondaryLength(el.lengths[other]);
 		if (el.speeds[other] > 0)
 			track.setTrackSecondarySpeed(clampSpeed(el.speeds[other]));

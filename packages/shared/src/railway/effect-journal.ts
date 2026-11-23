@@ -123,7 +123,7 @@ interface ReplayTarget {
 export function undoEntries(map: ReplayTarget, recorded: EffectEntry[]): void {
 	withoutRecording(() => {
 		map.deferPreferredDirectionRevalidation(() => {
-			for (let i = recorded.length - 1; i >= 0; i--) recorded[i].undo();
+			for (const entry of [...recorded].reverse()) entry.undo();
 		});
 		// trackList is a derived cache that goes stale on every add or delete.
 		map.makeTrackList();

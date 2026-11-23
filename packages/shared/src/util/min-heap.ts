@@ -1,3 +1,4 @@
+import { itemAt } from "./checked";
 /** A binary min-heap ordered by `before`: what comes out first. */
 export class MinHeap<T> {
 	private readonly items: T[] = [];
@@ -14,8 +15,11 @@ export class MinHeap<T> {
 		let i = items.length - 1;
 		while (i > 0) {
 			const parent = (i - 1) >> 1;
-			if (!this.before(items[i], items[parent])) break;
-			[items[i], items[parent]] = [items[parent], items[i]];
+			const child = itemAt(items, i);
+			const up = itemAt(items, parent);
+			if (!this.before(child, up)) break;
+			items[i] = up;
+			items[parent] = child;
 			i = parent;
 		}
 	}
@@ -30,10 +34,20 @@ export class MinHeap<T> {
 			const l = i * 2 + 1;
 			const r = l + 1;
 			let best = i;
-			if (l < items.length && this.before(items[l], items[best])) best = l;
-			if (r < items.length && this.before(items[r], items[best])) best = r;
+			if (
+				l < items.length &&
+				this.before(itemAt(items, l), itemAt(items, best))
+			)
+				best = l;
+			if (
+				r < items.length &&
+				this.before(itemAt(items, r), itemAt(items, best))
+			)
+				best = r;
 			if (best === i) break;
-			[items[i], items[best]] = [items[best], items[i]];
+			const down = itemAt(items, i);
+			items[i] = itemAt(items, best);
+			items[best] = down;
 			i = best;
 		}
 		return top;

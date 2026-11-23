@@ -24,6 +24,7 @@ import {
 	signalFacingExit,
 	type TrackKind,
 } from "../railway/track/track-data";
+import { itemAt } from "../util/checked";
 
 /** Index of a track in {@link RailGraph.nodes}. */
 export type NodeId = number;
@@ -100,6 +101,11 @@ export interface RailGraph {
 	crossings: LevelCrossing[];
 }
 
+/** The node with id `id`. Throws if the id was not handed out by this graph. */
+export function nodeOf(graph: RailGraph, id: NodeId): GraphNode {
+	return itemAt(graph.nodes, id, "node");
+}
+
 export const cellKey = (cell: Cell): string => `${cell.gx},${cell.gy}`;
 
 /** Where leaving `node` through `link` arrives, or null off the end of the line. */
@@ -117,7 +123,7 @@ export function nodeAt(graph: RailGraph, cell: Cell): NodeId | null {
 
 /** The path for a segment, or undefined when it is not a way through the node. */
 export function pathOf(graph: RailGraph, seg: Seg): GraphPath | undefined {
-	return graph.nodes[seg.node].paths.find(
+	return nodeOf(graph, seg.node).paths.find(
 		(p) => p.entry === seg.entry && p.exit === seg.exit,
 	);
 }
@@ -128,25 +134,25 @@ export function segLength(graph: RailGraph, seg: Seg): number {
 
 /** Occupancy key of the rail a segment runs along. */
 export function occKeyOf(graph: RailGraph, seg: Seg): number {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	const path = pathOf(graph, seg);
-	return node.occKeys[Math.max(0, path?.rail ?? 0)];
+	return itemAt(node.occKeys, Math.max(0, path?.rail ?? 0), "occupancy key");
 }
 
 /** Whether a train running along `seg` passes a signal facing it. */
 export function isFacingSignal(graph: RailGraph, seg: Seg): boolean {
-	return graph.nodes[seg.node].signalExit === seg.exit;
+	return nodeOf(graph, seg.node).signalExit === seg.exit;
 }
 
 /** Whether leaving `seg` takes a train off the map. */
 export function leavesMap(graph: RailGraph, seg: Seg): boolean {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	return node.kind === "exit" && node.deadEnd === seg.exit;
 }
 
 /** Whether `seg` runs into buffer stops. */
 export function endsAtBuffers(graph: RailGraph, seg: Seg): boolean {
-	const node = graph.nodes[seg.node];
+	const node = nodeOf(graph, seg.node);
 	return node.kind === "buffer" && node.deadEnd === seg.exit;
 }
 
@@ -194,7 +200,7 @@ export function buildGraph(map: Map_): RailGraph {
 	});
 
 	const crossings = groupCrossings(nodes, byCell, (id) =>
-		tracks[id].hasLevelCrossing(),
+		itemAt(tracks, id, "track").hasLevelCrossing(),
 	);
 
 	return { nodes, byCell, locations, next, crossings };
@@ -233,8 +239,9 @@ function groupCrossings(
 		) {
 			const id = byCell.get(cellKey(cell));
 			if (id === undefined || !hasCrossing(id)) break;
-			if (nodes[id].subtype !== node.subtype) break;
-			nodes[id].crossing = crossings.length;
+			const member = itemAt(nodes, id, "node");
+			if (member.subtype !== node.subtype) break;
+			member.crossing = crossings.length;
 			members.push(id);
 		}
 		crossings.push({ nodes: members });
@@ -287,8 +294,9 @@ function buildNode(track: Track, id: NodeId, cell: Cell): GraphNode {
 
 function deadEndOf(track: Track): number | null {
 	const links = getLinksForSubtype(track.data.kind, track.data.subtype);
-	if (links.length !== 1) return null;
-	return track.isTerminusDeadEnd(8 - links[0]) ? 8 - links[0] : null;
+	const [link] = links;
+	if (links.length !== 1 || link === undefined) return null;
+	return track.isTerminusDeadEnd(8 - link) ? 8 - link : null;
 }
 
 function pathsOf(

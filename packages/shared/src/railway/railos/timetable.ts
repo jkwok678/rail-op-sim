@@ -6,6 +6,7 @@
  * track — so it can be checked against whichever railway it lands on.
  */
 
+import { defined, itemAt } from "../../util/checked";
 import { SERIALIZED_TIMETABLE_VERSION } from "../timetable/serialization";
 import type { SimTime } from "../timetable/time";
 import type {
@@ -83,7 +84,7 @@ function parseStop(
 	const single = seenLocation ? { arrive: time } : { depart: time };
 	return {
 		kind: "stop",
-		location,
+		location: defined(location, "location"),
 		...single,
 		...(dwell ? { minDwellSeconds: Number(dwell) } : {}),
 		...w,
@@ -92,13 +93,16 @@ function parseStop(
 
 function startCells(ids: string): { rear: Cell; front: Cell } {
 	const [rear, front] = ids.split(" ");
-	return { rear: cellFromId(rear), front: cellFromId(front) };
+	return {
+		rear: cellFromId(defined(rear, "rear element ID")),
+		front: cellFromId(defined(front, "front element ID")),
+	};
 }
 
 type CommandParser = (
 	time: SimTime,
-	third: string,
-	fourth: string,
+	third: string | undefined,
+	fourth: string | undefined,
 	w: { warning?: true },
 ) => Action;
 
@@ -106,26 +110,26 @@ const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
 	Snt: (time, third, fourth, w) => ({
 		kind: "startNew",
 		time,
-		...startCells(third),
+		...startCells(defined(third, "start cells")),
 		...(fourth === "S" ? { signallerControl: true } : {}),
 		...w,
 	}),
 	Sns: (time, third, _fourth, w) => ({
 		kind: "startNewService",
 		time,
-		fromRef: third,
+		fromRef: defined(third, "fromRef"),
 		...w,
 	}),
 	Sfs: (time, third, _fourth, w) => ({
 		kind: "startFromSplit",
 		time,
-		fromRef: third,
+		fromRef: defined(third, "fromRef"),
 		...w,
 	}),
 	pas: (time, third, _fourth, w) => ({
 		kind: "pass",
 		time,
-		location: third,
+		location: defined(third, "location"),
 		...w,
 	}),
 	cdt: (time, _third, _fourth, w) => ({
@@ -136,88 +140,88 @@ const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
 	dsc: (time, third, _fourth, w) => ({
 		kind: "changeDescription",
 		time,
-		description: third,
+		description: defined(third, "description"),
 		...w,
 	}),
 	cms: (time, third, _fourth, w) => ({
 		kind: "changeMaxSpeed",
 		time,
-		maxSpeedKmh: Number(third),
+		maxSpeedKmh: Number(defined(third, "maxSpeedKmh")),
 		...w,
 	}),
 	fsp: (time, third, _fourth, w) => ({
 		kind: "frontSplit",
 		time,
-		newRef: third,
+		newRef: defined(third, "newRef"),
 		...w,
 	}),
 	rsp: (time, third, _fourth, w) => ({
 		kind: "rearSplit",
 		time,
-		newRef: third,
+		newRef: defined(third, "newRef"),
 		...w,
 	}),
 	jbo: (time, third, _fourth, w) => ({
 		kind: "joinedBy",
 		time,
-		otherRef: third,
+		otherRef: defined(third, "otherRef"),
 		...w,
 	}),
 	"Snt-sh": (time, third, fourth, w) => ({
 		kind: "startNewShuttle",
 		time,
-		...startCells(third),
-		otherRef: fourth,
+		...startCells(defined(third, "start cells")),
+		otherRef: defined(fourth, "otherRef"),
 		...w,
 	}),
 	"Sns-sh": (time, third, fourth, w) => ({
 		kind: "startShuttle",
 		time,
-		fromRef: fourth,
-		otherRef: third,
+		fromRef: defined(fourth, "fromRef"),
+		otherRef: defined(third, "otherRef"),
 		...w,
 	}),
 	"Sns-fsh": (time, third, _fourth, w) => ({
 		kind: "startFromShuttle",
 		time,
-		fromRef: third,
+		fromRef: defined(third, "fromRef"),
 		...w,
 	}),
 	"F-nshs": (time, third, _fourth, w) => ({
 		kind: "finishToShuttle",
 		time,
-		nextRef: third,
+		nextRef: defined(third, "nextRef"),
 		...w,
 	}),
 	Fns: (time, third, _fourth, w) => ({
 		kind: "finishNewService",
 		time,
-		nextRef: third,
+		nextRef: defined(third, "nextRef"),
 		...w,
 	}),
 	Fjo: (time, third, _fourth, w) => ({
 		kind: "finishJoin",
 		time,
-		otherRef: third,
+		otherRef: defined(third, "otherRef"),
 		...w,
 	}),
 	Fer: (time, third, _fourth, w) => ({
 		kind: "finishExit",
 		time,
-		exits: third.split(" ").filter(Boolean).map(cellFromId),
+		exits: defined(third, "exits").split(" ").filter(Boolean).map(cellFromId),
 		...w,
 	}),
 	"Frh-sh": (time, third, _fourth, w) => ({
 		kind: "finishShuttleRemainHere",
 		time,
-		otherRef: third,
+		otherRef: defined(third, "otherRef"),
 		...w,
 	}),
 	"Fns-sh": (time, third, fourth, w) => ({
 		kind: "finishShuttleNewService",
 		time,
-		otherRef: third,
-		nextRef: fourth,
+		otherRef: defined(third, "otherRef"),
+		nextRef: defined(fourth, "nextRef"),
 		...w,
 	}),
 };
@@ -225,8 +229,8 @@ const COMMAND_PARSERS: Readonly<Record<string, CommandParser>> = {
 function parseCommand(
 	word: string,
 	time: SimTime,
-	third: string,
-	fourth: string,
+	third: string | undefined,
+	fourth: string | undefined,
 	w: { warning?: true },
 ): Action {
 	const parser = COMMAND_PARSERS[word];
@@ -243,7 +247,7 @@ function parseAction(field: string, seenLocation: boolean): Action {
 	const time = timeOf(text);
 	if (time === null) throw new Error(`no time in "${field}"`);
 	const rest = text.slice(6);
-	const [word, third, fourth] = rest.split(";");
+	const [word = "", third, fourth] = rest.split(";");
 	if (timeOf(rest) !== null || !COMMANDS.has(word)) {
 		return parseStop(time, rest, seenLocation, w);
 	}
@@ -254,14 +258,18 @@ function parseService(entry: string): Service {
 	const fields = stripSpaces(entry)
 		.split(",")
 		.filter((f) => f !== "");
-	const info = fields[0].split(";");
+	const info = defined(fields[0], "service header").split(";");
 	const actions: Action[] = [];
 	let repeat: Service["repeat"];
 	let seen = false;
 	for (const field of fields.slice(1)) {
 		if (field.startsWith("R;")) {
 			const [, mins, digits, count] = field.split(";").map(Number);
-			repeat = { intervalMinutes: mins, headcodeIncrement: digits, count };
+			repeat = {
+				intervalMinutes: defined(mins, "repeat interval"),
+				headcodeIncrement: defined(digits, "repeat headcode increment"),
+				count: defined(count, "repeat count"),
+			};
 			continue;
 		}
 		const action = parseAction(field, seen);
@@ -271,7 +279,7 @@ function parseService(entry: string): Service {
 	// Keys in the order the editor writes them.
 	const spec = trainSpec(info);
 	return {
-		ref: info[0],
+		ref: defined(info[0], "service ref"),
 		...(info[1] ? { description: info[1] } : {}),
 		...(spec ? { train: spec } : {}),
 		actions,
@@ -308,11 +316,11 @@ export function convertRailosTimetable(
 			"Not a RailOS timetable: no start time found.",
 		);
 	}
-	const startTime = timeOf(stripSpaces(entries[i])) as SimTime;
+	const startTime = timeOf(stripSpaces(itemAt(entries, i, "entry"))) as SimTime;
 	const services: Service[] = [];
 	const seenRefs = new Set<string>();
 	for (i++; i < entries.length; i++) {
-		const entry = stripSpaces(entries[i]);
+		const entry = stripSpaces(itemAt(entries, i, "entry"));
 		if (entry === "" || /^,*$/.test(entry)) break;
 		if (entry.startsWith("*")) continue;
 		try {

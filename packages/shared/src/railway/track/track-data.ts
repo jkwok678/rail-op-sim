@@ -422,7 +422,8 @@ const bothWays = (pairs: readonly (readonly [number, number])[]): number[] =>
  */
 const GEOMETRIC_PAIRS: ReadonlySet<number> = new Set(
 	[...Object.values(STRAIGHT_LINKS), ...Object.values(CURVED_LINKS)].flatMap(
-		([a, b]) => [a * 9 + b, b * 9 + a],
+		([a, b]) =>
+			a === undefined || b === undefined ? [] : [a * 9 + b, b * 9 + a],
 	),
 );
 
@@ -613,11 +614,9 @@ export interface Rail {
 export function getRails(kind: TrackKind, subtype: SubtypeKey): Rail[] {
 	const links = getLinksForSubtype(kind, subtype);
 	const rails: { a: number; b: number }[] = [];
-	for (let i = 0; i < links.length; i++) {
-		for (let j = i + 1; j < links.length; j++) {
-			if (isTraversableLinkPair(kind, subtype, links[i], links[j])) {
-				rails.push({ a: links[i], b: links[j] });
-			}
+	for (const [i, a] of links.entries()) {
+		for (const b of links.slice(i + 1)) {
+			if (isTraversableLinkPair(kind, subtype, a, b)) rails.push({ a, b });
 		}
 	}
 	if (!hasSecondaryPath(kind) || rails.length < 2) {
@@ -639,12 +638,11 @@ function switchMainRailIndex(
 ): number {
 	const straight = rails.findIndex((r) => r.a + r.b === 8);
 	if (straight !== -1) return straight;
-	const stem =
-		rails[0].a === rails[1].a || rails[0].a === rails[1].b
-			? rails[0].a
-			: rails[0].b;
+	const [first, second] = rails;
+	if (!first || !second) return 0;
+	const stem = first.a === second.a || first.a === second.b ? first.a : first.b;
 	const far = (r: { a: number; b: number }) => (r.a === stem ? r.b : r.a);
-	return far(rails[0]) <= far(rails[1]) ? 0 : 1;
+	return far(first) <= far(second) ? 0 : 1;
 }
 
 /**

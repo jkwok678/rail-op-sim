@@ -213,7 +213,7 @@ export function linkNewElementToText(
 				}
 			}
 		} else {
-			textToLink = surroundingTextList[0];
+			textToLink = surroundingTextList[0] ?? null;
 		}
 
 		if (textToLink === null) {

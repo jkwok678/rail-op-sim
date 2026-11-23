@@ -11,12 +11,14 @@
 
 import { linkIndexForOffset } from "../railway/map/map-connectivity";
 import type { Cell, TrainSpec } from "../railway/timetable/types";
+import { firstOf, itemAt, lastOf } from "../util/checked";
 import { CALL_ON_MAX_SPEED_MS, clearCallingOnSignal } from "./callingOn";
 import { hitsRoadTraffic } from "./crossings";
 import {
 	isFacingSignal,
 	leavesMap,
 	nodeAt,
+	nodeOf,
 	occKeyOf,
 	pathOf,
 	type RailGraph,
@@ -119,7 +121,7 @@ export function startPosition(
 	const frontId = nodeAt(graph, front);
 	const link = linkIndexForOffset(front.gx - rear.gx, front.gy - rear.gy);
 	if (rearId === null || frontId === null || link === null) return null;
-	const rearNode = graph.nodes[rearId];
+	const rearNode = nodeOf(graph, rearId);
 	if (rearNode.kind === "exit" && rearNode.deadEnd !== null) {
 		const dead = rearNode.deadEnd;
 		return { segs: [{ node: rearId, entry: dead, exit: 8 - dead }], frontM: 0 };
@@ -148,7 +150,7 @@ export function segsOccupied(
 	return segs.some((seg) => keys.has(occKeyOf(graph, seg)));
 }
 
-const front = (train: Train): Seg => train.segs[train.segs.length - 1];
+const front = (train: Train): Seg => lastOf(train.segs, "segment");
 
 function speedLimit(graph: RailGraph, seg: Seg): number {
 	return (pathOf(graph, seg)?.speedKmh ?? 0) / 3.6;
@@ -162,7 +164,7 @@ function horizon(train: Train): number {
 
 /** The location of `seg`'s cell, or null. */
 const locationOf = (graph: RailGraph, seg: Seg | null): string | null =>
-	seg ? graph.nodes[seg.node].location : null;
+	seg ? nodeOf(graph, seg.node).location : null;
 
 /** The first thing ahead of `train` it must stop for, and the limits on the way. */
 function lookAhead(
@@ -462,10 +464,10 @@ function advanceFront(
 function dropRear(graph: RailGraph, train: Train, events: MoveEvent[]): void {
 	let behindFront = train.frontM;
 	for (let i = 0; i < train.segs.length - 1; i++) {
-		behindFront += segLength(graph, train.segs[i]);
+		behindFront += segLength(graph, itemAt(train.segs, i, "segment"));
 	}
 	while (train.segs.length > 0) {
-		const rear = train.segs[0];
+		const rear = firstOf(train.segs, "segment");
 		const rearLen = segLength(graph, rear);
 		if (behindFront - rearLen < train.lengthM) return;
 		if (train.segs.length === 1) {
@@ -489,7 +491,7 @@ export function approaching(
 	if (train.speed <= 0) return false;
 	const v = train.speed;
 	const reach = (v * v) / (2 * planningBrake(train)) + train.lengthM;
-	const first = route.segs[0];
+	const first = firstOf(route.segs, "segment");
 	let seg: Seg | null = front(train);
 	let dist = segLength(graph, seg) - train.frontM;
 	while (seg && dist < reach) {
@@ -527,11 +529,11 @@ export function trainSpans(
 	const spans: { seg: Seg; from: number; to: number }[] = [];
 	const last = train.segs.length - 1;
 	if (last < 0) return spans;
-	const frontLen = segLength(graph, train.segs[last]);
+	const frontLen = segLength(graph, itemAt(train.segs, last, "segment"));
 	// Whatever has run on past an exit's outer edge is off the map.
 	let remaining = train.lengthM - Math.max(0, train.frontM - frontLen);
 	for (let i = last; i >= 0 && remaining > 0; i--) {
-		const seg = train.segs[i];
+		const seg = itemAt(train.segs, i, "segment");
 		const len = segLength(graph, seg) || 1;
 		const frontHere = i === last ? Math.min(train.frontM, len) : len;
 		const covered = Math.min(frontHere, remaining);

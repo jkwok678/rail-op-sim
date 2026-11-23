@@ -1,3 +1,4 @@
+import { firstOf, itemAt, lastOf } from "../../util/checked";
 import { MinHeap } from "../../util/min-heap";
 import { Concourse, type NamedElement, NamedLocation } from "../element";
 import { type PreferredDirection, Track } from "../track/track";
@@ -37,6 +38,11 @@ export const LINK_OFFSETS: readonly [number, number][] = [
 	[0, -1], // 7: bottom
 	[1, -1], // 8: bottom-right
 ];
+
+/** {@link LINK_OFFSETS} for `link`; throws for anything outside 0–8. */
+export function linkOffset(link: number): readonly [number, number] {
+	return itemAt(LINK_OFFSETS, link, "link");
+}
 
 /** A track with at least one active link that does not join a neighbour. */
 export interface DanglingLink {
@@ -222,7 +228,7 @@ function isActiveLinkJoined(
 	cx: number,
 	cy: number,
 ): boolean {
-	const [dx, dy] = LINK_OFFSETS[link];
+	const [dx, dy] = linkOffset(link);
 	const neighbor = map.getTrackAt(cx + dx * step, cy + dy * step);
 	return neighbor?.getLinkAt(8 - link) === true;
 }
@@ -443,7 +449,7 @@ export function findPathBetween(
 		for (let link = 0; link <= 8; link++) {
 			if (link === 4) continue;
 			if (!current.track.getLinkAt(link) || !canLeave(current, link)) continue;
-			const [dx, dy] = LINK_OFFSETS[link];
+			const [dx, dy] = linkOffset(link);
 			const neighbor = map.getTrackAt(cx + dx * step, cy + dy * step);
 			// The neighbour is entered by its opposite link.
 			if (!neighbor || !canEnter(neighbor, 8 - link)) continue;
@@ -534,7 +540,7 @@ function endpointOtherLink(track: Track, known: number): number | null {
 			l !== known &&
 			isTraversableLinkPair(track.data.kind, track.data.subtype, known, l),
 	);
-	return partners.length === 1 ? partners[0] : null;
+	return partners.length === 1 ? (partners[0] ?? null) : null;
 }
 
 /** Outcome of {@link setPreferredDirectionsAlongPath}. */
@@ -588,9 +594,9 @@ export function setPreferredDirectionsAlongPath(
 	const legs = resolvePathDirections(map, path);
 	const facingSwitchEndpoint =
 		path.length > 1 &&
-		((legs[0] === null && path[0].data.kind === "switch") ||
+		((legs[0] === null && firstOf(path, "track").data.kind === "switch") ||
 			(legs[path.length - 1] === null &&
-				path[path.length - 1].data.kind === "switch"));
+				lastOf(path, "track").data.kind === "switch"));
 	if (facingSwitchEndpoint) {
 		return {
 			path,
@@ -603,9 +609,9 @@ export function setPreferredDirectionsAlongPath(
 	let applied = 0;
 	let unassigned = 0;
 
-	for (let i = 0; i < path.length; i++) {
+	for (const [i, track] of path.entries()) {
 		const leg = legs[i];
-		if (leg && path[i].addPreferredDirection(leg.entry, leg.exit)) {
+		if (leg && track.addPreferredDirection(leg.entry, leg.exit)) {
 			applied++;
 		} else {
 			unassigned++;
@@ -654,14 +660,14 @@ export function clearPreferredDirectionsAlongPath(
 	let removed = 0;
 	let untouched = 0;
 
-	for (let i = 0; i < path.length; i++) {
+	for (const [i, track] of path.entries()) {
 		const leg = legs[i];
 		// Both calls run: a track may carry either direction, or both.
 		const forward = leg
-			? path[i].removePreferredDirection(leg.entry, leg.exit)
+			? track.removePreferredDirection(leg.entry, leg.exit)
 			: false;
 		const backward = leg
-			? path[i].removePreferredDirection(leg.exit, leg.entry)
+			? track.removePreferredDirection(leg.exit, leg.entry)
 			: false;
 		if (forward || backward) removed++;
 		else untouched++;
@@ -755,7 +761,7 @@ export function neighborThroughLink(
 		return track.data.kind === "linked" ? track.getOtherLinkedTrack() : null;
 	}
 	const step = map.getImageSize();
-	const [dx, dy] = LINK_OFFSETS[link];
+	const [dx, dy] = linkOffset(link);
 	return map.getTrackAt(
 		track.getLocationX() + dx * step,
 		track.getLocationY() + dy * step,

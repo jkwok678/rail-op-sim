@@ -9,6 +9,7 @@
 
 import type { Map_ } from "../railway/map/map";
 import type { Timetable } from "../railway/timetable/types";
+import { firstOf, itemAt, lastOf } from "../util/checked";
 import { callOn, refreshCallingOnFlags } from "./callingOn";
 import { afterPause, afterRun, isSpeed, SIM_DT } from "./clock";
 import {
@@ -17,7 +18,13 @@ import {
 	handleTrainCommand,
 } from "./control";
 import { initialCrossings, workCrossings } from "./crossings";
-import { buildGraph, occKeyOf, type RailGraph, type Seg } from "./graph";
+import {
+	buildGraph,
+	nodeOf,
+	occKeyOf,
+	type RailGraph,
+	type Seg,
+} from "./graph";
 import { PerformanceLog } from "./log";
 import { trainKeys } from "./occupancy";
 import {
@@ -152,12 +159,12 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const refreshAspects = (): void => {
 		const occupied = trainKeys(graph, state.trains);
 		state.aspects = computeAspects(graph, state, (route, i) =>
-			occupied.has(occKeyOf(graph, route.segs[i])),
+			occupied.has(occKeyOf(graph, itemAt(route.segs, i, "segment"))),
 		);
 	};
 
 	const locationOf = (seg: Seg): string | null =>
-		graph.nodes[seg.node].location;
+		nodeOf(graph, seg.node).location;
 
 	const handleEvent = (event: MoveEvent): void => {
 		const { train } = event;
@@ -167,7 +174,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				if (cancelled) {
 					log.error(
 						state.time,
-						`${train.headcode} entered a route from the wrong end at ${placeName(graph.nodes[event.seg.node])}; the route was cancelled`,
+						`${train.headcode} entered a route from the wrong end at ${placeName(nodeOf(graph, event.seg.node))}; the route was cancelled`,
 					);
 				}
 				const location = locationOf(event.seg);
@@ -191,7 +198,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				state.counters.spads++;
 				log.error(
 					state.time,
-					`SPAD: ${train.headcode} PASSED SIGNAL AT DANGER at ${placeName(graph.nodes[event.seg.node])}`,
+					`SPAD: ${train.headcode} PASSED SIGNAL AT DANGER at ${placeName(nodeOf(graph, event.seg.node))}`,
 				);
 				return;
 			case "crash":
@@ -212,7 +219,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 				state.counters.crashedTrains++;
 				log.error(
 					state.time,
-					`CRASH: ${train.headcode} CRASHED INTO ROAD TRAFFIC AT A LEVEL CROSSING at ${placeName(graph.nodes[event.seg.node])}`,
+					`CRASH: ${train.headcode} CRASHED INTO ROAD TRAFFIC AT A LEVEL CROSSING at ${placeName(nodeOf(graph, event.seg.node))}`,
 				);
 				return;
 			case "stopped":
@@ -227,7 +234,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	const arrived = (train: Train, reason: WaitReason): void => {
 		if (train.control.mode === "signaller") return;
 		const target = stopTarget(ctx, train);
-		const here = locationOf(train.segs[train.segs.length - 1]);
+		const here = locationOf(lastOf(train.segs, "segment"));
 		const shortOf = reason === "signal" || reason === "train";
 		if (target && here === target && (reason === "station" || shortOf)) {
 			onStationStop(ctx, train, target);
@@ -256,7 +263,7 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 	};
 
 	const viewSeg = (seg: Seg, from = 0, to = 1): ViewSeg => {
-		const { gx, gy } = graph.nodes[seg.node].cell;
+		const { gx, gy } = nodeOf(graph, seg.node).cell;
 		return { gx, gy, entry: seg.entry, exit: seg.exit, from, to };
 	};
 
@@ -338,20 +345,24 @@ export function createEngine({ map, timetable }: EngineOptions): Engine {
 					.map((n) => ({
 						...n.cell,
 						subtype: n.subtype,
-						aspect: state.aspects[n.id],
+						aspect: itemAt(state.aspects, n.id, "aspect"),
 						aspects: n.signalAspects,
 						callingOn: state.callingOnSignals.includes(n.id),
 					})),
 				points: graph.nodes
 					.filter((n) => n.kind === "switch")
 					.map((n) => {
-						const rail = n.rails[state.lies[n.id]];
+						const rail = itemAt(
+							n.rails,
+							itemAt(state.lies, n.id, "lie"),
+							"rail",
+						);
 						return { ...n.cell, subtype: n.subtype, a: rail.a, b: rail.b };
 					}),
 				levelCrossings: graph.crossings.map((lc, i) => ({
-					subtype: graph.nodes[lc.nodes[0]].subtype,
-					cells: lc.nodes.map((id) => ({ ...graph.nodes[id].cell })),
-					barriers: state.crossings[i].barriers,
+					subtype: nodeOf(graph, firstOf(lc.nodes, "crossing node")).subtype,
+					cells: lc.nodes.map((id) => ({ ...nodeOf(graph, id).cell })),
+					barriers: itemAt(state.crossings, i, "crossing").barriers,
 				})),
 				routes: state.routes.map((r) => ({
 					id: r.id,

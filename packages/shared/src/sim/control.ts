@@ -4,10 +4,12 @@
  */
 
 import type { Action } from "../railway/timetable/types";
+import { firstOf, itemAt, lastOf } from "../util/checked";
 import { clearCallingOnSignal } from "./callingOn";
 import {
 	isFacingSignal,
 	leavesMap,
+	nodeOf,
 	occKeyOf,
 	type RailGraph,
 	type Seg,
@@ -58,12 +60,12 @@ function findTrain(ctx: RunnerContext, trainId: number): Train | null {
 }
 
 function frontSeg(train: Train): Seg {
-	return train.segs[train.segs.length - 1];
+	return lastOf(train.segs, "segment");
 }
 
 function frontLocation(graph: RailGraph, train: Train): string | null {
 	return train.segs.length > 0
-		? graph.nodes[frontSeg(train).node].location
+		? nodeOf(graph, frontSeg(train).node).location
 		: null;
 }
 
@@ -145,7 +147,7 @@ export function availableFollowOnService(
 			i >= 1 && (a.kind === "stop" || a.kind === "pass") && a.location === here,
 	);
 	if (matchIdx < 0) return null;
-	const matched = next.actions[matchIdx];
+	const matched = itemAt(next.actions, matchIdx, "action");
 	const resumeIndex =
 		matched.kind === "pass" ||
 		(matched.kind === "stop" && matched.depart === undefined)
@@ -438,7 +440,7 @@ function passRed(ctx: RunnerContext, trainId: number): CommandResult {
 	train.wait = null;
 	ctx.log.info(
 		ctx.state.time,
-		`${train.headcode} authorised to pass red signal at ${placeName(graph.nodes[next.node])}`,
+		`${train.headcode} authorised to pass red signal at ${placeName(nodeOf(graph, next.node))}`,
 	);
 	return ok();
 }
@@ -500,8 +502,8 @@ function signallerJoin(ctx: RunnerContext, trainId: number): CommandResult {
 		);
 	}
 
-	const otherFront = other.segs[other.segs.length - 1];
-	const sameDirRear = sameSeg(other.segs[0], next);
+	const otherFront = lastOf(other.segs, "segment");
+	const sameDirRear = sameSeg(firstOf(other.segs, "segment"), next);
 	const oppositeFront = sameSeg(
 		{ node: otherFront.node, entry: otherFront.exit, exit: otherFront.entry },
 		next,
@@ -560,7 +562,7 @@ function skipActions(
 		return fail("Invalid timetable step to skip to.");
 	}
 
-	const target = actions[toIndex];
+	const target = itemAt(actions, toIndex, "action");
 	if (isFinishAction(target)) {
 		return fail("Cannot skip directly to a finish action.");
 	}

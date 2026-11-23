@@ -7,6 +7,7 @@
  * clock of its own.
  */
 
+import { itemAt } from "../util/checked";
 import type { RunState } from "./types";
 
 /** Seconds of timetable time per engine step. */
@@ -20,7 +21,7 @@ export function stepSpeed(speed: number, direction: 1 | -1): number {
 	const i = SPEEDS.findIndex((s) => s >= speed);
 	const at = i === -1 ? SPEEDS.length - 1 : i;
 	const next = Math.min(SPEEDS.length - 1, Math.max(0, at + direction));
-	return SPEEDS[next];
+	return itemAt(SPEEDS, next, "speed");
 }
 
 /** Whether `speed` is one of {@link SPEEDS}. */
