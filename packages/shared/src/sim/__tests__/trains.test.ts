@@ -68,7 +68,7 @@ describe("a train at a signal", () => {
 			kind: "auto",
 		});
 		engine.advance(20);
-		expect(defined(engine.view().signals[0], "signals[0]").aspect).toBe(0);
+		expect(engine.view().signals[0]?.aspect).toBe(0);
 	});
 });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defined } from "../../railway/__tests__/test-helpers";
-import { nodeAt } from "../graph";
+import { nodeAt, nodeOf } from "../graph";
 import {
 	addTrain,
 	CELL,
@@ -17,7 +17,7 @@ const twoSignals = () => line("X->-->-X");
 
 const segNodes = (engine: ReturnType<typeof engineFor>, i = 0) =>
 	defined(engine.state.routes[i], "routes[i]").segs.map(
-		(s) => defined(engine.graph.nodes[s.node], "nodes[s.node]").cell.gx,
+		(s) => nodeOf(engine.graph, s.node).cell.gx,
 	);
 
 describe("setting routes", () => {
@@ -176,18 +176,15 @@ describe("points", () => {
 			kind: "preferred",
 		});
 		expect(result).toEqual({ ok: true });
-		const cells = defined(
-			engine.state.routes[1],
-			"engine.state.routes[1]",
-		).segs.map(
-			(s) => defined(engine.graph.nodes[s.node], "nodes[s.node]").cell,
+		const cells = defined(engine.state.routes[1], "routes[1]").segs.map(
+			(s) => nodeOf(engine.graph, s.node).cell,
 		);
 		expect(cells).toContainEqual({ gx: 3, gy: 1 });
 	});
 
 	const routeCells = (engine: ReturnType<typeof engineFor>) =>
 		defined(engine.state.routes[0], "routes[0]").segs.map(
-			(s) => defined(engine.graph.nodes[s.node], "nodes[s.node]").cell,
+			(s) => nodeOf(engine.graph, s.node).cell,
 		);
 
 	it("runs straight along the main line rather than round a loop as short", () => {
@@ -386,10 +383,7 @@ describe("setting every automatic route", () => {
 	const allNodes = (engine: ReturnType<typeof engineFor>) =>
 		engine.state.routes.map((r) =>
 			r.segs.map((s) => {
-				const { gx, gy } = defined(
-					engine.graph.nodes[s.node],
-					"engine.graph.nodes[s.node]",
-				).cell;
+				const { gx, gy } = nodeOf(engine.graph, s.node).cell;
 				return `${gx},${gy}`;
 			}),
 		);

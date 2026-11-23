@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { defined } from "../../__tests__/test-helpers";
 import {
 	convertRailosRailway,
 	convertRailosTimetable,
@@ -200,7 +199,7 @@ describe("convertRailosTimetable", () => {
 		);
 		expect(warnings).toEqual([]);
 		expect(timetable.services).toHaveLength(6);
-		expect(defined(timetable.services[0], "services[0]").train).toEqual({
+		expect(timetable.services[0]?.train).toEqual({
 			startSpeedKmh: 40,
 			maxSpeedKmh: 120,
 			massTonnes: 200,
@@ -208,14 +207,12 @@ describe("convertRailosTimetable", () => {
 			powerKw: 1500,
 			signallerSpeedKmh: 30,
 		});
-		expect(defined(timetable.services[0], "services[0]").repeat).toEqual({
+		expect(timetable.services[0]?.repeat).toEqual({
 			intervalMinutes: 30,
 			headcodeIncrement: 2,
 			count: 3,
 		});
-		expect(
-			defined(timetable.services[0], "services[0]").actions.map((a) => a.kind),
-		).toEqual([
+		expect(timetable.services[0]?.actions.map((a) => a.kind)).toEqual([
 			"startNew",
 			"stop",
 			"changeDirection",
@@ -227,9 +224,10 @@ describe("convertRailosTimetable", () => {
 			"stop",
 			"finishNewService",
 		]);
-		expect(
-			defined(timetable.services[5], "services[5]").actions.map((a) => a.kind),
-		).toEqual(["startFromShuttle", "finishRemainHere"]);
+		expect(timetable.services[5]?.actions.map((a) => a.kind)).toEqual([
+			"startFromShuttle",
+			"finishRemainHere",
+		]);
 	});
 
 	it("renames a repeated ref, and each run keeps its own warnings", () => {
@@ -251,10 +249,14 @@ describe("convertRailosTimetable", () => {
 
 	it("skips an entry it cannot read, with a warning", () => {
 		const { timetable, warnings } = convertRailosTimetable(
-			ttb("1A01;Bad,06:10;Snt;nonsense", "1A02;Good,06:10;Snt;1-0 2-0,Frh"),
+			ttb(
+				"1A01;Bad,06:10;Snt;nonsense",
+				"1A03;Truncated,06:10;Snt;1-0 2-0,06:12;cms,Frh",
+				"1A02;Good,06:10;Snt;1-0 2-0,Frh",
+			),
 		);
 		expect(timetable.services.map((s) => s.ref)).toEqual(["1A02"]);
-		expect(warnings).toHaveLength(1);
+		expect(warnings).toHaveLength(2);
 	});
 
 	it("refuses text with no start time", () => {

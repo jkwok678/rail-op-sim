@@ -13,6 +13,7 @@ import type { TrackKind } from "../../railway/track/track-data";
 import { createTrackData } from "../../railway/track/track-factory";
 import { applyPatch, type Patch } from "../../util/patch";
 import { createEngine, type Engine } from "../engine";
+import { nodeOf } from "../graph";
 import { startPosition, trainFromSpec } from "../trains";
 import type { Train } from "../types";
 
@@ -345,8 +346,6 @@ export function frontCell(
 	engine: Engine,
 	train: Train,
 ): { gx: number; gy: number } {
-	return defined(
-		engine.graph.nodes[defined(train.segs.at(-1), "train.segs.at(-1)").node],
-		'engine.graph.nodes[defined(train.segs.at(-1), "segs.at(-1)").node]',
-	).cell;
+	return nodeOf(engine.graph, defined(train.segs.at(-1), "train front").node)
+		.cell;
 }

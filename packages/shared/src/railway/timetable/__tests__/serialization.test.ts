@@ -175,17 +175,10 @@ describe("parseTimetable — round trips", () => {
 		]);
 		const parsed = roundTrip(original);
 		expect(parsed).toEqual(original);
+		const first = defined(parsed.services[0], "services[0]");
+		expect(Object.hasOwn(first, "description")).toBe(false);
 		expect(
-			Object.hasOwn(defined(parsed.services[0], "services[0]"), "description"),
-		).toBe(false);
-		expect(
-			Object.hasOwn(
-				defined(
-					defined(parsed.services[0], "parsed.services[0]").actions[1],
-					'defined(parsed.services[0], "services[0]").actions[1]',
-				),
-				"warning",
-			),
+			Object.hasOwn(defined(first.actions[1], "actions[1]"), "warning"),
 		).toBe(false);
 	});
 
@@ -193,9 +186,7 @@ describe("parseTimetable — round trips", () => {
 		const doc = JSON.parse(JSON.stringify(twoServiceTimetable()));
 		const parsed = parseTimetable(doc);
 		expect(parsed.services).not.toBe(doc.services);
-		expect(defined(parsed.services[0], "services[0]").actions).not.toBe(
-			doc.services[0].actions,
-		);
+		expect(parsed.services[0]?.actions).not.toBe(doc.services[0].actions);
 	});
 
 	it("accepts a hand-written clock time in place of seconds", () => {
@@ -220,10 +211,7 @@ describe("parseTimetable — round trips", () => {
 		};
 		const parsed = parseTimetable(doc);
 		expect(parsed.startTime).toBe(parseSimTime("05:00"));
-		const start = defined(
-			defined(parsed.services[0], "parsed.services[0]").actions[0],
-			'defined(parsed.services[0], "services[0]").actions[0]',
-		);
+		const start = defined(parsed.services[0]?.actions[0], "start action");
 		if (start.kind !== "startNew") throw new Error("wrong kind");
 		expect(start.time).toBe(parseSimTime("06:00"));
 	});
