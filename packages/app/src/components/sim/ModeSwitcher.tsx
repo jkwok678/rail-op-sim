@@ -92,7 +92,7 @@ function ModeTip({
 	shortcut,
 }: {
 	children: React.ReactNode;
-	shortcut?: ShortcutId;
+	shortcut?: ShortcutId | undefined;
 }) {
 	// Hooks can't be conditional, so always resolve and decide at render.
 	const keys = useShortcutKeys(shortcut ?? "modeRailway");

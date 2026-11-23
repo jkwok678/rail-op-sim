@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { applyPatch, type Patch } from "../../../util/patch";
 import { parseSimTime } from "../time";
 import type { Action, Service, Timetable } from "../types";
 import {
@@ -19,11 +20,10 @@ function structureCodes(tt: Timetable): string[] {
 }
 
 /** A one-service timetable around `actions`, with a train spec when it needs one. */
-function oneService(
-	actions: Action[],
-	extra: Partial<Service> = {},
-): Timetable {
-	return timetable([{ ref: "1A01", train: { ...TRAIN }, actions, ...extra }]);
+function oneService(actions: Action[], extra: Patch<Service> = {}): Timetable {
+	return timetable([
+		applyPatch({ ref: "1A01", train: { ...TRAIN }, actions }, extra),
+	]);
 }
 
 const startNew: Action = {

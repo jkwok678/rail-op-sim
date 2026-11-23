@@ -198,10 +198,10 @@ const SEEDS: { [K in Action["kind"]]: (s: ActionSeed) => ActionOf<K> } = {
 export function createAction(
 	kind: Action["kind"],
 	options: {
-		time?: number;
-		location?: string;
-		otherRef?: ServiceRef;
-		cell?: Cell;
+		time?: number | undefined;
+		location?: string | undefined;
+		otherRef?: ServiceRef | undefined;
+		cell?: Cell | undefined;
 	} = {},
 ): Action {
 	const cell = options.cell ?? { gx: 0, gy: 0 };

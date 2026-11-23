@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, Plus, Trash } from "@phosphor-icons/react";
 import {
 	type Action,
 	actionTime,
+	applyPatch,
 	createDefaultTrainSpec,
 	createsTrain,
 	formatSimTime,
@@ -9,6 +10,7 @@ import {
 	isStartAction,
 	issuesForService,
 	MAX_SERVICE_REF_LENGTH,
+	type Patch,
 	type Repeat,
 	type Service,
 	type ServiceRef,
@@ -384,8 +386,8 @@ function TrainSpecFields({
 	spec: TrainSpec;
 	onCommit: (spec: TrainSpec) => void;
 }) {
-	const set = (changes: Partial<TrainSpec>): void =>
-		onCommit({ ...spec, ...changes });
+	const set = (changes: Patch<TrainSpec>): void =>
+		onCommit(applyPatch(spec, changes));
 
 	return (
 		<fieldset className="mt-2 border border-border p-2">
@@ -555,7 +557,7 @@ function ActionRow({
 	index: number;
 	expanded: boolean;
 	/** Set on the selected row so a key that moves the selection can scroll to it. */
-	scrollRef?: Ref<HTMLLIElement>;
+	scrollRef?: Ref<HTMLLIElement> | undefined;
 	locations: string[];
 	otherRefs: ServiceRef[];
 	pendingCellPick: PendingCellPick | null;

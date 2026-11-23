@@ -8,7 +8,10 @@
 		"skipLibCheck": true,
 		"verbatimModuleSyntax": true,
 		"noUnusedLocals": true,
-		"noUnusedParameters": true
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noImplicitOverride": true,
+		"exactOptionalPropertyTypes": true
 	},
 	"include": ["./railway.ts"]
 }

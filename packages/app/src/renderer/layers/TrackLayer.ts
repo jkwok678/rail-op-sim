@@ -17,7 +17,7 @@ interface Entry {
 	/** Resolved subtype + aspect the sprite was baked from — needed to swap
 	 * between the themed and the white tintable texture variants. */
 	subtype: string;
-	aspect?: number;
+	aspect: number | undefined;
 }
 
 function cellKey(gx: number, gy: number): string {

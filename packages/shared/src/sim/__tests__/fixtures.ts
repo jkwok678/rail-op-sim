@@ -10,6 +10,7 @@ import type {
 } from "../../railway/timetable/types";
 import type { TrackKind } from "../../railway/track/track-data";
 import { createTrackData } from "../../railway/track/track-factory";
+import { applyPatch, type Patch } from "../../util/patch";
 import { createEngine, type Engine } from "../engine";
 import { startPosition, trainFromSpec } from "../trains";
 import type { Train } from "../types";
@@ -289,9 +290,9 @@ export function timetable(
 export function service(
 	ref: string,
 	actions: Action[],
-	extra: Partial<Service> = {},
+	extra: Patch<Service> = {},
 ): Service {
-	return { ref, train: { ...TRAIN }, actions, ...extra };
+	return applyPatch({ ref, train: { ...TRAIN }, actions }, extra);
 }
 
 export function engineFor(map: Map_, tt: Timetable = timetable([])): Engine {
