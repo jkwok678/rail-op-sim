@@ -477,9 +477,10 @@ function signalAspect(marker: string): number {
 
 /** Which of a two-rail track's rails RailOS's first link pair is: 0 main, 1 secondary. */
 function mainRailOf(rails: readonly Rail[], tag: number): 0 | 1 {
-	const [a, b] = linksOfTag(tag).slice(0, 2).map(linkOf);
-	if (a === undefined || b === undefined) return 1;
-	const first = rails.find((r) => pairKey(r.a, r.b) === pairKey(a, b));
+	const [a, b] = linksOfTag(tag);
+	const first = rails.find(
+		(r) => pairKey(r.a, r.b) === pairKey(linkOf(a), linkOf(b)),
+	);
 	return first && !first.secondary ? 0 : 1;
 }
 
