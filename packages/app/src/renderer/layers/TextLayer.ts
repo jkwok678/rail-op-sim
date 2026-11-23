@@ -29,50 +29,42 @@ export interface TextLayer {
 	destroy(): void;
 }
 
-/**
- * Renders text labels on their own dedicated layer above elements and tracks.
- */
+interface RenderedText {
+	model: MapText;
+	sprite: PixiText;
+	/** Underline/strikethrough lines, or null when the text has neither. */
+	decoration: Graphics | null;
+}
+
 /** Whether a drawn text's box covers the world-space point `(x, y)`. */
 function covers(p: PixiText, x: number, y: number): boolean {
 	// anchor (0, 0.5): x grows right from position, y centred on position.
 	const { x: left, y: middle } = p.position;
 	return (
-		x >= left &&
-		x <= left + p.width &&
-		y >= middle - p.height / 2 &&
-		y <= middle + p.height / 2
+		x >= left && x <= left + p.width && Math.abs(y - middle) <= p.height / 2
 	);
 }
 
+/**
+ * Renders text labels on their own dedicated layer above elements and tracks.
+ */
 export function createTextLayer(): TextLayer {
 	const container = new Container();
 	container.label = "text-layer";
 
-	const textEntries: PixiText[] = [];
-	// Parallel to textEntries: the map Text model each PixiText renders, so
-	// hitTest can map a rendered box back to its model. Kept in sync (pushed
-	// together, cleared together).
-	const textModels: MapText[] = [];
-	// Parallel to textEntries: underline/strikethrough decoration for each text,
-	// or null when it has neither. Pixi TextStyle can't draw these, so we render
-	// them as manual Graphics lines. Removed/destroyed alongside textEntries.
-	const decorations: (Graphics | null)[] = [];
+	const entries: RenderedText[] = [];
 
 	/** Remove and destroy every rendered text and its decoration. */
 	function removeAll() {
-		for (const text of textEntries) {
-			container.removeChild(text);
-			text.destroy();
-		}
-		for (const deco of decorations) {
-			if (deco) {
-				container.removeChild(deco);
-				deco.destroy();
+		for (const { sprite, decoration } of entries) {
+			container.removeChild(sprite);
+			sprite.destroy();
+			if (decoration) {
+				container.removeChild(decoration);
+				decoration.destroy();
 			}
 		}
-		textEntries.length = 0;
-		textModels.length = 0;
-		decorations.length = 0;
+		entries.length = 0;
 	}
 
 	return {
@@ -103,58 +95,56 @@ export function createTextLayer(): TextLayer {
 				pixiText.anchor.set(0, 0.5);
 				pixiText.label = `text-${i}`;
 				container.addChild(pixiText);
-				textEntries.push(pixiText);
-				textModels.push(t);
 
 				// Underline / strikethrough: Pixi TextStyle has no native support,
 				// so draw manual lines across the rendered box. anchor (0, 0.5)
 				// centres the text vertically on position.y and grows right.
+				let decoration: Graphics | null = null;
 				if (font.underline || font.strikethrough) {
-					const deco = new Graphics();
+					decoration = new Graphics();
 					const thickness = Math.max(1, font.pointSize / 8);
 					// Drawn in the text's own local space and then positioned on top of
 					// it, so moveTo() can shift text and decoration together.
 					if (font.strikethrough) {
-						deco
+						decoration
 							.moveTo(0, 0)
 							.lineTo(pixiText.width, 0)
 							.stroke({ color: fill, width: thickness });
 					}
 					if (font.underline) {
 						const uy = pixiText.height / 2 - thickness;
-						deco
+						decoration
 							.moveTo(0, uy)
 							.lineTo(pixiText.width, uy)
 							.stroke({ color: fill, width: thickness });
 					}
-					deco.position.set(x, y);
-					deco.label = `text-deco-${i}`;
-					container.addChild(deco);
-					decorations.push(deco);
-				} else {
-					decorations.push(null);
+					decoration.position.set(x, y);
+					decoration.label = `text-deco-${i}`;
+					container.addChild(decoration);
 				}
+				entries.push({ model: t, sprite: pixiText, decoration });
 			}
 
 			debugLog(
 				"trackLayer",
-				`textLayer sync complete — ${textEntries.length} texts`,
+				`textLayer sync complete — ${entries.length} texts`,
 			);
 		},
 
 		hitTest(worldX, worldY) {
 			// Topmost first — iterate in reverse draw order.
-			for (const [i, p] of [...textEntries.entries()].reverse()) {
-				if (covers(p, worldX, worldY)) return textModels[i] ?? null;
+			for (let i = entries.length - 1; i >= 0; i--) {
+				const entry = entries[i];
+				if (entry && covers(entry.sprite, worldX, worldY)) return entry.model;
 			}
 			return null;
 		},
 
 		moveTo(text, worldX, worldY) {
-			const i = textModels.indexOf(text);
-			if (i === -1) return;
-			textEntries[i]?.position.set(worldX, worldY);
-			decorations[i]?.position.set(worldX, worldY);
+			const entry = entries.find((e) => e.model === text);
+			if (!entry) return;
+			entry.sprite.position.set(worldX, worldY);
+			entry.decoration?.position.set(worldX, worldY);
 		},
 
 		clear() {

@@ -149,9 +149,9 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Description"), {
 			target: { value: "Ashfield to Coton" },
 		});
-		expect(
-			defined(store().timetable.services[0], "services[0]").description,
-		).toBe("Ashfield to Coton");
+		expect(store().timetable.services[0]?.description).toBe(
+			"Ashfield to Coton",
+		);
 	});
 
 	it("offers a train only to a service that creates one", () => {
@@ -160,9 +160,7 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Max (km/h)"), {
 			target: { value: "160" },
 		});
-		expect(
-			defined(store().timetable.services[0], "services[0]").train?.maxSpeedKmh,
-		).toBe(160);
+		expect(store().timetable.services[0]?.train?.maxSpeedKmh).toBe(160);
 		cleanup();
 
 		seed(timetable(), "2B01");
@@ -185,29 +183,19 @@ describe("TimetableEditor service detail", () => {
 		const rows = within(actions).getAllByRole("listitem");
 		expect(rows).toHaveLength(4);
 
+		const secondRow = defined(rows[1], "rows[1]");
 		fireEvent.click(
-			defined(
-				within(defined(rows[1], "rows[1]")).getAllByRole("button")[0],
-				'within(defined(rows[1], "rows[1]")).getAllByRole("button")[0]',
-			),
+			defined(within(secondRow).getAllByRole("button")[0], "row button"),
 		);
 		expect(store().selectedActionIndex).toBe(1);
 
 		fireEvent.click(
 			screen.getByRole("button", { name: "Move Pass a location up" }),
 		);
-		expect(
-			defined(
-				defined(store().timetable.services[0], "store().timetable.services[0]")
-					.actions[1],
-				'defined(store().timetable.services[0], "store().timetable.services[0]").actions[1]',
-			).kind,
-		).toBe("pass");
+		expect(store().timetable.services[0]?.actions[1]?.kind).toBe("pass");
 
 		fireEvent.click(screen.getByRole("button", { name: "Remove Remain here" }));
-		expect(
-			defined(store().timetable.services[0], "services[0]").actions,
-		).toHaveLength(3);
+		expect(store().timetable.services[0]?.actions).toHaveLength(3);
 	});
 
 	it("opens the selected action's form, and arms a cell pick from it", () => {
@@ -258,25 +246,17 @@ describe("TimetableEditor service detail", () => {
 			screen.getByRole("option", { name: "Start a new shuttle train" }),
 		);
 
-		expect(
-			defined(
-				defined(store().timetable.services[2], "store().timetable.services[2]")
-					.actions[0],
-				'defined(store().timetable.services[2], "store().timetable.services[2]").actions[0]',
-			).kind,
-		).toBe("startNewShuttle");
-		expect(
-			defined(store().timetable.services[2], "services[2]").train,
-		).toBeDefined();
+		expect(store().timetable.services[2]?.actions[0]?.kind).toBe(
+			"startNewShuttle",
+		);
+		expect(store().timetable.services[2]?.train).toBeDefined();
 	});
 
 	it("adds, edits and removes a service repeat", () => {
 		seed(timetable(), "1A01");
 		render(<TimetableEditor />);
 		fireEvent.click(screen.getByRole("button", { name: /Add repeat/ }));
-		expect(
-			defined(store().timetable.services[0], "services[0]").repeat,
-		).toEqual({
+		expect(store().timetable.services[0]?.repeat).toEqual({
 			intervalMinutes: 30,
 			headcodeIncrement: 1,
 			count: 1,
@@ -291,9 +271,7 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Count"), {
 			target: { value: "3" },
 		});
-		expect(
-			defined(store().timetable.services[0], "services[0]").repeat,
-		).toEqual({
+		expect(store().timetable.services[0]?.repeat).toEqual({
 			intervalMinutes: 20,
 			headcodeIncrement: 2,
 			count: 3,

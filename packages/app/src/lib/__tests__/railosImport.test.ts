@@ -12,7 +12,6 @@ import {
 	railosDownloadNames,
 } from "#/lib/railosImport";
 import { applyLoadedTimetable } from "#/lib/timetableActions";
-import { defined } from "./test-helpers";
 
 vi.mock("#/lib/documentFile", () => ({ downloadDocument: vi.fn() }));
 vi.mock("#/lib/mapActions", () => ({ applyLoadedMap: vi.fn() }));
@@ -131,21 +130,16 @@ describe("openRailosImport", () => {
 
 		expect(openRailosImport(result, "yaml")).toBe("blocked");
 		expect(order).toEqual(["map", "timetable"]);
-		expect(
-			defined(vi.mocked(applyLoadedMap).mock.calls[0], "calls[0]")[0].format,
-		).toBe("yaml");
-		expect(
-			defined(vi.mocked(applyLoadedTimetable).mock.calls[0], "calls[0]")[0]
-				.format,
-		).toBe("yaml");
+		expect(vi.mocked(applyLoadedMap).mock.calls[0]?.[0].format).toBe("yaml");
+		expect(vi.mocked(applyLoadedTimetable).mock.calls[0]?.[0].format).toBe(
+			"yaml",
+		);
 	});
 
 	it("leaves the timetable alone when only a railway was imported", () => {
 		openRailosImport(convertRailosFiles([source(RLY)]));
 		expect(applyLoadedMap).toHaveBeenCalledOnce();
-		expect(
-			defined(vi.mocked(applyLoadedMap).mock.calls[0], "calls[0]")[0].format,
-		).toBe("json");
+		expect(vi.mocked(applyLoadedMap).mock.calls[0]?.[0].format).toBe("json");
 		expect(applyLoadedTimetable).not.toHaveBeenCalled();
 	});
 });

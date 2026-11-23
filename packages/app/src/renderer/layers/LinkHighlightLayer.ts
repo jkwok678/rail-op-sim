@@ -257,22 +257,30 @@ export function createLinkHighlightLayer(
 		sectionOutlines.setEnd(end, true);
 	}
 
-	function setSectionPreview(coords: Coord[] | null, end: Coord | null): void {
-		sectionPreviewGfx.clear();
-		sectionOutlines.setEnd(end, coords !== null);
+	function strokeSectionPreview(coords: readonly Coord[]): void {
+		const [first, ...rest] = coords;
+		if (!first || rest.length === 0) return;
 		// Stroked through cell centres rather than tinted like a committed
 		// selection: the tint needs a recoloured sprite per cell, which is far
 		// too much to rebuild on every pointermove.
-		const [start, ...rest] = (coords ?? []).map((c) => gridToWorld(c.gx, c.gy));
-		if (!end || !start || rest.length === 0) return;
+		const start = gridToWorld(first.gx, first.gy);
 		sectionPreviewGfx.moveTo(start.x, start.y);
-		for (const { x, y } of rest) sectionPreviewGfx.lineTo(x, y);
+		for (const c of rest) {
+			const { x, y } = gridToWorld(c.gx, c.gy);
+			sectionPreviewGfx.lineTo(x, y);
+		}
 		sectionPreviewGfx.stroke({
 			color: GESTURE_PREVIEW_COLOR,
 			width: PREVIEW_WIDTH,
 			cap: "round",
 			join: "round",
 		});
+	}
+
+	function setSectionPreview(coords: Coord[] | null, end: Coord | null): void {
+		sectionPreviewGfx.clear();
+		sectionOutlines.setEnd(end, coords !== null);
+		if (end && coords) strokeSectionPreview(coords);
 	}
 
 	function setSectionRouteVisible(visible: boolean): void {

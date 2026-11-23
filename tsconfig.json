@@ -15,9 +15,6 @@
     "noImplicitReturns": true,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
-    // Indexed reads are `T | undefined`. Lookups that are invariants go
-    // through itemAt/firstOf/lastOf (packages/shared/src/util/checked.ts)
-    // so a broken one fails loudly.
     "noUncheckedIndexedAccess": true,
     "noUncheckedSideEffectImports": true
   }

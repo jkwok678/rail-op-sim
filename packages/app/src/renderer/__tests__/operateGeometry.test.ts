@@ -70,7 +70,7 @@ describe("operate geometry", () => {
 		});
 		expect(paths).toHaveLength(1);
 		expect(paths[0]).toHaveLength(5);
-		expect(defined(paths[0], "paths[0]")[4]).toEqual({
+		expect(paths[0]?.[4]).toEqual({
 			x: CELL_SIZE + half,
 			y: 0,
 		});
@@ -87,8 +87,8 @@ describe("operate geometry", () => {
 		near(mid, { x: -half / 4, y: half / 4 });
 		// A partial span starts and ends on the curve too.
 		const span = spanPoints({ ...curve, from: 0.5, to: 1 });
-		expect(defined(span[0], "span[0]").x).toBeCloseTo(mid.x);
-		expect(defined(span[0], "span[0]").y).toBeCloseTo(mid.y);
+		expect(span[0]?.x).toBeCloseTo(mid.x);
+		expect(span[0]?.y).toBeCloseTo(mid.y);
 	});
 
 	it("keeps straight and gentle curves through the middle", () => {
@@ -106,20 +106,9 @@ describe("operate geometry", () => {
 		const there = { gx: 9, gy: 4, entry: 3, exit: 5, from: 0, to: 1 };
 		const paths = joinedPaths([here, there]);
 		expect(paths).toHaveLength(2);
-		near(
-			defined(
-				defined(paths[0], "paths[0]").at(-1),
-				'defined(paths[0], "paths[0]").at(-1)',
-			),
-			edgePoint(0, 0, 5),
-		);
-		near(
-			defined(
-				defined(paths[1], "paths[1]")[0],
-				'defined(paths[1], "paths[1]")[0]',
-			),
-			edgePoint(9, 4, 3),
-		);
+		const [first, second] = paths;
+		near(defined(first?.at(-1), "first end"), edgePoint(0, 0, 5));
+		near(defined(second?.[0], "second start"), edgePoint(9, 4, 3));
 	});
 	it("shows only the lamps a signal has", () => {
 		expect(signalLamp(0, 4)).toBe("red");

@@ -77,11 +77,6 @@ const ALL_LABELS: Record<string, string> = {
 };
 
 /** Subtype enum values for each kind (both tracks and elements with subtypes). */
-/** The subtypes offered for `kind`, or none. */
-function subtypesOf(kind: string | null): string[] {
-	return (kind && SUBTYPE_VALUES[kind]) || [];
-}
-
 const SUBTYPE_VALUES: Record<string, string[]> = {
 	// ── Tracks ──
 	straight: Object.values(StraightType),
@@ -183,10 +178,11 @@ export function AddPalette() {
 		}
 	};
 
+	const subtypeValues = selectedKind
+		? (SUBTYPE_VALUES[selectedKind] ?? [])
+		: [];
 	/** Whether the current selectedKind has a subtype grid to show. */
-	const hasSubtypeGrid =
-		selectedKind != null && SUBTYPE_VALUES[selectedKind] != null;
-	const subtypeValues = subtypesOf(selectedKind);
+	const hasSubtypeGrid = subtypeValues.length > 0;
 	const isSingleSubtype = subtypeValues.length === 1;
 
 	// Title for the header bar

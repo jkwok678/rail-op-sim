@@ -51,8 +51,9 @@ describe("guardTicker", () => {
 		const onError = vi.fn();
 		guardTicker(ticker, onError);
 		ticker.update();
-		expect(defined(onError.mock.calls[0], "calls[0]")[0]).toBeInstanceOf(Error);
-		expect(defined(onError.mock.calls[0], "calls[0]")[0].message).toBe("plain");
+		const [err] = defined(onError.mock.calls[0], "calls[0]");
+		expect(err).toBeInstanceOf(Error);
+		expect(err.message).toBe("plain");
 		expect(ticker.stop).toHaveBeenCalled();
 	});
 });

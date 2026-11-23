@@ -104,19 +104,17 @@ export function SectionEditPanel() {
 	// Pre-fill from the first track in the section when the panel becomes visible
 	useEffect(() => {
 		if (!visible) return;
-		const ctrl = PlacementController.instance;
-		if (!ctrl) return;
 		const first = sectionTracks[0];
-		if (!first) return;
-		const track = ctrl.map.getTrackAt(first.gx, first.gy);
-		if (track) {
-			setMainSpeed(String(track.getTrackMainSpeed()));
-			// Main length shows total section length, not per-track
-			setMainLength(String(totalLength));
-			if (hasSecondaryPath(track.data.kind)) {
-				setSecondarySpeed(String(track.getTrackSecondarySpeed()));
-				setSecondaryLength(String(track.getTrackSecondaryLength()));
-			}
+		const track = first
+			? PlacementController.instance?.map.getTrackAt(first.gx, first.gy)
+			: null;
+		if (!track) return;
+		setMainSpeed(String(track.getTrackMainSpeed()));
+		// Main length shows total section length, not per-track
+		setMainLength(String(totalLength));
+		if (hasSecondaryPath(track.data.kind)) {
+			setSecondarySpeed(String(track.getTrackSecondarySpeed()));
+			setSecondaryLength(String(track.getTrackSecondaryLength()));
 		}
 	}, [visible, sectionTracks, totalLength]);
 
