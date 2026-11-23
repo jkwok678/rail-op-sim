@@ -1,5 +1,4 @@
 import type { Map as Map_ } from "@rail-op-sim/shared";
-import { itemAt } from "@rail-op-sim/shared";
 import { Container, Graphics, type Sprite } from "pixi.js";
 import { gridToWorld } from "#/lib/grid";
 import {
@@ -261,17 +260,13 @@ export function createLinkHighlightLayer(
 	function setSectionPreview(coords: Coord[] | null, end: Coord | null): void {
 		sectionPreviewGfx.clear();
 		sectionOutlines.setEnd(end, coords !== null);
-		if (!end || !coords || coords.length < 2) return;
-
 		// Stroked through cell centres rather than tinted like a committed
 		// selection: the tint needs a recoloured sprite per cell, which is far
 		// too much to rebuild on every pointermove.
-		const first = gridToWorld(itemAt(coords, 0).gx, itemAt(coords, 0).gy);
-		sectionPreviewGfx.moveTo(first.x, first.y);
-		for (let i = 1; i < coords.length; i++) {
-			const { x, y } = gridToWorld(itemAt(coords, i).gx, itemAt(coords, i).gy);
-			sectionPreviewGfx.lineTo(x, y);
-		}
+		const [start, ...rest] = (coords ?? []).map((c) => gridToWorld(c.gx, c.gy));
+		if (!end || !start || rest.length === 0) return;
+		sectionPreviewGfx.moveTo(start.x, start.y);
+		for (const { x, y } of rest) sectionPreviewGfx.lineTo(x, y);
 		sectionPreviewGfx.stroke({
 			color: GESTURE_PREVIEW_COLOR,
 			width: PREVIEW_WIDTH,

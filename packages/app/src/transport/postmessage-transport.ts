@@ -1,4 +1,3 @@
-import { itemAt } from "@rail-op-sim/shared";
 import type { SimTransport } from "./types";
 
 /**
@@ -50,12 +49,13 @@ export function postMessageTransport<In, Out>(
 			const listeners = types.map((type) => {
 				const listener = (e: Event) => handler(describeFailure(type, e));
 				port.addEventListener(type, listener);
-				return listener;
+				return { type, listener };
 			});
-			return () =>
-				types.forEach((type, i) => {
-					port.removeEventListener(type, itemAt(listeners, i));
-				});
+			return () => {
+				for (const { type, listener } of listeners) {
+					port.removeEventListener(type, listener);
+				}
+			};
 		},
 		close,
 	};

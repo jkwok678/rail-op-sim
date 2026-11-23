@@ -1,11 +1,11 @@
 import {
 	createEmptyTimetable,
-	itemAt,
 	parseSimTime,
 	type Timetable,
 } from "@rail-op-sim/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "../../lib/__tests__/test-helpers";
 
 /**
  * The store is exercised with no map: the railway half of validation is the
@@ -108,7 +108,9 @@ describe("services", () => {
 		store().selectService("1A01");
 		store().updateService("1A01", { ref: "1A99" }, null);
 		expect(store().selectedServiceRef).toBe("1A99");
-		expect(itemAt(store().timetable.services, 0).ref).toBe("1A99");
+		expect(defined(store().timetable.services[0], "services[0]").ref).toBe(
+			"1A99",
+		);
 	});
 });
 
@@ -122,7 +124,9 @@ describe("actions", () => {
 			1,
 		);
 		expect(
-			itemAt(store().timetable.services, 0).actions.map((a) => a.kind),
+			defined(store().timetable.services[0], "services[0]").actions.map(
+				(a) => a.kind,
+			),
 		).toEqual(["startNew", "changeDirection", "finishNewService"]);
 	});
 
@@ -141,7 +145,9 @@ describe("actions", () => {
 		);
 		// 04:00 is before the timetable's own 05:00 start.
 		expect(codes()).toContain("start-before-timetable");
-		expect(itemAt(store().timetable.services, 1).actions).toHaveLength(2);
+		expect(
+			defined(store().timetable.services[1], "services[1]").actions,
+		).toHaveLength(2);
 	});
 
 	it("reorders actions and keeps the moved one selected", () => {
@@ -149,7 +155,9 @@ describe("actions", () => {
 		store().selectAction(0);
 		store().moveAction("1A01", 0, 1, null);
 		expect(
-			itemAt(store().timetable.services, 0).actions.map((a) => a.kind),
+			defined(store().timetable.services[0], "services[0]").actions.map(
+				(a) => a.kind,
+			),
 		).toEqual(["finishNewService", "startNew"]);
 		expect(store().selectedActionIndex).toBe(1);
 		// The service now finishes before it starts, which is exactly what the
@@ -161,7 +169,9 @@ describe("actions", () => {
 		store().replaceTimetable(twoServices(), null);
 		store().moveAction("1A01", 5, 0, null);
 		expect(
-			itemAt(store().timetable.services, 0).actions.map((a) => a.kind),
+			defined(store().timetable.services[0], "services[0]").actions.map(
+				(a) => a.kind,
+			),
 		).toEqual(["startNew", "finishNewService"]);
 	});
 
@@ -169,7 +179,9 @@ describe("actions", () => {
 		store().replaceTimetable(twoServices(), null);
 		store().moveAction("1A01", 0, 9, null);
 		expect(
-			itemAt(store().timetable.services, 0).actions.map((a) => a.kind),
+			defined(store().timetable.services[0], "services[0]").actions.map(
+				(a) => a.kind,
+			),
 		).toEqual(["finishNewService", "startNew"]);
 	});
 
@@ -223,7 +235,11 @@ describe("picking a cell on the map", () => {
 		});
 		store().completeCellPick({ gx: 4, gy: 2 }, null);
 
-		const action = itemAt(itemAt(store().timetable.services, 0).actions, 0);
+		const action = defined(
+			defined(store().timetable.services[0], "store().timetable.services[0]")
+				.actions[0],
+			'defined(store().timetable.services[0], "store().timetable.services[0]").actions[0]',
+		);
 		if (action.kind !== "startNew") throw new Error("wrong kind");
 		expect(action.front).toEqual({ gx: 4, gy: 2 });
 		expect(action.rear).toEqual({ gx: 0, gy: 0 });
@@ -244,7 +260,11 @@ describe("picking a cell on the map", () => {
 		});
 		store().completeCellPick({ gx: 5, gy: 0 }, null);
 
-		const action = itemAt(itemAt(store().timetable.services, 1).actions, 1);
+		const action = defined(
+			defined(store().timetable.services[1], "store().timetable.services[1]")
+				.actions[1],
+			'defined(store().timetable.services[1], "store().timetable.services[1]").actions[1]',
+		);
 		if (action.kind !== "finishExit") throw new Error("wrong kind");
 		expect(action.exits).toEqual([{ gx: 5, gy: 0 }]);
 	});
@@ -271,7 +291,11 @@ describe("picking a cell on the map", () => {
 		});
 		store().completeCellPick({ gx: 9, gy: 9 }, null);
 
-		const action = itemAt(itemAt(store().timetable.services, 1).actions, 1);
+		const action = defined(
+			defined(store().timetable.services[1], "store().timetable.services[1]")
+				.actions[1],
+			'defined(store().timetable.services[1], "store().timetable.services[1]").actions[1]',
+		);
 		if (action.kind !== "finishExit") throw new Error("wrong kind");
 		expect(action.exits).toEqual([
 			{ gx: 9, gy: 9 },
@@ -288,7 +312,9 @@ describe("picking a cell on the map", () => {
 			field: "rear",
 		});
 		store().completeCellPick({ gx: 3, gy: 3 }, null);
-		expect(itemAt(store().timetable.services, 0).actions[1]).toEqual({
+		expect(
+			defined(store().timetable.services[0], "services[0]").actions[1],
+		).toEqual({
 			kind: "finishNewService",
 			time: parseSimTime("06:30"),
 			nextRef: "2B01",

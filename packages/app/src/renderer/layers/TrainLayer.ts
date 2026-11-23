@@ -1,5 +1,4 @@
 import type { SimView, TrainView } from "@rail-op-sim/shared";
-import { itemAt, lastOf } from "@rail-op-sim/shared";
 import { Container, Graphics, Text } from "pixi.js";
 import { CELL_SIZE } from "#/lib/grid";
 import {
@@ -31,8 +30,10 @@ function strokePolyline(
 	points: readonly { x: number; y: number }[],
 	color: number,
 ): void {
-	bodies.moveTo(itemAt(points, 0).x, itemAt(points, 0).y);
-	for (const p of points.slice(1)) bodies.lineTo(p.x, p.y);
+	const [first, ...rest] = points;
+	if (!first) return;
+	bodies.moveTo(first.x, first.y);
+	for (const p of rest) bodies.lineTo(p.x, p.y);
 	bodies.stroke({ width: BODY_WIDTH, color, cap: "butt", join: "miter" });
 }
 
@@ -112,8 +113,9 @@ export function createTrainLayer(): TrainLayer {
 		text.rotation = anchor.angle;
 		drawHeadcodePlate(bodies, train, anchor);
 
-		const head = lastOf(pieces);
-		strokePolyline(bodies, pathTail(head, BODY_WIDTH * 0.35), 0xdc2626);
+		const head = pieces.at(-1);
+		if (head)
+			strokePolyline(bodies, pathTail(head, BODY_WIDTH * 0.35), 0xdc2626);
 	};
 
 	return {

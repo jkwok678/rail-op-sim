@@ -1,4 +1,3 @@
-import { firstOf, itemAt, lastOf } from "@rail-op-sim/shared";
 /**
  * Where the timetable list keys land, decided from the document alone.
  *
@@ -35,9 +34,9 @@ export function stepService(
 ): string | null {
 	if (refs.length === 0) return null;
 	const index = selected === null ? -1 : refs.indexOf(selected);
-	if (index === -1) return direction === 1 ? firstOf(refs) : lastOf(refs);
+	if (index === -1) return (direction === 1 ? refs[0] : refs.at(-1)) ?? null;
 	if (refs.length === 1) return null;
-	return itemAt(refs, (index + direction + refs.length) % refs.length);
+	return refs[(index + direction + refs.length) % refs.length] ?? null;
 }
 
 /**

@@ -1,11 +1,4 @@
-import {
-	firstOf,
-	itemAt,
-	lastOf,
-	linkOffset,
-	type TrainView,
-	type ViewSeg,
-} from "@rail-op-sim/shared";
+import { linkOffset, type TrainView, type ViewSeg } from "@rail-op-sim/shared";
 import { CELL_SIZE, gridToWorld } from "#/lib/grid";
 
 /**
@@ -73,68 +66,85 @@ export function segPath(seg: ViewSeg): Point[] {
 	return points;
 }
 
-/** The point `d` along a polyline whose cumulative lengths are `lengths`. */
-function atDistance(points: Point[], lengths: number[], d: number): Point {
-	for (let i = 1; i < points.length; i++) {
-		if (d <= itemAt(lengths, i) || i === points.length - 1) {
-			const span = itemAt(lengths, i) - itemAt(lengths, i - 1);
-			const t = span > 0 ? (d - itemAt(lengths, i - 1)) / span : 0;
-			return lerp(
-				itemAt(points, i - 1),
-				itemAt(points, i),
-				Math.min(1, Math.max(0, t)),
-			);
-		}
-	}
-	return firstOf(points);
+/** A point on a polyline, with how far along the polyline it is. */
+interface Station {
+	point: Point;
+	at: number;
 }
 
-function cumulative(points: Point[]): number[] {
-	const lengths = [0];
-	for (let i = 1; i < points.length; i++) {
-		lengths.push(
-			itemAt(lengths, i - 1) + dist(itemAt(points, i - 1), itemAt(points, i)),
-		);
+function measure(points: readonly Point[]): Station[] {
+	let at = 0;
+	let prev: Point | undefined;
+	return points.map((point) => {
+		if (prev) at += dist(prev, point);
+		prev = point;
+		return { point, at };
+	});
+}
+
+const lengthOf = (stations: readonly Station[]): number =>
+	stations.at(-1)?.at ?? 0;
+
+/** The point `d` along a measured polyline, clamped to its ends. */
+function atDistance(stations: readonly Station[], d: number): Point {
+	const [first, ...rest] = stations;
+	if (!first) throw new Error("an empty polyline has no points");
+	const last = rest.at(-1);
+	let prev = first;
+	for (const s of rest) {
+		if (d <= s.at || s === last) {
+			const span = s.at - prev.at;
+			const t = span > 0 ? (d - prev.at) / span : 0;
+			return lerp(prev.point, s.point, Math.min(1, Math.max(0, t)));
+		}
+		prev = s;
 	}
-	return lengths;
+	return first.point;
+}
+
+/** The inner points of a polyline that lie strictly between `start` and `end`. */
+function innerPoints(
+	stations: readonly Station[],
+	start: number,
+	end: number,
+): Point[] {
+	return stations
+		.slice(1, -1)
+		.filter((s) => s.at > start + 1e-6 && s.at < end - 1e-6)
+		.map((s) => s.point);
 }
 
 /** The point `t` (0–1) of the way along a segment, measured along its rail. */
 export function pointAlong(seg: ViewSeg, t: number): Point {
-	const points = segPath(seg);
-	const lengths = cumulative(points);
-	return atDistance(points, lengths, t * lastOf(lengths));
+	const stations = measure(segPath(seg));
+	return atDistance(stations, t * lengthOf(stations));
 }
 
 /** The polyline covering the span `from`–`to` of a segment, along its rail. */
 export function spanPoints(seg: ViewSeg): Point[] {
-	const points = segPath(seg);
-	const lengths = cumulative(points);
-	const total = lastOf(lengths);
+	const stations = measure(segPath(seg));
+	const total = lengthOf(stations);
 	const start = seg.from * total;
 	const end = seg.to * total;
-	const out = [atDistance(points, lengths, start)];
-	for (let i = 1; i < points.length - 1; i++) {
-		if (itemAt(lengths, i) > start + 1e-6 && itemAt(lengths, i) < end - 1e-6) {
-			out.push(itemAt(points, i));
-		}
-	}
-	out.push(atDistance(points, lengths, end));
-	return out;
+	return [
+		atDistance(stations, start),
+		...innerPoints(stations, start, end),
+		atDistance(stations, end),
+	];
 }
 
 /** The last `d` of a polyline, as a polyline — all of it if it is shorter. */
 export function pathTail(points: Point[], d: number): Point[] {
-	const lengths = cumulative(points);
-	const total = lastOf(lengths);
-	if (points.length < 2 || d >= total) return points;
+	const stations = measure(points);
+	const total = lengthOf(stations);
+	const end = points.at(-1);
+	if (!end || points.length < 2 || d >= total) return points;
 	const start = total - d;
-	const out = [atDistance(points, lengths, start)];
-	for (let i = 1; i < points.length - 1; i++) {
-		if (itemAt(lengths, i) > start + 1e-6) out.push(itemAt(points, i));
-	}
-	out.push(lastOf(points));
-	return out;
+	return [
+		atDistance(stations, start),
+		...innerPoints(stations, start, Number.POSITIVE_INFINITY),
+		end,
+	];
 }
 
 /**
@@ -144,28 +154,30 @@ export function pathTail(points: Point[], d: number): Point[] {
 export function labelAnchor(
 	paths: Point[][],
 ): { x: number; y: number; angle: number } | null {
-	let best: Point[] | null = null;
-	let bestLength = -1;
+	let best: Station[] = [];
 	for (const points of paths) {
 		if (points.length < 2) continue;
-		const lengths = cumulative(points);
-		const length = lastOf(lengths);
-		if (length > bestLength) {
-			best = points;
-			bestLength = length;
+		const stations = measure(points);
+		if (best.length === 0 || lengthOf(stations) > lengthOf(best)) {
+			best = stations;
 		}
 	}
-	if (!best) return null;
-	const lengths = cumulative(best);
-	const mid = bestLength / 2;
-	let leg = 1;
-	while (leg < best.length - 1 && itemAt(lengths, leg) < mid) leg++;
-	const a = itemAt(best, leg - 1);
-	const b = itemAt(best, leg);
-	let angle = Math.atan2(b.y - a.y, b.x - a.x);
+	const [first, ...rest] = best;
+	if (!first) return null;
+	const mid = lengthOf(best) / 2;
+	// The leg the middle falls on: up to the first point at or past it.
+	const last = rest.at(-1);
+	let a = first;
+	let b = first;
+	for (const s of rest) {
+		b = s;
+		if (s.at >= mid || s === last) break;
+		a = s;
+	}
+	let angle = Math.atan2(b.point.y - a.point.y, b.point.x - a.point.x);
 	if (angle > Math.PI / 2) angle -= Math.PI;
 	else if (angle <= -Math.PI / 2) angle += Math.PI;
-	const at = atDistance(best, lengths, mid);
+	const at = atDistance(best, mid);
 	return { x: at.x, y: at.y, angle };
 }
 
@@ -185,8 +197,9 @@ export function joinedPaths(segs: readonly ViewSeg[]): Point[][] {
 	let current: Point[] = [];
 	for (const seg of segs) {
 		const span = spanPoints(seg);
-		const last = current[current.length - 1];
-		if (last && !samePoint(last, itemAt(span, 0))) {
+		const last = current.at(-1);
+		const [head] = span;
+		if (last && head && !samePoint(last, head)) {
 			paths.push(current);
 			current = [];
 		}

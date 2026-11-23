@@ -1,7 +1,7 @@
-import { itemAt } from "@rail-op-sim/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DirectionTool } from "#/editor/tools/DirectionTool";
 import { useEditorStore } from "#/store/editor-store";
+import { defined } from "../../../lib/__tests__/test-helpers";
 import {
 	addLine,
 	at,
@@ -91,9 +91,9 @@ describe("DirectionTool", () => {
 	it("previews the route from the pending start", () => {
 		tool.click(at(0, 0));
 		tool.preview(at(3, 0));
-		const [map, path, end] = itemAt(
-			h.layers.direction.setRoutePreview.mock.calls,
-			0,
+		const [map, path, end] = defined(
+			h.layers.direction.setRoutePreview.mock.calls[0],
+			"calls[0]",
 		);
 		expect(map).toBe(h.map);
 		expect(path).toHaveLength(4);

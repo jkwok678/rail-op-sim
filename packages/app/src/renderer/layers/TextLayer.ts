@@ -1,5 +1,4 @@
 import type { Map as Map_, Text as MapText } from "@rail-op-sim/shared";
-import { itemAt } from "@rail-op-sim/shared";
 import { Container, Graphics, Text as PixiText, TextStyle } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
 import { gridToWorld } from "#/lib/grid";
@@ -33,6 +32,18 @@ export interface TextLayer {
 /**
  * Renders text labels on their own dedicated layer above elements and tracks.
  */
+/** Whether a drawn text's box covers the world-space point `(x, y)`. */
+function covers(p: PixiText, x: number, y: number): boolean {
+	// anchor (0, 0.5): x grows right from position, y centred on position.
+	const { x: left, y: middle } = p.position;
+	return (
+		x >= left &&
+		x <= left + p.width &&
+		y >= middle - p.height / 2 &&
+		y <= middle + p.height / 2
+	);
+}
+
 export function createTextLayer(): TextLayer {
 	const container = new Container();
 	container.label = "text-layer";
@@ -76,8 +87,7 @@ export function createTextLayer(): TextLayer {
 			removeAll();
 
 			const textList = map.getTextList();
-			for (let i = 0; i < textList.length; i++) {
-				const t = itemAt(textList, i);
+			for (const [i, t] of textList.entries()) {
 				const font = t.getFont();
 				const fill = font.color ? normalizeCssColor(font.color) : textColor;
 				const style = new TextStyle({
@@ -134,21 +144,8 @@ export function createTextLayer(): TextLayer {
 
 		hitTest(worldX, worldY) {
 			// Topmost first — iterate in reverse draw order.
-			for (let i = textEntries.length - 1; i >= 0; i--) {
-				const p = itemAt(textEntries, i);
-				// anchor (0, 0.5): x grows right from position, y centred on position.
-				const left = p.position.x;
-				const right = p.position.x + p.width;
-				const top = p.position.y - p.height / 2;
-				const bottom = p.position.y + p.height / 2;
-				if (
-					worldX >= left &&
-					worldX <= right &&
-					worldY >= top &&
-					worldY <= bottom
-				) {
-					return itemAt(textModels, i);
-				}
+			for (const [i, p] of [...textEntries.entries()].reverse()) {
+				if (covers(p, worldX, worldY)) return textModels[i] ?? null;
 			}
 			return null;
 		},
@@ -156,7 +153,7 @@ export function createTextLayer(): TextLayer {
 		moveTo(text, worldX, worldY) {
 			const i = textModels.indexOf(text);
 			if (i === -1) return;
-			itemAt(textEntries, i).position.set(worldX, worldY);
+			textEntries[i]?.position.set(worldX, worldY);
 			decorations[i]?.position.set(worldX, worldY);
 		},
 

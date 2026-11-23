@@ -3,7 +3,6 @@ import {
 	DEFAULT_MAIN_SPEED,
 	formatImperialLength,
 	hasSecondaryPath,
-	itemAt,
 	round1,
 	TRACK_COLOR_BOTH,
 	TRACK_COLOR_LENGTH,
@@ -107,7 +106,8 @@ export function SectionEditPanel() {
 		if (!visible) return;
 		const ctrl = PlacementController.instance;
 		if (!ctrl) return;
-		const first = itemAt(sectionTracks, 0);
+		const first = sectionTracks[0];
+		if (!first) return;
 		const track = ctrl.map.getTrackAt(first.gx, first.gy);
 		if (track) {
 			setMainSpeed(String(track.getTrackMainSpeed()));

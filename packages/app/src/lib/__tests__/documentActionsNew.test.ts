@@ -1,6 +1,5 @@
 import {
 	createEmptyTimetable,
-	itemAt,
 	Map as Map_,
 	parseSimTime,
 	type Service,
@@ -9,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PlacementController } from "#/editor/PlacementController";
 import { clearTimetable, newRailway } from "#/lib/documentActions";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "./test-helpers";
 
 const loadFromData = vi.fn();
 const stub = { map: new Map_(), loadFromData };
@@ -53,7 +53,7 @@ describe("new / clear", () => {
 	it("newRailway loads an empty map and empties the timetable", () => {
 		newRailway();
 		expect(loadFromData).toHaveBeenCalledOnce();
-		const [data] = itemAt(loadFromData.mock.calls, 0);
+		const [data] = defined(loadFromData.mock.calls[0], "calls[0]");
 		expect(data.tracks).toEqual([]);
 		expect(data.texts).toEqual([]);
 		expect(useTimetableStore.getState().timetable.services).toEqual([]);

@@ -1,5 +1,4 @@
 import {
-	itemAt,
 	linkOffset,
 	type Map as Map_,
 	type PreferredDirection,
@@ -270,10 +269,9 @@ export function createDirectionLayer(): DirectionLayer {
 				map,
 				path,
 			);
-			for (let i = 0; i < path.length; i++) {
+			for (const [i, track] of path.entries()) {
 				const leg = legs[i];
 				if (!leg) continue;
-				const track = itemAt(path, i);
 				const { x, y } = gridToWorld(
 					track.getLocationX(),
 					track.getLocationY(),

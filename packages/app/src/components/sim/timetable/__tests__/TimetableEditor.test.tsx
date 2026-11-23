@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
+
 import {
 	createEmptyTimetable,
-	itemAt,
 	parseSimTime,
 	type Timetable,
 	validateTimetable,
@@ -16,6 +16,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { TimetableEditor } from "#/components/sim/timetable/TimetableEditor";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "../../../../lib/__tests__/test-helpers";
 
 /**
  * Rendered with no placement controller, so there is no map: what matters here
@@ -148,9 +149,9 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Description"), {
 			target: { value: "Ashfield to Coton" },
 		});
-		expect(itemAt(store().timetable.services, 0).description).toBe(
-			"Ashfield to Coton",
-		);
+		expect(
+			defined(store().timetable.services[0], "services[0]").description,
+		).toBe("Ashfield to Coton");
 	});
 
 	it("offers a train only to a service that creates one", () => {
@@ -159,7 +160,9 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Max (km/h)"), {
 			target: { value: "160" },
 		});
-		expect(itemAt(store().timetable.services, 0).train?.maxSpeedKmh).toBe(160);
+		expect(
+			defined(store().timetable.services[0], "services[0]").train?.maxSpeedKmh,
+		).toBe(160);
 		cleanup();
 
 		seed(timetable(), "2B01");
@@ -182,18 +185,29 @@ describe("TimetableEditor service detail", () => {
 		const rows = within(actions).getAllByRole("listitem");
 		expect(rows).toHaveLength(4);
 
-		fireEvent.click(itemAt(within(itemAt(rows, 1)).getAllByRole("button"), 0));
+		fireEvent.click(
+			defined(
+				within(defined(rows[1], "rows[1]")).getAllByRole("button")[0],
+				'within(defined(rows[1], "rows[1]")).getAllByRole("button")[0]',
+			),
+		);
 		expect(store().selectedActionIndex).toBe(1);
 
 		fireEvent.click(
 			screen.getByRole("button", { name: "Move Pass a location up" }),
 		);
-		expect(itemAt(itemAt(store().timetable.services, 0).actions, 1).kind).toBe(
-			"pass",
-		);
+		expect(
+			defined(
+				defined(store().timetable.services[0], "store().timetable.services[0]")
+					.actions[1],
+				'defined(store().timetable.services[0], "store().timetable.services[0]").actions[1]',
+			).kind,
+		).toBe("pass");
 
 		fireEvent.click(screen.getByRole("button", { name: "Remove Remain here" }));
-		expect(itemAt(store().timetable.services, 0).actions).toHaveLength(3);
+		expect(
+			defined(store().timetable.services[0], "services[0]").actions,
+		).toHaveLength(3);
 	});
 
 	it("opens the selected action's form, and arms a cell pick from it", () => {
@@ -225,7 +239,7 @@ describe("TimetableEditor service detail", () => {
 
 	it("says so when the selected service has no problems", () => {
 		const tt = timetable();
-		tt.services = [itemAt(tt.services, 0)];
+		tt.services = [defined(tt.services[0], "services[0]")];
 		seed(tt, "1A01");
 		render(<TimetableEditor />);
 		expect(screen.getByText("No problems.")).toBeDefined();
@@ -235,24 +249,34 @@ describe("TimetableEditor service detail", () => {
 		Element.prototype.scrollIntoView = () => {};
 		seed(timetable(), "3C01");
 		render(<TimetableEditor />);
-		expect(itemAt(store().timetable.services, 2).train).toBeUndefined();
+		expect(
+			defined(store().timetable.services[2], "services[2]").train,
+		).toBeUndefined();
 
 		fireEvent.click(screen.getByRole("combobox", { name: "Add an action" }));
 		fireEvent.click(
 			screen.getByRole("option", { name: "Start a new shuttle train" }),
 		);
 
-		expect(itemAt(itemAt(store().timetable.services, 2).actions, 0).kind).toBe(
-			"startNewShuttle",
-		);
-		expect(itemAt(store().timetable.services, 2).train).toBeDefined();
+		expect(
+			defined(
+				defined(store().timetable.services[2], "store().timetable.services[2]")
+					.actions[0],
+				'defined(store().timetable.services[2], "store().timetable.services[2]").actions[0]',
+			).kind,
+		).toBe("startNewShuttle");
+		expect(
+			defined(store().timetable.services[2], "services[2]").train,
+		).toBeDefined();
 	});
 
 	it("adds, edits and removes a service repeat", () => {
 		seed(timetable(), "1A01");
 		render(<TimetableEditor />);
 		fireEvent.click(screen.getByRole("button", { name: /Add repeat/ }));
-		expect(itemAt(store().timetable.services, 0).repeat).toEqual({
+		expect(
+			defined(store().timetable.services[0], "services[0]").repeat,
+		).toEqual({
 			intervalMinutes: 30,
 			headcodeIncrement: 1,
 			count: 1,
@@ -267,13 +291,17 @@ describe("TimetableEditor service detail", () => {
 		fireEvent.change(screen.getByLabelText("Count"), {
 			target: { value: "3" },
 		});
-		expect(itemAt(store().timetable.services, 0).repeat).toEqual({
+		expect(
+			defined(store().timetable.services[0], "services[0]").repeat,
+		).toEqual({
 			intervalMinutes: 20,
 			headcodeIncrement: 2,
 			count: 3,
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Remove repeat" }));
-		expect(itemAt(store().timetable.services, 0).repeat).toBeUndefined();
+		expect(
+			defined(store().timetable.services[0], "services[0]").repeat,
+		).toBeUndefined();
 	});
 });

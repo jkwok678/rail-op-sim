@@ -1,13 +1,10 @@
-import {
-	createEmptyTimetable,
-	itemAt,
-	parseSimTime,
-} from "@rail-op-sim/shared";
+import { createEmptyTimetable, parseSimTime } from "@rail-op-sim/shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadTimetable } from "#/lib/timetableActions";
 import { pickAndReadTimetableFile } from "#/lib/timetableFile";
 import { useEditorStore } from "#/store/editor-store";
 import { useTimetableStore } from "#/store/timetable-store";
+import { defined } from "./test-helpers";
 
 vi.mock("#/lib/timetableFile", () => ({
 	downloadTimetable: vi.fn(),
@@ -67,7 +64,7 @@ describe("loadTimetable", () => {
 
 		const message = await loadTimetable();
 		expect(message).toContain("Operate is unavailable");
-		const first = itemAt(useTimetableStore.getState().issues, 0);
+		const first = defined(useTimetableStore.getState().issues[0], "issues[0]");
 		expect(message).toContain(first.message);
 	});
 });
