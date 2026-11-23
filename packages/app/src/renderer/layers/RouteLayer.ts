@@ -1,4 +1,5 @@
 import type { RouteKind, SimView } from "@rail-op-sim/shared";
+import { itemAt } from "@rail-op-sim/shared";
 import { Container, Graphics } from "pixi.js";
 import { CELL_SIZE } from "#/lib/grid";
 import { joinedPaths, type Point } from "#/renderer/operateGeometry";
@@ -18,7 +19,7 @@ export interface RouteLayer {
 }
 
 function strokePath(g: Graphics, points: Point[]): void {
-	g.moveTo(points[0].x, points[0].y);
+	g.moveTo(itemAt(points, 0).x, itemAt(points, 0).y);
 	for (const p of points.slice(1)) g.lineTo(p.x, p.y);
 }
 

@@ -1,4 +1,4 @@
-import { Platform, type Text } from "@rail-op-sim/shared";
+import { itemAt, Platform, type Text } from "@rail-op-sim/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TextTool } from "#/editor/tools/TextTool";
 import { gridToWorld } from "#/lib/grid";
@@ -28,7 +28,7 @@ describe("TextTool", () => {
 	/** Place a text and make the stub layer report it under every pointer. */
 	function placeHitText(): Text {
 		tool.placeText(64, -64, "Hello", FONT);
-		const text = h.map.getTextList()[0];
+		const text = itemAt(h.map.getTextList(), 0);
 		h.layers.text.hitTest.mockReturnValue(text);
 		return text;
 	}
@@ -65,7 +65,7 @@ describe("TextTool", () => {
 
 	it("places text at fractional grid coordinates that round-trip to the pixel", () => {
 		tool.placeText(40, -16, "Hi", FONT);
-		const text = h.map.getTextList()[0];
+		const text = itemAt(h.map.getTextList(), 0);
 		expect(gridToWorld(text.getLocationX(), text.getLocationY())).toEqual({
 			x: 40,
 			y: -16,

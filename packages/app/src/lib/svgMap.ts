@@ -1,4 +1,4 @@
-import { SignalAspect } from "@rail-op-sim/shared";
+import { SignalAspect, type SignalAspectValue } from "@rail-op-sim/shared";
 
 /**
  * Maps every track subtype (enum string value) to its SVG filename in
@@ -204,7 +204,7 @@ export const SHUNT_SVG_MAP: Record<string, string> = {
 /**
  * Maps each aspect value to its preview SVG filename (used in the palette).
  */
-export const ASPECT_SVG_MAP: Record<number, string> = {
+export const ASPECT_SVG_MAP: Record<SignalAspectValue, string> = {
 	[SignalAspect.FOUR_ASPECT]: "aspect4.svg",
 	[SignalAspect.THREE_ASPECT]: "aspect3.svg",
 	[SignalAspect.TWO_ASPECT]: "aspect2.svg",
@@ -216,7 +216,10 @@ export const ASPECT_SVG_MAP: Record<number, string> = {
  * and aspect. Shunt signals use the shunt SVG; all others use the normal
  * signal SVG.
  */
-export function svgFilenameForSignal(subtype: string, aspect: number): string {
+export function svgFilenameForSignal(
+	subtype: string,
+	aspect: number,
+): string | undefined {
 	if (aspect === SignalAspect.SHUNT) {
 		return SHUNT_SVG_MAP[subtype] ?? SVG_MAP[subtype];
 	}

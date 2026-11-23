@@ -1,6 +1,7 @@
 import {
 	convertRailosRailway,
 	convertRailosTimetable,
+	itemAt,
 	type SerializedMap,
 	serializeMap,
 	type Timetable,
@@ -69,7 +70,7 @@ export function convertRailosFiles(files: RailosSourceFile[]): RailosImport {
 	const other = files.filter((f) => !rly.includes(f) && !ttb.includes(f));
 	if (other.length > 0) {
 		throw new RailosImportError(
-			`${other[0].name} is not a RailOS file — pick a .rly railway and/or a .ttb timetable.`,
+			`${itemAt(other, 0).name} is not a RailOS file — pick a .rly railway and/or a .ttb timetable.`,
 		);
 	}
 	if (rly.length > 1 || ttb.length > 1 || files.length === 0) {

@@ -1,4 +1,5 @@
 import type { TrainView } from "@rail-op-sim/shared";
+import { itemAt } from "@rail-op-sim/shared";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Separator } from "#/components/ui/separator";
 import { useOperateStore } from "#/store/operate-store";
@@ -342,7 +343,7 @@ export function TrainContextMenu() {
 			</div>
 			<Separator className="my-1" />
 			{items.map((item, idx) => {
-				const prevGroup = idx > 0 ? items[idx - 1].group : item.group;
+				const prevGroup = idx > 0 ? itemAt(items, idx - 1).group : item.group;
 				return (
 					<div key={item.id}>
 						{item.group !== prevGroup ? <Separator className="my-1" /> : null}

@@ -6,9 +6,6 @@
     // root's lib (and auto-loaded @types such as node) makes the compiler
     // enforce that. Runtime-agnostic globals go in src/runtime-globals.d.ts.
     "lib": ["ES2022"],
-    "types": [],
-    // Indexed reads are `T | undefined`. Lookups that are invariants go
-    // through src/util/checked.ts so a broken one fails loudly.
-    "noUncheckedIndexedAccess": true
+    "types": []
   }
 }

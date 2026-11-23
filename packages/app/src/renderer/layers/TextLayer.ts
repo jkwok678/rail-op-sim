@@ -1,4 +1,5 @@
 import type { Map as Map_, Text as MapText } from "@rail-op-sim/shared";
+import { itemAt } from "@rail-op-sim/shared";
 import { Container, Graphics, Text as PixiText, TextStyle } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
 import { gridToWorld } from "#/lib/grid";
@@ -76,7 +77,7 @@ export function createTextLayer(): TextLayer {
 
 			const textList = map.getTextList();
 			for (let i = 0; i < textList.length; i++) {
-				const t = textList[i];
+				const t = itemAt(textList, i);
 				const font = t.getFont();
 				const fill = font.color ? normalizeCssColor(font.color) : textColor;
 				const style = new TextStyle({
@@ -134,7 +135,7 @@ export function createTextLayer(): TextLayer {
 		hitTest(worldX, worldY) {
 			// Topmost first — iterate in reverse draw order.
 			for (let i = textEntries.length - 1; i >= 0; i--) {
-				const p = textEntries[i];
+				const p = itemAt(textEntries, i);
 				// anchor (0, 0.5): x grows right from position, y centred on position.
 				const left = p.position.x;
 				const right = p.position.x + p.width;
@@ -146,7 +147,7 @@ export function createTextLayer(): TextLayer {
 					worldY >= top &&
 					worldY <= bottom
 				) {
-					return textModels[i];
+					return itemAt(textModels, i);
 				}
 			}
 			return null;
@@ -155,7 +156,7 @@ export function createTextLayer(): TextLayer {
 		moveTo(text, worldX, worldY) {
 			const i = textModels.indexOf(text);
 			if (i === -1) return;
-			textEntries[i].position.set(worldX, worldY);
+			itemAt(textEntries, i).position.set(worldX, worldY);
 			decorations[i]?.position.set(worldX, worldY);
 		},
 

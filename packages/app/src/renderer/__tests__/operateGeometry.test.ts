@@ -1,3 +1,4 @@
+import { firstOf, itemAt, lastOf } from "@rail-op-sim/shared";
 import { describe, expect, it } from "vitest";
 import { CELL_SIZE } from "#/lib/grid";
 import {
@@ -69,28 +70,28 @@ describe("operate geometry", () => {
 		});
 		expect(paths).toHaveLength(1);
 		expect(paths[0]).toHaveLength(5);
-		expect(paths[0][4]).toEqual({ x: CELL_SIZE + half, y: 0 });
+		expect(itemAt(paths, 0)[4]).toEqual({ x: CELL_SIZE + half, y: 0 });
 	});
 
 	it("follows a tight curve round the corner, not through the middle", () => {
 		// In from the left, out at the bottom: the rail bows toward the corner.
 		const curve = { gx: 0, gy: 0, entry: 3, exit: 7, from: 0, to: 1 };
 		const path = segPath(curve);
-		near(path[0], edgePoint(0, 0, 3));
-		near(path[path.length - 1], edgePoint(0, 0, 7));
+		near(itemAt(path, 0), edgePoint(0, 0, 3));
+		near(lastOf(path), edgePoint(0, 0, 7));
 		const mid = pointAlong(curve, 0.5);
 		// A quarter of the way to the corner — where the tight-curve art runs.
 		near(mid, { x: -half / 4, y: half / 4 });
 		// A partial span starts and ends on the curve too.
 		const span = spanPoints({ ...curve, from: 0.5, to: 1 });
-		expect(span[0].x).toBeCloseTo(mid.x);
-		expect(span[0].y).toBeCloseTo(mid.y);
+		expect(itemAt(span, 0).x).toBeCloseTo(mid.x);
+		expect(itemAt(span, 0).y).toBeCloseTo(mid.y);
 	});
 
 	it("keeps straight and gentle curves through the middle", () => {
 		expect(segPath(seg(0))).toHaveLength(3);
 		const diagonalTurn = { gx: 0, gy: 0, entry: 3, exit: 8, from: 0, to: 1 };
-		near(segPath(diagonalTurn)[1], { x: 0, y: 0 });
+		near(itemAt(segPath(diagonalTurn), 1), { x: 0, y: 0 });
 	});
 
 	it("breaks the line at a hop between linked tracks", () => {
@@ -99,8 +100,8 @@ describe("operate geometry", () => {
 		const there = { gx: 9, gy: 4, entry: 3, exit: 5, from: 0, to: 1 };
 		const paths = joinedPaths([here, there]);
 		expect(paths).toHaveLength(2);
-		near(paths[0][paths[0].length - 1], edgePoint(0, 0, 5));
-		near(paths[1][0], edgePoint(9, 4, 3));
+		near(lastOf(itemAt(paths, 0)), edgePoint(0, 0, 5));
+		near(firstOf(itemAt(paths, 1)), edgePoint(9, 4, 3));
 	});
 	it("shows only the lamps a signal has", () => {
 		expect(signalLamp(0, 4)).toBe("red");
@@ -164,9 +165,9 @@ describe("operate geometry", () => {
 		];
 		const tail = pathTail(bent, 14);
 		expect(tail).toHaveLength(3);
-		near(tail[0], { x: 6, y: 0 });
-		near(tail[1], { x: 10, y: 0 });
-		near(tail[2], { x: 10, y: 10 });
+		near(itemAt(tail, 0), { x: 6, y: 0 });
+		near(itemAt(tail, 1), { x: 10, y: 0 });
+		near(itemAt(tail, 2), { x: 10, y: 10 });
 	});
 
 	it("anchors a label at the middle of a straight path", () => {
@@ -191,7 +192,7 @@ describe("operate geometry", () => {
 		for (const [a, b] of [
 			[0, 10],
 			[10, 0],
-		]) {
+		] as const) {
 			const vertical = labelAnchor([
 				[
 					{ x: 0, y: a },

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import {
 	createEmptyTimetable,
+	itemAt,
 	parseSimTime,
 	type Timetable,
 	type TimetableIssue,
@@ -333,11 +334,9 @@ describe("timetable list keys", () => {
 		seed();
 		const { rerender } = render(<Harness />);
 		const order = () =>
-			useTimetableStore
-				.getState()
-				.timetable.services[0].actions.map((action) =>
-					action.kind === "pass" ? action.location : action.kind,
-				);
+			itemAt(useTimetableStore.getState().timetable.services, 0).actions.map(
+				(action) => (action.kind === "pass" ? action.location : action.kind),
+			);
 
 		press("ArrowDown", { altKey: true, code: "ArrowDown" });
 		expect(useTimetableStore.getState().selectedActionIndex).toBe(2);

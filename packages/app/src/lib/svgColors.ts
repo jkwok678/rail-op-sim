@@ -96,7 +96,7 @@ export function normalizeCssColor(input: string): string {
 
 	ctx.fillStyle = computed;
 	ctx.fillRect(0, 0, 1, 1);
-	const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+	const [r = 0, g = 0, b = 0] = ctx.getImageData(0, 0, 1, 1).data;
 	const hex = (n: number) => n.toString(16).padStart(2, "0");
 	const result = `#${hex(r)}${hex(g)}${hex(b)}`;
 	normalizedCache.set(input, result);
@@ -107,7 +107,7 @@ export function normalizeCssColor(input: string): string {
 function rgbToHex(rgb: string): string | null {
 	const match = rgb.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
 	if (!match) return null;
-	const [, r, g, b] = match;
+	const [, r = "0", g = "0", b = "0"] = match;
 	const hex = (n: string) => Number(n).toString(16).padStart(2, "0");
 	return `#${hex(r)}${hex(g)}${hex(b)}`;
 }

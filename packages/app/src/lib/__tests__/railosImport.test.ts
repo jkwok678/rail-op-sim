@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { itemAt } from "@rail-op-sim/shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { downloadDocument } from "#/lib/documentFile";
 import { applyLoadedMap } from "#/lib/mapActions";
@@ -130,16 +131,20 @@ describe("openRailosImport", () => {
 
 		expect(openRailosImport(result, "yaml")).toBe("blocked");
 		expect(order).toEqual(["map", "timetable"]);
-		expect(vi.mocked(applyLoadedMap).mock.calls[0][0].format).toBe("yaml");
-		expect(vi.mocked(applyLoadedTimetable).mock.calls[0][0].format).toBe(
+		expect(itemAt(vi.mocked(applyLoadedMap).mock.calls, 0)[0].format).toBe(
 			"yaml",
 		);
+		expect(
+			itemAt(vi.mocked(applyLoadedTimetable).mock.calls, 0)[0].format,
+		).toBe("yaml");
 	});
 
 	it("leaves the timetable alone when only a railway was imported", () => {
 		openRailosImport(convertRailosFiles([source(RLY)]));
 		expect(applyLoadedMap).toHaveBeenCalledOnce();
-		expect(vi.mocked(applyLoadedMap).mock.calls[0][0].format).toBe("json");
+		expect(itemAt(vi.mocked(applyLoadedMap).mock.calls, 0)[0].format).toBe(
+			"json",
+		);
 		expect(applyLoadedTimetable).not.toHaveBeenCalled();
 	});
 });

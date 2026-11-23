@@ -1,5 +1,6 @@
 import {
 	createEmptyTimetable,
+	itemAt,
 	Map as Map_,
 	parseSimTime,
 	type Service,
@@ -52,7 +53,7 @@ describe("new / clear", () => {
 	it("newRailway loads an empty map and empties the timetable", () => {
 		newRailway();
 		expect(loadFromData).toHaveBeenCalledOnce();
-		const [data] = loadFromData.mock.calls[0];
+		const [data] = itemAt(loadFromData.mock.calls, 0);
 		expect(data.tracks).toEqual([]);
 		expect(data.texts).toEqual([]);
 		expect(useTimetableStore.getState().timetable.services).toEqual([]);

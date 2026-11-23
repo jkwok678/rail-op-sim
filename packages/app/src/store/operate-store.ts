@@ -118,11 +118,10 @@ export const useOperateStore = create<OperateState>((set) => ({
 			if (ids.length === 0 || ids.every((id) => live.has(Number(id)))) {
 				return { view, callOnArmed, trainMenu, trainDialog };
 			}
-			const timetables: Record<number, TrainTimetableRow[]> = {};
-			for (const id of ids) {
-				if (live.has(Number(id)))
-					timetables[Number(id)] = s.timetables[Number(id)];
-			}
+			const timetables: Record<number, TrainTimetableRow[]> =
+				Object.fromEntries(
+					Object.entries(s.timetables).filter(([id]) => live.has(Number(id))),
+				);
 			return { view, callOnArmed, timetables, trainMenu, trainDialog };
 		}),
 	mergeTimetables: (rows) =>

@@ -1,3 +1,4 @@
+import { itemAt } from "@rail-op-sim/shared";
 import { Ticker } from "pixi.js";
 import { describe, expect, it, vi } from "vitest";
 import { guardTicker } from "#/editor/guardTicker";
@@ -50,8 +51,8 @@ describe("guardTicker", () => {
 		const onError = vi.fn();
 		guardTicker(ticker, onError);
 		ticker.update();
-		expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
-		expect(onError.mock.calls[0][0].message).toBe("plain");
+		expect(itemAt(onError.mock.calls, 0)[0]).toBeInstanceOf(Error);
+		expect(itemAt(onError.mock.calls, 0)[0].message).toBe("plain");
 		expect(ticker.stop).toHaveBeenCalled();
 	});
 });

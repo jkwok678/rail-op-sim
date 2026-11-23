@@ -1,5 +1,8 @@
 import {
-	LINK_OFFSETS,
+	firstOf,
+	itemAt,
+	lastOf,
+	linkOffset,
 	type TrainView,
 	type ViewSeg,
 } from "@rail-op-sim/shared";
@@ -22,7 +25,7 @@ export interface Point {
 /** The middle of the edge of cell `(gx, gy)` that `link` leaves through. */
 export function edgePoint(gx: number, gy: number, link: number): Point {
 	const centre = gridToWorld(gx, gy);
-	const [dx, dy] = LINK_OFFSETS[link];
+	const [dx, dy] = linkOffset(link);
 	// Grid +Y is up; world +Y is down.
 	return {
 		x: centre.x + (dx * CELL_SIZE) / 2,
@@ -73,19 +76,25 @@ export function segPath(seg: ViewSeg): Point[] {
 /** The point `d` along a polyline whose cumulative lengths are `lengths`. */
 function atDistance(points: Point[], lengths: number[], d: number): Point {
 	for (let i = 1; i < points.length; i++) {
-		if (d <= lengths[i] || i === points.length - 1) {
-			const span = lengths[i] - lengths[i - 1];
-			const t = span > 0 ? (d - lengths[i - 1]) / span : 0;
-			return lerp(points[i - 1], points[i], Math.min(1, Math.max(0, t)));
+		if (d <= itemAt(lengths, i) || i === points.length - 1) {
+			const span = itemAt(lengths, i) - itemAt(lengths, i - 1);
+			const t = span > 0 ? (d - itemAt(lengths, i - 1)) / span : 0;
+			return lerp(
+				itemAt(points, i - 1),
+				itemAt(points, i),
+				Math.min(1, Math.max(0, t)),
+			);
 		}
 	}
-	return points[0];
+	return firstOf(points);
 }
 
 function cumulative(points: Point[]): number[] {
 	const lengths = [0];
 	for (let i = 1; i < points.length; i++) {
-		lengths.push(lengths[i - 1] + dist(points[i - 1], points[i]));
+		lengths.push(
+			itemAt(lengths, i - 1) + dist(itemAt(points, i - 1), itemAt(points, i)),
+		);
 	}
 	return lengths;
 }
@@ -94,20 +103,20 @@ function cumulative(points: Point[]): number[] {
 export function pointAlong(seg: ViewSeg, t: number): Point {
 	const points = segPath(seg);
 	const lengths = cumulative(points);
-	return atDistance(points, lengths, t * lengths[lengths.length - 1]);
+	return atDistance(points, lengths, t * lastOf(lengths));
 }
 
 /** The polyline covering the span `from`–`to` of a segment, along its rail. */
 export function spanPoints(seg: ViewSeg): Point[] {
 	const points = segPath(seg);
 	const lengths = cumulative(points);
-	const total = lengths[lengths.length - 1];
+	const total = lastOf(lengths);
 	const start = seg.from * total;
 	const end = seg.to * total;
 	const out = [atDistance(points, lengths, start)];
 	for (let i = 1; i < points.length - 1; i++) {
-		if (lengths[i] > start + 1e-6 && lengths[i] < end - 1e-6) {
-			out.push(points[i]);
+		if (itemAt(lengths, i) > start + 1e-6 && itemAt(lengths, i) < end - 1e-6) {
+			out.push(itemAt(points, i));
 		}
 	}
 	out.push(atDistance(points, lengths, end));
@@ -117,14 +126,14 @@ export function spanPoints(seg: ViewSeg): Point[] {
 /** The last `d` of a polyline, as a polyline — all of it if it is shorter. */
 export function pathTail(points: Point[], d: number): Point[] {
 	const lengths = cumulative(points);
-	const total = lengths[lengths.length - 1];
+	const total = lastOf(lengths);
 	if (points.length < 2 || d >= total) return points;
 	const start = total - d;
 	const out = [atDistance(points, lengths, start)];
 	for (let i = 1; i < points.length - 1; i++) {
-		if (lengths[i] > start + 1e-6) out.push(points[i]);
+		if (itemAt(lengths, i) > start + 1e-6) out.push(itemAt(points, i));
 	}
-	out.push(points[points.length - 1]);
+	out.push(lastOf(points));
 	return out;
 }
 
@@ -140,7 +149,7 @@ export function labelAnchor(
 	for (const points of paths) {
 		if (points.length < 2) continue;
 		const lengths = cumulative(points);
-		const length = lengths[lengths.length - 1];
+		const length = lastOf(lengths);
 		if (length > bestLength) {
 			best = points;
 			bestLength = length;
@@ -150,9 +159,9 @@ export function labelAnchor(
 	const lengths = cumulative(best);
 	const mid = bestLength / 2;
 	let leg = 1;
-	while (leg < best.length - 1 && lengths[leg] < mid) leg++;
-	const a = best[leg - 1];
-	const b = best[leg];
+	while (leg < best.length - 1 && itemAt(lengths, leg) < mid) leg++;
+	const a = itemAt(best, leg - 1);
+	const b = itemAt(best, leg);
 	let angle = Math.atan2(b.y - a.y, b.x - a.x);
 	if (angle > Math.PI / 2) angle -= Math.PI;
 	else if (angle <= -Math.PI / 2) angle += Math.PI;
@@ -177,7 +186,7 @@ export function joinedPaths(segs: readonly ViewSeg[]): Point[][] {
 	for (const seg of segs) {
 		const span = spanPoints(seg);
 		const last = current[current.length - 1];
-		if (last && !samePoint(last, span[0])) {
+		if (last && !samePoint(last, itemAt(span, 0))) {
 			paths.push(current);
 			current = [];
 		}

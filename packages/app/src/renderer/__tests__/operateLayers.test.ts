@@ -1,4 +1,5 @@
 import type { SimView, TrainView } from "@rail-op-sim/shared";
+import { itemAt } from "@rail-op-sim/shared";
 import { Container, type Graphics, type Text } from "pixi.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CELL_SIZE, gridToWorld } from "#/lib/grid";
@@ -148,7 +149,9 @@ describe("attachOperateLayers", () => {
 	it("flashes a crossing whose barriers are on the move", () => {
 		const moving = view({
 			pendingRoute: null,
-			levelCrossings: [{ ...view().levelCrossings[0], barriers: "lowering" }],
+			levelCrossings: [
+				{ ...itemAt(view().levelCrossings, 0), barriers: "lowering" },
+			],
 		});
 		useOperateStore.setState({ view: moving });
 		const first = crossings().size;

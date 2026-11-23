@@ -6,6 +6,7 @@ import {
 	CrossoverType,
 	CurvedType,
 	DirectedType,
+	defined,
 	ExitType,
 	FlyoverType,
 	LinkedType,
@@ -98,7 +99,7 @@ describe("SVG_MAP completeness", () => {
 		const seen = new Map<string, string>();
 		const dupes: string[] = [];
 		for (const subtype of ALL_TRACK_SUBTYPES) {
-			const file = SVG_MAP[subtype];
+			const file = defined(SVG_MAP[subtype], subtype);
 			const prev = seen.get(file);
 			if (prev) dupes.push(`${file} (${prev} & ${subtype})`);
 			else seen.set(file, subtype);

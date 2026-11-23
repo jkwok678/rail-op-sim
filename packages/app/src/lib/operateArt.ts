@@ -372,7 +372,7 @@ function collectCrossingArtFiles(files: Set<string>): void {
 			[0, 3],
 			[1, 3],
 			[2, 3],
-		]) {
+		] as const) {
 			const f = openCrossingTile(subtype, i, n);
 			if (f) files.add(f);
 		}
