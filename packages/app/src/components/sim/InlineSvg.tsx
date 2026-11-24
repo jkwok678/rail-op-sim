@@ -1,4 +1,34 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { buildDomColorMap, recolorSvg } from "#/lib/svgColors";
+
+const DOM_COLOR_MAP = buildDomColorMap();
+
+/**
+ * Load an SVG markup string asynchronously and recolour it for DOM previews.
+ * Cancels stale updates if the key changes or the component unmounts.
+ */
+export function useRecoloredSvg(
+	key: string,
+	load: (key: string) => Promise<string>,
+): string | null {
+	const [markup, setMarkup] = useState<string | null>(null);
+
+	useEffect(() => {
+		let active = true;
+		load(key)
+			.then((svg) => {
+				if (active) setMarkup(recolorSvg(svg, DOM_COLOR_MAP));
+			})
+			.catch(() => {
+				if (active) setMarkup(null);
+			});
+		return () => {
+			active = false;
+		};
+	}, [key, load]);
+
+	return markup;
+}
 
 /**
  * Mount bundled SVG markup as real DOM nodes.

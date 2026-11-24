@@ -4,7 +4,7 @@ import {
 	setPreferredDirectionsAlongPath,
 	type Track,
 } from "@rail-op-sim/shared";
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 import type { EditorState } from "#/store/editor-store";
 
@@ -18,7 +18,7 @@ import type { EditorState } from "#/store/editor-store";
  * The tool needs physically joined track; the controller drops back to the
  * select tool if the map becomes disconnected.
  */
-export class DirectionTool implements Tool {
+export class DirectionTool implements EditorTool {
 	/** Cell key of the last route preview (avoids re-running BFS per pointermove). */
 	private hoverKey: string | null = null;
 

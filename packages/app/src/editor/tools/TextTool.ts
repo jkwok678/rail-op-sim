@@ -1,7 +1,7 @@
 import type { FontInfo, NamedElement, Text } from "@rail-op-sim/shared";
 import type {
+	EditorTool,
 	ReleaseKind,
-	Tool,
 	ToolContext,
 	ToolPointer,
 } from "#/editor/tools/Tool";
@@ -21,7 +21,7 @@ import type { NameableKind } from "#/store/editor-store";
  * The dialogs the clicks open call back into the document operations below
  * (through the controller), so the text model is changed in one place.
  */
-export class TextTool implements Tool {
+export class TextTool implements EditorTool {
 	/**
 	 * In-progress drag: the grabbed Text plus the world-space offset from its
 	 * anchor to the pointer, so the text keeps its grab point under the cursor.

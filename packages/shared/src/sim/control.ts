@@ -195,11 +195,20 @@ export function handleTrainCommand(
 	}
 }
 
-function takeControl(ctx: RunnerContext, trainId: number): CommandResult {
+function requireControllableTrain(
+	ctx: RunnerContext,
+	trainId: number,
+	crashedMessage = "Crashed trains cannot be controlled.",
+): Train | CommandResult {
 	const train = findTrain(ctx, trainId);
 	if (!train) return fail("Train not found.");
-	if (train.status === "crashed")
-		return fail("Crashed trains cannot be controlled.");
+	if (train.status === "crashed") return fail(crashedMessage);
+	return train;
+}
+
+function takeControl(ctx: RunnerContext, trainId: number): CommandResult {
+	const train = requireControllableTrain(ctx, trainId);
+	if ("ok" in train) return train;
 	if (train.control.mode === "signaller")
 		return fail("Train is already under signaller control.");
 
@@ -277,10 +286,12 @@ function restoreTimetable(ctx: RunnerContext, trainId: number): CommandResult {
 }
 
 function moveForwards(ctx: RunnerContext, trainId: number): CommandResult {
-	const train = findTrain(ctx, trainId);
-	if (!train) return fail("Train not found.");
-	if (train.status === "crashed")
-		return fail("Crashed trains cannot be moved.");
+	const train = requireControllableTrain(
+		ctx,
+		trainId,
+		"Crashed trains cannot be moved.",
+	);
+	if ("ok" in train) return train;
 	if (train.control.mode !== "signaller")
 		return fail("Take signaller control before ordering movement.");
 
@@ -294,10 +305,8 @@ function moveForwards(ctx: RunnerContext, trainId: number): CommandResult {
 }
 
 function stopTrain(ctx: RunnerContext, trainId: number): CommandResult {
-	const train = findTrain(ctx, trainId);
-	if (!train) return fail("Train not found.");
-	if (train.status === "crashed")
-		return fail("Crashed trains cannot be controlled.");
+	const train = requireControllableTrain(ctx, trainId);
+	if ("ok" in train) return train;
 	if (train.control.mode !== "signaller")
 		return fail("Take signaller control before stopping the train.");
 
@@ -592,32 +601,51 @@ function skipActions(
 	return ok();
 }
 
-function becomeNewService(ctx: RunnerContext, trainId: number): CommandResult {
-	const train = findTrain(ctx, trainId);
-	if (!train) return fail("Train not found.");
-	if (train.status === "crashed")
-		return fail("Crashed trains cannot become a new service.");
-	if (train.control.mode !== "timetable")
+function checkBecomeNewServicePreconditions(
+	ctx: RunnerContext,
+	trainId: number,
+):
+	| {
+			train: Train;
+			here: string;
+			targetRef: string;
+			candidate: NonNullable<ReturnType<typeof availableFollowOnService>>;
+	  }
+	| CommandResult {
+	const train = requireControllableTrain(
+		ctx,
+		trainId,
+		"Crashed trains cannot become a new service.",
+	);
+	if ("ok" in train) return train;
+	if (train.control.mode !== "timetable") {
 		return fail(
 			"Restore timetable control before becoming the follow-on service.",
 		);
+	}
 	if (train.speed > 0 || train.working.at === null) {
 		return fail(
 			"Train must be stopped at a location to become the follow-on service.",
 		);
 	}
-	if (train.working.done)
+	if (train.working.done) {
 		return fail("Train has already finished its timetable.");
-
+	}
 	const target = handoverTarget(ctx, train);
 	if (!target) return fail("This service has no follow-on service.");
-
 	const candidate = availableFollowOnService(ctx, train);
 	if (!candidate) {
 		return fail(
 			`Follow-on service ${target.ref} does not call at ${train.working.at}.`,
 		);
 	}
+	return { train, here: train.working.at, targetRef: target.ref, candidate };
+}
+
+function becomeNewService(ctx: RunnerContext, trainId: number): CommandResult {
+	const ready = checkBecomeNewServicePreconditions(ctx, trainId);
+	if ("ok" in ready) return ready;
+	const { train, here, targetRef, candidate } = ready;
 
 	const actions = actionsOf(ctx, train.working);
 	const oldIndex = train.working.index;
@@ -632,23 +660,17 @@ function becomeNewService(ctx: RunnerContext, trainId: number): CommandResult {
 			.filter((a) => a.kind === "changeDirection").length;
 
 	const oldHeadcode = train.headcode;
-	const here = train.working.at;
-	const nextHeadcode = candidate.nextRef;
 	const changed = becomeService(
 		ctx,
 		train,
 		candidate.rawRef,
 		here,
-		`${oldHeadcode} became follow-on service ${nextHeadcode} early at ${here}`,
+		`${oldHeadcode} became follow-on service ${candidate.nextRef} early at ${here}`,
 		candidate.repeat,
 	);
-	if (!changed) {
-		return fail(`Follow-on service ${target.ref} not found.`);
-	}
+	if (!changed) return fail(`Follow-on service ${targetRef} not found.`);
 
-	if (skippedReversals % 2 === 1) {
-		reverse(ctx.graph, train);
-	}
+	if (skippedReversals % 2 === 1) reverse(ctx.graph, train);
 
 	train.working.index = candidate.resumeIndex;
 	train.working.at = here;

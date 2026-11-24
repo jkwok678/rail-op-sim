@@ -1,10 +1,6 @@
 import { SignalAspect, subtypeWithAspect } from "@rail-op-sim/shared";
-import { useEffect, useState } from "react";
-import { InlineSvg } from "#/components/sim/InlineSvg";
-import { buildDomColorMap, recolorSvg } from "#/lib/svgColors";
+import { InlineSvg, useRecoloredSvg } from "#/components/sim/InlineSvg";
 import { loadRawSvg, loadRawSvgByFilename, SHUNT_SVG_MAP } from "#/lib/svgMap";
-
-const DOM_COLOR_MAP = buildDomColorMap();
 
 /**
  * Renders a track subtype's actual SVG art (recoloured for the theme) as inline
@@ -22,27 +18,12 @@ export function TrackPreview({
 	/** Signal aspect — when SHUNT, loads the shunt SVG variant. */
 	aspect?: number | undefined;
 }) {
-	const [markup, setMarkup] = useState<string | null>(null);
-
-	useEffect(() => {
-		let active = true;
-
-		const loader =
-			aspect === SignalAspect.SHUNT && SHUNT_SVG_MAP[subtype]
-				? loadRawSvgByFilename(SHUNT_SVG_MAP[subtype])
-				: loadRawSvg(subtype);
-
-		loader
-			.then((svg) => {
-				if (active) setMarkup(recolorSvg(svg, DOM_COLOR_MAP));
-			})
-			.catch(() => {
-				if (active) setMarkup(null);
-			});
-		return () => {
-			active = false;
-		};
-	}, [subtype, aspect]);
+	const shuntFile =
+		aspect === SignalAspect.SHUNT ? SHUNT_SVG_MAP[subtype] : undefined;
+	const markup = useRecoloredSvg(
+		shuntFile ?? subtype,
+		shuntFile ? loadRawSvgByFilename : loadRawSvg,
+	);
 
 	if (!markup) return <span className="block size-7" aria-hidden="true" />;
 

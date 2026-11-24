@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// fallow-ignore-file unused-file
 
 /**
  * Converts 16×16 pixel-art PNG files to SVG.

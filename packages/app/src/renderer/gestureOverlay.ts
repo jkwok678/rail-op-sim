@@ -27,26 +27,26 @@ import { CELL_SIZE, gridToWorld } from "#/lib/grid";
  */
 
 /** Pending first pick (blue-500). */
-export const GESTURE_START_COLOR = 0x3b82f6;
+const GESTURE_START_COLOR = 0x3b82f6;
 /** Pending first pick while the gesture erases rather than assigns (red-500). */
-export const GESTURE_START_ERASE_COLOR = 0xef4444;
+const GESTURE_START_ERASE_COLOR = 0xef4444;
 /** Hovered second pick, gesture can complete (amber-500). */
-export const GESTURE_END_COLOR = 0xf59e0b;
+const GESTURE_END_COLOR = 0xf59e0b;
 /**
  * Hovered second pick, gesture cannot complete (red-600). A shade darker than
  * the red-500 used for unpaired standing state, so hovering an unpaired portal
  * that still cannot be paired does not read as red-on-red.
  */
-export const GESTURE_INVALID_COLOR = 0xdc2626;
+const GESTURE_INVALID_COLOR = 0xdc2626;
 /** What the gesture would assign (blue-500). */
 export const GESTURE_PREVIEW_COLOR = 0x3b82f6;
 /** What the gesture would remove, matching the erase outline (red-500). */
 export const GESTURE_PREVIEW_ERASE_COLOR = 0xef4444;
 
 /** Gesture picks are the heavier tier, so they win over standing state. */
-export const GESTURE_OUTLINE_WIDTH = 3;
+const GESTURE_OUTLINE_WIDTH = 3;
 /** Inset so outlines of adjacent cells stay distinct instead of merging. */
-export const GESTURE_OUTLINE_INSET = 2;
+const GESTURE_OUTLINE_INSET = 2;
 
 // ── Standing state ──────────────────────────────────────────────────────
 

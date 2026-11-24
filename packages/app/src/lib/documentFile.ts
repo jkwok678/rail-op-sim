@@ -142,6 +142,25 @@ export interface PickedDocument<T> extends LoadedDocument<T> {
 }
 
 /**
+ * Open a browser multi-file picker and resolve with the chosen files, or `null`
+ * if cancelled. Must be called from a user gesture.
+ */
+export function pickFiles(accept: string): Promise<File[] | null> {
+	return new Promise((resolve) => {
+		const input = document.createElement("input");
+		input.type = "file";
+		input.accept = accept;
+		input.multiple = true;
+		input.addEventListener("cancel", () => resolve(null));
+		input.addEventListener("change", () => {
+			const files = Array.from(input.files ?? []);
+			resolve(files.length === 0 ? null : files);
+		});
+		input.click();
+	});
+}
+
+/**
  * Like {@link pickAndReadDocument}, but the picker allows several files and
  * every one is read and parsed. Resolves with the documents in the order the
  * browser listed them, or `null` if the user cancels.
@@ -150,39 +169,21 @@ export interface PickedDocument<T> extends LoadedDocument<T> {
  * message — the caller gets all the files or none, so it can refuse a bad set
  * without having half-applied it.
  */
-export function pickAndReadDocuments<T>(
+export async function pickAndReadDocuments<T>(
 	parse: (text: string, format: DocumentFileFormat) => T,
 ): Promise<PickedDocument<T>[] | null> {
-	return new Promise((resolve, reject) => {
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = DOCUMENT_FILE_ACCEPT;
-		input.multiple = true;
-
-		input.addEventListener("cancel", () => resolve(null));
-
-		input.addEventListener("change", () => {
-			const files = Array.from(input.files ?? []);
-			if (files.length === 0) {
-				resolve(null);
-				return;
+	const files = await pickFiles(DOCUMENT_FILE_ACCEPT);
+	if (!files) return null;
+	return Promise.all(
+		files.map(async (file) => {
+			const text = await file.text();
+			const format = inferDocumentFormat(file.name, text);
+			try {
+				return { name: file.name, data: parse(text, format), format };
+			} catch (err) {
+				const reason = err instanceof Error ? err.message : String(err);
+				throw new Error(`${file.name}: ${reason}`);
 			}
-			Promise.all(
-				files.map(async (file) => {
-					const text = await file.text();
-					const format = inferDocumentFormat(file.name, text);
-					try {
-						return { name: file.name, data: parse(text, format), format };
-					} catch (err) {
-						const reason = err instanceof Error ? err.message : String(err);
-						throw new Error(`${file.name}: ${reason}`);
-					}
-				}),
-			)
-				.then(resolve)
-				.catch(reject);
-		});
-
-		input.click();
-	});
+		}),
+	);
 }

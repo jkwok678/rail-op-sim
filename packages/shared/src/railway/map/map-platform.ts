@@ -6,6 +6,60 @@ import { linkNewElementToText } from "./map-text-linking";
 // Platform & level-crossing helpers for Map_
 // ============================================================================
 
+/** Platform slots allowed on a track subtype: [platform1Side, platform2Side]. */
+type PlatformSlots = readonly [Platform | null, Platform | null];
+
+const HORIZONTAL_SLOTS: PlatformSlots = [Platform.UP, Platform.DOWN];
+const VERTICAL_SLOTS: PlatformSlots = [Platform.LEFT, Platform.RIGHT];
+const UP_ONLY: PlatformSlots = [Platform.UP, null];
+const DOWN_ONLY: PlatformSlots = [null, Platform.DOWN];
+const LEFT_ONLY: PlatformSlots = [Platform.LEFT, null];
+const RIGHT_ONLY: PlatformSlots = [null, Platform.RIGHT];
+
+const PLATFORM_SLOTS_BY_SUBTYPE: Record<string, PlatformSlots> = {
+	STRAIGHTH: HORIZONTAL_SLOTS,
+	STRAIGHTV: VERTICAL_SLOTS,
+	DIRECTEDUP: VERTICAL_SLOTS,
+	DIRECTEDDOWN: VERTICAL_SLOTS,
+	DIRECTEDLEFT: HORIZONTAL_SLOTS,
+	DIRECTEDRIGHT: HORIZONTAL_SLOTS,
+	BUFFERUP: VERTICAL_SLOTS,
+	BUFFERDOWN: VERTICAL_SLOTS,
+	BUFFERLEFT: HORIZONTAL_SLOTS,
+	BUFFERRIGHT: HORIZONTAL_SLOTS,
+	SIGNALUP: VERTICAL_SLOTS,
+	SIGNALDOWN: VERTICAL_SLOTS,
+	SIGNALLEFT: HORIZONTAL_SLOTS,
+	SIGNALRIGHT: HORIZONTAL_SLOTS,
+	BRIDGE1: HORIZONTAL_SLOTS,
+	UNDERPASS1: HORIZONTAL_SLOTS,
+	BRIDGE2: VERTICAL_SLOTS,
+	UNDERPASS2: VERTICAL_SLOTS,
+	SWITCHTIGHT1: DOWN_ONLY,
+	SWITCHTIGHT2: DOWN_ONLY,
+	SWITCH1: DOWN_ONLY,
+	SWITCH2: DOWN_ONLY,
+	SWITCHTIGHT3: UP_ONLY,
+	SWITCHTIGHT4: UP_ONLY,
+	SWITCH3: UP_ONLY,
+	SWITCH4: UP_ONLY,
+	SWITCHTIGHT5: RIGHT_ONLY,
+	SWITCHTIGHT7: RIGHT_ONLY,
+	SWITCH5: RIGHT_ONLY,
+	SWITCH7: RIGHT_ONLY,
+	SWITCHTIGHT6: LEFT_ONLY,
+	SWITCHTIGHT8: LEFT_ONLY,
+	SWITCH6: LEFT_ONLY,
+	SWITCH8: LEFT_ONLY,
+};
+
+const NAMED_LOCATION_BLOCKED_KINDS = new Set([
+	"straight",
+	"directed",
+	"buffer",
+	"signal",
+]);
+
 /**
  * Add a platform to a track at the given coordinates.
  */
@@ -18,163 +72,24 @@ export function addPlatform(
 	const t = map.getTrackAt(locationX, locationY);
 	if (!t) return;
 
-	const d = t.data;
-	let added = false;
-
-	switch (d.kind) {
-		case "straight": {
-			if (t.hasLevelCrossing() || t.hasLinkedNamedLocation()) break;
-			if (d.subtype === "STRAIGHTH") {
-				if (side === Platform.UP) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.DOWN) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			} else if (d.subtype === "STRAIGHTV") {
-				if (side === Platform.LEFT) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.RIGHT) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			}
-			break;
-		}
-		case "directed": {
-			if (t.hasLinkedNamedLocation()) break;
-			if (d.subtype === "DIRECTEDUP" || d.subtype === "DIRECTEDDOWN") {
-				if (side === Platform.LEFT) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.RIGHT) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			} else if (
-				d.subtype === "DIRECTEDLEFT" ||
-				d.subtype === "DIRECTEDRIGHT"
-			) {
-				if (side === Platform.UP) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.DOWN) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			}
-			break;
-		}
-		case "buffer": {
-			if (t.hasLinkedNamedLocation()) break;
-			if (d.subtype === "BUFFERUP" || d.subtype === "BUFFERDOWN") {
-				if (side === Platform.LEFT) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.RIGHT) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			} else if (d.subtype === "BUFFERLEFT" || d.subtype === "BUFFERRIGHT") {
-				if (side === Platform.UP) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.DOWN) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			}
-			break;
-		}
-		case "signal": {
-			if (t.hasLinkedNamedLocation()) break;
-			if (d.subtype === "SIGNALUP" || d.subtype === "SIGNALDOWN") {
-				if (side === Platform.LEFT) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.RIGHT) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			} else if (d.subtype === "SIGNALLEFT" || d.subtype === "SIGNALRIGHT") {
-				if (side === Platform.UP) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.DOWN) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			}
-			break;
-		}
-		case "bridgeUnderpass": {
-			if (d.subtype === "BRIDGE2" || d.subtype === "UNDERPASS2") {
-				if (side === Platform.LEFT) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.RIGHT) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			} else if (d.subtype === "BRIDGE1" || d.subtype === "UNDERPASS1") {
-				if (side === Platform.UP) {
-					t.setPlatform1(true);
-					added = true;
-				} else if (side === Platform.DOWN) {
-					t.setPlatform2(true);
-					added = true;
-				}
-			}
-			break;
-		}
-		case "switch": {
-			switch (d.subtype) {
-				case "SWITCHTIGHT1":
-				case "SWITCHTIGHT2":
-				case "SWITCH1":
-				case "SWITCH2":
-					if (side === Platform.DOWN) {
-						t.setPlatform2(true);
-						added = true;
-					}
-					break;
-				case "SWITCHTIGHT3":
-				case "SWITCHTIGHT4":
-				case "SWITCH3":
-				case "SWITCH4":
-					if (side === Platform.UP) {
-						t.setPlatform1(true);
-						added = true;
-					}
-					break;
-				case "SWITCHTIGHT5":
-				case "SWITCHTIGHT7":
-				case "SWITCH5":
-				case "SWITCH7":
-					if (side === Platform.RIGHT) {
-						t.setPlatform2(true);
-						added = true;
-					}
-					break;
-				case "SWITCHTIGHT6":
-				case "SWITCHTIGHT8":
-				case "SWITCH6":
-				case "SWITCH8":
-					if (side === Platform.LEFT) {
-						t.setPlatform1(true);
-						added = true;
-					}
-					break;
-			}
-			break;
-		}
+	const { kind, subtype } = t.data;
+	if (kind === "straight" && t.hasLevelCrossing()) return;
+	if (NAMED_LOCATION_BLOCKED_KINDS.has(kind) && t.hasLinkedNamedLocation()) {
+		return;
 	}
 
-	if (added) {
-		linkNewElementToText(map, locationX, locationY);
+	const slots = PLATFORM_SLOTS_BY_SUBTYPE[subtype];
+	if (!slots) return;
+
+	if (slots[0] === side) {
+		t.setPlatform1(true);
+	} else if (slots[1] === side) {
+		t.setPlatform2(true);
+	} else {
+		return;
 	}
+
+	linkNewElementToText(map, locationX, locationY);
 }
 
 /**

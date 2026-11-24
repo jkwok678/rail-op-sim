@@ -1,4 +1,4 @@
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 
 /**
@@ -9,7 +9,7 @@ import { debugLog } from "#/lib/debugLogger";
  * whenever a cell pick is pending, ahead of whatever tool is active, since the
  * user asked for this click specifically. The map stays on its own tool.
  */
-export class CellPickTool implements Tool {
+export class CellPickTool implements EditorTool {
 	constructor(private readonly ctx: ToolContext) {}
 
 	cursor(): string {

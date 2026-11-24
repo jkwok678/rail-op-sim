@@ -90,7 +90,7 @@ export interface ToolContext {
 	publishTrackStatus(): void;
 	/** Whether the viewport is mid-pan, so a press belongs to the pan. */
 	isPanning(): boolean;
-	/** Set the canvas cursor for a hover-dependent cursor (see {@link Tool.cursor}). */
+	/** Set the canvas cursor for a hover-dependent cursor (see {@link EditorTool.cursor}). */
 	setCursor(cursor: string): void;
 }
 
@@ -102,7 +102,7 @@ export interface ToolContext {
  * Every hook but {@link cursor} and {@link clear} is optional; a tool that
  * ignores an input just leaves the hook out.
  */
-export interface Tool {
+export interface EditorTool {
 	/**
 	 * The canvas cursor while this tool is active. The controller applies it
 	 * when the tool or the palette selection changes. A cursor that depends on

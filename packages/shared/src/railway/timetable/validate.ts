@@ -414,24 +414,16 @@ function checkOrder(
 	return time;
 }
 
-/**
- * Every link between services must be matched exactly once, from both ends, and
- * both ends must agree on the time.
- *
- * A split names the portion it becomes and that portion names its parent; a
- * finishing service names its successor and the successor names it; a join
- * names the train it couples onto and that train is waiting with a `joinedBy`.
- * A one-sided link is the mistake RailOS catches in its cross-reference pass,
- * and it is caught the same way here — by collecting both directions and
- * pairing them off.
- */
-function validateCrossReferences(tt: Timetable, out: IssueList): void {
+function indexServicesByRef(tt: Timetable): Map<ServiceRef, Service> {
 	const byRef = new Map<ServiceRef, Service>();
 	for (const service of tt.services) {
 		if (!byRef.has(service.ref)) byRef.set(service.ref, service);
 	}
+	return byRef;
+}
 
-	/** References made *by* a service, keyed by the kind of link. */
+/** References made *by* a service, keyed by the kind of link. */
+function collectCrossReferences(tt: Timetable) {
 	const splitsOut: Reference[] = [];
 	const splitsIn: Reference[] = [];
 	const handoversOut: Reference[] = [];
@@ -472,17 +464,15 @@ function validateCrossReferences(tt: Timetable, out: IssueList): void {
 			}
 		});
 	}
+	return { splitsOut, splitsIn, handoversOut, handoversIn, joinsOut, joinsIn };
+}
 
-	// Every reference must name a service that exists, whichever direction it
-	// runs — checked once here so the pairing below only has real names to match.
-	for (const reference of [
-		...splitsOut,
-		...splitsIn,
-		...handoversOut,
-		...handoversIn,
-		...joinsOut,
-		...joinsIn,
-	]) {
+function validateReferenceTargets(
+	references: Reference[],
+	byRef: Map<ServiceRef, Service>,
+	out: IssueList,
+): void {
+	for (const reference of references) {
 		if (!byRef.has(reference.target)) {
 			out.error(
 				"unknown-service-ref",
@@ -504,16 +494,47 @@ function validateCrossReferences(tt: Timetable, out: IssueList): void {
 			);
 		}
 	}
+}
 
-	pairUp(out, byRef, splitsOut, splitsIn, {
+/**
+ * Every link between services must be matched exactly once, from both ends, and
+ * both ends must agree on the time.
+ *
+ * A split names the portion it becomes and that portion names its parent; a
+ * finishing service names its successor and the successor names it; a join
+ * names the train it couples onto and that train is waiting with a `joinedBy`.
+ * A one-sided link is the mistake RailOS catches in its cross-reference pass,
+ * and it is caught the same way here — by collecting both directions and
+ * pairing them off.
+ */
+function validateCrossReferences(tt: Timetable, out: IssueList): void {
+	const byRef = indexServicesByRef(tt);
+	const refs = collectCrossReferences(tt);
+
+	// Every reference must name a service that exists, whichever direction it
+	// runs — checked once here so the pairing below only has real names to match.
+	validateReferenceTargets(
+		[
+			...refs.splitsOut,
+			...refs.splitsIn,
+			...refs.handoversOut,
+			...refs.handoversIn,
+			...refs.joinsOut,
+			...refs.joinsIn,
+		],
+		byRef,
+		out,
+	);
+
+	pairUp(out, byRef, refs.splitsOut, refs.splitsIn, {
 		outName: "split",
 		inName: "start from a split",
 	});
-	pairUp(out, byRef, handoversOut, handoversIn, {
+	pairUp(out, byRef, refs.handoversOut, refs.handoversIn, {
 		outName: "hand-over",
 		inName: "take-over",
 	});
-	pairUp(out, byRef, joinsOut, joinsIn, {
+	pairUp(out, byRef, refs.joinsOut, refs.joinsIn, {
 		outName: "join",
 		inName: "wait to be joined",
 	});
@@ -627,6 +648,28 @@ function validateShuttlePairTiming(
 	}
 }
 
+function validateShuttleFeeder(
+	serviceRef: ServiceRef,
+	fromRef: ServiceRef,
+	byRef: Map<ServiceRef, Service>,
+	where: { serviceRef: ServiceRef; actionIndex: number },
+	out: IssueList,
+): void {
+	const feeder = lookupShuttleRef(byRef, serviceRef, fromRef, where, out);
+	if (
+		feeder &&
+		!feeder.actions.some(
+			(a) => a.kind === "finishToShuttle" && a.nextRef === serviceRef,
+		)
+	) {
+		out.error(
+			"unmatched-reference",
+			`"${serviceRef}" expects to start a shuttle from "${fromRef}", but "${fromRef}" does not hand over to it.`,
+			where,
+		);
+	}
+}
+
 function validateShuttleStart(
 	service: Service,
 	byRef: Map<ServiceRef, Service>,
@@ -639,25 +682,7 @@ function validateShuttleStart(
 	}
 	const where = { serviceRef: service.ref, actionIndex: 0 };
 	if (start.kind === "startShuttle") {
-		const feeder = lookupShuttleRef(
-			byRef,
-			service.ref,
-			start.fromRef,
-			where,
-			out,
-		);
-		if (
-			feeder &&
-			!feeder.actions.some(
-				(a) => a.kind === "finishToShuttle" && a.nextRef === service.ref,
-			)
-		) {
-			out.error(
-				"unmatched-reference",
-				`"${service.ref}" expects to start a shuttle from "${start.fromRef}", but "${start.fromRef}" does not hand over to it.`,
-				where,
-			);
-		}
+		validateShuttleFeeder(service.ref, start.fromRef, byRef, where, out);
 	}
 
 	const other = byRef.get(start.otherRef);
@@ -844,10 +869,7 @@ function validateShuttleTail(
  * `CheckNonRepeatingShuttleLinksAndSetData` and `CheckShuttleServiceIntegrity`.
  */
 function validateShuttles(tt: Timetable, out: IssueList): void {
-	const byRef = new Map<ServiceRef, Service>();
-	for (const service of tt.services) {
-		if (!byRef.has(service.ref)) byRef.set(service.ref, service);
-	}
+	const byRef = indexServicesByRef(tt);
 
 	for (const service of tt.services) {
 		validateShuttleRepeatRules(service, out);
@@ -948,6 +970,51 @@ function pairUp(
 	}
 }
 
+function validateActionAgainstMap(
+	map: Map_,
+	known: Set<string>,
+	action: Action,
+	where: { serviceRef: ServiceRef; actionIndex: number },
+	out: IssueList,
+): void {
+	if (action.kind === "stop" || action.kind === "pass") {
+		if (!known.has(action.location.trim())) {
+			out.error(
+				"unknown-location",
+				`There is nowhere called "${action.location}" on this railway.`,
+				where,
+			);
+		}
+		return;
+	}
+
+	if (action.kind === "startNew" || action.kind === "startNewShuttle") {
+		checkStartPosition(map, action.rear, action.front, out, where);
+		return;
+	}
+
+	if (action.kind !== "finishExit") return;
+	if (action.exits.length === 0) {
+		out.error("no-exit", "A service leaving the map needs an exit.", where);
+	}
+	for (const cell of action.exits) {
+		const track = trackAtCell(map, cell);
+		if (!track) {
+			out.error(
+				"exit-not-track",
+				`There is no track at (${cell.gx}, ${cell.gy}).`,
+				where,
+			);
+		} else if (track.data.kind !== "exit") {
+			out.error(
+				"exit-not-exit",
+				`The track at (${cell.gx}, ${cell.gy}) is not an exit.`,
+				where,
+			);
+		}
+	}
+}
+
 /**
  * Check a timetable against the railway it is meant to run on: locations that
  * exist, start positions a train actually fits on, and exits that are exits.
@@ -971,56 +1038,47 @@ export function validateTimetableAgainstMap(
 	}
 
 	const known = new Set(getLocationNames(map));
-
 	for (const service of tt.services) {
 		service.actions.forEach((action, i) => {
-			const where = { serviceRef: service.ref, actionIndex: i };
-
-			if (action.kind === "stop" || action.kind === "pass") {
-				if (!known.has(action.location.trim())) {
-					out.error(
-						"unknown-location",
-						`There is nowhere called "${action.location}" on this railway.`,
-						where,
-					);
-				}
-				return;
-			}
-
-			if (action.kind === "startNew" || action.kind === "startNewShuttle") {
-				checkStartPosition(map, action.rear, action.front, out, where);
-				return;
-			}
-
-			if (action.kind === "finishExit") {
-				if (action.exits.length === 0) {
-					out.error(
-						"no-exit",
-						"A service leaving the map needs an exit.",
-						where,
-					);
-				}
-				for (const cell of action.exits) {
-					const track = trackAtCell(map, cell);
-					if (!track) {
-						out.error(
-							"exit-not-track",
-							`There is no track at (${cell.gx}, ${cell.gy}).`,
-							where,
-						);
-					} else if (track.data.kind !== "exit") {
-						out.error(
-							"exit-not-exit",
-							`The track at (${cell.gx}, ${cell.gy}) is not an exit.`,
-							where,
-						);
-					}
-				}
-			}
+			validateActionAgainstMap(
+				map,
+				known,
+				action,
+				{ serviceRef: service.ref, actionIndex: i },
+				out,
+			);
 		});
 	}
 
 	return out.issues;
+}
+
+function checkStartTracksConnected(
+	rear: Cell,
+	front: Cell,
+	rearTrack: NonNullable<ReturnType<typeof trackAtCell>>,
+	frontTrack: NonNullable<ReturnType<typeof trackAtCell>>,
+	out: IssueList,
+	where: { serviceRef: ServiceRef; actionIndex: number },
+): void {
+	// Adjacency is geometry; joining is the reciprocal link, which is what the
+	// connectivity report means by "connected".
+	const link = linkIndexForOffset(front.gx - rear.gx, front.gy - rear.gy);
+	if (link === null) {
+		out.error(
+			"start-not-adjacent",
+			`(${rear.gx}, ${rear.gy}) and (${front.gx}, ${front.gy}) are not next to each other.`,
+			where,
+		);
+		return;
+	}
+	if (!rearTrack.getLinkAt(link) || !frontTrack.getLinkAt(8 - link)) {
+		out.error(
+			"start-not-joined",
+			`The track at (${rear.gx}, ${rear.gy}) does not join the track at (${front.gx}, ${front.gy}).`,
+			where,
+		);
+	}
 }
 
 /**
@@ -1058,7 +1116,6 @@ function checkStartPosition(
 		);
 		return;
 	}
-
 	// Front-first, because a train placed nose-out of an exit would leave the
 	// map the instant it moved.
 	if (frontTrack.data.kind === "exit") {
@@ -1075,25 +1132,7 @@ function checkStartPosition(
 			where,
 		);
 	}
-
-	const link = linkIndexForOffset(front.gx - rear.gx, front.gy - rear.gy);
-	if (link === null) {
-		out.error(
-			"start-not-adjacent",
-			`(${rear.gx}, ${rear.gy}) and (${front.gx}, ${front.gy}) are not next to each other.`,
-			where,
-		);
-		return;
-	}
-	// Adjacency is geometry; joining is the reciprocal link, which is what the
-	// connectivity report means by "connected".
-	if (!rearTrack.getLinkAt(link) || !frontTrack.getLinkAt(8 - link)) {
-		out.error(
-			"start-not-joined",
-			`The track at (${rear.gx}, ${rear.gy}) does not join the track at (${front.gx}, ${front.gy}).`,
-			where,
-		);
-	}
+	checkStartTracksConnected(rear, front, rearTrack, frontTrack, out, where);
 }
 
 /**
