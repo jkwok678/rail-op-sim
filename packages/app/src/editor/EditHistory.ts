@@ -1,7 +1,7 @@
 import type { EffectEntry } from "@rail-op-sim/shared";
 
 /** Undo depth. Older steps fall off the bottom of the stack. */
-export const DEFAULT_HISTORY_LIMIT = 100;
+const DEFAULT_HISTORY_LIMIT = 100;
 
 /**
  * Which render layers a command's changes affect.

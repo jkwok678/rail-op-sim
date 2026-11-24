@@ -1,5 +1,5 @@
 import { findPathBetween, type Track } from "@rail-op-sim/shared";
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 
 /** A section edit the speed/length panel applies to every selected track. */
@@ -16,7 +16,7 @@ export interface SectionEdit {
  * Before the second click the hovered cell previews the route it would pick.
  * While the tool is active every track is tinted by its speed and length.
  */
-export class SectionTool implements Tool {
+export class SectionTool implements EditorTool {
 	/** Cell key of the last route preview (avoids re-running BFS per pointermove). */
 	private hoverKey: string | null = null;
 

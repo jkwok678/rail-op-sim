@@ -71,6 +71,8 @@ export class ViewportController {
 		this.onTick = this.handleTick.bind(this);
 	}
 
+	// Dynamically imported by usePixiApp, so static class-member tracking misses these.
+	// fallow-ignore-next-line unused-class-member
 	get state(): ViewportState {
 		return {
 			x: this.world.position.x,
@@ -85,6 +87,7 @@ export class ViewportController {
 	}
 
 	/** Attach DOM event listeners. Call after the canvas is in the DOM. */
+	// fallow-ignore-next-line unused-class-member
 	attach(): void {
 		this.canvas.addEventListener("pointerdown", this.onPointerDown);
 		this.canvas.addEventListener("pointermove", this.onPointerMove);
@@ -98,6 +101,7 @@ export class ViewportController {
 	}
 
 	/** Remove all DOM event listeners. Call before destroying the app. */
+	// fallow-ignore-next-line unused-class-member
 	detach(): void {
 		this.canvas.removeEventListener("pointerdown", this.onPointerDown);
 		this.canvas.removeEventListener("pointermove", this.onPointerMove);
@@ -112,6 +116,7 @@ export class ViewportController {
 	}
 
 	/** Reset transform so the grid extent fits the screen. */
+	// fallow-ignore-next-line unused-class-member
 	fitToView(extent = 5000, padding = 40): void {
 		const availableWidth = this.app.screen.width - padding * 2;
 		const availableHeight = this.app.screen.height - padding * 2;
@@ -135,17 +140,12 @@ export class ViewportController {
 	}
 
 	/** Set zoom centered on a screen point (defaults to screen center). */
+	// fallow-ignore-next-line unused-class-member
 	zoomTo(zoom: number, screenX?: number, screenY?: number): void {
 		const sx = screenX !== undefined ? screenX : this.app.screen.width / 2;
 		const sy = screenY !== undefined ? screenY : this.app.screen.height / 2;
 		const clamped = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 		this.applyZoom(clamped, sx, sy);
-		this.notify();
-	}
-
-	/** Set pan position in screen coordinates. */
-	panTo(x: number, y: number): void {
-		this.world.position.set(x, y);
 		this.notify();
 	}
 

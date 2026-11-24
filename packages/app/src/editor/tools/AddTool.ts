@@ -7,7 +7,7 @@ import {
 	type TrackKind,
 } from "@rail-op-sim/shared";
 import type { Sprite } from "pixi.js";
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 import { gridToWorld } from "#/lib/grid";
 import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
@@ -42,7 +42,7 @@ const ELEMENT_LABELS: Record<ElementKind, string> = {
  * right-click. A half-transparent ghost of the selection follows the pointer,
  * snapped to the grid, so the user sees what a click would put down.
  */
-export class AddTool implements Tool {
+export class AddTool implements EditorTool {
 	private ghostSprite: Sprite | null = null;
 	private ghostSubtype: string | null = null;
 	private ghostAspect: number | undefined = undefined;

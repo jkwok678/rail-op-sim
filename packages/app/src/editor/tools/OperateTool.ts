@@ -1,4 +1,4 @@
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 import { applyOperateIntent } from "#/lib/operateActions";
 import { resolveOperateClick } from "#/lib/operateInput";
@@ -9,7 +9,7 @@ import { findTrainAt } from "#/lib/trainInfo";
  * throws points, or opens a train's menu. The controller hands it every click
  * in operate mode, left or right, since nothing there edits the map.
  */
-export class OperateTool implements Tool {
+export class OperateTool implements EditorTool {
 	constructor(private readonly ctx: ToolContext) {}
 
 	cursor(): string {

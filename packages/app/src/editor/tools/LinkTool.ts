@@ -1,4 +1,4 @@
-import type { Tool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
+import type { EditorTool, ToolContext, ToolPointer } from "#/editor/tools/Tool";
 import { debugLog } from "#/lib/debugLogger";
 
 /**
@@ -7,7 +7,7 @@ import { debugLog } from "#/lib/debugLogger";
  * highlighted, and once one is picked the hovered cell previews whether it can
  * pair (amber) or not (red).
  */
-export class LinkTool implements Tool {
+export class LinkTool implements EditorTool {
 	/** Cell key of the last pairing preview (avoids redrawing per pointermove). */
 	private hoverKey: string | null = null;
 

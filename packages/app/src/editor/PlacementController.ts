@@ -22,7 +22,7 @@ import { type SectionEdit, SectionTool } from "#/editor/tools/SectionTool";
 import { SelectTool } from "#/editor/tools/SelectTool";
 import { TextTool } from "#/editor/tools/TextTool";
 import type {
-	Tool,
+	EditorTool,
 	ToolContext,
 	ToolId,
 	ToolLayers,
@@ -115,7 +115,7 @@ export function resolveClickTarget(
 }
 
 /**
- * Owns the map and routes canvas input to the active editor {@link Tool}.
+ * Owns the map and routes canvas input to the active editor {@link EditorTool}.
  *
  * Each tool lives in its own file under `editor/tools/` and is handed a
  * {@link ToolContext} — the map, the render layers, the stores and the undo
@@ -151,7 +151,7 @@ export class PlacementController {
 	private readonly textTool: TextTool;
 	private readonly sectionTool: SectionTool;
 	/** Every editor tool, by the id the editor store names it with. */
-	private readonly tools: Record<ToolId, Tool>;
+	private readonly tools: Record<ToolId, EditorTool>;
 	/** Takes the clicks a pending timetable "pick on map" borrows. */
 	private readonly cellPickTool: CellPickTool;
 	/** Takes every click in operate mode. */
@@ -225,7 +225,7 @@ export class PlacementController {
 	}
 
 	/** The editor tool the store says is active. */
-	private activeTool(): Tool {
+	private activeTool(): EditorTool {
 		return this.tools[this.stores.editor.getState().tool];
 	}
 
@@ -549,7 +549,7 @@ export class PlacementController {
 	};
 
 	/** The tool a click goes to, if any — see {@link resolveClickTarget}. */
-	private clickTarget(button: number): Tool | null {
+	private clickTarget(button: number): EditorTool | null {
 		const target = resolveClickTarget(
 			this.stores.mode.getState().mode,
 			button,
