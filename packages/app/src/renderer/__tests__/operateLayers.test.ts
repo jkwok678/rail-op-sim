@@ -2,9 +2,10 @@ import type { SimView, TrainView } from "@rail-op-sim/shared";
 import { Container, type Graphics, type Text } from "pixi.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CELL_SIZE, gridToWorld } from "#/lib/grid";
-import { attachOperateLayers } from "#/renderer/operateLayers";
-import { useModeStore } from "#/store/mode-store";
-import { useOperateStore } from "#/store/operate-store";
+import {
+	attachOperateLayers,
+	type OperateLayersSource,
+} from "#/renderer/operateLayers";
 import { defined } from "../../lib/__tests__/test-helpers";
 
 const seg = (gx: number) => ({ gx, gy: 0, entry: 3, exit: 5, from: 0, to: 1 });
@@ -82,6 +83,48 @@ const headcodes = (world: Container): string[] =>
 		(c) => (c as Text).text,
 	);
 
+function createTestSource(): {
+	source: OperateLayersSource;
+	setMode: (next: "railway" | "operate") => void;
+	setView: (next: SimView | null) => void;
+	reset: () => void;
+} {
+	let mode: "railway" | "operate" = "operate";
+	let currentView: SimView | null = null;
+	const modeListeners = new Set<() => void>();
+	const viewListeners = new Set<() => void>();
+
+	return {
+		source: {
+			isOperateMode: () => mode === "operate",
+			getView: () => currentView,
+			subscribeMode: (onChange) => {
+				modeListeners.add(onChange);
+				return () => modeListeners.delete(onChange);
+			},
+			subscribeView: (onChange) => {
+				viewListeners.add(onChange);
+				return () => viewListeners.delete(onChange);
+			},
+		},
+		setMode(next) {
+			if (next === mode) return;
+			mode = next;
+			for (const listener of modeListeners) listener();
+		},
+		setView(next) {
+			if (next === currentView) return;
+			currentView = next;
+			for (const listener of viewListeners) listener();
+		},
+		reset() {
+			mode = "operate";
+			currentView = null;
+		},
+	};
+}
+
+const testSource = createTestSource();
 let world: Container;
 let detach: () => void;
 const setOverrides = vi.fn();
@@ -97,8 +140,7 @@ const lowered = new Map([
 
 beforeEach(() => {
 	vi.useFakeTimers();
-	useOperateStore.getState().reset();
-	useModeStore.setState({ mode: "operate" });
+	testSource.reset();
 	setOverrides.mockClear();
 	setLevelCrossingArt.mockClear();
 	world = new Container();
@@ -106,25 +148,26 @@ beforeEach(() => {
 		world,
 		{ setOverrides },
 		{ setLevelCrossingArt },
+		testSource.source,
 	);
 });
 
 afterEach(() => {
 	detach();
 	vi.useRealTimers();
-	useModeStore.setState({ mode: "railway" });
+	testSource.setMode("railway");
 });
 
 describe("attachOperateLayers", () => {
 	it("draws routes and trains from the view", () => {
-		useOperateStore.setState({ view: view() });
+		testSource.setView(view());
 		expect(drawn(world, "routes")).toBe(true);
 		expect(drawn(world, "trains")).toBe(true);
 		expect(headcodes(world)).toEqual(["1A01"]);
 	});
 
 	it("shows signal aspects and point lies in the track's art", () => {
-		useOperateStore.setState({ view: view() });
+		testSource.setView(view());
 		expect(overrides()).toEqual(
 			new Map([
 				["3,0", ["signalRightDoubleYellow.svg"]],
@@ -135,14 +178,14 @@ describe("attachOperateLayers", () => {
 	});
 
 	it("gives the track its usual art back outside operate mode", () => {
-		useOperateStore.setState({ view: view() });
-		useModeStore.setState({ mode: "railway" });
+		testSource.setView(view());
+		testSource.setMode("railway");
 		expect(overrides().size).toBe(0);
 		expect(crossings().size).toBe(0);
 	});
 
 	it("shows a crossing's lowered barriers", () => {
-		useOperateStore.setState({ view: view() });
+		testSource.setView(view());
 		expect(crossings()).toEqual(lowered);
 	});
 
@@ -156,14 +199,14 @@ describe("attachOperateLayers", () => {
 				},
 			],
 		});
-		useOperateStore.setState({ view: moving });
+		testSource.setView(moving);
 		const first = crossings().size;
 		vi.advanceTimersByTime(250);
 		expect(crossings().size).not.toBe(first);
 	});
 
 	it("puts a train's headcode on the middle of its body", () => {
-		useOperateStore.setState({ view: view() });
+		testSource.setView(view());
 		const text = (layer(world, "trains").children[1] as Container)
 			.children[0] as Text;
 		// Segs at gx 1 and 2 run left to right: the body spans gx 1's entry
@@ -175,26 +218,26 @@ describe("attachOperateLayers", () => {
 	});
 
 	it("drops a train's label once it has gone", () => {
-		useOperateStore.setState({ view: view() });
-		useOperateStore.setState({ view: view({ trains: [] }) });
+		testSource.setView(view());
+		testSource.setView(view({ trains: [] }));
 		expect(headcodes(world)).toEqual([]);
 	});
 
 	it("skips a train with nothing on the railway yet", () => {
-		useOperateStore.setState({ view: view({ trains: [train({ segs: [] })] }) });
+		testSource.setView(view({ trains: [train({ segs: [] })] }));
 		expect(headcodes(world)).toEqual([]);
 	});
 
 	it("flashes a route that is still setting", () => {
-		useOperateStore.setState({ view: view({ routes: [] }) });
+		testSource.setView(view({ routes: [] }));
 		const shown = drawn(world, "routes");
 		vi.advanceTimersByTime(250);
 		expect(drawn(world, "routes")).not.toBe(shown);
 	});
 
 	it("draws nothing outside operate mode", () => {
-		useOperateStore.setState({ view: view() });
-		useModeStore.setState({ mode: "railway" });
+		testSource.setView(view());
+		testSource.setMode("railway");
 		expect(drawn(world, "routes")).toBe(false);
 		expect(drawn(world, "trains")).toBe(false);
 	});

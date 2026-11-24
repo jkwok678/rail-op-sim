@@ -2,7 +2,7 @@ import {
 	DEFAULT_MAX_ZOOM,
 	DEFAULT_MIN_ZOOM,
 	ZOOM_BUTTON_STEP,
-} from "#/editor/zoomConstants";
+} from "#/lib/zoomConstants";
 
 /**
  * Discrete viewport commands, shared by the zoom controls and the hotkeys.

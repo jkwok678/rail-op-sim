@@ -6,12 +6,12 @@ export interface ViewportState {
 	zoom: number;
 }
 
-import { PAN_KEY_SPEED } from "./panConstants";
 import {
 	DEFAULT_MAX_ZOOM,
 	DEFAULT_MIN_ZOOM,
 	ZOOM_FACTOR,
-} from "./zoomConstants";
+} from "#/lib/zoomConstants";
+import { PAN_KEY_SPEED } from "./panConstants";
 
 export interface ViewportControllerOptions {
 	world: Container;

@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-	DEFAULT_MAX_ZOOM,
-	DEFAULT_MIN_ZOOM,
-	ZOOM_BUTTON_STEP,
-} from "#/editor/zoomConstants";
-import {
 	FIT_EXTENT,
 	FIT_PADDING,
 	fitToView,
@@ -12,6 +7,11 @@ import {
 	zoomIn,
 	zoomOut,
 } from "#/lib/viewportActions";
+import {
+	DEFAULT_MAX_ZOOM,
+	DEFAULT_MIN_ZOOM,
+	ZOOM_BUTTON_STEP,
+} from "#/lib/zoomConstants";
 
 const stub = (zoom: number) => ({
 	state: { zoom },

@@ -16,7 +16,7 @@ import {
 } from "../enums";
 import { Map_ } from "../map";
 import type { FontInfo, MessageCallback, TextSelectionPrompt } from "../types";
-import { trackAt } from "./test-helpers";
+import { defined, trackAt } from "./test-helpers";
 
 const testFont: FontInfo = { family: "Arial", pointSize: 12 };
 
@@ -118,9 +118,8 @@ describe("StraightTrack CRUD", () => {
 			0,
 			0,
 		);
-		const track = map.getTrackAt(0, 0);
-		expect(track).not.toBeNull();
-		expect(track!.data.subtype).toBe(StraightType.STRAIGHTH);
+		const track = defined(map.getTrackAt(0, 0));
+		expect(track.data.subtype).toBe(StraightType.STRAIGHTH);
 	});
 
 	it("hasTrackAt returns false for empty coord", () => {
@@ -938,9 +937,8 @@ describe("Unified lookups", () => {
 			0,
 			0,
 		);
-		const el = map.getElementAt(0, 0);
-		expect(el).not.toBeNull();
-		expect(el!.locationToString()).toBe("0,0");
+		const el = defined(map.getElementAt(0, 0));
+		expect(el.locationToString()).toBe("0,0");
 	});
 
 	it("getElementAt returns non-track element", () => {
@@ -1006,7 +1004,7 @@ describe("List to save string methods", () => {
 			0,
 		);
 		const all = map.tracksToSaveStrings();
-		const straightResult = all.get("straight")!;
+		const straightResult = defined(all.get("straight"));
 		expect(straightResult).toContain("SH,0,0,200,100,0,0,0");
 		expect(straightResult).toContain("\n");
 	});

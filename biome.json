@@ -71,6 +71,68 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["packages/app/src/renderer/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/store/**",
+											"@/store/**",
+											"**/store/**",
+											"**/store",
+											"#/editor/**",
+											"@/editor/**",
+											"**/editor/**",
+											"**/editor",
+											"#/components/**",
+											"@/components/**",
+											"**/components/**",
+											"**/components"
+										],
+										"message": "packages/app/src/renderer is pure rendering code and must not import from store/, editor/, or components/. Pass state or callbacks in via explicit parameters or context instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/app/src/store/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"#/editor/**",
+											"@/editor/**",
+											"**/editor/**",
+											"**/editor",
+											"#/renderer/**",
+											"@/renderer/**",
+											"**/renderer/**",
+											"**/renderer"
+										],
+										"message": "packages/app/src/store holds application state and must not import from editor/ or renderer/. Move shared constants or helpers into packages/app/src/lib instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
 		}
 	]
 }

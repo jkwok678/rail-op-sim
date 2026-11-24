@@ -28,7 +28,7 @@ import {
 } from "../map/map-connectivity";
 import type { TrackKind } from "../track/track-data";
 import { createTrackData } from "../track/track-factory";
-import { trackAt } from "./test-helpers";
+import { defined, trackAt } from "./test-helpers";
 
 // ============================================================================
 // checkAllTracksConnected
@@ -493,9 +493,9 @@ describe("isRailwayComplete", () => {
 		expect(isRailwayComplete(map)).toBe(false);
 		expect(getConnectivityReport(map).unnamed).toHaveLength(1);
 
-		map
-			.getNamedLocationAt(0, 32)!
-			.setText(map.createAddText(0, 32, "Depot", FONT));
+		defined(map.getNamedLocationAt(0, 32)).setText(
+			map.createAddText(0, 32, "Depot", FONT),
+		);
 		expect(isRailwayComplete(map)).toBe(true);
 	});
 
@@ -724,11 +724,10 @@ describe("findPathBetween", () => {
 		);
 		const start = trackAt(map, 0, 0);
 		const end = trackAt(map, 16, 0);
-		const path = findPathBetween(map, start, end);
-		expect(path).not.toBeNull();
-		expect(path!.length).toBe(2);
-		expect(path![0]).toBe(start);
-		expect(path![1]).toBe(end);
+		const path = defined(findPathBetween(map, start, end));
+		expect(path.length).toBe(2);
+		expect(path[0]).toBe(start);
+		expect(path[1]).toBe(end);
 	});
 
 	it("runs straight through points rather than round a loop as short", () => {
@@ -802,9 +801,8 @@ describe("findPathBetween", () => {
 		);
 		const start = trackAt(map, -16, 0);
 		const end = trackAt(map, 32, 0);
-		const path = findPathBetween(map, start, end);
-		expect(path).not.toBeNull();
-		expect(path!.length).toBe(4);
+		const path = defined(findPathBetween(map, start, end));
+		expect(path.length).toBe(4);
 	});
 
 	it("returns null when tracks are in disconnected components", () => {
@@ -875,9 +873,8 @@ describe("findPathBetween", () => {
 		);
 		const start = trackAt(map, -16, 0);
 		const end = trackAt(map, 16, 0);
-		const path = findPathBetween(map, start, end);
-		expect(path).not.toBeNull();
-		expect(path!.length).toBe(3); // left → switch → right
+		const path = defined(findPathBetween(map, start, end));
+		expect(path.length).toBe(3); // left → switch → right
 	});
 
 	it("cleans up found flags after traversal", () => {
@@ -986,10 +983,9 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(map, 32);
 		const start = trackAt(map, 0, 0);
 		const end = trackAt(map, 32, 0);
-		const result = setPreferredDirectionsAlongPath(map, start, end);
-		expect(result).not.toBeNull();
-		expect(result!.path).toHaveLength(3);
-		expect(result!.applied).toBe(3);
+		const result = defined(setPreferredDirectionsAlongPath(map, start, end));
+		expect(result.path).toHaveLength(3);
+		expect(result.applied).toBe(3);
 		for (const x of [0, 16, 32]) {
 			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([
 				{ entry: 3, exit: 5 },
@@ -1013,10 +1009,10 @@ describe("setPreferredDirectionsAlongPath", () => {
 			]);
 		}
 		// Re-running L→R must not add duplicates, and must report nothing applied.
-		const repeat = setPreferredDirectionsAlongPath(map, left, right);
+		const repeat = defined(setPreferredDirectionsAlongPath(map, left, right));
 		expect(trackAt(map, 16, 0).getPreferredDirections()).toHaveLength(2);
-		expect(repeat!.applied).toBe(0);
-		expect(repeat!.unassigned).toBe(3);
+		expect(repeat.applied).toBe(0);
+		expect(repeat.unassigned).toBe(3);
 	});
 
 	it("endpoint on a curve borrows the curve's other link (not 8-entry)", () => {
@@ -1125,12 +1121,14 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightV(map, 0, 16); // link 1 (top) neighbour of the switch
 		const start = trackAt(map, 0, 16);
 		const switchTrack = trackAt(map, 0, 0);
-		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
+		const result = defined(
+			setPreferredDirectionsAlongPath(map, start, switchTrack),
+		);
 		expect(switchTrack.getPreferredDirections()).toEqual([
 			{ entry: 1, exit: 3 },
 		]);
-		expect(result!.applied).toBe(2);
-		expect(result!.unassigned).toBe(0);
+		expect(result.applied).toBe(2);
+		expect(result.unassigned).toBe(0);
 	});
 
 	it("refuses a facing switch endpoint instead of partially committing", () => {
@@ -1152,11 +1150,13 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(map, -16);
 		const start = trackAt(map, -16, 0);
 		const switchTrack = trackAt(map, 0, 0);
-		const result = setPreferredDirectionsAlongPath(map, start, switchTrack);
+		const result = defined(
+			setPreferredDirectionsAlongPath(map, start, switchTrack),
+		);
 		expect(switchTrack.getPreferredDirections()).toEqual([]);
 		expect(start.getPreferredDirections()).toEqual([]);
-		expect(result!.applied).toBe(0);
-		expect(result!.facingSwitchEndpoint).toBe(true);
+		expect(result.applied).toBe(0);
+		expect(result.facingSwitchEndpoint).toBe(true);
 	});
 
 	it("SWITCH1 trailing on the diverging leg assigns 2→3, facing 3 stays unset", () => {
@@ -1185,13 +1185,11 @@ describe("setPreferredDirectionsAlongPath", () => {
 		);
 		const spur = trackAt(trailing, 16, 16);
 		const swTrail = trackAt(trailing, 0, 0);
-		const trailResult = setPreferredDirectionsAlongPath(
-			trailing,
-			spur,
-			swTrail,
+		const trailResult = defined(
+			setPreferredDirectionsAlongPath(trailing, spur, swTrail),
 		);
 		expect(swTrail.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
-		expect(trailResult!.unassigned).toBe(0);
+		expect(trailResult.unassigned).toBe(0);
 
 		const facing = new Map_();
 		facing.addTrack(
@@ -1207,11 +1205,13 @@ describe("setPreferredDirectionsAlongPath", () => {
 		straightH(facing, -16);
 		const stem = trackAt(facing, -16, 0);
 		const swFace = trackAt(facing, 0, 0);
-		const faceResult = setPreferredDirectionsAlongPath(facing, stem, swFace);
+		const faceResult = defined(
+			setPreferredDirectionsAlongPath(facing, stem, swFace),
+		);
 		expect(swFace.getPreferredDirections()).toEqual([]);
 		expect(stem.getPreferredDirections()).toEqual([]);
-		expect(faceResult!.applied).toBe(0);
-		expect(faceResult!.facingSwitchEndpoint).toBe(true);
+		expect(faceResult.applied).toBe(0);
+		expect(faceResult.facingSwitchEndpoint).toBe(true);
 	});
 
 	it("returns null and mutates nothing for disconnected tracks", () => {
@@ -1229,9 +1229,9 @@ describe("setPreferredDirectionsAlongPath", () => {
 		const map = new Map_();
 		straightH(map, 0);
 		const t = trackAt(map, 0, 0);
-		const result = setPreferredDirectionsAlongPath(map, t, t);
-		expect(result!.path).toEqual([t]);
-		expect(result!.applied).toBe(0);
+		const result = defined(setPreferredDirectionsAlongPath(map, t, t));
+		expect(result.path).toEqual([t]);
+		expect(result.applied).toBe(0);
 		expect(t.getPreferredDirections()).toEqual([]);
 	});
 
@@ -1245,10 +1245,9 @@ describe("setPreferredDirectionsAlongPath", () => {
 		map.connectTwoLinkedTracks(48, 0);
 		const a = trackAt(map, 0, 0);
 		const b = trackAt(map, 64, 0);
-		const result = setPreferredDirectionsAlongPath(map, a, b);
-		expect(result).not.toBeNull();
-		expect(result!.path).toHaveLength(4);
-		expect(result!.applied).toBe(4);
+		const result = defined(setPreferredDirectionsAlongPath(map, a, b));
+		expect(result.path).toHaveLength(4);
+		expect(result.applied).toBe(4);
 		// LINKRIGHT: enter from the railway (3), leave through the mouth (5).
 		expect(trackAt(map, 16, 0).getPreferredDirections()).toEqual([
 			{ entry: 3, exit: 5 },
@@ -1265,8 +1264,8 @@ describe("setPreferredDirectionsAlongPath", () => {
 		map.addTrack({ kind: "linked", subtype: LinkedType.LINKRIGHT }, 16, 0);
 		const start = trackAt(map, 0, 0);
 		const portal = trackAt(map, 16, 0);
-		const result = setPreferredDirectionsAlongPath(map, start, portal);
-		expect(result!.applied).toBe(1);
+		const result = defined(setPreferredDirectionsAlongPath(map, start, portal));
+		expect(result.applied).toBe(1);
 		expect(start.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 		expect(portal.getPreferredDirections()).toEqual([]);
 	});
@@ -1317,11 +1316,10 @@ describe("clearPreferredDirectionsAlongPath", () => {
 
 	it("removes exactly what the same two clicks assigned", () => {
 		const { map, left, right } = chainLR();
-		const result = clearPreferredDirectionsAlongPath(map, left, right);
-		expect(result).not.toBeNull();
-		expect(result!.path).toHaveLength(3);
-		expect(result!.removed).toBe(3);
-		expect(result!.untouched).toBe(0);
+		const result = defined(clearPreferredDirectionsAlongPath(map, left, right));
+		expect(result.path).toHaveLength(3);
+		expect(result.removed).toBe(3);
+		expect(result.untouched).toBe(0);
 		for (const x of [0, 16, 32]) {
 			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
 			expect(trackAt(map, x, 0).hasPreferredDirection()).toBe(false);
@@ -1331,8 +1329,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 	it("clears both directions of a two-way route", () => {
 		const { map, left, right } = chainLR();
 		setPreferredDirectionsAlongPath(map, right, left);
-		const result = clearPreferredDirectionsAlongPath(map, left, right);
-		expect(result!.removed).toBe(3);
+		const result = defined(clearPreferredDirectionsAlongPath(map, left, right));
+		expect(result.removed).toBe(3);
 		for (const x of [0, 16, 32]) {
 			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
 			expect(trackAt(map, x, 0).getDirectionality()).toBe("none");
@@ -1342,8 +1340,8 @@ describe("clearPreferredDirectionsAlongPath", () => {
 	it("erases a one-way route retraced against its arrows", () => {
 		const { map, left, right } = chainLR();
 		// Clicked end→start, the opposite way round from how it was drawn.
-		const result = clearPreferredDirectionsAlongPath(map, right, left);
-		expect(result!.removed).toBe(3);
+		const result = defined(clearPreferredDirectionsAlongPath(map, right, left));
+		expect(result.removed).toBe(3);
 		for (const x of [0, 16, 32]) {
 			expect(trackAt(map, x, 0).getPreferredDirections()).toEqual([]);
 		}
@@ -1355,9 +1353,9 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		straightH(map, 16);
 		const left = trackAt(map, 0, 0);
 		const right = trackAt(map, 16, 0);
-		const result = clearPreferredDirectionsAlongPath(map, left, right);
-		expect(result!.removed).toBe(0);
-		expect(result!.untouched).toBe(2);
+		const result = defined(clearPreferredDirectionsAlongPath(map, left, right));
+		expect(result.removed).toBe(0);
+		expect(result.untouched).toBe(2);
 	});
 
 	it("erasing one route through a switch leaves the other spur set", () => {
@@ -1408,9 +1406,9 @@ describe("clearPreferredDirectionsAlongPath", () => {
 		straightH(map, 0);
 		const t = trackAt(map, 0, 0);
 		t.addPreferredDirection(3, 5);
-		const result = clearPreferredDirectionsAlongPath(map, t, t);
-		expect(result!.path).toEqual([t]);
-		expect(result!.removed).toBe(0);
+		const result = defined(clearPreferredDirectionsAlongPath(map, t, t));
+		expect(result.path).toEqual([t]);
+		expect(result.removed).toBe(0);
 		expect(t.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 	});
 });
@@ -1499,7 +1497,9 @@ describe("path traversability", () => {
 		const directed = trackAt(map, 16, 0);
 
 		// With the arrow: assigned all the way through.
-		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(3);
+		expect(
+			defined(setPreferredDirectionsAlongPath(map, left, right)).applied,
+		).toBe(3);
 		expect(directed.getPreferredDirections()).toEqual([{ entry: 3, exit: 5 }]);
 
 		// Against the arrow: no route exists, nothing is mutated.
@@ -1726,9 +1726,9 @@ describe("split-switch geometry", () => {
 		expect(findPathBetween(map, diag, bottom)).toBeNull();
 
 		// Trailing on a branch uniquely infers the stem (2↔7 is not a rail).
-		const trail = setPreferredDirectionsAlongPath(map, diag, sw);
-		expect(trail!.facingSwitchEndpoint).toBe(false);
-		expect(trail!.applied).toBe(2);
+		const trail = defined(setPreferredDirectionsAlongPath(map, diag, sw));
+		expect(trail.facingSwitchEndpoint).toBe(false);
+		expect(trail.applied).toBe(2);
 		expect(sw.getPreferredDirections()).toEqual([{ entry: 2, exit: 3 }]);
 		expect(sw.addPreferredDirection(2, 7)).toBe(false);
 	});
@@ -1800,7 +1800,9 @@ describe("revalidatePreferredDirections", () => {
 		const right = trackAt(map, 64, 0);
 		const west = trackAt(map, 16, 0);
 		const east = trackAt(map, 48, 0);
-		expect(setPreferredDirectionsAlongPath(map, left, right)!.applied).toBe(4);
+		expect(
+			defined(setPreferredDirectionsAlongPath(map, left, right)).applied,
+		).toBe(4);
 
 		map.deleteElement(0, 0);
 		// Single-pass revalidation would prune only the west mouth (no neighbour)

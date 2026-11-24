@@ -10,6 +10,8 @@ import { buildThemeColorMap } from "#/lib/svgColors";
 import { SVG_MAP } from "#/lib/svgMap";
 import { FIT_EXTENT, FIT_PADDING } from "#/lib/viewportActions";
 import { useEditorStore } from "#/store/editor-store";
+import { useModeStore } from "#/store/mode-store";
+import { useOperateStore } from "#/store/operate-store";
 
 /** How far the canvas has got: `error` means PixiJS could not start at all. */
 export type CanvasStatus = "loading" | "ready" | "error";
@@ -134,7 +136,23 @@ function createSceneLayers(
 	);
 	// Operate mode's routes and trains, and the signal, point and crossing art,
 	// driven by the engine's view.
-	const stopOperate = mods.attachOperateLayers(world, trackLayer, elementLayer);
+	const stopOperate = mods.attachOperateLayers(
+		world,
+		trackLayer,
+		elementLayer,
+		{
+			isOperateMode: () => useModeStore.getState().mode === "operate",
+			getView: () => useOperateStore.getState().view,
+			subscribeMode: (onChange) =>
+				useModeStore.subscribe((state, prev) => {
+					if (state.mode !== prev.mode) onChange();
+				}),
+			subscribeView: (onChange) =>
+				useOperateStore.subscribe((state, prev) => {
+					if (state.view !== prev.view) onChange();
+				}),
+		},
+	);
 	return {
 		ground,
 		textures,
