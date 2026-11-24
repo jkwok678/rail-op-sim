@@ -6,7 +6,11 @@ import {
 	type Timetable,
 } from "@rail-op-sim/shared";
 import { debugLog } from "#/lib/debugLogger";
-import { type DocumentFileFormat, downloadDocument } from "#/lib/documentFile";
+import {
+	type DocumentFileFormat,
+	downloadDocument,
+	pickFiles,
+} from "#/lib/documentFile";
 import { applyLoadedMap } from "#/lib/mapActions";
 import { applyLoadedTimetable } from "#/lib/timetableActions";
 
@@ -124,30 +128,15 @@ function withFileName<T>(file: RailosSourceFile, convert: () => T): T {
  * Open a picker for RailOS files and read every one chosen. Resolves `null`
  * when the picker is cancelled. Must be called from a user gesture.
  */
-export function pickRailosFiles(): Promise<RailosSourceFile[] | null> {
-	return new Promise((resolve, reject) => {
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = RAILOS_ACCEPT;
-		input.multiple = true;
-		input.addEventListener("cancel", () => resolve(null));
-		input.addEventListener("change", () => {
-			const files = Array.from(input.files ?? []);
-			if (files.length === 0) {
-				resolve(null);
-				return;
-			}
-			Promise.all(
-				files.map(async (f) => ({
-					name: f.name,
-					bytes: await f.arrayBuffer(),
-				})),
-			)
-				.then(resolve)
-				.catch(reject);
-		});
-		input.click();
-	});
+export async function pickRailosFiles(): Promise<RailosSourceFile[] | null> {
+	const files = await pickFiles(RAILOS_ACCEPT);
+	if (!files) return null;
+	return Promise.all(
+		files.map(async (f) => ({
+			name: f.name,
+			bytes: await f.arrayBuffer(),
+		})),
+	);
 }
 
 /** File names for the downloaded documents, after the files they came from. */

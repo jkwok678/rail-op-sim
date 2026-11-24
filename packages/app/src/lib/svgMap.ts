@@ -148,7 +148,7 @@ export const SVG_MAP: Record<string, string> = {
 };
 
 /** Public URL for a subtype's SVG, or null if unmapped. */
-export function svgUrlFor(subtype: string): string | null {
+function svgUrlFor(subtype: string): string | null {
 	const filename = SVG_MAP[subtype];
 	if (!filename) return null;
 	// Resolve relative to the configured base so the app works under subpaths.
@@ -160,15 +160,7 @@ export function svgUrlFor(subtype: string): string | null {
 
 const rawCache = new Map<string, Promise<string>>();
 
-/**
- * Fetch the raw (un-recoloured) SVG markup for a subtype, cached by URL.
- * Rejects if the subtype is unmapped or the fetch fails.
- */
-export function loadRawSvg(subtype: string): Promise<string> {
-	const url = svgUrlFor(subtype);
-	if (!url) {
-		return Promise.reject(new Error(`No SVG mapped for subtype: ${subtype}`));
-	}
+function fetchRawSvg(url: string): Promise<string> {
 	let pending = rawCache.get(url);
 	if (!pending) {
 		pending = fetch(url).then((res) => {
@@ -182,6 +174,18 @@ export function loadRawSvg(subtype: string): Promise<string> {
 		rawCache.set(url, pending);
 	}
 	return pending;
+}
+
+/**
+ * Fetch the raw (un-recoloured) SVG markup for a subtype, cached by URL.
+ * Rejects if the subtype is unmapped or the fetch fails.
+ */
+export function loadRawSvg(subtype: string): Promise<string> {
+	const url = svgUrlFor(subtype);
+	if (!url) {
+		return Promise.reject(new Error(`No SVG mapped for subtype: ${subtype}`));
+	}
+	return fetchRawSvg(url);
 }
 
 // ── Shunt signal SVG mapping ────────────────────────────────────────────
@@ -212,37 +216,10 @@ export const ASPECT_SVG_MAP: Record<SignalAspectValue, string> = {
 };
 
 /**
- * Return the correct SVG filename for a signal given its direction subtype
- * and aspect. Shunt signals use the shunt SVG; all others use the normal
- * signal SVG.
- */
-export function svgFilenameForSignal(
-	subtype: string,
-	aspect: number,
-): string | undefined {
-	if (aspect === SignalAspect.SHUNT) {
-		return SHUNT_SVG_MAP[subtype] ?? SVG_MAP[subtype];
-	}
-	return SVG_MAP[subtype];
-}
-
-/**
  * Fetch raw SVG markup from a direct filename (bypassing the subtype map).
  * Used for aspect preview SVGs and other non-subtype assets.
  */
 export function loadRawSvgByFilename(filename: string): Promise<string> {
 	const base = import.meta.env.BASE_URL ?? "/";
-	const url = `${base}graphics/${filename}`;
-	let pending = rawCache.get(url);
-	if (!pending) {
-		pending = fetch(url).then((res) => {
-			if (!res.ok) {
-				throw new Error(`Failed to load SVG ${url}: ${res.status}`);
-			}
-			return res.text();
-		});
-		pending.catch(() => rawCache.delete(url));
-		rawCache.set(url, pending);
-	}
-	return pending;
+	return fetchRawSvg(`${base}graphics/${filename}`);
 }

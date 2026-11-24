@@ -1,7 +1,8 @@
 import type { Map as Map_, Track } from "@rail-op-sim/shared";
-import { Container, Sprite, type Texture } from "pixi.js";
+import { Container, type Sprite } from "pixi.js";
 import { debugLog } from "#/lib/debugLogger";
-import { CELL_SIZE, gridToWorld } from "#/lib/grid";
+import { CELL_SIZE } from "#/lib/grid";
+import { makeTrackSprite } from "#/renderer/layers/TrackLayer";
 import type { TextureCache } from "#/renderer/textureCache";
 
 // ============================================================================
@@ -82,17 +83,6 @@ function cellKey(gx: number, gy: number): string {
 
 /** Suffix of a level crossing's sprite key, after its cell key. */
 const LC_SUFFIX = ":lc";
-
-/** Create a PixiJS Sprite at the given grid cell, same conventions as TrackLayer. */
-function makeElementSprite(texture: Texture, gx: number, gy: number): Sprite {
-	const sprite = new Sprite(texture);
-	sprite.anchor.set(0.5);
-	sprite.width = CELL_SIZE;
-	sprite.height = CELL_SIZE;
-	const { x, y } = gridToWorld(gx, gy);
-	sprite.position.set(x, y);
-	return sprite;
-}
 
 // ============================================================================
 // Entry types
@@ -207,7 +197,7 @@ export function createElementLayer(textures: TextureCache): ElementLayer {
 		const existing = spriteEntries.get(compositeKey);
 		if (matchesEntry(existing, lookupKey, parent)) return;
 		if (existing) removeSpriteEntry(compositeKey, existing);
-		const sprite = makeElementSprite(texture, gx, gy);
+		const sprite = makeTrackSprite(texture, gx, gy);
 		sprite.label = `element-${compositeKey}`;
 		parent.addChild(sprite);
 		spriteEntries.set(compositeKey, { sprite, lookupKey, parent });

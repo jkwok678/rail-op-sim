@@ -1,14 +1,6 @@
 import type { NamedElement } from "@rail-op-sim/shared";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "#/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "#/components/ui/dialog";
-import { Input } from "#/components/ui/input";
+import { TextPromptDialog } from "#/components/sim/TextPromptDialog";
 import { PlacementController } from "#/editor/PlacementController";
 import type { NameableKind } from "#/store/editor-store";
 import { useEditorStore } from "#/store/editor-store";
@@ -59,10 +51,8 @@ export function NameElementDialog({
 }: NameElementDialogProps) {
 	const pendingNameTarget = useEditorStore((s) => s.pendingNameTarget);
 	const setPendingNameTarget = useEditorStore((s) => s.setPendingNameTarget);
-
 	const controller = PlacementController.instance;
 	const map = controller?.map;
-
 	const [content, setContent] = useState("");
 
 	// Prevent re-entrant execution when Radix Dialog re-dispatches the same
@@ -71,45 +61,17 @@ export function NameElementDialog({
 
 	// Pre-fill the input from the current label when the dialog opens for a new target.
 	useEffect(() => {
-		if (!pendingNameTarget || !map) {
-			setContent("");
-			return;
-		}
-		const element = getElementAt(
-			map,
-			pendingNameTarget.gx,
-			pendingNameTarget.gy,
-			pendingNameTarget.kind,
-		);
+		const element =
+			pendingNameTarget && map
+				? getElementAt(
+						map,
+						pendingNameTarget.gx,
+						pendingNameTarget.gy,
+						pendingNameTarget.kind,
+					)
+				: null;
 		setContent(element?.getText()?.getReadableText() ?? "");
 	}, [pendingNameTarget, map]);
-
-	const handleConfirm = () => {
-		if (confirmingRef.current) return; // gate: already executing
-		if (!pendingNameTarget || !map) {
-			handleCancel();
-			return;
-		}
-
-		confirmingRef.current = true;
-		const trimmed = content.trim();
-
-		try {
-			controller?.nameElementAt(
-				pendingNameTarget.gx,
-				pendingNameTarget.gy,
-				trimmed,
-				pendingNameTarget.kind,
-			);
-		} finally {
-			// Always clean up dialog state, even if the model call or PixiJS
-			// layer sync throws unexpectedly.
-			setContent("");
-			setPendingNameTarget(null);
-			onOpenChange(false);
-			confirmingRef.current = false;
-		}
-	};
 
 	const handleCancel = () => {
 		setContent("");
@@ -117,65 +79,39 @@ export function NameElementDialog({
 		onOpenChange(false);
 	};
 
-	const title = pendingNameTarget
-		? KIND_TITLES[pendingNameTarget.kind]
-		: "Name Element";
+	const handleConfirm = () => {
+		if (confirmingRef.current) return; // gate: already executing
+		if (!pendingNameTarget || !map) return handleCancel();
+		confirmingRef.current = true;
+		try {
+			controller?.nameElementAt(
+				pendingNameTarget.gx,
+				pendingNameTarget.gy,
+				content.trim(),
+				pendingNameTarget.kind,
+			);
+		} finally {
+			// Always clean up dialog state, even if the model call or PixiJS
+			// layer sync throws unexpectedly.
+			handleCancel();
+			confirmingRef.current = false;
+		}
+	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent
-				showCloseButton={false}
-				// Radix dismisses from a capture-phase listener on document; stopping
-				// propagation here keeps the global Escape from *also* firing and
-				// cancelling the tool gesture sitting underneath this dialog.
-				onEscapeKeyDown={(e) => {
-					e.stopPropagation();
-					handleCancel();
-				}}
-				onPointerDownOutside={handleCancel}
-			>
-				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
-				</DialogHeader>
-
-				<div className="flex flex-col gap-1.5">
-					<label
-						htmlFor="name-content"
-						className="text-xs font-medium text-muted-foreground"
-					>
-						Label
-					</label>
-					<Input
-						id="name-content"
-						placeholder="Enter name…"
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								e.preventDefault();
-								e.stopPropagation();
-								handleConfirm();
-							}
-							if (e.key === "Escape") {
-								e.preventDefault();
-								e.stopPropagation();
-								handleCancel();
-							}
-						}}
-						// eslint-disable-next-line jsx-a11y/no-autofocus
-						autoFocus
-					/>
-				</div>
-
-				<DialogFooter>
-					<Button variant="outline" size="sm" onClick={handleCancel}>
-						Cancel
-					</Button>
-					<Button size="sm" onClick={handleConfirm}>
-						Confirm
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+		<TextPromptDialog
+			open={open}
+			onOpenChange={onOpenChange}
+			title={
+				pendingNameTarget ? KIND_TITLES[pendingNameTarget.kind] : "Name Element"
+			}
+			inputId="name-content"
+			label="Label"
+			placeholder="Enter name…"
+			value={content}
+			onValueChange={setContent}
+			onConfirm={handleConfirm}
+			onCancel={handleCancel}
+		/>
 	);
 }
