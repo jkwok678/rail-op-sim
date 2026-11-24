@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [master]
+    # labeled/unlabeled so toggling `allow-escape-hatch` re-runs the guardrails job.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [master]
 
@@ -50,6 +52,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run test
 
+  guardrails:
+    name: Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      # Full history so the diff checks can find the merge base with the PR base.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Pushes only run the escape-hatch budget and ceilings; PRs also check added
+      # lines for new escape hatches (waived by the `allow-escape-hatch` label) and
+      # for comments without `why:`.
+      - name: Check guardrails
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          ALLOW_HATCHES: ${{ contains(github.event.pull_request.labels.*.name, 'allow-escape-hatch') }}
+        run: |
+          args=()
+          if [ -n "$BASE_REF" ]; then args+=(--base "origin/$BASE_REF"); fi
+          if [ "$ALLOW_HATCHES" = "true" ]; then args+=(--allow-escape-hatches); fi
+          node scripts/guardrails/check-diff.ts "${args[@]}"
+
   fallow:
     name: Fallow
     runs-on: ubuntu-latest
@@ -71,7 +100,7 @@ jobs:
 
   build:
     name: Build
-    needs: [typecheck, biome, test, fallow]
+    needs: [typecheck, biome, test, guardrails, fallow]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

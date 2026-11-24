@@ -3,6 +3,7 @@
  * The Web Worker entry point: one engine, spoken to over `postMessage`.
  */
 
+import { after } from "#/lib/timers";
 import { postMessageTransport } from "#/transport/postmessage-transport";
 import type { EngineToHost, HostToEngine } from "#/transport/types";
 import { startEngineHost } from "./engine-host";
@@ -13,7 +14,6 @@ startEngineHost(
 	postMessageTransport<HostToEngine, EngineToHost>(scope, () => scope.close()),
 	{
 		now: () => performance.now(),
-		schedule: (fn, ms) => setTimeout(fn, ms),
-		cancel: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
+		schedule: (fn, ms) => after(ms, fn),
 	},
 );

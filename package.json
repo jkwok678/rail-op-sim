@@ -5,16 +5,20 @@
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
-    "test": "pnpm -r run test",
+    "test": "pnpm -r run test && pnpm test:guardrails",
+    "test:guardrails": "node --test \"scripts/guardrails/__tests__/*.test.ts\"",
     "coverage": "pnpm -r run coverage && node scripts/merge-coverage.mjs",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check --error-on-warnings",
-    "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json && pnpm exec tsc --noEmit -p .railway/tsconfig.json",
+    "guardrails": "node scripts/guardrails/check-diff.ts --base origin/master",
+    "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json && pnpm exec tsc --noEmit -p .railway/tsconfig.json && pnpm exec tsc --noEmit -p scripts/guardrails/tsconfig.json",
     "start": "pnpm --filter @rail-op-sim/app start"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.13",
     "@biomejs/biome": "2.6.6",
+    "@types/node": "26.6.6",
     "fallow": "^3.40.0",
     "pngjs": "^7.0.0",
     "railway": "^3.16.0",

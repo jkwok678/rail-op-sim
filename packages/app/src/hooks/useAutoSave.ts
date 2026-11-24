@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { autosaveNow, restoreAutosave } from "#/lib/sessionActions";
+import { after, type Cancel } from "#/lib/timers";
 import { useEditorStore } from "#/store/editor-store";
 import { useTimetableStore } from "#/store/timetable-store";
 
@@ -27,15 +28,13 @@ export function useAutoSave(ready: boolean): void {
 		if (!ready) return;
 
 		let cancelled = false;
-		let timer: ReturnType<typeof setTimeout> | null = null;
+		let cancelTimer: Cancel | null = null;
 		let dirty = false;
 		const cleanups: Array<() => void> = [];
 
 		const save = async () => {
-			if (timer !== null) {
-				clearTimeout(timer);
-				timer = null;
-			}
+			cancelTimer?.();
+			cancelTimer = null;
 			if (!dirty) return;
 			dirty = false;
 			let written = false;
@@ -59,8 +58,8 @@ export function useAutoSave(ready: boolean): void {
 
 		const schedule = () => {
 			dirty = true;
-			if (timer !== null) clearTimeout(timer);
-			timer = setTimeout(() => void save(), AUTOSAVE_DEBOUNCE_MS);
+			cancelTimer?.();
+			cancelTimer = after(AUTOSAVE_DEBOUNCE_MS, () => void save());
 		};
 
 		const onVisibilityChange = () => {
@@ -99,7 +98,7 @@ export function useAutoSave(ready: boolean): void {
 
 		return () => {
 			cancelled = true;
-			if (timer !== null) clearTimeout(timer);
+			cancelTimer?.();
 			for (const cleanup of cleanups) cleanup();
 		};
 	}, [ready]);
