@@ -217,9 +217,9 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		expect(nl2.getNamed()).toBe(true);
 
 		// All three share the SAME Text instance
-		const t0 = nl0.getText()!;
-		const t1 = nl1.getText()!;
-		const t2 = nl2.getText()!;
+		const t0 = defined(nl0.getText());
+		const t1 = defined(nl1.getText());
+		const t2 = defined(nl2.getText());
 		expect(t1).toBe(t0);
 		expect(t2).toBe(t0);
 
@@ -251,7 +251,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		] as const) {
 			const nl = defined(map.getNamedLocationAt(gx, gy));
 			expect(nl.getNamed()).toBe(true);
-			expect(nl.getText()!.getReadableText()).toBe("Depot");
+			expect(defined(nl.getText()).getReadableText()).toBe("Depot");
 			expect(nl.getText()).toBe(
 				defined(map.getNamedLocationAt(0, 0)).getText(),
 			);
@@ -270,7 +270,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		map.createAddLinkText(1, 0, "Ghost Town", true, testFont);
 
 		const nl1 = defined(map.getNamedLocationAt(1, 0));
-		const sharedText = nl1.getText()!;
+		const sharedText = defined(nl1.getText());
 
 		// Delete via changeDeleteText with empty string
 		changeDeleteText(map, "", true, sharedText);
@@ -295,7 +295,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		map.createAddNamedLocation(2, 0);
 		map.createAddLinkText(1, 0, "Old Name", true, testFont);
 
-		const sharedText = defined(map.getNamedLocationAt(1, 0)).getText()!;
+		const sharedText = defined(defined(map.getNamedLocationAt(1, 0)).getText());
 
 		// Edit the shared text
 		changeDeleteText(map, "New Name", true, sharedText);
@@ -326,7 +326,7 @@ describe("createAddLinkText — NamedLocation multi-cell spread", () => {
 		// createAddNamedLocation calls linkNewElementToText -> should inherit
 		expect(nl2.getNamed()).toBe(true);
 		expect(nl2.getText()).toBe(defined(map.getNamedLocationAt(1, 0)).getText());
-		expect(nl2.getText()!.getReadableText()).toBe("Hub");
+		expect(defined(nl2.getText()).getReadableText()).toBe("Hub");
 	});
 
 	it("does NOT spread to non-adjacent NamedLocations (no diagonal spread)", () => {

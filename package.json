@@ -9,7 +9,7 @@
     "coverage": "pnpm -r run coverage && node scripts/merge-coverage.mjs",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check",
+    "check": "biome check --error-on-warnings",
     "typecheck": "pnpm exec tsc --noEmit -p packages/shared/tsconfig.json && pnpm exec tsc --noEmit -p packages/app/tsconfig.json && pnpm exec tsc --noEmit -p .railway/tsconfig.json",
     "start": "pnpm --filter @rail-op-sim/app start"
   },
