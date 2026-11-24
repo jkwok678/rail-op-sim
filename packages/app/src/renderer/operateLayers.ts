@@ -1,14 +1,28 @@
+import type { SimView } from "@rail-op-sim/shared";
 import type { Container } from "pixi.js";
 import { crossingArt, crossingsChanging, operateArt } from "#/lib/operateArt";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import { createRouteLayer } from "#/renderer/layers/RouteLayer";
 import type { TrackLayer } from "#/renderer/layers/TrackLayer";
 import { createTrainLayer } from "#/renderer/layers/TrainLayer";
-import { useModeStore } from "#/store/mode-store";
-import { useOperateStore } from "#/store/operate-store";
 
 /** How often a route that is still setting, or barriers on the move, flash. */
 const FLASH_MS = 250;
+
+/**
+ * State source for {@link attachOperateLayers}, passed in so the renderer
+ * stays decoupled from application stores.
+ */
+export interface OperateLayersSource {
+	/** Whether operate mode is currently active. */
+	isOperateMode(): boolean;
+	/** The engine's latest published view, or `null` when unavailable. */
+	getView(): SimView | null;
+	/** Subscribe to operate-mode changes; returns an unsubscribe function. */
+	subscribeMode(onChange: () => void): () => void;
+	/** Subscribe to view changes; returns an unsubscribe function. */
+	subscribeView(onChange: () => void): () => void;
+}
 
 /**
  * Add operate mode's layers to `world` — routes under trains — and keep them
@@ -22,16 +36,14 @@ export function attachOperateLayers(
 	world: Container,
 	track: Pick<TrackLayer, "setOverrides">,
 	elements: Pick<ElementLayer, "setLevelCrossingArt">,
+	source: OperateLayersSource,
 ): () => void {
 	const routes = createRouteLayer();
 	const trains = createTrainLayer();
 	world.addChild(routes.container, trains.container);
 
 	let flashOn = true;
-	const currentView = () =>
-		useModeStore.getState().mode === "operate"
-			? useOperateStore.getState().view
-			: null;
+	const currentView = () => (source.isOperateMode() ? source.getView() : null);
 
 	const syncFlashing = (): void => {
 		const view = currentView();
@@ -45,14 +57,10 @@ export function attachOperateLayers(
 		trains.sync(view);
 	};
 
-	const unsubView = useOperateStore.subscribe((state, prev) => {
-		if (state.view !== prev.view) sync();
-	});
-	const unsubMode = useModeStore.subscribe((state, prev) => {
-		if (state.mode !== prev.mode) sync();
-	});
+	const unsubView = source.subscribeView(sync);
+	const unsubMode = source.subscribeMode(sync);
 	const flash = setInterval(() => {
-		const view = useOperateStore.getState().view;
+		const view = source.getView();
 		if (!view?.pendingRoute && !crossingsChanging(view)) return;
 		flashOn = !flashOn;
 		syncFlashing();

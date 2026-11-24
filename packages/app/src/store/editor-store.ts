@@ -5,9 +5,9 @@ import {
 	type TrainTimetableEntry,
 } from "@rail-op-sim/shared";
 import { create } from "zustand";
-import { DEFAULT_ZOOM } from "#/editor/zoomConstants";
 import { debugLog } from "#/lib/debugLogger";
 import type { MapFileFormat } from "#/lib/mapFile";
+import { DEFAULT_ZOOM } from "#/lib/zoomConstants";
 
 /** The active editing tool. */
 export type Tool = "select" | "add" | "text" | "link" | "section" | "direction";
