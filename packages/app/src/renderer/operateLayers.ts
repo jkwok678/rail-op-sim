@@ -1,6 +1,7 @@
 import type { SimView } from "@rail-op-sim/shared";
 import type { Container } from "pixi.js";
 import { crossingArt, crossingsChanging, operateArt } from "#/lib/operateArt";
+import { every } from "#/lib/timers";
 import type { ElementLayer } from "#/renderer/layers/ElementLayer";
 import { createRouteLayer } from "#/renderer/layers/RouteLayer";
 import type { TrackLayer } from "#/renderer/layers/TrackLayer";
@@ -59,17 +60,17 @@ export function attachOperateLayers(
 
 	const unsubView = source.subscribeView(sync);
 	const unsubMode = source.subscribeMode(sync);
-	const flash = setInterval(() => {
+	const stopFlashing = every(FLASH_MS, () => {
 		const view = source.getView();
 		if (!view?.pendingRoute && !crossingsChanging(view)) return;
 		flashOn = !flashOn;
 		syncFlashing();
-	}, FLASH_MS);
+	});
 
 	return () => {
 		unsubView();
 		unsubMode();
-		clearInterval(flash);
+		stopFlashing();
 		track.setOverrides(new Map());
 		elements.setLevelCrossingArt(new Map());
 	};

@@ -5,6 +5,7 @@ import {
 	parseTimetable,
 	Map as RailMap,
 } from "@rail-op-sim/shared";
+import type { Cancel } from "#/lib/timers";
 import { parseHostMessage } from "#/transport/schemas";
 import type { EngineTransport, HostToEngine } from "#/transport/types";
 
@@ -18,8 +19,7 @@ import type { EngineTransport, HostToEngine } from "#/transport/types";
 
 export interface HostClock {
 	now(): number;
-	schedule(fn: () => void, ms: number): unknown;
-	cancel(handle: unknown): void;
+	schedule(fn: () => void, ms: number): Cancel;
 }
 
 /** How often the loop runs. */
@@ -34,7 +34,7 @@ export function startEngineHost(
 	clock: HostClock,
 ): void {
 	let engine: Engine | null = null;
-	let timer: unknown = null;
+	let timer: Cancel | null = null;
 	let last = 0;
 	let lastView = 0;
 	let lastVersion = -1;
@@ -61,7 +61,7 @@ export function startEngineHost(
 	};
 
 	const stop = (): void => {
-		if (timer !== null) clock.cancel(timer);
+		timer?.();
 		timer = null;
 	};
 

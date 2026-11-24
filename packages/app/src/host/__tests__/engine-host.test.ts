@@ -13,11 +13,10 @@ function fakeClock() {
 		schedule(fn, ms) {
 			const id = nextId++;
 			tasks.push({ at: now + ms, fn, id });
-			return id;
-		},
-		cancel(handle) {
-			const i = tasks.findIndex((t) => t.id === handle);
-			if (i >= 0) tasks.splice(i, 1);
+			return () => {
+				const i = tasks.findIndex((t) => t.id === id);
+				if (i >= 0) tasks.splice(i, 1);
+			};
 		},
 	};
 	const advance = (ms: number) => {
