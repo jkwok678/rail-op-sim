@@ -1,0 +1,13 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+	"ignorePatterns": ["**/graphify-out/**"],
+	"ignoreExports": [
+		{
+			"file": "packages/app/src/components/ui/**",
+			"exports": ["*"]
+		}
+	],
+	"health": {
+		"ignore": ["**/__tests__/**", "**/*.test.*", "**/*.spec.*"]
+	}
+}
