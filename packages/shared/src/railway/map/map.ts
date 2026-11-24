@@ -14,13 +14,8 @@ import type { TrackData, TrackKind } from "../track/track-data";
 import { KIND_META, supportsPlatforms } from "../track/track-data";
 import type { FontInfo, MessageCallback, TextSelectionPrompt } from "../types";
 import {
-	checkAllTracksConnected as checkAllTracksConnectedFn,
-	findAllLinkedTracks as findAllLinkedTracksFn,
-	findUnpairedLinkedTracks as findUnpairedLinkedTracksFn,
-	getLinkedTrackPairs as getLinkedTrackPairsFn,
 	getLinkedTrackReport as getLinkedTrackReportFn,
 	isRailwayComplete as isRailwayCompleteFn,
-	type LinkedTrackPair,
 	type LinkedTrackReport,
 	revalidatePreferredDirections,
 } from "./map-connectivity";
@@ -129,10 +124,6 @@ export class Map_ {
 		return this.totalTrack;
 	}
 
-	setTotalTrack(n: number): void {
-		this.totalTrack = n;
-	}
-
 	/**
 	 * Remove every user-placed element and reset all counters and transient
 	 * state machines to their empty defaults. Used before loading a saved map
@@ -183,13 +174,6 @@ export class Map_ {
 		return this.elementsByCoord.has(coordKey(x, y));
 	}
 
-	checkTrackConcourseParapetExists(x: number, y: number): boolean {
-		const el = this.elementsByCoord.get(coordKey(x, y));
-		return (
-			el instanceof Track || el instanceof Concourse || el instanceof Parapet
-		);
-	}
-
 	hasElementAt(x: number, y: number): boolean {
 		return this.elementsByCoord.has(coordKey(x, y));
 	}
@@ -209,14 +193,6 @@ export class Map_ {
 
 	getElementAt(x: number, y: number): Element | null {
 		return this.elementsByCoord.get(coordKey(x, y)) ?? null;
-	}
-
-	getElementExcludingTrackAt(x: number, y: number): Element | null {
-		const riding = this.namedOnTrack.get(coordKey(x, y));
-		if (riding) return riding;
-		const el = this.elementsByCoord.get(coordKey(x, y));
-		if (el && !(el instanceof Track)) return el;
-		return null;
 	}
 
 	getNamedElementAt(x: number, y: number): NamedElement | null {
@@ -620,14 +596,6 @@ export class Map_ {
 		return null;
 	}
 
-	checkNamedLocationAt(x: number, y: number): boolean {
-		return this.getNamedLocationAt(x, y) !== null;
-	}
-
-	namedLocationListToSaveString(): string {
-		return this.namedLocationList.map((e) => e.toSaveString()).join("\n");
-	}
-
 	// ══ Concourse accessors ══════════════════════════════════════════════
 
 	getConcourseList(): Concourse[] {
@@ -638,14 +606,6 @@ export class Map_ {
 		const el = this.elementsByCoord.get(coordKey(x, y));
 		if (el instanceof Concourse) return el;
 		return null;
-	}
-
-	checkConcourseAt(x: number, y: number): boolean {
-		return this.getConcourseAt(x, y) !== null;
-	}
-
-	concourseListToSaveString(): string {
-		return this.concourseList.map((e) => e.toSaveString()).join("\n");
 	}
 
 	// ══ Parapet accessors ════════════════════════════════════════════════
@@ -660,22 +620,10 @@ export class Map_ {
 		return null;
 	}
 
-	checkParapetAt(x: number, y: number): boolean {
-		return this.getParapetAt(x, y) !== null;
-	}
-
-	parapetListToSaveString(): string {
-		return this.parapetList.map((e) => e.toSaveString()).join("\n");
-	}
-
 	// ══ Text accessors ═══════════════════════════════════════════════════
 
 	getTextList(): Text[] {
 		return this.textList;
-	}
-
-	setTextList(list: Text[]): void {
-		this.textList = list;
 	}
 
 	textListToSaveString(): string {
@@ -775,10 +723,6 @@ export class Map_ {
 		return this.trackList;
 	}
 
-	setTrackList(list: Track[]): void {
-		this.trackList = list;
-	}
-
 	/** Rebuild the unified track list from all kind arrays. */
 	makeTrackList(): void {
 		const all: Track[] = [];
@@ -832,24 +776,8 @@ export class Map_ {
 	// Connectivity (delegated)
 	// ====================================================================
 
-	checkAllTracksConnected(): boolean {
-		return checkAllTracksConnectedFn(this);
-	}
-
 	isRailwayComplete(): boolean {
 		return isRailwayCompleteFn(this);
-	}
-
-	findAllLinkedTracks(): Track[] {
-		return findAllLinkedTracksFn(this);
-	}
-
-	findUnpairedLinkedTracks(): Track[] {
-		return findUnpairedLinkedTracksFn(this);
-	}
-
-	getLinkedTrackPairs(): LinkedTrackPair[] {
-		return getLinkedTrackPairsFn(this);
 	}
 
 	getLinkedTrackReport(): LinkedTrackReport {
