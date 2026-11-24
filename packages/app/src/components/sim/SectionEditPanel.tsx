@@ -52,434 +52,294 @@ const YARDS_PER_CHAIN = 22;
 const CHAINS_PER_MILE = 80;
 const M_PER_YARD = 0.9144;
 
-/** Floating sidepanel for editing speed/length of a selected section. */
-export function SectionEditPanel() {
-	const sectionStart = useEditorStore((s) => s.sectionStart);
-	const sectionEnd = useEditorStore((s) => s.sectionEnd);
-	const sectionTracks = useEditorStore((s) => s.sectionTracks);
-	const clearSectionSelection = useEditorStore((s) => s.clearSectionSelection);
+interface SectionValues {
+	mainSpeed: string;
+	mainLength: string;
+	secondarySpeed: string;
+	secondaryLength: string;
+}
 
-	const [mainSpeed, setMainSpeed] = useState("200");
-	const [mainLength, setMainLength] = useState("100");
-	const [secondarySpeed, setSecondarySpeed] = useState("200");
-	const [secondaryLength, setSecondaryLength] = useState("100");
+const DEFAULT_SECTION_VALUES: SectionValues = {
+	mainSpeed: "200",
+	mainLength: "100",
+	secondarySpeed: "200",
+	secondaryLength: "100",
+};
 
-	// Converter state
-	const [convKmh, setConvKmh] = useState("200");
-	const [convMph, setConvMph] = useState("124");
-	const [convM, setConvM] = useState("100");
-	const [convCh, setConvCh] = useState("5.0");
-	const [convYd, setConvYd] = useState("109.4");
-	const [convMi, setConvMi] = useState("0.06");
-	const confirmingRef = useRef(false);
-	const panelRef = useRef<HTMLDivElement>(null);
+interface SectionEditPayload {
+	mainSpeed: number;
+	mainLength: number;
+	secondarySpeed?: number;
+	secondaryLength?: number;
+}
 
-	const visible = sectionStart && sectionEnd && sectionTracks.length > 0;
+function parsePositiveNumber(raw: string): number | null {
+	const n = Number(raw);
+	return !Number.isNaN(n) && n > 0 ? n : null;
+}
 
-	// Check if any track in the section has a secondary path
-	const hasSecondary = useMemo(() => {
-		if (!visible) return false;
-		const ctrl = PlacementController.instance;
-		if (!ctrl) return false;
-		for (const c of sectionTracks) {
-			const track = ctrl.map.getTrackAt(c.gx, c.gy);
-			if (track && hasSecondaryPath(track.data.kind)) return true;
-		}
-		return false;
-	}, [visible, sectionTracks]);
+function parseNonNegativeNumber(raw: string): number | null {
+	const n = Number(raw);
+	return !Number.isNaN(n) && n >= 0 ? n : null;
+}
 
-	// Total length across all tracks in the section
-	const totalLength = useMemo(() => {
-		if (!visible) return 0;
-		const ctrl = PlacementController.instance;
-		if (!ctrl) return 0;
-		let sum = 0;
-		for (const c of sectionTracks) {
-			const track = ctrl.map.getTrackAt(c.gx, c.gy);
-			if (track) sum += track.getTrackMainLength();
-		}
-		return sum;
-	}, [visible, sectionTracks]);
+function parsePositivePair(a: string, b: string): [number, number] | null {
+	const first = parsePositiveNumber(a);
+	const second = parsePositiveNumber(b);
+	return first !== null && second !== null ? [first, second] : null;
+}
 
-	// Pre-fill from the first track in the section when the panel becomes visible
-	useEffect(() => {
-		if (!visible) return;
-		const first = sectionTracks[0];
-		const track = first
-			? PlacementController.instance?.map.getTrackAt(first.gx, first.gy)
-			: null;
-		if (!track) return;
-		setMainSpeed(String(track.getTrackMainSpeed()));
-		// Main length shows total section length, not per-track
-		setMainLength(String(totalLength));
-		if (hasSecondaryPath(track.data.kind)) {
-			setSecondarySpeed(String(track.getTrackSecondarySpeed()));
-			setSecondaryLength(String(track.getTrackSecondaryLength()));
-		}
-	}, [visible, sectionTracks, totalLength]);
+function parseSectionEditPayload(
+	values: SectionValues,
+	trackCount: number,
+	hasSecondary: boolean,
+): SectionEditPayload | null {
+	const main = parsePositivePair(values.mainSpeed, values.mainLength);
+	if (!main) return null;
+	const payload: SectionEditPayload = {
+		mainSpeed: main[0],
+		mainLength: Math.round(main[1] / trackCount),
+	};
+	const secondary = hasSecondary
+		? parsePositivePair(values.secondarySpeed, values.secondaryLength)
+		: null;
+	if (secondary) {
+		payload.secondarySpeed = secondary[0];
+		payload.secondaryLength = secondary[1];
+	}
+	return payload;
+}
 
-	// ── Converter handlers ──────────────────────────────────────────────
+function computeSectionMetrics(sectionTracks: { gx: number; gy: number }[]): {
+	hasSecondary: boolean;
+	totalLength: number;
+} {
+	const map = PlacementController.instance?.map;
+	if (!map) return { hasSecondary: false, totalLength: 0 };
+	const tracks = sectionTracks
+		.map((c) => map.getTrackAt(c.gx, c.gy))
+		.filter((t): t is NonNullable<typeof t> => t !== null);
+	return {
+		hasSecondary: tracks.some((t) => hasSecondaryPath(t.data.kind)),
+		totalLength: tracks.reduce((sum, t) => sum + t.getTrackMainLength(), 0),
+	};
+}
 
-	const handleConvKmh = useCallback((v: string) => {
-		setConvKmh(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) {
-			setConvMph(String(round1(n * MPH_PER_KMH)));
-		}
-	}, []);
-
-	const handleConvMph = useCallback((v: string) => {
-		setConvMph(v);
-		const n = Number(v);
-		if (!Number.isNaN(n) && n >= 0) {
-			setConvKmh(String(round1(n / MPH_PER_KMH)));
-		}
-	}, []);
-
-	const syncLengthFromM = useCallback((m: number) => {
-		const totalYards = m / M_PER_YARD;
-		const totalChains = totalYards / YARDS_PER_CHAIN;
-		setConvCh(String(round1(totalChains)));
-		setConvYd(String(round1(totalYards)));
-		setConvMi(String(round1(totalChains / CHAINS_PER_MILE)));
-	}, []);
-
-	const handleConvM = useCallback(
-		(v: string) => {
-			setConvM(v);
-			const n = Number(v);
-			if (!Number.isNaN(n) && n >= 0) syncLengthFromM(n);
-		},
-		[syncLengthFromM],
+function useSectionMetrics(
+	visible: boolean,
+	sectionTracks: { gx: number; gy: number }[],
+): { hasSecondary: boolean; totalLength: number } {
+	return useMemo(
+		() =>
+			visible
+				? computeSectionMetrics(sectionTracks)
+				: { hasSecondary: false, totalLength: 0 },
+		[visible, sectionTracks],
 	);
+}
 
-	const handleConvCh = useCallback(
-		(v: string) => {
-			setConvCh(v);
-			const n = Number(v);
-			if (!Number.isNaN(n) && n >= 0) {
-				const m = Math.round(n * M_PER_CHAIN);
-				setConvM(String(m));
-				syncLengthFromM(m);
-			}
-		},
-		[syncLengthFromM],
+function SectionField({
+	id,
+	label,
+	value,
+	onChange,
+}: {
+	id: string;
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+}) {
+	return (
+		<>
+			<label htmlFor={id} className="block mb-1 text-muted-foreground">
+				{label}
+			</label>
+			<Input
+				id={id}
+				type="number"
+				min={1}
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				className="mb-2"
+			/>
+		</>
 	);
+}
 
-	const handleConvYd = useCallback(
-		(v: string) => {
-			setConvYd(v);
-			const n = Number(v);
-			if (!Number.isNaN(n) && n >= 0) {
-				const m = Math.round(n * M_PER_YARD);
-				setConvM(String(m));
-				syncLengthFromM(m);
-			}
-		},
-		[syncLengthFromM],
+interface ConverterInputSpec {
+	id: string;
+	label: string;
+	value: string;
+	step?: string;
+	onChange: (v: string) => void;
+}
+
+function ConverterInput({
+	id,
+	label,
+	value,
+	step,
+	onChange,
+}: ConverterInputSpec) {
+	return (
+		<div>
+			<label
+				htmlFor={id}
+				className="block mb-0.5 text-muted-foreground text-[10px]"
+			>
+				{label}
+			</label>
+			<Input
+				id={id}
+				type="number"
+				min={0}
+				step={step}
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+			/>
+		</div>
 	);
+}
 
-	const handleConvMi = useCallback(
-		(v: string) => {
-			setConvMi(v);
-			const n = Number(v);
-			if (!Number.isNaN(n) && n >= 0) {
-				const m = Math.round(n * CHAINS_PER_MILE * M_PER_CHAIN);
-				setConvM(String(m));
-				syncLengthFromM(m);
-			}
-		},
-		[syncLengthFromM],
-	);
-
-	// ── Apply / Defaults / Cancel ────────────────────────────────────────
-
-	const handleApply = useCallback(() => {
-		if (confirmingRef.current) return;
-		confirmingRef.current = true;
-		const ctrl = PlacementController.instance;
-		if (ctrl) {
-			const ms = Number(mainSpeed);
-			const ml = Number(mainLength);
-			if (!Number.isNaN(ms) && !Number.isNaN(ml) && ms > 0 && ml > 0) {
-				const n = sectionTracks.length;
-				const values: {
-					mainSpeed: number;
-					mainLength: number;
-					secondarySpeed?: number;
-					secondaryLength?: number;
-				} = { mainSpeed: ms, mainLength: Math.round(ml / n) };
-				if (hasSecondary) {
-					const ss = Number(secondarySpeed);
-					const sl = Number(secondaryLength);
-					if (!Number.isNaN(ss) && !Number.isNaN(sl) && ss > 0 && sl > 0) {
-						values.secondarySpeed = ss;
-						values.secondaryLength = sl;
-					}
-				}
-				ctrl.applySectionEdit(values);
-				// The edit is done: close the panel and drop the selection (route
-				// tint + endpoint outlines). The speed/length colours stay on, so
-				// the result of the edit is what is left on screen.
-				ctrl.clearSectionHighlight();
-				clearSectionSelection();
-			}
-		}
-		confirmingRef.current = false;
-	}, [
-		mainSpeed,
-		mainLength,
-		secondarySpeed,
-		secondaryLength,
-		hasSecondary,
-		sectionTracks.length,
-		clearSectionSelection,
-	]);
-
-	const handleDefaults = useCallback(() => {
-		const ctrl = PlacementController.instance;
-		if (ctrl) {
-			ctrl.restoreSection();
-			setMainSpeed("200");
-			setMainLength(String(200 * sectionTracks.length));
-			setSecondarySpeed("200");
-			setSecondaryLength("100");
-		}
-	}, [sectionTracks.length]);
-
-	const handleCancel = useCallback(() => {
-		clearSectionSelection();
-		const ctrl = PlacementController.instance;
-		if (ctrl) {
-			ctrl.clearSectionHighlight();
-		}
-	}, [clearSectionSelection]);
-
-	// Enter applies the edit. Bound here rather than globally because the values
-	// being applied are this component's local state.
-	//
-	// `ignoreInputs: false` is the load-bearing option — Enter defaults to
-	// ignoring input-originated events, and the cursor sitting in a speed field is
-	// exactly where you want Enter to mean "apply". Scoping to the panel keeps it
-	// from firing anywhere else; element listeners also run before the document
-	// one and stop propagation by default, so this beats any global binding for
-	// free. `handleApply`'s `confirmingRef` latch makes key-repeat safe.
-	useHotkey(SHORTCUTS.applySection.hotkey, handleApply, {
-		target: panelRef,
-		ignoreInputs: false,
-		enabled: Boolean(visible),
-	});
-
-	if (!visible) return null;
-
-	const convImperial = formatImperialLength(Number(convM) || 0);
-
+function ConverterPairRow({
+	left,
+	right,
+	className,
+}: {
+	left: ConverterInputSpec;
+	right: ConverterInputSpec;
+	className: string;
+}) {
 	return (
 		<div
-			ref={panelRef}
-			className="absolute right-4 top-16 z-10 w-80 rounded-none border border-border bg-background/95 p-3 shadow-sm backdrop-blur-sm text-xs"
+			className={`grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 ${className}`}
 		>
-			<div className="font-medium mb-2">Section Editor</div>
+			<ConverterInput {...left} />
+			<span className="text-muted-foreground pt-3.5">=</span>
+			<ConverterInput {...right} />
+		</div>
+	);
+}
 
-			{/* Section info */}
-			<div className="text-muted-foreground mb-2 space-y-0.5">
-				<div>
-					{sectionTracks.length} track{sectionTracks.length !== 1 ? "s" : ""}{" "}
-					selected — total {totalLength} m
-				</div>
-				<div>
-					Start ({sectionStart.gx}, {sectionStart.gy}) → End ({sectionEnd.gx},{" "}
-					{sectionEnd.gy})
-				</div>
-			</div>
+function lengthFieldsFromMetres(m: number) {
+	const totalYards = m / M_PER_YARD;
+	const totalChains = totalYards / YARDS_PER_CHAIN;
+	return {
+		ch: String(round1(totalChains)),
+		yd: String(round1(totalYards)),
+		mi: String(round1(totalChains / CHAINS_PER_MILE)),
+	};
+}
 
-			{/* Main speed */}
-			<label
-				htmlFor="section-main-speed"
-				className="block mb-1 text-muted-foreground"
-			>
-				Main Speed (km/h)
-			</label>
-			<Input
-				id="section-main-speed"
-				type="number"
-				min={1}
-				value={mainSpeed}
-				onChange={(e) => setMainSpeed(e.target.value)}
-				className="mb-2"
-			/>
+function useUnitConverterState() {
+	const [convKmh, setConvKmh] = useState("200");
+	const [convMph, setConvMph] = useState("124");
+	const [len, setLen] = useState({
+		m: "100",
+		ch: "5.0",
+		yd: "109.4",
+		mi: "0.06",
+	});
 
-			{/* Main length */}
-			<label
-				htmlFor="section-main-length"
-				className="block mb-1 text-muted-foreground"
-			>
-				Main Length — total (m)
-			</label>
-			<Input
-				id="section-main-length"
-				type="number"
-				min={1}
-				value={mainLength}
-				onChange={(e) => setMainLength(e.target.value)}
-				className="mb-2"
-			/>
+	const updateKmh = (v: string) => {
+		setConvKmh(v);
+		const n = parseNonNegativeNumber(v);
+		if (n !== null) setConvMph(String(round1(n * MPH_PER_KMH)));
+	};
 
-			{/* Secondary speed + length (only for tracks that support it) */}
-			{hasSecondary && (
-				<>
-					<div className="border-t border-border my-2" />
-					<div className="text-muted-foreground mb-1 font-medium">
-						Secondary Path
-					</div>
+	const updateMph = (v: string) => {
+		setConvMph(v);
+		const n = parseNonNegativeNumber(v);
+		if (n !== null) setConvKmh(String(round1(n / MPH_PER_KMH)));
+	};
 
-					<label
-						htmlFor="section-secondary-speed"
-						className="block mb-1 text-muted-foreground"
-					>
-						Secondary Speed (km/h)
-					</label>
-					<Input
-						id="section-secondary-speed"
-						type="number"
-						min={1}
-						value={secondarySpeed}
-						onChange={(e) => setSecondarySpeed(e.target.value)}
-						className="mb-2"
-					/>
+	const updateLength = (
+		v: string,
+		field: "m" | "ch" | "yd" | "mi",
+		factorToM: number,
+	) => {
+		const n = parseNonNegativeNumber(v);
+		if (n === null) {
+			setLen((prev) => ({ ...prev, [field]: v }));
+			return;
+		}
+		const m = field === "m" ? n : Math.round(n * factorToM);
+		setLen({
+			...lengthFieldsFromMetres(m),
+			m: String(m),
+			[field]: v,
+		});
+	};
 
-					<label
-						htmlFor="section-secondary-length"
-						className="block mb-1 text-muted-foreground"
-					>
-						Secondary Length (m)
-					</label>
-					<Input
-						id="section-secondary-length"
-						type="number"
-						min={1}
-						value={secondaryLength}
-						onChange={(e) => setSecondaryLength(e.target.value)}
-						className="mb-2"
-					/>
-				</>
-			)}
+	return { convKmh, convMph, len, updateKmh, updateMph, updateLength };
+}
 
-			{/* ── Unit Converter ──────────────────────────────────────────── */}
+function SectionUnitConverter() {
+	const { convKmh, convMph, len, updateKmh, updateMph, updateLength } =
+		useUnitConverterState();
+
+	return (
+		<>
 			<div className="border-t border-border my-2" />
 			<div className="text-muted-foreground mb-2 font-medium">Converter</div>
-
-			{/* Speed converter */}
-			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-2">
-				<div>
-					<label
-						htmlFor="section-conv-kmh"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						km/h
-					</label>
-					<Input
-						id="section-conv-kmh"
-						type="number"
-						min={0}
-						value={convKmh}
-						onChange={(e) => handleConvKmh(e.target.value)}
-					/>
-				</div>
-				<span className="text-muted-foreground pt-3.5">=</span>
-				<div>
-					<label
-						htmlFor="section-conv-mph"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						mph
-					</label>
-					<Input
-						id="section-conv-mph"
-						type="number"
-						min={0}
-						value={convMph}
-						onChange={(e) => handleConvMph(e.target.value)}
-					/>
-				</div>
-			</div>
-
-			{/* Length converter — row 1: metres ↔ chains */}
-			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-1.5">
-				<div>
-					<label
-						htmlFor="section-conv-m"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						metres
-					</label>
-					<Input
-						id="section-conv-m"
-						type="number"
-						min={0}
-						value={convM}
-						onChange={(e) => handleConvM(e.target.value)}
-					/>
-				</div>
-				<span className="text-muted-foreground pt-3.5">=</span>
-				<div>
-					<label
-						htmlFor="section-conv-ch"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						chains
-					</label>
-					<Input
-						id="section-conv-ch"
-						type="number"
-						min={0}
-						step="0.1"
-						value={convCh}
-						onChange={(e) => handleConvCh(e.target.value)}
-					/>
-				</div>
-			</div>
-			{/* Length converter — row 2: yards ↔ miles */}
-			<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 mb-1">
-				<div>
-					<label
-						htmlFor="section-conv-yd"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						yards
-					</label>
-					<Input
-						id="section-conv-yd"
-						type="number"
-						min={0}
-						step="0.1"
-						value={convYd}
-						onChange={(e) => handleConvYd(e.target.value)}
-					/>
-				</div>
-				<span className="text-muted-foreground pt-3.5">=</span>
-				<div>
-					<label
-						htmlFor="section-conv-mi"
-						className="block mb-0.5 text-muted-foreground text-[10px]"
-					>
-						miles
-					</label>
-					<Input
-						id="section-conv-mi"
-						type="number"
-						min={0}
-						step="0.01"
-						value={convMi}
-						onChange={(e) => handleConvMi(e.target.value)}
-					/>
-				</div>
-			</div>
+			<ConverterPairRow
+				left={{
+					id: "section-conv-kmh",
+					label: "km/h",
+					value: convKmh,
+					onChange: updateKmh,
+				}}
+				right={{
+					id: "section-conv-mph",
+					label: "mph",
+					value: convMph,
+					onChange: updateMph,
+				}}
+				className="mb-2"
+			/>
+			<ConverterPairRow
+				left={{
+					id: "section-conv-m",
+					label: "metres",
+					value: len.m,
+					onChange: (v) => updateLength(v, "m", 1),
+				}}
+				right={{
+					id: "section-conv-ch",
+					label: "chains",
+					value: len.ch,
+					step: "0.1",
+					onChange: (v) => updateLength(v, "ch", M_PER_CHAIN),
+				}}
+				className="mb-1.5"
+			/>
+			<ConverterPairRow
+				left={{
+					id: "section-conv-yd",
+					label: "yards",
+					value: len.yd,
+					step: "0.1",
+					onChange: (v) => updateLength(v, "yd", M_PER_YARD),
+				}}
+				right={{
+					id: "section-conv-mi",
+					label: "miles",
+					value: len.mi,
+					step: "0.01",
+					onChange: (v) => updateLength(v, "mi", CHAINS_PER_MILE * M_PER_CHAIN),
+				}}
+				className="mb-1"
+			/>
 			<div className="text-[10px] text-muted-foreground mb-1 tabular-nums">
-				{convImperial}
+				{formatImperialLength(Number(len.m) || 0)}
 			</div>
+		</>
+	);
+}
 
-			{/* ── Colour Legend ──────────────────────────────────────────── */}
+function TrackStatusLegend() {
+	return (
+		<>
 			<div className="border-t border-border my-2" />
 			<div className="mb-1 font-medium">Track Status</div>
 			<div className="text-[10px] text-muted-foreground mb-1.5">
@@ -499,17 +359,196 @@ export function SectionEditPanel() {
 					</div>
 				))}
 			</div>
+		</>
+	);
+}
 
-			{/* Actions */}
+function SectionEditFormFields({
+	values,
+	hasSecondary,
+	onChange,
+}: {
+	values: SectionValues;
+	hasSecondary: boolean;
+	onChange: (patch: Partial<SectionValues>) => void;
+}) {
+	return (
+		<>
+			<SectionField
+				id="section-main-speed"
+				label="Main Speed (km/h)"
+				value={values.mainSpeed}
+				onChange={(mainSpeed) => onChange({ mainSpeed })}
+			/>
+			<SectionField
+				id="section-main-length"
+				label="Main Length — total (m)"
+				value={values.mainLength}
+				onChange={(mainLength) => onChange({ mainLength })}
+			/>
+			{hasSecondary && (
+				<>
+					<div className="border-t border-border my-2" />
+					<div className="text-muted-foreground mb-1 font-medium">
+						Secondary Path
+					</div>
+					<SectionField
+						id="section-secondary-speed"
+						label="Secondary Speed (km/h)"
+						value={values.secondarySpeed}
+						onChange={(secondarySpeed) => onChange({ secondarySpeed })}
+					/>
+					<SectionField
+						id="section-secondary-length"
+						label="Secondary Length (m)"
+						value={values.secondaryLength}
+						onChange={(secondaryLength) => onChange({ secondaryLength })}
+					/>
+				</>
+			)}
+		</>
+	);
+}
+
+function useSectionForm(
+	visible: boolean,
+	sectionTracks: { gx: number; gy: number }[],
+	totalLength: number,
+	hasSecondary: boolean,
+	clearSectionSelection: () => void,
+) {
+	const [values, setValues] = useState<SectionValues>(DEFAULT_SECTION_VALUES);
+	const confirmingRef = useRef(false);
+
+	// Pre-fill from the first track in the section when the panel becomes visible.
+	useEffect(() => {
+		if (!visible) return;
+		const first = sectionTracks[0];
+		const track = first
+			? PlacementController.instance?.map.getTrackAt(first.gx, first.gy)
+			: null;
+		if (!track) return;
+		setValues((prev) => ({
+			mainSpeed: String(track.getTrackMainSpeed()),
+			// Main length shows total section length, not per-track.
+			mainLength: String(totalLength),
+			secondarySpeed: hasSecondaryPath(track.data.kind)
+				? String(track.getTrackSecondarySpeed())
+				: prev.secondarySpeed,
+			secondaryLength: hasSecondaryPath(track.data.kind)
+				? String(track.getTrackSecondaryLength())
+				: prev.secondaryLength,
+		}));
+	}, [visible, sectionTracks, totalLength]);
+
+	const handleApply = useCallback(() => {
+		if (confirmingRef.current) return;
+		confirmingRef.current = true;
+		const ctrl = PlacementController.instance;
+		const payload = ctrl
+			? parseSectionEditPayload(values, sectionTracks.length, hasSecondary)
+			: null;
+		if (ctrl && payload) {
+			ctrl.applySectionEdit(payload);
+			// The edit is done: close the panel and drop the selection (route
+			// tint + endpoint outlines). The speed/length colours stay on, so
+			// the result of the edit is what is left on screen.
+			ctrl.clearSectionHighlight();
+			clearSectionSelection();
+		}
+		confirmingRef.current = false;
+	}, [values, hasSecondary, sectionTracks.length, clearSectionSelection]);
+
+	const handleDefaults = useCallback(() => {
+		const ctrl = PlacementController.instance;
+		if (!ctrl) return;
+		ctrl.restoreSection();
+		setValues({
+			mainSpeed: "200",
+			mainLength: String(200 * sectionTracks.length),
+			secondarySpeed: "200",
+			secondaryLength: "100",
+		});
+	}, [sectionTracks.length]);
+
+	const handleCancel = useCallback(() => {
+		clearSectionSelection();
+		PlacementController.instance?.clearSectionHighlight();
+	}, [clearSectionSelection]);
+
+	return { values, setValues, handleApply, handleDefaults, handleCancel };
+}
+
+/** Floating sidepanel for editing speed/length of a selected section. */
+export function SectionEditPanel() {
+	const sectionStart = useEditorStore((s) => s.sectionStart);
+	const sectionEnd = useEditorStore((s) => s.sectionEnd);
+	const sectionTracks = useEditorStore((s) => s.sectionTracks);
+	const clearSectionSelection = useEditorStore((s) => s.clearSectionSelection);
+	const panelRef = useRef<HTMLDivElement>(null);
+
+	const visible = Boolean(sectionStart && sectionEnd && sectionTracks.length);
+	const { hasSecondary, totalLength } = useSectionMetrics(
+		visible,
+		sectionTracks,
+	);
+	const form = useSectionForm(
+		visible,
+		sectionTracks,
+		totalLength,
+		hasSecondary,
+		clearSectionSelection,
+	);
+
+	// Enter applies the edit. Bound here rather than globally because the values
+	// being applied are this component's local state.
+	//
+	// `ignoreInputs: false` is the load-bearing option — Enter defaults to
+	// ignoring input-originated events, and the cursor sitting in a speed field is
+	// exactly where you want Enter to mean "apply". Scoping to the panel keeps it
+	// from firing anywhere else; element listeners also run before the document
+	// one and stop propagation by default, so this beats any global binding for
+	// free. `handleApply`'s `confirmingRef` latch makes key-repeat safe.
+	useHotkey(SHORTCUTS.applySection.hotkey, form.handleApply, {
+		target: panelRef,
+		ignoreInputs: false,
+		enabled: visible,
+	});
+
+	if (!visible || !sectionStart || !sectionEnd) return null;
+
+	return (
+		<div
+			ref={panelRef}
+			className="absolute right-4 top-16 z-10 w-80 rounded-none border border-border bg-background/95 p-3 shadow-sm backdrop-blur-sm text-xs"
+		>
+			<div className="font-medium mb-2">Section Editor</div>
+			<div className="text-muted-foreground mb-2 space-y-0.5">
+				<div>
+					{sectionTracks.length} track{sectionTracks.length !== 1 ? "s" : ""}{" "}
+					selected — total {totalLength} m
+				</div>
+				<div>
+					Start ({sectionStart.gx}, {sectionStart.gy}) → End ({sectionEnd.gx},{" "}
+					{sectionEnd.gy})
+				</div>
+			</div>
+			<SectionEditFormFields
+				values={form.values}
+				hasSecondary={hasSecondary}
+				onChange={(patch) => form.setValues((prev) => ({ ...prev, ...patch }))}
+			/>
+			<SectionUnitConverter />
+			<TrackStatusLegend />
 			<div className="flex gap-1.5 mt-3">
-				<Button variant="outline" size="xs" onClick={handleDefaults}>
+				<Button variant="outline" size="xs" onClick={form.handleDefaults}>
 					Defaults
 				</Button>
-				<Button variant="outline" size="xs" onClick={handleCancel}>
+				<Button variant="outline" size="xs" onClick={form.handleCancel}>
 					Cancel
 					<KbdGroup className="ml-1" keys={shortcutKeys("escape")} />
 				</Button>
-				<Button variant="default" size="xs" onClick={handleApply}>
+				<Button variant="default" size="xs" onClick={form.handleApply}>
 					Apply
 					<KbdGroup className="ml-1" keys={shortcutKeys("applySection")} />
 				</Button>

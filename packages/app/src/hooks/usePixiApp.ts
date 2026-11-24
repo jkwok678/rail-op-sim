@@ -31,6 +31,298 @@ export interface UsePixiAppReturn {
 const themeKey = (): string =>
 	document.documentElement.classList.contains("dark") ? "dark" : "light";
 
+const cssVar = (name: string): string =>
+	getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+async function loadPixiModules() {
+	const [
+		{ createPixiApp },
+		{ createGroundLayer },
+		{ ViewportController: VC },
+		{ Container },
+		{ createTrackLayer },
+		{ createElementLayer },
+		{ createTextLayer },
+		{ createLinkHighlightLayer },
+		{ createTrackColorLayer },
+		{ createDirectionLayer },
+		{ attachOperateLayers },
+		{ createTextureCache },
+		{ PlacementController: PC },
+	] = await Promise.all([
+		import("#/editor/PixiApp"),
+		import("#/editor/GroundLayer"),
+		import("#/editor/ViewportController"),
+		import("pixi.js"),
+		import("#/renderer/layers/TrackLayer"),
+		import("#/renderer/layers/ElementLayer"),
+		import("#/renderer/layers/TextLayer"),
+		import("#/renderer/layers/LinkHighlightLayer"),
+		import("#/renderer/layers/TrackColorLayer"),
+		import("#/renderer/layers/DirectionLayer"),
+		import("#/renderer/operateLayers"),
+		import("#/renderer/textureCache"),
+		import("#/editor/PlacementController"),
+	]);
+	return {
+		createPixiApp,
+		createGroundLayer,
+		VC,
+		Container,
+		createTrackLayer,
+		createElementLayer,
+		createTextLayer,
+		createLinkHighlightLayer,
+		createTrackColorLayer,
+		createDirectionLayer,
+		attachOperateLayers,
+		createTextureCache,
+		PC,
+	};
+}
+
+type PixiModules = Awaited<ReturnType<typeof loadPixiModules>>;
+type TextureCache = ReturnType<PixiModules["createTextureCache"]>;
+
+interface CanvasSession {
+	app: Application;
+	viewport: ViewportController;
+	placement: PlacementController;
+	dispose: () => void;
+}
+
+function createSceneLayers(
+	mods: PixiModules,
+	world: InstanceType<PixiModules["Container"]>,
+	getColors: () => { gridColor: string; axisColor: string },
+) {
+	const ground = mods.createGroundLayer({
+		gridColor: () => getColors().gridColor,
+		axisColor: () => getColors().axisColor,
+		gridAlpha: 0.2,
+		fixedSpacing: CELL_SIZE,
+		showAxes: false,
+	});
+	ground.container.visible = useEditorStore.getState().showGrid;
+
+	// Shared texture cache + track layer (created before colour layer
+	// so the colour layer can delegate tinting to it).
+	const textures: TextureCache = mods.createTextureCache(
+		themeKey(),
+		buildThemeColorMap(),
+	);
+	const trackLayer = mods.createTrackLayer(textures);
+	// Track colour overlay (empty container; tints are applied to track sprites).
+	const trackColorLayer = mods.createTrackColorLayer(trackLayer);
+	const elementLayer = mods.createElementLayer(textures);
+	const textLayer = mods.createTextLayer();
+	const linkHighlightLayer = mods.createLinkHighlightLayer(textures);
+	// Preferred-direction overlay (per-route legs + arrow markers), added
+	// after the link highlights and below the ghost.
+	const directionLayer = mods.createDirectionLayer();
+
+	// Scene-graph order: ground → colour → element underlay → tracks → elements → text → links → directions
+	world.addChild(
+		ground.container,
+		trackColorLayer.container,
+		elementLayer.underlay,
+		trackLayer.container,
+		elementLayer.container,
+		textLayer.container,
+		linkHighlightLayer.container,
+		directionLayer.container,
+	);
+	// Operate mode's routes and trains, and the signal, point and crossing art,
+	// driven by the engine's view.
+	const stopOperate = mods.attachOperateLayers(world, trackLayer, elementLayer);
+	return {
+		ground,
+		textures,
+		trackLayer,
+		trackColorLayer,
+		elementLayer,
+		textLayer,
+		linkHighlightLayer,
+		directionLayer,
+		stopOperate,
+	};
+}
+
+function preloadArtAndSync(
+	textures: TextureCache,
+	syncAllLayers: () => void,
+	isDestroyed: () => boolean,
+): void {
+	// Preload all track art and operate mode's signal and point art,
+	// then backfill anything placed (or operated) meanwhile.
+	Promise.all([
+		textures.preload(Object.keys(SVG_MAP)),
+		textures.preloadFiles(OPERATE_ART_FILES),
+	])
+		.then(() => {
+			if (isDestroyed()) return;
+			syncAllLayers();
+			debugLog("pixi", "init complete — ready for interaction");
+		})
+		.catch((reason: unknown) =>
+			// The canvas works without the art (pieces appear as it loads or
+			// not at all), so this is logged rather than failing the canvas.
+			console.error("Track art failed to load", reason),
+		);
+}
+
+function assembleScene(
+	mods: PixiModules,
+	app: Application,
+	container: HTMLDivElement,
+	isDestroyed: () => boolean,
+): CanvasSession {
+	const cleanups: (() => void)[] = [() => app.destroy(true)];
+	const dispose = () => {
+		for (let i = cleanups.length - 1; i >= 0; i--) {
+			cleanups[i]?.();
+		}
+	};
+
+	try {
+		// Scene graph: stage → world → { ground, tracks, ghost }
+		const world = new mods.Container();
+		world.label = "world";
+		// Cache colours so getComputedStyle isn't called on every pan/zoom frame.
+		const colors = {
+			gridColor: cssVar("--sea-ink"),
+			axisColor: cssVar("--lagoon"),
+		};
+		const layers = createSceneLayers(mods, world, () => colors);
+		cleanups.push(
+			() => layers.textures.destroy(),
+			() => layers.stopOperate(),
+		);
+		app.stage.addChild(world);
+		debugLog(
+			"pixi",
+			`scene graph assembled — world children: ${world.children.map((c) => c.label).join(", ")}`,
+		);
+
+		const redrawGrid = () => {
+			layers.ground.redraw(world.scale.x, app.screen.width, app.screen.height);
+			useEditorStore.getState().setZoom(world.scale.x);
+		};
+
+		Object.assign(app.canvas.style, {
+			display: "block",
+			width: "100%",
+			height: "100%",
+		});
+		container.appendChild(app.canvas);
+
+		const viewport = new mods.VC({ world, app, onChange: redrawGrid });
+		viewport.attach();
+		cleanups.push(() => viewport.detach());
+		// A tile-scale starting view (≈ origin centred, cells ~cell-size on screen).
+		viewport.fitToView(FIT_EXTENT, FIT_PADDING);
+		debugLog(
+			"pixi",
+			`viewport attached — fitToView(${FIT_EXTENT},${FIT_PADDING}), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`,
+		);
+		redrawGrid();
+
+		// Placement interaction (owns the Map; ghost lives on top of the tracks).
+		const placement = new mods.PC({
+			app,
+			world,
+			trackLayer: layers.trackLayer,
+			elementLayer: layers.elementLayer,
+			textLayer: layers.textLayer,
+			linkHighlightLayer: layers.linkHighlightLayer,
+			trackColorLayer: layers.trackColorLayer,
+			directionLayer: layers.directionLayer,
+			textures: layers.textures,
+			viewport,
+		});
+		world.addChild(placement.ghost);
+		placement.attach();
+		cleanups.push(() => placement.detach());
+
+		const syncAllLayers = () => {
+			layers.trackLayer.sync(placement.map);
+			layers.trackColorLayer.sync(placement.map);
+			layers.elementLayer.sync(placement.map);
+			layers.textLayer.sync(placement.map);
+			layers.directionLayer.sync(placement.map);
+			placement.refreshGhost();
+		};
+		preloadArtAndSync(layers.textures, syncAllLayers, isDestroyed);
+
+		const stopObservers = attachCanvasObservers({
+			app,
+			container,
+			redrawGrid,
+			// Theme: rebuild grid colours and re-bake track/ghost textures.
+			onThemeChange: () => {
+				colors.gridColor = cssVar("--sea-ink");
+				colors.axisColor = cssVar("--lagoon");
+				layers.textures.setTheme(themeKey(), buildThemeColorMap());
+				layers.trackLayer.clear();
+				layers.elementLayer.clear();
+				layers.textLayer.clear();
+				syncAllLayers();
+				redrawGrid();
+			},
+			onGridVisibilityChange: (visible) => {
+				layers.ground.container.visible = visible;
+			},
+		});
+		cleanups.push(stopObservers);
+
+		return { app, viewport, placement, dispose };
+	} catch (err) {
+		dispose();
+		throw err;
+	}
+}
+
+function attachCanvasObservers({
+	app,
+	container,
+	redrawGrid,
+	onThemeChange,
+	onGridVisibilityChange,
+}: {
+	app: Application;
+	container: HTMLDivElement;
+	redrawGrid: () => void;
+	onThemeChange: () => void;
+	onGridVisibilityChange: (visible: boolean) => void;
+}): () => void {
+	const themeObserver = new MutationObserver(onThemeChange);
+	themeObserver.observe(document.documentElement, {
+		attributes: true,
+		attributeFilter: ["class"],
+	});
+
+	const unsubGrid = useEditorStore.subscribe((state, prev) => {
+		if (state.showGrid !== prev.showGrid) {
+			onGridVisibilityChange(state.showGrid);
+		}
+	});
+
+	const observer = new ResizeObserver((entries) => {
+		const entry = entries[0];
+		if (!entry) return;
+		const { width: w, height: h } = entry.contentRect;
+		app.renderer.resize(Math.max(1, Math.floor(w)), Math.max(1, Math.floor(h)));
+		redrawGrid();
+	});
+	observer.observe(container);
+
+	return () => {
+		observer.disconnect();
+		themeObserver.disconnect();
+		unsubGrid();
+	};
+}
+
 /**
  * Initializes a PixiJS Application with a fixed-cell ground grid, a track layer
  * driven by a shared texture cache, viewport controls, and click-to-place
@@ -52,54 +344,17 @@ export function usePixiApp(): UsePixiAppReturn {
 
 	useEffect(() => {
 		let destroyed = false;
-		let observer: ResizeObserver | null = null;
-		let themeObserver: MutationObserver | null = null;
-		let unsubGrid: (() => void) | null = null;
-		let stopOperate: () => void = () => {};
-		let textures: ReturnType<
-			typeof import("#/renderer/textureCache").createTextureCache
-		> | null = null;
-
+		let session: CanvasSession | null = null;
 		const container = containerRef.current;
 		if (!container) return;
 
 		const init = async () => {
-			const [
-				{ createPixiApp },
-				{ createGroundLayer },
-				{ ViewportController: VC },
-				{ Container },
-				{ createTrackLayer },
-				{ createElementLayer },
-				{ createTextLayer },
-				{ createLinkHighlightLayer },
-				{ createTrackColorLayer },
-				{ createDirectionLayer },
-				{ attachOperateLayers },
-				{ createTextureCache },
-				{ PlacementController: PC },
-			] = await Promise.all([
-				import("#/editor/PixiApp"),
-				import("#/editor/GroundLayer"),
-				import("#/editor/ViewportController"),
-				import("pixi.js"),
-				import("#/renderer/layers/TrackLayer"),
-				import("#/renderer/layers/ElementLayer"),
-				import("#/renderer/layers/TextLayer"),
-				import("#/renderer/layers/LinkHighlightLayer"),
-				import("#/renderer/layers/TrackColorLayer"),
-				import("#/renderer/layers/DirectionLayer"),
-				import("#/renderer/operateLayers"),
-				import("#/renderer/textureCache"),
-				import("#/editor/PlacementController"),
-			]);
-
+			const mods = await loadPixiModules();
 			if (destroyed) return;
-
-			const width = container.clientWidth || 800;
-			const height = container.clientHeight || 600;
-
-			const app = await createPixiApp({ width, height });
+			const app = await mods.createPixiApp({
+				width: container.clientWidth || 800,
+				height: container.clientHeight || 600,
+			});
 			if (destroyed) {
 				app.destroy(true);
 				return;
@@ -114,169 +369,10 @@ export function usePixiApp(): UsePixiAppReturn {
 					throw crash;
 				});
 			});
-
-			// Scene graph: stage → world → { ground, tracks, ghost }
-			const world = new Container();
-			world.label = "world";
-
-			const cssVar = (name: string): string =>
-				getComputedStyle(document.documentElement)
-					.getPropertyValue(name)
-					.trim();
-
-			// Cache colours so getComputedStyle isn't called on every pan/zoom frame.
-			let gridColor = cssVar("--sea-ink");
-			let axisColor = cssVar("--lagoon");
-
-			const ground = createGroundLayer({
-				gridColor: () => gridColor,
-				axisColor: () => axisColor,
-				gridAlpha: 0.2,
-				fixedSpacing: CELL_SIZE,
-				showAxes: false,
-			});
-			ground.container.visible = useEditorStore.getState().showGrid;
-			world.addChild(ground.container);
-
-			// Shared texture cache + track layer (created before colour layer
-			// so the colour layer can delegate tinting to it)
-			textures = createTextureCache(themeKey(), buildThemeColorMap());
-			const trackLayer = createTrackLayer(textures);
-
-			// Track colour overlay (empty container; tints are applied to track sprites)
-			const trackColorLayer = createTrackColorLayer(trackLayer);
-
-			const elementLayer = createElementLayer(textures);
-
-			// Scene-graph order: ground → colour → element underlay → tracks → elements
-			world.addChild(trackColorLayer.container);
-			world.addChild(elementLayer.underlay);
-			world.addChild(trackLayer.container);
-			world.addChild(elementLayer.container);
-
-			const textLayer = createTextLayer();
-			world.addChild(textLayer.container);
-
-			const linkHighlightLayer = createLinkHighlightLayer(textures);
-			world.addChild(linkHighlightLayer.container);
-
-			// Preferred-direction overlay (per-route legs + arrow markers), added
-			// after the link highlights and below the ghost.
-			const directionLayer = createDirectionLayer();
-			world.addChild(directionLayer.container);
-
-			// Operate mode's routes and trains, and the signal, point and crossing art,
-			// driven by the engine's view.
-			stopOperate = attachOperateLayers(world, trackLayer, elementLayer);
-
-			app.stage.addChild(world);
-			debugLog(
-				"pixi",
-				`scene graph assembled — world children: ${world.children.map((c) => c.label).join(", ")}`,
-			);
-
-			const redrawGrid = () => {
-				ground.redraw(world.scale.x, app.screen.width, app.screen.height);
-				useEditorStore.getState().setZoom(world.scale.x);
-			};
-
-			const canvas = app.canvas;
-			canvas.style.display = "block";
-			canvas.style.width = "100%";
-			canvas.style.height = "100%";
-			container.appendChild(canvas);
-
-			const viewport = new VC({ world, app, onChange: redrawGrid });
-			viewport.attach();
-			// A tile-scale starting view (≈ origin centred, cells ~cell-size on screen).
-			viewport.fitToView(FIT_EXTENT, FIT_PADDING);
-			debugLog(
-				"pixi",
-				`viewport attached — fitToView(${FIT_EXTENT},${FIT_PADDING}), worldPos=(${world.position.x.toFixed(1)},${world.position.y.toFixed(1)}) worldScale=(${world.scale.x.toFixed(3)},${world.scale.y.toFixed(3)})`,
-			);
-			redrawGrid();
-
-			// Placement interaction (owns the Map; ghost lives on top of the tracks)
-			const placement = new PC({
-				app,
-				world,
-				trackLayer,
-				elementLayer,
-				textLayer,
-				linkHighlightLayer,
-				trackColorLayer,
-				directionLayer,
-				textures,
-				viewport,
-			});
-			world.addChild(placement.ghost);
-			placement.attach();
-
-			const syncAllLayers = () => {
-				trackLayer.sync(placement.map);
-				trackColorLayer.sync(placement.map);
-				elementLayer.sync(placement.map);
-				textLayer.sync(placement.map);
-				directionLayer.sync(placement.map);
-				placement.refreshGhost();
-			};
-
-			// Preload all track art and operate mode's signal and point art,
-			// then backfill anything placed (or operated) meanwhile.
-			const allSubtypes = Object.keys(SVG_MAP);
-			Promise.all([
-				textures.preload(allSubtypes),
-				textures.preloadFiles(OPERATE_ART_FILES),
-			])
-				.then(() => {
-					if (destroyed) return;
-					syncAllLayers();
-					debugLog("pixi", "init complete — ready for interaction");
-				})
-				// The canvas works without the art (pieces appear as it loads or
-				// not at all), so this is logged rather than failing the canvas.
-				.catch((reason: unknown) => {
-					console.error("Track art failed to load", reason);
-				});
-
-			// Theme: rebuild grid colours and re-bake track/ghost textures.
-			themeObserver = new MutationObserver(() => {
-				if (!textures) return;
-				gridColor = cssVar("--sea-ink");
-				axisColor = cssVar("--lagoon");
-				textures.setTheme(themeKey(), buildThemeColorMap());
-				trackLayer.clear();
-				elementLayer.clear();
-				textLayer.clear();
-				syncAllLayers();
-				redrawGrid();
-			});
-			themeObserver.observe(document.documentElement, {
-				attributes: true,
-				attributeFilter: ["class"],
-			});
-
-			unsubGrid = useEditorStore.subscribe((state, prev) => {
-				if (state.showGrid !== prev.showGrid) {
-					ground.container.visible = state.showGrid;
-				}
-			});
-
-			observer = new ResizeObserver((entries) => {
-				const entry = entries[0];
-				if (!entry) return;
-				const { width: w, height: h } = entry.contentRect;
-				app.renderer.resize(
-					Math.max(1, Math.floor(w)),
-					Math.max(1, Math.floor(h)),
-				);
-				redrawGrid();
-			});
-			observer.observe(container);
-
-			appRef.current = app;
-			viewportRef.current = viewport;
-			placementRef.current = placement;
+			session = assembleScene(mods, app, container, () => destroyed);
+			appRef.current = session.app;
+			viewportRef.current = session.viewport;
+			placementRef.current = session.placement;
 			setStatus("ready");
 		};
 
@@ -290,18 +386,10 @@ export function usePixiApp(): UsePixiAppReturn {
 		return () => {
 			debugLog("pixi", "cleanup — destroying");
 			destroyed = true;
-			if (observer) observer.disconnect();
-			if (themeObserver) themeObserver.disconnect();
-			if (unsubGrid) unsubGrid();
-			stopOperate();
-			placementRef.current?.detach();
-			viewportRef.current?.detach();
-			textures?.destroy();
-			appRef.current?.destroy(true);
+			session?.dispose();
 			appRef.current = null;
 			viewportRef.current = null;
 			placementRef.current = null;
-			textures = null;
 		};
 	}, []);
 
