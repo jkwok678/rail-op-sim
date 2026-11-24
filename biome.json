@@ -13,6 +13,8 @@
 			"**/index.html",
 			"**/vite.config.ts",
 			".railway/**/*.ts",
+			"scripts/guardrails/**/*.ts",
+			"scripts/guardrails/**/*.json",
 			"!**/src/routeTree.gen.ts",
 			"!**/src/styles.css",
 			"!**/src/components/ui/**/"

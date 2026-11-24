@@ -166,9 +166,15 @@ importers:
 
   .:
     devDependencies:
+      '@babel/parser':
+        specifier: 7.29.13
+        version: 7.29.13
       '@biomejs/biome':
         specifier: 2.6.6
         version: 2.6.6
+      '@types/node':
+        specifier: 26.6.6
+        version: 26.6.6
       fallow:
         specifier: ^3.40.0
         version: 3.40.0

@@ -1,0 +1,36 @@
+{
+	"prod": {
+		"as any": 1,
+		"as unknown as": 2,
+		"as never": 6,
+		"@ts-ignore": 0,
+		"@ts-expect-error": 0,
+		"@ts-nocheck": 0,
+		"biome-ignore": 6,
+		"fallow-ignore": 7,
+		"v8 ignore": 0,
+		"c8 ignore": 0,
+		"istanbul ignore": 0,
+		"type assertion": 58
+	},
+	"test": {
+		"as any": 0,
+		"as unknown as": 16,
+		"as never": 21,
+		"@ts-ignore": 0,
+		"@ts-expect-error": 0,
+		"@ts-nocheck": 0,
+		"biome-ignore": 0,
+		"fallow-ignore": 0,
+		"v8 ignore": 0,
+		"c8 ignore": 0,
+		"istanbul ignore": 0,
+		"type assertion": 65
+	},
+	"ceilings": {
+		"unmarked comments": 2234,
+		"useEffect": 20,
+		"useLayoutEffect": 2,
+		"timers": 0
+	}
+}
